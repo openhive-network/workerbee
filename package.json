@@ -1,0 +1,52 @@
+{
+  "name": "@hive-staging/autobee",
+  "version": "0.1.0",
+  "description": "Example bot to use in your browser app based on the wax and beekeeper library",
+  "main": "dist/bundle/index.js",
+  "types": "dist/bundle/index.d.ts",
+  "type": "module",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "private": false,
+  "scripts": {
+    "lint": "eslint src --ext .js,.ts --max-warnings=0 --ignore-pattern *.d.ts --fix",
+    "prebuild": "husky install",
+    "build": "rimraf dist && tsc",
+    "postbuild": "rollup -c && scripts/generate_api_docs.sh",
+    "test": "unset CI && playwright test --workers 1 --max-failures 1 --project=autobee_testsuite",
+    "prepack": "scripts/prepublish_hook.sh"
+  },
+  "files": [
+    "LICENSE.md",
+    "README.md",
+    "package.json",
+    "dist/bundle"
+  ],
+  "devDependencies": {
+    "@playwright/test": "^1.39.0",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@types/node": "^20.7.1",
+    "@typescript-eslint/eslint-plugin": "^6.11.0",
+    "@typescript-eslint/parser": "^6.11.0",
+    "concat-md": "^0.5.1",
+    "eslint": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "http-server": "^14.1.1",
+    "husky": "8.0.3",
+    "playwright": "^1.39.0",
+    "rimraf": "^5.0.1",
+    "rollup": "^4.3.0",
+    "rollup-plugin-typescript2": "^0.36.0",
+    "typedoc": "0.25.3",
+    "typedoc-plugin-markdown": "3.17.1",
+    "typescript": "5.2.2"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.syncad.com/mtyszczak/autobee.git"
+  },
+  "engines": {
+    "node": ">= 12"
+  }
+}

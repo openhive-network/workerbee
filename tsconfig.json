@@ -1,0 +1,56 @@
+{
+  "compilerOptions": {
+    "emitDecoratorMetadata": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+
+    "declaration": true,
+    "noImplicitAny": false,
+    "noLib": false,
+
+    "allowUnreachableCode": false,
+    "allowSyntheticDefaultImports": true,
+    "allowUnusedLabels": false,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "noFallthroughCasesInSwitch": false,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    "rootDir": "./src",
+    "baseUrl": ".",
+
+    "paths": {},
+
+    "outDir": "./dist",
+
+    "removeComments": false,
+    "incremental": false,
+    "checkJs": false,
+    "strict": true,
+    "alwaysStrict": true,
+
+    "allowJs": true,
+
+    "sourceMap": true,
+
+    "target": "ES2020",
+    "lib": [
+      "ES2020",
+      "DOM"
+    ],
+    "module": "ES2020",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+
+    "noErrorTruncation": true
+  },
+  "buildOptions": {
+    "force": true,
+    "verbose": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["**/node_modules", "dist"]
+}

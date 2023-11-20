@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autobee Test</title>
+</head>
+<body id="autobeebody">
+  <script type="importmap">
+    {
+      "imports": {
+        "@hive-staging/autobee": "/dist/bundle/index.js"
+      }
+    }
+  </script>
+  <script type="module">
+    import bootstrap from '@hive-staging/autobee';
+
+    Object.defineProperties(window, {
+      bootstrap: {
+        get() {
+          return bootstrap;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

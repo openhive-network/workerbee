@@ -1,0 +1,42 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# dist and build directories
+dist
+build
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+test-results
+results.json
+results.xml
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Output of 'npm pack'
+*.tgz
+
+# dotenv environment variables file
+config/.env*
+!config/.env.example
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+.vscode/*
+.vs
+
+# But include debug configuration universal for other users using vscode
+!.vscode/launch.json
