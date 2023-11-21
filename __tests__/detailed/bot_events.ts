@@ -5,7 +5,7 @@ import "../assets/data";
 
 let browser!: ChromiumBrowser;
 
-test.describe("AutoBee Base tests", () => {
+test.describe("AutoBee Bot events test", () => {
   test.beforeAll(async() => {
     browser = await chromium.launch({
       headless: true
@@ -20,26 +20,21 @@ test.describe("AutoBee Base tests", () => {
     await page.goto("http://localhost:8080/__tests__/assets/test.html", { waitUntil: "load" });
   });
 
-  // Base browser type test
-  test("Should test on chromium", async() => {
-    const browserType = browser.browserType();
-
-    expect(browserType.name()).toBe("chromium");
-  });
-
-  // Base valid test html webpage test
-  test("Should have a valid html test webpage", async({ page }) => {
-    const id = await page.$eval("body", n => n.getAttribute("id"));
-
-    expect(id).toBe("autobeebody");
-  });
-
   test("Should have global module", async({ page }) => {
-    const moduleType = await page.evaluate(() => {
-      return typeof AutoBee;
+    const moduleType = await page.evaluate(async() => {
+      const bot = new AutoBee();
+      let handlersCalled = 0;
+
+      bot.addListener('start', () => { ++handlersCalled; });
+      bot.addListener('stop', () => { ++handlersCalled; });
+
+      await bot.start({ postingKey: '' });
+      await bot.stop();
+
+      return handlersCalled;
     });
 
-    expect(moduleType).toBe("function");
+    expect(moduleType).toStrictEqual(2);
   });
 
   test.afterAll(async() => {

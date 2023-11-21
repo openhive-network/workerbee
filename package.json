@@ -25,6 +25,7 @@
     "@playwright/test": "^1.39.0",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
+    "@types/events": "^3.0.3",
     "@types/node": "^20.7.1",
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
@@ -41,7 +42,9 @@
     "typedoc-plugin-markdown": "3.17.1",
     "typescript": "5.2.2"
   },
-  "dependencies": {},
+  "dependencies": {
+    "events": "^3.3.0"
+  },
   "repository": {
     "type": "git",
     "url": "https://gitlab.syncad.com/mtyszczak/autobee.git"

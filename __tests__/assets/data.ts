@@ -1,5 +1,5 @@
-import type bootstrapT from "../../dist/bundle";
+import type AutoBeeT from "../../dist/bundle";
 
 declare global {
-  var bootstrap: typeof bootstrapT;
+  var AutoBee: typeof AutoBeeT;
 }

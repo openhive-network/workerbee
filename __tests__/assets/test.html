@@ -14,12 +14,12 @@
     }
   </script>
   <script type="module">
-    import bootstrap from '@hive-staging/autobee';
+    import AutoBee from '@hive-staging/autobee';
 
     Object.defineProperties(window, {
-      bootstrap: {
+      AutoBee: {
         get() {
-          return bootstrap;
+          return AutoBee;
         }
       }
     });
