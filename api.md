@@ -3,10 +3,6 @@
 
 # @hive-staging/autobee
 
-## Enumerations
-
-- [EBotStatus](#enumsebotstatusmd)
-
 ## Interfaces
 
 - [IAutoBee](#interfacesiautobeemd)
@@ -23,70 +19,51 @@
 src/index.ts:8
 
 
-<a name="enumsebotstatusmd"></a>
-
-# Enumeration: EBotStatus
-
-## Enumeration Members
-
-### RUNNING
-
-• **RUNNING** = ``3``
-
-#### Defined in
-
-src/bot.ts:9
-
-___
-
-### STALE
-
-• **STALE** = ``0``
-
-#### Defined in
-
-src/bot.ts:6
-
-___
-
-### STOPPED
-
-• **STOPPED** = ``2``
-
-#### Defined in
-
-src/bot.ts:8
-
-___
-
-### WAIT\_STOP
-
-• **WAIT\_STOP** = ``1``
-
-#### Defined in
-
-src/bot.ts:7
-
-
 <a name="interfacesiautobeemd"></a>
 
 # Interface: IAutoBee
 
 ## Properties
 
-### status
+### configuration
 
-• `Readonly` **status**: [`EBotStatus`](#enumsebotstatusmd)
+• `Readonly` **configuration**: `Readonly`\<[`IStartConfiguration`](#interfacesistartconfigurationmd)\>
 
 #### Defined in
 
-src/interfaces.ts:4
+src/interfaces.ts:11
+
+___
+
+### running
+
+• `Readonly` **running**: `boolean`
+
+#### Defined in
+
+src/interfaces.ts:10
 
 ## Methods
 
-### addListener
+### delete
 
-▸ **addListener**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
+▸ **delete**(): `Promise`\<`void`\>
+
+Deletes the current bot instance and underlying wax and beekepeer objects
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Defined in
+
+src/interfaces.ts:26
+
+___
+
+### on
+
+▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
 
 Triggers on any bot start
 
@@ -103,9 +80,9 @@ Triggers on any bot start
 
 #### Defined in
 
-src/interfaces.ts:29
+src/interfaces.ts:34
 
-▸ **addListener**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
+▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
 
 Triggers on any bot stop
 
@@ -122,9 +99,9 @@ Triggers on any bot stop
 
 #### Defined in
 
-src/interfaces.ts:36
+src/interfaces.ts:41
 
-▸ **addListener**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
+▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
 
 Triggers on any bot-related error
 
@@ -141,33 +118,34 @@ Triggers on any bot-related error
 
 #### Defined in
 
-src/interfaces.ts:43
+src/interfaces.ts:48
 
-___
+▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
 
-### start
-
-▸ **start**(`configuration`): `Promise`\<`void`\>
-
-Starts the automation with given configuration
+Triggers on new block detected
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `configuration` | [`IStartConfiguration`](#interfacesistartconfigurationmd) | Configuration for the automation |
+| `event` | ``"block"`` | event name |
+| `handler` | (`data`: `IBlockData`) => `void` | handler to be called on error event |
 
 #### Returns
 
-`Promise`\<`void`\>
+[`IAutoBee`](#interfacesiautobeemd)
 
 #### Defined in
 
-src/interfaces.ts:11
+src/interfaces.ts:55
+
+___
+
+### start
 
 ▸ **start**(): `Promise`\<`void`\>
 
-Resumes the configuration with the previously saved configuration
+Starts the automation with given configuration
 
 #### Returns
 
@@ -183,7 +161,7 @@ ___
 
 ▸ **stop**(): `Promise`\<`void`\>
 
-Request configuration stop
+Request automation stop
 
 #### Returns
 
@@ -200,6 +178,24 @@ src/interfaces.ts:21
 
 ## Properties
 
+### chainOptions
+
+• `Optional` **chainOptions**: `Partial`\<`IWaxOptionsChain`\>
+
+Wax chain options
+
+**`Default`**
+
+```ts
+{}
+```
+
+#### Defined in
+
+src/bot.ts:21
+
+___
+
 ### postingKey
 
 • **postingKey**: `string`
@@ -208,4 +204,4 @@ Posting private key in WIF format
 
 #### Defined in
 
-src/bot.ts:18
+src/bot.ts:13

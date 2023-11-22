@@ -45,7 +45,7 @@ module.exports = {
     // Suggestions
     "@typescript-eslint/no-namespace": 0,
     "@typescript-eslint/no-explicit-any": 0,
-    "camelcase":                      1,
+    "camelcase":                      0,
     "capitalized-comments":           1,
     "dot-notation":                   1,
     "multiline-comment-style":        1,

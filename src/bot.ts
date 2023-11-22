@@ -1,13 +1,8 @@
 import EventEmitter from "events";
-import { AutoBeeError } from "./errors";
-import { IAutoBee } from "./interfaces";
+import beekeeperFactory, { IBeekeeperInstance, IBeekeeperUnlockedWallet } from "@hive-staging/beekeeper";
+import { IHiveChainInterface, IWaxOptionsChain, createHiveChain } from "@hive-staging/wax";
 
-export enum EBotStatus {
-  STALE = 0,
-  WAIT_STOP = 1,
-  STOPPED = 2,
-  RUNNING = 3
-}
+import { IAutoBee } from "./interfaces";
 
 export interface IStartConfiguration {
   /**
@@ -16,57 +11,126 @@ export interface IStartConfiguration {
    * @type {string}
    */
   postingKey: string;
+
+  /**
+   * Wax chain options
+   *
+   * @type {?Partial<IWaxOptionsChain>}
+   * @default {}
+   */
+  chainOptions?: Partial<IWaxOptionsChain>;
 }
 
+export const DEFAULT_AUTOBEE_OPTIONS = {
+  chainOptions: {}
+};
+
+export const DEFAULT_BLOCK_INTERVAL_TIMEOUT = 1500;
+
 export class AutoBee extends EventEmitter implements IAutoBee {
-  public status: EBotStatus = EBotStatus.STALE;
+  public running: boolean = false;
 
-  private runLoop!: Promise<void>;
+  public configuration: IStartConfiguration;
 
-  // @ts-expect-error Configuration is not used yet
-  private configuration!: IStartConfiguration;
+  private chain?: IHiveChainInterface;
 
-  public constructor() {
+  private beekeeper?: IBeekeeperInstance;
+
+  private wallet?: IBeekeeperUnlockedWallet;
+
+  private headBlockNumber: number = 0;
+
+  public constructor(
+    configuration: IStartConfiguration
+  ) {
     super();
+
+    this.configuration = { ...DEFAULT_AUTOBEE_OPTIONS, ...configuration };
+
+    // When halt is requested, indicate we are not going to do the task again
+    super.on("halt", () => {
+      this.running = false;
+    });
   }
 
-  public async start(configuration?: IStartConfiguration): Promise<void> {
-    if(this.status !== EBotStatus.STALE)
-      throw new AutoBeeError("Bot is already configured. If you intend on resuming the automation call AutoBee#resume");
+  public async start(): Promise<void> {
+    // Initialize chain and beekepeer if required
+    if(typeof this.chain === "undefined" || typeof this.beekeeper === "undefined" || typeof this.wallet === "undefined") {
+      this.chain = await createHiveChain(this.configuration.chainOptions);
+      this.beekeeper = await beekeeperFactory();
 
-    if(typeof configuration === "undefined")
-      return this.resume();
+      const random = Math.random().toString(16)
+        .slice(2);
 
-    this.configuration = configuration;
-    this.status = EBotStatus.STOPPED;
+      ({ wallet: this.wallet } = await this.beekeeper.createSession(random).createWallet(random));
 
-    await this.resume();
-  }
+      ({ head_block_number: this.headBlockNumber } = await this.chain.api.database_api.get_dynamic_global_properties({}));
+    }
 
-  public resume(): void {
-    if(this.status !== EBotStatus.STOPPED)
-      throw new AutoBeeError("Bot is not configured and stopped. If you intend on starting the automation call AutoBee#start");
+    // Ensure the app is not running
+    await this.stop();
 
+    // Do the first task and run the app
+    this.running = true;
     super.emit("start");
-    this.status = EBotStatus.RUNNING;
 
-    this.runLoop = new Promise<void>(res => {
-      setTimeout(res, 2000);
-    }).catch(error => {
-      super.emit("error", error);
-    })
-      .finally(() => { this.status = EBotStatus.STOPPED; });
+    this.doTask();
   }
 
-  public async stop(): Promise<void> {
-    if(this.status !== EBotStatus.RUNNING)
-      throw new AutoBeeError("Bot is not running. Nothing to stop");
+  public async doTask(): Promise<void> {
+    try {
+      // Get the head block, but wait at least DEFAULT_BLOCK_INTERVAL_TIMEOUT ms
+      const [ { block } ] = await Promise.all([
+        this.chain!.api.block_api.get_block({ block_num: this.headBlockNumber }),
+        new Promise(res => { setTimeout(res, DEFAULT_BLOCK_INTERVAL_TIMEOUT); })
+      ]);
 
-    this.status = EBotStatus.WAIT_STOP;
+      if(typeof block === "object") {
+        super.emit("block", {
+          number: this.headBlockNumber,
+          block
+        });
 
-    await this.runLoop;
-    super.emit("stop");
+        ++this.headBlockNumber;
+      } // Else -> no new block
+    } catch(error) {
+      // Ensure we are emitting the Error instance
+      super.emit("error", error instanceof Error ? error : new Error(`Unknown error occurred during automation: ${String(error)}`));
 
-    this.status = EBotStatus.STOPPED;
+      // Wait before any next operation is performed to reduce spamming the API
+      await new Promise(res => { setTimeout(res, DEFAULT_BLOCK_INTERVAL_TIMEOUT); });
+    } finally {
+      // Do the task if running
+      if(this.running)
+        this.doTask();
+      else // Inform about the application stop otherwise
+        super.emit("stop");
+    }
+  }
+
+  public stop(): Promise<void> {
+    return new Promise<void>(res => {
+      if(!this.running)
+        res();
+
+      // Request application stop
+      super.emit("halt");
+
+      // Wait for the stop and resolve
+      super.once("stop", res);
+    });
+  }
+
+  public async delete(): Promise<void> {
+    // This function actually allows you to actually reset the bot instance
+    await this.stop();
+
+    this.chain?.delete();
+    this.wallet?.close();
+    await this.beekeeper?.delete();
+
+    this.chain = undefined;
+    this.beekeeper = undefined;
+    this.wallet = undefined;
   }
 }
