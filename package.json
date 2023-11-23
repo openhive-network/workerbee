@@ -45,7 +45,8 @@
   "dependencies": {
     "@hive-staging/beekeeper": "^0.1.0",
     "@hive-staging/wax": "^0.1.7",
-    "events": "^3.3.0"
+    "events": "^3.3.0",
+    "tslib": "^2.6.2"
   },
   "repository": {
     "type": "git",

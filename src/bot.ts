@@ -2,7 +2,7 @@ import EventEmitter from "events";
 import beekeeperFactory, { IBeekeeperInstance, IBeekeeperUnlockedWallet } from "@hive-staging/beekeeper";
 import { IHiveChainInterface, IWaxOptionsChain, createHiveChain } from "@hive-staging/wax";
 
-import { IAutoBee } from "./interfaces";
+import type { IAutoBee, IBlockData } from "./interfaces";
 
 export interface IStartConfiguration {
   /**
@@ -75,6 +75,13 @@ export class AutoBee extends EventEmitter implements IAutoBee {
     super.emit("start");
 
     this.doTask();
+  }
+
+  public async *[Symbol.asyncIterator](): AsyncIterator<IBlockData> {
+    while(this.running)
+      yield await new Promise(res => {
+        super.once("block", res);
+      });
   }
 
   public async doTask(): Promise<void> {

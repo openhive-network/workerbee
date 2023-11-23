@@ -26,17 +26,22 @@ export interface IAutoBee {
   delete(): Promise<void>;
 
   /**
+   * Allows you to iterate over blocks indefinitely
+   */
+  [Symbol.asyncIterator](): AsyncIterator<IBlockData>;
+
+  /**
    * Triggers on any bot start
    *
    * @param event event name
-   * @param handler handler to be called on error event
+   * @param handler handler to be called before automation start
    */
   on(event: "start", handler: () => void): this;
   /**
    * Triggers on any bot stop
    *
    * @param event event name
-   * @param handler handler to be called on error event
+   * @param handler handler to be called after complete stop of the automation
    */
   on(event: "stop", handler: () => void): this;
   /**
@@ -50,7 +55,7 @@ export interface IAutoBee {
    * Triggers on new block detected
    *
    * @param event event name
-   * @param handler handler to be called on error event
+   * @param handler handler to be called on new block event
    */
   on(event: "block", handler: (data: IBlockData) => void): this;
 }

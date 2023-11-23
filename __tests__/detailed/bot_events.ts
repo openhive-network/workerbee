@@ -78,6 +78,39 @@ test.describe("AutoBee Bot events test", () => {
     expect(blocksParsed).toBeGreaterThanOrEqual(1);
   });
 
+  test("Should be able to use async iterator on bot", async({ page }) => {
+    const blocksParsed = await page.evaluate(async(HIVE_BLOCK_INTERVAL) => {
+      const bot = new AutoBee({ postingKey: '5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT' });
+      bot.on("error", console.error);
+
+      let blocksParsed = 0;
+
+      await Promise.race([
+        new Promise<void>(async(res) => {
+          await bot.start();
+
+          for await(const { block, number } of bot) {
+            console.info(`Got block #${block.block_id} (${number})`);
+            ++blocksParsed;
+
+            if(blocksParsed > 1)
+              break;
+          }
+
+          res();
+        }),
+        new Promise((res) => { setTimeout(res, HIVE_BLOCK_INTERVAL * 4); }),
+      ]);
+
+      await bot.stop();
+      await bot.delete();
+
+      return blocksParsed;
+    }, HIVE_BLOCK_INTERVAL);
+
+    expect(blocksParsed).toBeGreaterThanOrEqual(1);
+  });
+
   test.afterAll(async() => {
     await browser.close();
   });

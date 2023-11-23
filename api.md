@@ -45,6 +45,20 @@ src/interfaces.ts:10
 
 ## Methods
 
+### [asyncIterator]
+
+▸ **[asyncIterator]**(): `AsyncIterator`\<`IBlockData`, `any`, `undefined`\>
+
+#### Returns
+
+`AsyncIterator`\<`IBlockData`, `any`, `undefined`\>
+
+#### Defined in
+
+src/interfaces.ts:28
+
+___
+
 ### delete
 
 ▸ **delete**(): `Promise`\<`void`\>
@@ -80,7 +94,7 @@ Triggers on any bot start
 
 #### Defined in
 
-src/interfaces.ts:34
+src/interfaces.ts:36
 
 ▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
 
@@ -99,7 +113,7 @@ Triggers on any bot stop
 
 #### Defined in
 
-src/interfaces.ts:41
+src/interfaces.ts:43
 
 ▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
 
@@ -118,7 +132,7 @@ Triggers on any bot-related error
 
 #### Defined in
 
-src/interfaces.ts:48
+src/interfaces.ts:50
 
 ▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
 
@@ -137,7 +151,7 @@ Triggers on new block detected
 
 #### Defined in
 
-src/interfaces.ts:55
+src/interfaces.ts:57
 
 ___
 
