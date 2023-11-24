@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Block parser example</title>
+  <style>
+    #log {
+      border: 3px solid black;
+      height: 50vh;
+      overflow: auto;
+      padding: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: .8rem;
+    }
+    #log .data {
+      margin: 5px;
+      padding: 5px;
+      color: darkslategray;
+      border-bottom: 2px solid gray;
+    }
+    #log .data.error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>AutoBee Block parser example</h1>
+  <input id="key" placeholder="Posting Key">
+  <button id="start">Start</button>
+  <hr>
+  <h2>Log</h2>
+  <div id="log"></div>
+  <script type="module">
+    import AutoBee from "../../dist/bundle/index.js";
+
+    const startBtn = document.getElementById("start");
+    const logger = document.getElementById("log");
+    const log = (what, error = false) => {
+      console[error ? 'error' : 'info'](what);
+
+      const node = document.createElement('div');
+      node.classList.add('data');
+      if(error)
+        node.classList.add('error');
+
+      node.innerText = typeof what === 'string' ? what : JSON.stringify(what);
+
+      logger.prepend(node);
+    };
+
+    let bot;
+
+    const actualBotWork = async() => {
+      for await(const { block, number } of bot) {
+        log(`Got block #${block.block_id} (${number})`);
+      }
+    };
+
+    let running = false;
+
+    startBtn.addEventListener('click', async() => {
+      try {
+        startBtn.disabled = true;
+
+        if(running && bot) {
+          await bot.stop();
+          await bot.delete();
+
+          running = false;
+          startBtn.innerText = 'Start';
+          return;
+        }
+
+        bot = new AutoBee({ postingKey: String(document.getElementById("key").value) });
+        bot.on("error", error => {
+          log(error, true);
+        });
+
+        await bot.start();
+
+        actualBotWork(bot).catch((error) => { log(error, true); });
+
+        running = true;
+        startBtn.innerText = 'Stop';
+      } catch(error) {
+        log(error, true);
+      } finally {
+        startBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

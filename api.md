@@ -49,13 +49,15 @@ src/interfaces.ts:10
 
 ▸ **[asyncIterator]**(): `AsyncIterator`\<`IBlockData`, `any`, `undefined`\>
 
+Allows you to iterate over blocks indefinitely
+
 #### Returns
 
 `AsyncIterator`\<`IBlockData`, `any`, `undefined`\>
 
 #### Defined in
 
-src/interfaces.ts:28
+src/interfaces.ts:31
 
 ___
 
@@ -86,7 +88,7 @@ Triggers on any bot start
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `event` | ``"start"`` | event name |
-| `handler` | () => `void` | handler to be called on error event |
+| `handler` | () => `void` | handler to be called before automation start |
 
 #### Returns
 
@@ -94,7 +96,7 @@ Triggers on any bot start
 
 #### Defined in
 
-src/interfaces.ts:36
+src/interfaces.ts:39
 
 ▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
 
@@ -105,7 +107,7 @@ Triggers on any bot stop
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `event` | ``"stop"`` | event name |
-| `handler` | () => `void` | handler to be called on error event |
+| `handler` | () => `void` | handler to be called after complete stop of the automation |
 
 #### Returns
 
@@ -113,7 +115,7 @@ Triggers on any bot stop
 
 #### Defined in
 
-src/interfaces.ts:43
+src/interfaces.ts:46
 
 ▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
 
@@ -132,7 +134,7 @@ Triggers on any bot-related error
 
 #### Defined in
 
-src/interfaces.ts:50
+src/interfaces.ts:53
 
 ▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
 
@@ -143,7 +145,7 @@ Triggers on new block detected
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `event` | ``"block"`` | event name |
-| `handler` | (`data`: `IBlockData`) => `void` | handler to be called on error event |
+| `handler` | (`data`: `IBlockData`) => `void` | handler to be called on new block event |
 
 #### Returns
 
@@ -151,7 +153,7 @@ Triggers on new block detected
 
 #### Defined in
 
-src/interfaces.ts:57
+src/interfaces.ts:60
 
 ___
 
