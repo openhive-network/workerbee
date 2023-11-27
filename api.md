@@ -54,9 +54,9 @@ src/interfaces.ts:7
 
 ## Methods
 
-### account
+### accountOperations
 
-▸ **account**(`name`): `Subscribable`\<`operation`\>
+▸ **accountOperations**(`name`): `Subscribable`\<`operation`\>
 
 Observes given account and notifies when new operation in blockchain related to the given account is detected
 

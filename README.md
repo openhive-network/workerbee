@@ -67,7 +67,7 @@ bot.on("error", console.error);
 
 await bot.start();
 
-const observer = bot.observe.account("gtg");
+const observer = bot.observe.accountOperations("gtg");
 
 observer.subscribe({
   next(op) {

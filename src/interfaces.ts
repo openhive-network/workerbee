@@ -43,7 +43,7 @@ export interface IQueenBee {
    * @param name account name to observe
    * @returns subscribable object that will call `next` on every operation related to the given account
    */
-  account(name: string): Subscribable<operation>;
+  accountOperations(name: string): Subscribable<operation>;
 }
 
 export interface IWorkerBee extends EventEmitter {

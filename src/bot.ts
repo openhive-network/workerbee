@@ -101,7 +101,7 @@ export class QueenBee {
     };
   }
 
-  public account(name: string): Subscribable<operation> {
+  public accountOperations(name: string): Subscribable<operation> {
     return {
       subscribe: (observer: Partial<Observer<operation>>): Unsubscribable => {
         const complete = (): void => {
