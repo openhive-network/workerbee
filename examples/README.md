@@ -12,3 +12,14 @@ Block parser explains how to parse and display block info from the remote using 
 # Run example
 pnpm dlx parcel block-parser/index.html
 ```
+
+## Account observer
+
+**[account-observer/index.html](account-observer/index.html)**
+
+Account observer explains how to observe given account on the blockchain using our libraries
+
+```bash
+# Run example
+pnpm dlx parcel account-observer/index.html
+```

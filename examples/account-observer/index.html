@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Block parser example</title>
+  <title>Account observer example</title>
   <style>
     #log {
       border: 3px solid black;
@@ -25,7 +25,8 @@
   </style>
 </head>
 <body>
-  <h1>AutoBee Block parser example</h1>
+  <h1>AutoBee Account observer example</h1>
+  <input id="acc" placeholder="Account">
   <button id="start">Start</button>
   <hr>
   <h2>Log</h2>
@@ -48,12 +49,14 @@
       logger.prepend(node);
     };
 
-    let bot;
+    let bot, work;
 
-    const actualBotWork = async() => {
-      for await(const { block, number } of bot) {
-        log(`Got block #${block.block_id} (${number})`);
-      }
+    const actualBotWork = async(accountToObserve) => {
+      work = bot.observe.account(accountToObserve).subscribe({
+        next(op) {
+          log(op);
+        }
+      })
     };
 
     let running = false;
@@ -65,6 +68,9 @@
         if(running && bot) {
           await bot.stop();
           await bot.delete();
+
+          if(work)
+            work.unsubscribe();
 
           running = false;
           startBtn.innerText = 'Start';
@@ -78,7 +84,9 @@
 
         await bot.start();
 
-        actualBotWork().catch((error) => { log(error, true); });
+        const accountToObserve = String(document.getElementById("acc").value);
+
+        actualBotWork(accountToObserve).catch((error) => { log(error, true); });
 
         running = true;
         startBtn.innerText = 'Stop';
