@@ -1,4 +1,4 @@
-# AutoBee
+# WorkerBee
 
 Example bot to use in your browser app based on the wax and beekeeper library
 
@@ -14,7 +14,7 @@ Installation is done using the
 [`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
 
 ```bash
-npm install @hive-staging/autobee
+npm install @hive-staging/workerbee
 ```
 
 ## Usage
@@ -22,9 +22,9 @@ npm install @hive-staging/autobee
 ### Iterating indefinitely over new blocks
 
 ```js
-import AutoBee from "@hive-staging/autobee";
+import WorkerBee from "@hive-staging/workerbee";
 
-const bot = new AutoBee();
+const bot = new WorkerBee();
 bot.on("error", console.error);
 
 await bot.start();
@@ -36,9 +36,9 @@ for await(const { block, number } of bot)
 ### Wait for the next block using observer
 
 ```js
-import AutoBee from "@hive-staging/autobee";
+import WorkerBee from "@hive-staging/workerbee";
 
-const bot = new AutoBee();
+const bot = new WorkerBee();
 bot.on("error", console.error);
 
 await bot.start();
@@ -60,9 +60,9 @@ observer.subscribe({
 ### Observe given account for operations in blockchain
 
 ```js
-import AutoBee from "@hive-staging/autobee";
+import WorkerBee from "@hive-staging/workerbee";
 
-const bot = new AutoBee();
+const bot = new WorkerBee();
 bot.on("error", console.error);
 
 await bot.start();
@@ -78,13 +78,13 @@ observer.subscribe({
 
 ## API
 
-See API definition in [api.md](https://gitlab.syncad.com/mtyszczak/autobee/-/blob/${CommitSHA}/api.md)
+See API definition in [api.md](https://gitlab.syncad.com/mtyszczak/workerbee/-/blob/${CommitSHA}/api.md)
 
 ## Support and tests
 
 Tested on the latest Chromium (v117)
 
-[Automated CI test](https://gitlab.syncad.com/mtyszczak/autobee/-/pipelines) runs are available.
+[Automated CI test](https://gitlab.syncad.com/mtyszczak/workerbee/-/pipelines) runs are available.
 
 To run the tests on your own, clone the Wax repo and install the dependencies and then compile the project:
 
@@ -107,4 +107,4 @@ npm run test
 
 ## License
 
-See license in the [LICENSE.md](https://gitlab.syncad.com/mtyszczak/autobee/-/blob/${CommitSHA}/LICENSE.md) file
+See license in the [LICENSE.md](https://gitlab.syncad.com/mtyszczak/workerbee/-/blob/${CommitSHA}/LICENSE.md) file

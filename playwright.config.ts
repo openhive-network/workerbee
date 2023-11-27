@@ -8,7 +8,7 @@ export default defineConfig({
   ],
   projects: [
     {
-      name: "autobee_testsuite",
+      name: "workerbee_testsuite",
       testDir: "./__tests__/"
     }
   ],

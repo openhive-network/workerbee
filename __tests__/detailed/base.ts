@@ -5,7 +5,7 @@ import "../assets/data";
 
 let browser!: ChromiumBrowser;
 
-test.describe("AutoBee Base tests", () => {
+test.describe("WorkerBee Base tests", () => {
   test.beforeAll(async() => {
     browser = await chromium.launch({
       headless: true
@@ -31,12 +31,12 @@ test.describe("AutoBee Base tests", () => {
   test("Should have a valid html test webpage", async({ page }) => {
     const id = await page.$eval("body", n => n.getAttribute("id"));
 
-    expect(id).toBe("autobeebody");
+    expect(id).toBe("workerbeebody");
   });
 
   test("Should have global module", async({ page }) => {
     const moduleType = await page.evaluate(() => {
-      return typeof AutoBee;
+      return typeof WorkerBee;
     });
 
     expect(moduleType).toBe("function");

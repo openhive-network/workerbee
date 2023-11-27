@@ -1,9 +1,9 @@
 /**
  * @internal
  */
-export class AutoBeeError extends Error {
+export class WorkerBeeError extends Error {
   public constructor(message: string) {
     super(message);
-    this.name = "AutoBeeError";
+    this.name = "WorkerBeeError";
   }
 }

@@ -25,14 +25,14 @@
   </style>
 </head>
 <body>
-  <h1>AutoBee Account observer example</h1>
+  <h1>WorkerBee Account observer example</h1>
   <input id="acc" placeholder="Account">
   <button id="start">Start</button>
   <hr>
   <h2>Log</h2>
   <div id="log"></div>
   <script type="module">
-    import AutoBee from "../../dist/bundle/index.js";
+    import WorkerBee from "../../dist/bundle/index.js";
 
     const startBtn = document.getElementById("start");
     const logger = document.getElementById("log");
@@ -77,7 +77,7 @@
           return;
         }
 
-        bot = new AutoBee();
+        bot = new WorkerBee();
         bot.on("error", error => {
           log(error, true);
         });

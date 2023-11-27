@@ -1,8 +1,8 @@
-import { AutoBee } from "./bot";
-import { IAutoBeeConstructor } from "./interfaces";
+import { WorkerBee } from "./bot";
+import { IWorkerBeeConstructor } from "./interfaces";
 
 export * from "./interfaces";
 export { IStartConfiguration } from "./bot";
-export { AutoBeeError } from "./errors";
+export { WorkerBeeError } from "./errors";
 
-export default AutoBee as IAutoBeeConstructor;
+export default WorkerBee as IWorkerBeeConstructor;

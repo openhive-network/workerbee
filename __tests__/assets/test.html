@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Autobee Test</title>
+  <title>WorkerBee Test</title>
 </head>
-<body id="autobeebody">
+<body id="workerbeebody">
   <script type="importmap">
     {
       "imports": {
-        "@hive-staging/autobee": "/dist/bundle/index.js"
+        "@hive-staging/workerbee": "/dist/bundle/index.js"
       }
     }
   </script>
   <script type="module">
-    import AutoBee from '@hive-staging/autobee';
+    import WorkerBee from '@hive-staging/workerbee';
 
     Object.defineProperties(window, {
-      AutoBee: {
+      WorkerBee: {
         get() {
-          return AutoBee;
+          return WorkerBee;
         }
       }
     });

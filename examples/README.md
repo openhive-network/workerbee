@@ -1,4 +1,4 @@
-# AutoBee examples
+# WorkerBee examples
 
 This directory exists for the purpose of demonstrating how to run our scripts in the browser environment as a bundle
 

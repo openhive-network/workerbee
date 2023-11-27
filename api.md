@@ -1,37 +1,219 @@
 
 <a name="_modulesmd"></a>
 
-# @hive-staging/autobee
+# @hive-staging/workerbee
 
 ## Interfaces
 
-- [IAutoBee](#interfacesiautobeemd)
-- [IAutoBeeConstructor](#interfacesiautobeeconstructormd)
 - [IBlockData](#interfacesiblockdatamd)
 - [IQueenBee](#interfacesiqueenbeemd)
 - [IStartConfiguration](#interfacesistartconfigurationmd)
 - [ITransactionData](#interfacesitransactiondatamd)
+- [IWorkerBee](#interfacesiworkerbeemd)
+- [IWorkerBeeConstructor](#interfacesiworkerbeeconstructormd)
 
 ## Variables
 
 ### default
 
-• **default**: [`IAutoBeeConstructor`](#interfacesiautobeeconstructormd)
+• **default**: [`IWorkerBeeConstructor`](#interfacesiworkerbeeconstructormd)
 
 #### Defined in
 
 src/index.ts:8
 
 
-<a name="interfacesiautobeemd"></a>
+<a name="interfacesiblockdatamd"></a>
 
-# Interface: IAutoBee
+# Interface: IBlockData
+
+## Properties
+
+### block
+
+• **block**: `ApiBlock`
+
+#### Defined in
+
+src/interfaces.ts:8
+
+___
+
+### number
+
+• **number**: `number`
+
+#### Defined in
+
+src/interfaces.ts:7
+
+
+<a name="interfacesiqueenbeemd"></a>
+
+# Interface: IQueenBee
+
+## Methods
+
+### account
+
+▸ **account**(`name`): `Subscribable`\<`operation`\>
+
+Observes given account and notifies when new operation in blockchain related to the given account is detected
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `name` | `string` | account name to observe |
+
+#### Returns
+
+`Subscribable`\<`operation`\>
+
+subscribable object that will call `next` on every operation related to the given account
+
+#### Defined in
+
+src/interfaces.ts:46
+
+___
+
+### block
+
+▸ **block**(`blockId`): `Subscribable`\<`ApiBlock`\>
+
+Observes block with given id and notifies on its detection
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `blockId` | `string` | block id to observe |
+
+#### Returns
+
+`Subscribable`\<`ApiBlock`\>
+
+subscribable object that will call `next` only once and completes
+
+#### Defined in
+
+src/interfaces.ts:23
+
+▸ **block**(`blockNumber`): `Subscribable`\<`ApiBlock`\>
+
+Observes block with given number and notifies on its detection
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `blockNumber` | `number` | block number to observe |
+
+#### Returns
+
+`Subscribable`\<`ApiBlock`\>
+
+subscribable object that will call `next` only once and completes
+
+#### Defined in
+
+src/interfaces.ts:30
+
+___
+
+### transaction
+
+▸ **transaction**(`transactionId`): `Subscribable`\<`ApiTransaction`\>
+
+Observes transaction with given id and notifies on its detection
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `transactionId` | `string` | transaction id to observe |
+
+#### Returns
+
+`Subscribable`\<`ApiTransaction`\>
+
+subscribable object that will call `next` only once and completes
+
+#### Defined in
+
+src/interfaces.ts:38
+
+
+<a name="interfacesistartconfigurationmd"></a>
+
+# Interface: IStartConfiguration
+
+## Properties
+
+### chainOptions
+
+• `Optional` **chainOptions**: `Partial`\<`IWaxOptionsChain`\>
+
+Wax chain options
+
+**`Default`**
+
+```ts
+{}
+```
+
+#### Defined in
+
+src/bot.ts:23
+
+___
+
+### postingKey
+
+• `Optional` **postingKey**: `string`
+
+Posting private key in WIF format
+
+#### Defined in
+
+src/bot.ts:15
+
+
+<a name="interfacesitransactiondatamd"></a>
+
+# Interface: ITransactionData
+
+## Properties
+
+### id
+
+• **id**: `string`
+
+#### Defined in
+
+src/interfaces.ts:12
+
+___
+
+### transaction
+
+• **transaction**: `ApiTransaction`
+
+#### Defined in
+
+src/interfaces.ts:13
+
+
+<a name="interfacesiworkerbeemd"></a>
+
+# Interface: IWorkerBee
 
 ## Hierarchy
 
 - `EventEmitter`
 
-  ↳ **`IAutoBee`**
+  ↳ **`IWorkerBee`**
 
 ## Properties
 
@@ -83,7 +265,7 @@ ___
 
 ### addListener
 
-▸ **addListener**(`eventName`, `listener`): [`IAutoBee`](#interfacesiautobeemd)
+▸ **addListener**(`eventName`, `listener`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
 Alias for `emitter.on(eventName, listener)`.
 
@@ -96,7 +278,7 @@ Alias for `emitter.on(eventName, listener)`.
 
 #### Returns
 
-[`IAutoBee`](#interfacesiautobeemd)
+[`IWorkerBee`](#interfacesiworkerbeemd)
 
 **`Since`**
 
@@ -332,7 +514,7 @@ ___
 
 ### off
 
-▸ **off**(`eventName`, `listener`): [`IAutoBee`](#interfacesiautobeemd)
+▸ **off**(`eventName`, `listener`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
 Alias for `emitter.removeListener()`.
 
@@ -345,7 +527,7 @@ Alias for `emitter.removeListener()`.
 
 #### Returns
 
-[`IAutoBee`](#interfacesiautobeemd)
+[`IWorkerBee`](#interfacesiworkerbeemd)
 
 **`Since`**
 
@@ -363,7 +545,7 @@ ___
 
 ### on
 
-▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
+▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
 Triggers on any bot start
 
@@ -376,7 +558,7 @@ Triggers on any bot start
 
 #### Returns
 
-[`IAutoBee`](#interfacesiautobeemd)
+[`IWorkerBee`](#interfacesiworkerbeemd)
 
 #### Overrides
 
@@ -386,7 +568,7 @@ EventEmitter.on
 
 src/interfaces.ts:81
 
-▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
+▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
 Triggers on any bot stop
 
@@ -399,7 +581,7 @@ Triggers on any bot stop
 
 #### Returns
 
-[`IAutoBee`](#interfacesiautobeemd)
+[`IWorkerBee`](#interfacesiworkerbeemd)
 
 #### Overrides
 
@@ -409,7 +591,7 @@ EventEmitter.on
 
 src/interfaces.ts:88
 
-▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
+▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
 Triggers on any bot-related error
 
@@ -422,7 +604,7 @@ Triggers on any bot-related error
 
 #### Returns
 
-[`IAutoBee`](#interfacesiautobeemd)
+[`IWorkerBee`](#interfacesiworkerbeemd)
 
 #### Overrides
 
@@ -432,7 +614,7 @@ EventEmitter.on
 
 src/interfaces.ts:95
 
-▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
+▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
 Triggers on new block detected
 
@@ -445,7 +627,7 @@ Triggers on new block detected
 
 #### Returns
 
-[`IAutoBee`](#interfacesiautobeemd)
+[`IWorkerBee`](#interfacesiworkerbeemd)
 
 #### Overrides
 
@@ -455,7 +637,7 @@ EventEmitter.on
 
 src/interfaces.ts:102
 
-▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
+▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
 Triggers on new transaction detected
 
@@ -468,7 +650,7 @@ Triggers on new transaction detected
 
 #### Returns
 
-[`IAutoBee`](#interfacesiautobeemd)
+[`IWorkerBee`](#interfacesiworkerbeemd)
 
 #### Overrides
 
@@ -482,7 +664,7 @@ ___
 
 ### once
 
-▸ **once**(`eventName`, `listener`): [`IAutoBee`](#interfacesiautobeemd)
+▸ **once**(`eventName`, `listener`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
 Adds a **one-time**`listener` function for the event named `eventName`. The
 next time `eventName` is triggered, this listener is removed and then invoked.
@@ -518,7 +700,7 @@ myEE.emit('foo');
 
 #### Returns
 
-[`IAutoBee`](#interfacesiautobeemd)
+[`IWorkerBee`](#interfacesiworkerbeemd)
 
 **`Since`**
 
@@ -536,7 +718,7 @@ ___
 
 ### prependListener
 
-▸ **prependListener**(`eventName`, `listener`): [`IAutoBee`](#interfacesiautobeemd)
+▸ **prependListener**(`eventName`, `listener`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
 Adds the `listener` function to the _beginning_ of the listeners array for the
 event named `eventName`. No checks are made to see if the `listener` has
@@ -560,7 +742,7 @@ Returns a reference to the `EventEmitter`, so that calls can be chained.
 
 #### Returns
 
-[`IAutoBee`](#interfacesiautobeemd)
+[`IWorkerBee`](#interfacesiworkerbeemd)
 
 **`Since`**
 
@@ -578,7 +760,7 @@ ___
 
 ### prependOnceListener
 
-▸ **prependOnceListener**(`eventName`, `listener`): [`IAutoBee`](#interfacesiautobeemd)
+▸ **prependOnceListener**(`eventName`, `listener`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
 Adds a **one-time**`listener` function for the event named `eventName` to the _beginning_ of the listeners array. The next time `eventName` is triggered, this
 listener is removed, and then invoked.
@@ -600,7 +782,7 @@ Returns a reference to the `EventEmitter`, so that calls can be chained.
 
 #### Returns
 
-[`IAutoBee`](#interfacesiautobeemd)
+[`IWorkerBee`](#interfacesiworkerbeemd)
 
 **`Since`**
 
@@ -674,7 +856,7 @@ ___
 
 ### removeAllListeners
 
-▸ **removeAllListeners**(`event?`): [`IAutoBee`](#interfacesiautobeemd)
+▸ **removeAllListeners**(`event?`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
 Removes all listeners, or those of the specified `eventName`.
 
@@ -692,7 +874,7 @@ Returns a reference to the `EventEmitter`, so that calls can be chained.
 
 #### Returns
 
-[`IAutoBee`](#interfacesiautobeemd)
+[`IWorkerBee`](#interfacesiworkerbeemd)
 
 **`Since`**
 
@@ -710,7 +892,7 @@ ___
 
 ### removeListener
 
-▸ **removeListener**(`eventName`, `listener`): [`IAutoBee`](#interfacesiautobeemd)
+▸ **removeListener**(`eventName`, `listener`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
 Removes the specified `listener` from the listener array for the event named`eventName`.
 
@@ -801,7 +983,7 @@ Returns a reference to the `EventEmitter`, so that calls can be chained.
 
 #### Returns
 
-[`IAutoBee`](#interfacesiautobeemd)
+[`IWorkerBee`](#interfacesiworkerbeemd)
 
 **`Since`**
 
@@ -819,7 +1001,7 @@ ___
 
 ### setMaxListeners
 
-▸ **setMaxListeners**(`n`): [`IAutoBee`](#interfacesiautobeemd)
+▸ **setMaxListeners**(`n`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
 By default `EventEmitter`s will print a warning if more than `10` listeners are
 added for a particular event. This is a useful default that helps finding
@@ -836,7 +1018,7 @@ Returns a reference to the `EventEmitter`, so that calls can be chained.
 
 #### Returns
 
-[`IAutoBee`](#interfacesiautobeemd)
+[`IWorkerBee`](#interfacesiworkerbeemd)
 
 **`Since`**
 
@@ -883,17 +1065,17 @@ Request automation stop
 src/interfaces.ts:61
 
 
-<a name="interfacesiautobeeconstructormd"></a>
+<a name="interfacesiworkerbeeconstructormd"></a>
 
-# Interface: IAutoBeeConstructor
+# Interface: IWorkerBeeConstructor
 
 ## Constructors
 
 ### constructor
 
-• **new IAutoBeeConstructor**(`configuration?`): [`IAutoBee`](#interfacesiautobeemd)
+• **new IWorkerBeeConstructor**(`configuration?`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
-Constructs new AutoBee bot object
+Constructs new WorkerBee bot object
 
 #### Parameters
 
@@ -903,190 +1085,8 @@ Constructs new AutoBee bot object
 
 #### Returns
 
-[`IAutoBee`](#interfacesiautobeemd)
+[`IWorkerBee`](#interfacesiworkerbeemd)
 
 #### Defined in
 
 src/interfaces.ts:118
-
-
-<a name="interfacesiblockdatamd"></a>
-
-# Interface: IBlockData
-
-## Properties
-
-### block
-
-• **block**: `ApiBlock`
-
-#### Defined in
-
-src/interfaces.ts:8
-
-___
-
-### number
-
-• **number**: `number`
-
-#### Defined in
-
-src/interfaces.ts:7
-
-
-<a name="interfacesiqueenbeemd"></a>
-
-# Interface: IQueenBee
-
-## Methods
-
-### account
-
-▸ **account**(`name`): `Subscribable`\<`operation`\>
-
-Observes given account and notifies when new operation in blockchain related to the given account is detected
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `name` | `string` | account name to observe |
-
-#### Returns
-
-`Subscribable`\<`operation`\>
-
-subscribable object that will call `next` on every operation related to the given account
-
-#### Defined in
-
-src/interfaces.ts:46
-
-___
-
-### block
-
-▸ **block**(`blockId`): `Subscribable`\<`ApiBlock`\>
-
-Observes block with given id and notifies on its detection
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `blockId` | `string` | block id to observe |
-
-#### Returns
-
-`Subscribable`\<`ApiBlock`\>
-
-subscribable object that will call `next` only once and completes
-
-#### Defined in
-
-src/interfaces.ts:23
-
-▸ **block**(`blockNumber`): `Subscribable`\<`ApiBlock`\>
-
-Observes block with given number and notifies on its detection
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `blockNumber` | `number` | block number to observe |
-
-#### Returns
-
-`Subscribable`\<`ApiBlock`\>
-
-subscribable object that will call `next` only once and completes
-
-#### Defined in
-
-src/interfaces.ts:30
-
-___
-
-### transaction
-
-▸ **transaction**(`transactionId`): `Subscribable`\<`ApiTransaction`\>
-
-Observes transaction with given id and notifies on its detection
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `transactionId` | `string` | transaction id to observe |
-
-#### Returns
-
-`Subscribable`\<`ApiTransaction`\>
-
-subscribable object that will call `next` only once and completes
-
-#### Defined in
-
-src/interfaces.ts:38
-
-
-<a name="interfacesistartconfigurationmd"></a>
-
-# Interface: IStartConfiguration
-
-## Properties
-
-### chainOptions
-
-• `Optional` **chainOptions**: `Partial`\<`IWaxOptionsChain`\>
-
-Wax chain options
-
-**`Default`**
-
-```ts
-{}
-```
-
-#### Defined in
-
-src/bot.ts:23
-
-___
-
-### postingKey
-
-• `Optional` **postingKey**: `string`
-
-Posting private key in WIF format
-
-#### Defined in
-
-src/bot.ts:15
-
-
-<a name="interfacesitransactiondatamd"></a>
-
-# Interface: ITransactionData
-
-## Properties
-
-### id
-
-• **id**: `string`
-
-#### Defined in
-
-src/interfaces.ts:12
-
-___
-
-### transaction
-
-• **transaction**: `ApiTransaction`
-
-#### Defined in
-
-src/interfaces.ts:13

@@ -1,5 +1,5 @@
-import type AutoBeeT from "../../dist/bundle";
+import type WorkerBeeT from "../../dist/bundle";
 
 declare global {
-  var AutoBee: typeof AutoBeeT;
+  var WorkerBee: typeof WorkerBeeT;
 }

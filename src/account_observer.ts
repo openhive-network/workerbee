@@ -9,7 +9,7 @@ import {
   transfer_to_vesting, update_proposal, update_proposal_votes, vote, withdraw_vesting, witness_block_approve,
   witness_set_properties, witness_update } from "@hive-staging/wax";
 
-export class AccountObserver extends OperationVisitor<operation | void> {
+export class AccountOperationVisitor extends OperationVisitor<operation | void> {
   public constructor(
     private readonly account: string
   ) {

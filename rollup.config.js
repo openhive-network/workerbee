@@ -7,7 +7,7 @@ export default {
   output: {
     dir: 'dist/bundle',
     format: 'es',
-    name: 'autobee'
+    name: 'workerbee'
   },
   plugins: [
     nodeResolve({ preferBuiltins: false, browser: true }),

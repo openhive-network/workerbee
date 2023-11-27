@@ -3,8 +3,8 @@ import beekeeperFactory, { IBeekeeperInstance, IBeekeeperUnlockedWallet } from "
 import { ApiBlock, ApiTransaction, IHiveChainInterface, IWaxOptionsChain, createHiveChain, operation } from "@hive-staging/wax";
 import type { Observer, Subscribable, Unsubscribable } from "rxjs";
 
-import { AccountObserver } from "./account_observer";
-import type { IAutoBee, IBlockData, ITransactionData } from "./interfaces";
+import { AccountOperationVisitor } from "./account_observer";
+import type { IWorkerBee, IBlockData, ITransactionData } from "./interfaces";
 
 export interface IStartConfiguration {
   /**
@@ -23,7 +23,7 @@ export interface IStartConfiguration {
   chainOptions?: Partial<IWaxOptionsChain>;
 }
 
-export const DEFAULT_AUTOBEE_OPTIONS = {
+export const DEFAULT_WORKERBEE_OPTIONS = {
   chainOptions: {}
 };
 
@@ -31,7 +31,7 @@ export const DEFAULT_BLOCK_INTERVAL_TIMEOUT = 1500;
 
 export class QueenBee {
   public constructor(
-    private readonly worker: AutoBee
+    private readonly worker: WorkerBee
   ) {}
 
   public block(idOrNumber: string | number): Subscribable<ApiBlock> {
@@ -101,7 +101,7 @@ export class QueenBee {
           this.worker.off("transaction", listener);
         };
 
-        const visitor = new AccountObserver(name);
+        const visitor = new AccountOperationVisitor(name);
 
         const listener = ({ transaction }: ITransactionData): void => {
           const confirm = (result: operation): void => {
@@ -127,7 +127,7 @@ export class QueenBee {
   }
 }
 
-export class AutoBee extends EventEmitter implements IAutoBee {
+export class WorkerBee extends EventEmitter implements IWorkerBee {
   public running: boolean = false;
 
   public configuration: IStartConfiguration;
@@ -147,7 +147,7 @@ export class AutoBee extends EventEmitter implements IAutoBee {
   ) {
     super();
 
-    this.configuration = { ...DEFAULT_AUTOBEE_OPTIONS, ...configuration };
+    this.configuration = { ...DEFAULT_WORKERBEE_OPTIONS, ...configuration };
 
     // When halt is requested, indicate we are not going to do the task again
     super.on("halt", () => {

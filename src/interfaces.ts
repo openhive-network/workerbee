@@ -46,7 +46,7 @@ export interface IQueenBee {
   account(name: string): Subscribable<operation>;
 }
 
-export interface IAutoBee extends EventEmitter {
+export interface IWorkerBee extends EventEmitter {
   readonly running: boolean;
   readonly configuration: Readonly<IStartConfiguration>;
 
@@ -109,11 +109,11 @@ export interface IAutoBee extends EventEmitter {
   on(event: "transaction", handler: (data: ITransactionData) => void): this;
 }
 
-export interface IAutoBeeConstructor {
+export interface IWorkerBeeConstructor {
   /**
-   * Constructs new AutoBee bot object
+   * Constructs new WorkerBee bot object
    *
    * @param configuration Configuration for the automation
    */
-  new(configuration?: Partial<IStartConfiguration>): IAutoBee;
+  new(configuration?: Partial<IStartConfiguration>): IWorkerBee;
 }

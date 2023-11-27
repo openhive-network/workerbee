@@ -1,6 +1,6 @@
 {
-  "name": "@hive-staging/autobee",
-  "version": "0.2.1",
+  "name": "@hive-staging/workerbee",
+  "version": "0.3.0",
   "description": "Example bot to use in your browser app based on the wax and beekeeper library",
   "main": "dist/bundle/index.js",
   "types": "dist/bundle/index.d.ts",
@@ -12,7 +12,7 @@
     "prebuild": "husky install",
     "build": "rimraf dist && tsc",
     "postbuild": "rollup -c && scripts/generate_api_docs.sh",
-    "test": "unset CI && playwright test --workers 1 --max-failures 1 --project=autobee_testsuite",
+    "test": "unset CI && playwright test --workers 1 --max-failures 1 --project=workerbee_testsuite",
     "prepack": "scripts/prepublish_hook.sh"
   },
   "files": [
@@ -53,7 +53,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.syncad.com/mtyszczak/autobee.git"
+    "url": "https://gitlab.syncad.com/mtyszczak/workerbee.git"
   },
   "engines": {
     "node": ">= 12"
