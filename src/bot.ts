@@ -116,7 +116,9 @@ export class QueenBee {
             observer.next?.(result);
           };
 
-          for(const op of transaction.operations) {
+          const proto = this.worker.chain!.TransactionBuilder.fromApi(transaction).build();
+
+          for(const op of proto.operations) {
             const result = visitor.accept(op);
 
             if(typeof result === "object")
@@ -140,7 +142,7 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
 
   public configuration: IStartConfiguration;
 
-  private chain?: IHiveChainInterface;
+  public chain?: IHiveChainInterface;
 
   private beekeeper?: IBeekeeperInstance;
 
