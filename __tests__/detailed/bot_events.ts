@@ -25,7 +25,7 @@ test.describe("AutoBee Bot events test", () => {
 
   test("Should have a destroyable global module", async({ page }) => {
     await page.evaluate(async() => {
-      const bot = new AutoBee({ postingKey: '5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT' });
+      const bot = new AutoBee();
 
       await bot.delete();
     });
@@ -33,7 +33,7 @@ test.describe("AutoBee Bot events test", () => {
 
   test("Should call proper events", async({ page }) => {
     const handlersCalled = await page.evaluate(async() => {
-      const bot = new AutoBee({ postingKey: '5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT' });
+      const bot = new AutoBee();
       bot.on("error", console.error);
 
       let handlersCalled = 0;
@@ -52,7 +52,7 @@ test.describe("AutoBee Bot events test", () => {
 
   test("Should be able to parse at least 2 blocks from the remote", async({ page }) => {
     const blocksParsed = await page.evaluate(async(HIVE_BLOCK_INTERVAL) => {
-      const bot = new AutoBee({ postingKey: '5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT' });
+      const bot = new AutoBee();
       bot.on("error", console.error);
 
       let blocksParsed = 0;
@@ -81,7 +81,7 @@ test.describe("AutoBee Bot events test", () => {
 
   test("Should be able to use async iterator on bot", async({ page }) => {
     const blocksParsed = await page.evaluate(async(HIVE_BLOCK_INTERVAL) => {
-      const bot = new AutoBee({ postingKey: '5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT' });
+      const bot = new AutoBee();
       bot.on("error", console.error);
 
       let blocksParsed = 0;
@@ -114,7 +114,7 @@ test.describe("AutoBee Bot events test", () => {
 
   test("Should be able to use block observer", async({ page }) => {
     await page.evaluate(async(HIVE_BLOCK_INTERVAL) => {
-      const bot = new AutoBee({ postingKey: '5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT' });
+      const bot = new AutoBee();
       bot.on("error", console.error);
 
       await Promise.race([
@@ -127,14 +127,11 @@ test.describe("AutoBee Bot events test", () => {
 
           console.info(`Waiting for block: #${block.number + 1}`);
           const observer = bot.observe.block(block.number + 1);
-          const observed = observer.subscribe({
+          observer.subscribe({
             next() {
               console.info('Block detected');
 
               res();
-            },
-            complete() {
-              observed.unsubscribe();
             }
           });
         }),

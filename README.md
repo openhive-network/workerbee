@@ -24,7 +24,7 @@ npm install @hive-staging/autobee
 ```js
 import AutoBee from "@hive-staging/autobee";
 
-const bot = new AutoBee({ postingKey: '5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT' });
+const bot = new AutoBee();
 bot.on("error", console.error);
 
 await bot.start();
@@ -38,7 +38,7 @@ for await(const { block, number } of bot)
 ```js
 import AutoBee from "@hive-staging/autobee";
 
-const bot = new AutoBee({ postingKey: '5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT' });
+const bot = new AutoBee();
 bot.on("error", console.error);
 
 await bot.start();
@@ -50,13 +50,9 @@ const block = await new Promise(blockResolve => {
 console.info(`Waiting for block: #${block.number + 1}`);
 const observer = bot.observe.block(block.number + 1);
 
-const observed = observer.subscribe({
+observer.subscribe({
   next() {
     console.info('Block detected');
-  },
-  // Complete method is optional
-  complete() {
-    observed.unsubscribe();
   }
 });
 ```
@@ -66,7 +62,7 @@ const observed = observer.subscribe({
 ```js
 import AutoBee from "@hive-staging/autobee";
 
-const bot = new AutoBee({ postingKey: '5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT' });
+const bot = new AutoBee();
 bot.on("error", console.error);
 
 await bot.start();

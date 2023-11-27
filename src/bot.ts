@@ -10,9 +10,9 @@ export interface IStartConfiguration {
   /**
    * Posting private key in WIF format
    *
-   * @type {string}
+   * @type {?string}
    */
-  postingKey: string;
+  postingKey?: string;
 
   /**
    * Wax chain options
@@ -143,7 +143,7 @@ export class AutoBee extends EventEmitter implements IAutoBee {
   public readonly observe: QueenBee = new QueenBee(this);
 
   public constructor(
-    configuration: IStartConfiguration
+    configuration: IStartConfiguration = {}
   ) {
     super();
 
@@ -153,6 +153,10 @@ export class AutoBee extends EventEmitter implements IAutoBee {
     super.on("halt", () => {
       this.running = false;
     });
+  }
+
+  private get isAuthorized(): boolean {
+    return typeof this.configuration.postingKey === "string";
   }
 
   public async start(): Promise<void> {
@@ -165,6 +169,8 @@ export class AutoBee extends EventEmitter implements IAutoBee {
         .slice(2);
 
       ({ wallet: this.wallet } = await this.beekeeper.createSession(random).createWallet(random));
+      if(this.isAuthorized)
+        await this.wallet.importKey(this.configuration.postingKey as string);
 
       ({ head_block_number: this.headBlockNumber } = await this.chain.api.database_api.get_dynamic_global_properties({}));
     }

@@ -115,5 +115,5 @@ export interface IAutoBeeConstructor {
    *
    * @param configuration Configuration for the automation
    */
-  new(configuration: Partial<IStartConfiguration>): IAutoBee;
+  new(configuration?: Partial<IStartConfiguration>): IAutoBee;
 }

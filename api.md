@@ -891,7 +891,7 @@ src/interfaces.ts:61
 
 ### constructor
 
-• **new IAutoBeeConstructor**(`configuration`): [`IAutoBee`](#interfacesiautobeemd)
+• **new IAutoBeeConstructor**(`configuration?`): [`IAutoBee`](#interfacesiautobeemd)
 
 Constructs new AutoBee bot object
 
@@ -899,7 +899,7 @@ Constructs new AutoBee bot object
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `configuration` | `Partial`\<[`IStartConfiguration`](#interfacesistartconfigurationmd)\> | Configuration for the automation |
+| `configuration?` | `Partial`\<[`IStartConfiguration`](#interfacesistartconfigurationmd)\> | Configuration for the automation |
 
 #### Returns
 
@@ -1058,7 +1058,7 @@ ___
 
 ### postingKey
 
-• **postingKey**: `string`
+• `Optional` **postingKey**: `string`
 
 Posting private key in WIF format
 
