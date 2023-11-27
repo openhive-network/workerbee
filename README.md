@@ -22,6 +22,8 @@ npm install @hive-staging/autobee
 ### Iterating indefinitely over new blocks
 
 ```js
+import AutoBee from "@hive-staging/autobee";
+
 const bot = new AutoBee({ postingKey: '5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT' });
 bot.on("error", console.error);
 
@@ -34,6 +36,8 @@ for await(const { block, number } of bot)
 ### Wait for the next block using observer
 
 ```js
+import AutoBee from "@hive-staging/autobee";
+
 const bot = new AutoBee({ postingKey: '5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT' });
 bot.on("error", console.error);
 

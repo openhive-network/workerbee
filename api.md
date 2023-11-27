@@ -6,13 +6,17 @@
 ## Interfaces
 
 - [IAutoBee](#interfacesiautobeemd)
+- [IAutoBeeConstructor](#interfacesiautobeeconstructormd)
+- [IBlockData](#interfacesiblockdatamd)
+- [IQueenBee](#interfacesiqueenbeemd)
 - [IStartConfiguration](#interfacesistartconfigurationmd)
+- [ITransactionData](#interfacesitransactiondatamd)
 
 ## Variables
 
 ### default
 
-• **default**: `IAutoBeeConstructor`
+• **default**: [`IAutoBeeConstructor`](#interfacesiautobeeconstructormd)
 
 #### Defined in
 
@@ -43,7 +47,7 @@ ___
 
 ### observe
 
-• `Readonly` **observe**: `IQueenBee`
+• `Readonly` **observe**: [`IQueenBee`](#interfacesiqueenbeemd)
 
 #### Defined in
 
@@ -63,13 +67,13 @@ src/interfaces.ts:26
 
 ### [asyncIterator]
 
-▸ **[asyncIterator]**(): `AsyncIterator`\<`IBlockData`, `any`, `undefined`\>
+▸ **[asyncIterator]**(): `AsyncIterator`\<[`IBlockData`](#interfacesiblockdatamd), `any`, `undefined`\>
 
 Allows you to iterate over blocks indefinitely
 
 #### Returns
 
-`AsyncIterator`\<`IBlockData`, `any`, `undefined`\>
+`AsyncIterator`\<[`IBlockData`](#interfacesiblockdatamd), `any`, `undefined`\>
 
 #### Defined in
 
@@ -437,7 +441,7 @@ Triggers on new block detected
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `event` | ``"block"`` | event name |
-| `handler` | (`data`: `IBlockData`) => `void` | handler to be called on new block event |
+| `handler` | (`data`: [`IBlockData`](#interfacesiblockdatamd)) => `void` | handler to be called on new block event |
 
 #### Returns
 
@@ -460,7 +464,7 @@ Triggers on new transaction detected
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `event` | ``"transaction"`` | event name |
-| `handler` | (`data`: `ITransactionData`) => `void` | handler to be called on new block event |
+| `handler` | (`data`: [`ITransactionData`](#interfacesitransactiondatamd)) => `void` | handler to be called on new block event |
 
 #### Returns
 
@@ -879,6 +883,119 @@ Request automation stop
 src/interfaces.ts:37
 
 
+<a name="interfacesiautobeeconstructormd"></a>
+
+# Interface: IAutoBeeConstructor
+
+## Constructors
+
+### constructor
+
+• **new IAutoBeeConstructor**(`configuration`): [`IAutoBee`](#interfacesiautobeemd)
+
+Constructs new AutoBee bot object
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `configuration` | `Partial`\<[`IStartConfiguration`](#interfacesistartconfigurationmd)\> | Configuration for the automation |
+
+#### Returns
+
+[`IAutoBee`](#interfacesiautobeemd)
+
+#### Defined in
+
+src/interfaces.ts:94
+
+
+<a name="interfacesiblockdatamd"></a>
+
+# Interface: IBlockData
+
+## Properties
+
+### block
+
+• **block**: `ApiBlock`
+
+#### Defined in
+
+src/interfaces.ts:8
+
+___
+
+### number
+
+• **number**: `number`
+
+#### Defined in
+
+src/interfaces.ts:7
+
+
+<a name="interfacesiqueenbeemd"></a>
+
+# Interface: IQueenBee
+
+## Methods
+
+### block
+
+▸ **block**(`blockId`): `Subscribable`\<`ApiBlock`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `blockId` | `string` |
+
+#### Returns
+
+`Subscribable`\<`ApiBlock`\>
+
+#### Defined in
+
+src/interfaces.ts:17
+
+▸ **block**(`blockNumber`): `Subscribable`\<`ApiBlock`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `blockNumber` | `number` |
+
+#### Returns
+
+`Subscribable`\<`ApiBlock`\>
+
+#### Defined in
+
+src/interfaces.ts:18
+
+___
+
+### transaction
+
+▸ **transaction**(`transactionId`): `Subscribable`\<`ApiTransaction`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `transactionId` | `string` |
+
+#### Returns
+
+`Subscribable`\<`ApiTransaction`\>
+
+#### Defined in
+
+src/interfaces.ts:20
+
+
 <a name="interfacesistartconfigurationmd"></a>
 
 # Interface: IStartConfiguration
@@ -912,3 +1029,28 @@ Posting private key in WIF format
 #### Defined in
 
 src/bot.ts:14
+
+
+<a name="interfacesitransactiondatamd"></a>
+
+# Interface: ITransactionData
+
+## Properties
+
+### id
+
+• **id**: `string`
+
+#### Defined in
+
+src/interfaces.ts:12
+
+___
+
+### transaction
+
+• **transaction**: `ApiTransaction`
+
+#### Defined in
+
+src/interfaces.ts:13
