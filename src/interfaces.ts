@@ -1,5 +1,5 @@
 import type EventEmitter from "events";
-import type { ApiBlock, ApiTransaction } from "@hive-staging/wax";
+import type { ApiBlock, ApiTransaction, operation } from "@hive-staging/wax";
 import type { Subscribable } from "rxjs";
 import type { IStartConfiguration } from "./bot";
 
@@ -14,12 +14,36 @@ export interface ITransactionData {
 }
 
 export interface IQueenBee {
+  /**
+   * Observes block with given id and notifies on its detection
+   *
+   * @param blockId block id to observe
+   * @returns subscribable object that will call `next` only once and completes
+   */
   block(blockId: string): Subscribable<ApiBlock>;
+  /**
+   * Observes block with given number and notifies on its detection
+   *
+   * @param blockNumber block number to observe
+   * @returns subscribable object that will call `next` only once and completes
+   */
   block(blockNumber: number): Subscribable<ApiBlock>;
 
+  /**
+   * Observes transaction with given id and notifies on its detection
+   *
+   * @param transactionId transaction id to observe
+   * @returns subscribable object that will call `next` only once and completes
+   */
   transaction(transactionId: string): Subscribable<ApiTransaction>;
 
-  // TODO: Account
+  /**
+   * Observes given account and notifies when new operation in blockchain related to the given account is detected
+   *
+   * @param name account name to observe
+   * @returns subscribable object that will call `next` on every operation related to the given account
+   */
+  account(name: string): Subscribable<operation>;
 }
 
 export interface IAutoBee extends EventEmitter {

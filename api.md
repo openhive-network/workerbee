@@ -41,7 +41,7 @@ src/index.ts:8
 
 #### Defined in
 
-src/interfaces.ts:27
+src/interfaces.ts:51
 
 ___
 
@@ -51,7 +51,7 @@ ___
 
 #### Defined in
 
-src/interfaces.ts:44
+src/interfaces.ts:68
 
 ___
 
@@ -61,7 +61,7 @@ ___
 
 #### Defined in
 
-src/interfaces.ts:26
+src/interfaces.ts:50
 
 ## Methods
 
@@ -77,7 +77,7 @@ Allows you to iterate over blocks indefinitely
 
 #### Defined in
 
-src/interfaces.ts:49
+src/interfaces.ts:73
 
 ___
 
@@ -124,7 +124,7 @@ Deletes the current bot instance and underlying wax and beekepeer objects
 
 #### Defined in
 
-src/interfaces.ts:42
+src/interfaces.ts:66
 
 ___
 
@@ -384,7 +384,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:57
+src/interfaces.ts:81
 
 ▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
 
@@ -407,7 +407,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:64
+src/interfaces.ts:88
 
 ▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
 
@@ -430,7 +430,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:71
+src/interfaces.ts:95
 
 ▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
 
@@ -453,7 +453,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:78
+src/interfaces.ts:102
 
 ▸ **on**(`event`, `handler`): [`IAutoBee`](#interfacesiautobeemd)
 
@@ -476,7 +476,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:85
+src/interfaces.ts:109
 
 ___
 
@@ -864,7 +864,7 @@ Starts the automation with given configuration
 
 #### Defined in
 
-src/interfaces.ts:32
+src/interfaces.ts:56
 
 ___
 
@@ -880,7 +880,7 @@ Request automation stop
 
 #### Defined in
 
-src/interfaces.ts:37
+src/interfaces.ts:61
 
 
 <a name="interfacesiautobeeconstructormd"></a>
@@ -907,7 +907,7 @@ Constructs new AutoBee bot object
 
 #### Defined in
 
-src/interfaces.ts:94
+src/interfaces.ts:118
 
 
 <a name="interfacesiblockdatamd"></a>
@@ -941,39 +941,71 @@ src/interfaces.ts:7
 
 ## Methods
 
+### account
+
+▸ **account**(`name`): `Subscribable`\<`operation`\>
+
+Observes given account and notifies when new operation in blockchain related to the given account is detected
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `name` | `string` | account name to observe |
+
+#### Returns
+
+`Subscribable`\<`operation`\>
+
+subscribable object that will call `next` on every operation related to the given account
+
+#### Defined in
+
+src/interfaces.ts:46
+
+___
+
 ### block
 
 ▸ **block**(`blockId`): `Subscribable`\<`ApiBlock`\>
 
+Observes block with given id and notifies on its detection
+
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `blockId` | `string` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `blockId` | `string` | block id to observe |
 
 #### Returns
 
 `Subscribable`\<`ApiBlock`\>
 
+subscribable object that will call `next` only once and completes
+
 #### Defined in
 
-src/interfaces.ts:17
+src/interfaces.ts:23
 
 ▸ **block**(`blockNumber`): `Subscribable`\<`ApiBlock`\>
 
+Observes block with given number and notifies on its detection
+
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `blockNumber` | `number` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `blockNumber` | `number` | block number to observe |
 
 #### Returns
 
 `Subscribable`\<`ApiBlock`\>
 
+subscribable object that will call `next` only once and completes
+
 #### Defined in
 
-src/interfaces.ts:18
+src/interfaces.ts:30
 
 ___
 
@@ -981,19 +1013,23 @@ ___
 
 ▸ **transaction**(`transactionId`): `Subscribable`\<`ApiTransaction`\>
 
+Observes transaction with given id and notifies on its detection
+
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `transactionId` | `string` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `transactionId` | `string` | transaction id to observe |
 
 #### Returns
 
 `Subscribable`\<`ApiTransaction`\>
 
+subscribable object that will call `next` only once and completes
+
 #### Defined in
 
-src/interfaces.ts:20
+src/interfaces.ts:38
 
 
 <a name="interfacesistartconfigurationmd"></a>
@@ -1016,7 +1052,7 @@ Wax chain options
 
 #### Defined in
 
-src/bot.ts:22
+src/bot.ts:23
 
 ___
 
@@ -1028,7 +1064,7 @@ Posting private key in WIF format
 
 #### Defined in
 
-src/bot.ts:14
+src/bot.ts:15
 
 
 <a name="interfacesitransactiondatamd"></a>

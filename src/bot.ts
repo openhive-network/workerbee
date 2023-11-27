@@ -1,9 +1,10 @@
 import EventEmitter from "events";
 import beekeeperFactory, { IBeekeeperInstance, IBeekeeperUnlockedWallet } from "@hive-staging/beekeeper";
-import { ApiBlock, ApiTransaction, IHiveChainInterface, IWaxOptionsChain, createHiveChain } from "@hive-staging/wax";
+import { ApiBlock, ApiTransaction, IHiveChainInterface, IWaxOptionsChain, createHiveChain, operation } from "@hive-staging/wax";
 import type { Observer, Subscribable, Unsubscribable } from "rxjs";
 
-import type { IAutoBee, IBlockData } from "./interfaces";
+import { AccountObserver } from "./account_observer";
+import type { IAutoBee, IBlockData, ITransactionData } from "./interfaces";
 
 export interface IStartConfiguration {
   /**
@@ -36,11 +37,15 @@ export class QueenBee {
   public block(idOrNumber: string | number): Subscribable<ApiBlock> {
     return {
       subscribe: (observer: Partial<Observer<ApiBlock>>): Unsubscribable => {
+        const complete = (): void => {
+          observer.complete?.();
+          this.worker.off("block", listener);
+        };
+
         const listener = ({ block, number }): void => {
           const confirm = (): void => {
             observer.next?.(block);
-            observer.complete?.();
-            this.worker.off("block", listener);
+            complete();
           };
 
           if(typeof idOrNumber === "string") {
@@ -53,7 +58,7 @@ export class QueenBee {
 
         return {
           unsubscribe: (): void => {
-            this.worker.off("block", listener);
+            complete();
           }
         };
       }
@@ -63,11 +68,15 @@ export class QueenBee {
   public transaction(txId: string): Subscribable<ApiTransaction> {
     return {
       subscribe: (observer: Partial<Observer<ApiTransaction>>): Unsubscribable => {
+        const complete = (): void => {
+          observer.complete?.();
+          this.worker.off("transaction", listener);
+        };
+
         const listener = ({ id, transaction }): void => {
           const confirm = (): void => {
             observer.next?.(transaction);
-            observer.complete?.();
-            this.worker.off("transaction", listener);
+            complete();
           };
 
           if(txId === id)
@@ -77,7 +86,40 @@ export class QueenBee {
 
         return {
           unsubscribe: (): void => {
-            this.worker.off("transaction", listener);
+            complete();
+          }
+        };
+      }
+    };
+  }
+
+  public account(name: string): Subscribable<operation> {
+    return {
+      subscribe: (observer: Partial<Observer<operation>>): Unsubscribable => {
+        const complete = (): void => {
+          observer.complete?.();
+          this.worker.off("transaction", listener);
+        };
+
+        const visitor = new AccountObserver(name);
+
+        const listener = ({ transaction }: ITransactionData): void => {
+          const confirm = (result: operation): void => {
+            observer.next?.(result);
+          };
+
+          for(const op of transaction.operations) {
+            const result = visitor.accept(op);
+
+            if(typeof result === "object")
+              confirm(result);
+          }
+        };
+        this.worker.on("transaction", listener);
+
+        return {
+          unsubscribe: (): void => {
+            complete();
           }
         };
       }

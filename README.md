@@ -59,7 +59,25 @@ const observed = observer.subscribe({
     observed.unsubscribe();
   }
 });
+```
 
+### Observe given account for operations in blockchain
+
+```js
+import AutoBee from "@hive-staging/autobee";
+
+const bot = new AutoBee({ postingKey: '5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT' });
+bot.on("error", console.error);
+
+await bot.start();
+
+const observer = bot.observe.account("gtg");
+
+observer.subscribe({
+  next(op) {
+    console.info(op);
+  }
+});
 ```
 
 ## API
