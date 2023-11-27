@@ -1,6 +1,6 @@
 {
   "name": "@hive-staging/autobee",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Example bot to use in your browser app based on the wax and beekeeper library",
   "main": "dist/bundle/index.js",
   "types": "dist/bundle/index.d.ts",
