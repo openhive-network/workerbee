@@ -151,6 +151,24 @@ src/interfaces.ts:38
 
 ## Properties
 
+### beekeeperOptions
+
+• `Optional` **beekeeperOptions**: `Partial`\<`IBeekeeperOptions`\>
+
+Beekeeper wallet options
+
+**`Default`**
+
+```ts
+{}
+```
+
+#### Defined in
+
+src/bot.ts:31
+
+___
+
 ### chainOptions
 
 • `Optional` **chainOptions**: `Partial`\<`IWaxOptionsChain`\>

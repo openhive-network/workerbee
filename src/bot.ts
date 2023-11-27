@@ -1,5 +1,5 @@
 import EventEmitter from "events";
-import beekeeperFactory, { IBeekeeperInstance, IBeekeeperUnlockedWallet } from "@hive-staging/beekeeper";
+import beekeeperFactory, { IBeekeeperInstance, IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hive-staging/beekeeper";
 import { ApiBlock, ApiTransaction, IHiveChainInterface, IWaxOptionsChain, createHiveChain, operation } from "@hive-staging/wax";
 import type { Observer, Subscribable, Unsubscribable } from "rxjs";
 
@@ -21,6 +21,14 @@ export interface IStartConfiguration {
    * @default {}
    */
   chainOptions?: Partial<IWaxOptionsChain>;
+
+  /**
+   * Beekeeper wallet options
+   *
+   * @type {?Partial<IBeekeeperOptions>}
+   * @default {}
+   */
+  beekeeperOptions?: Partial<IBeekeeperOptions>;
 }
 
 export const DEFAULT_WORKERBEE_OPTIONS = {
@@ -163,7 +171,7 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
     // Initialize chain and beekepeer if required
     if(typeof this.chain === "undefined" || typeof this.beekeeper === "undefined" || typeof this.wallet === "undefined") {
       this.chain = await createHiveChain(this.configuration.chainOptions);
-      this.beekeeper = await beekeeperFactory();
+      this.beekeeper = await beekeeperFactory(this.configuration.beekeeperOptions);
 
       const random = Math.random().toString(16)
         .slice(2);
