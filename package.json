@@ -46,6 +46,7 @@
     "@hive-staging/beekeeper": "^0.1.0",
     "@hive-staging/wax": "^0.1.7",
     "events": "^3.3.0",
+    "rxjs": "^7.8.1",
     "tslib": "^2.6.2"
   },
   "repository": {

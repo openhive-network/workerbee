@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { ChromiumBrowser, ConsoleMessage, chromium } from "playwright";
 
 import "../assets/data";
+import type { IBlockData } from "../../src/interfaces";
 
 let browser!: ChromiumBrowser;
 
@@ -109,6 +110,40 @@ test.describe("AutoBee Bot events test", () => {
     }, HIVE_BLOCK_INTERVAL);
 
     expect(blocksParsed).toBeGreaterThanOrEqual(1);
+  });
+
+  test("Should be able to use block observer", async({ page }) => {
+    await page.evaluate(async(HIVE_BLOCK_INTERVAL) => {
+      const bot = new AutoBee({ postingKey: '5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT' });
+      bot.on("error", console.error);
+
+      await Promise.race([
+        new Promise<void>(async(res) => {
+          await bot.start();
+
+          const block = await new Promise(blockResolve => {
+            bot.once("block", blockResolve);
+          }) as IBlockData;
+
+          console.info(`Waiting for block: #${block.number + 1}`);
+          const observer = bot.observe.block(block.number + 1);
+          const observed = observer.subscribe({
+            next() {
+              console.info('Block detected');
+
+              res();
+            },
+            complete() {
+              observed.unsubscribe();
+            }
+          });
+        }),
+        new Promise((res) => { setTimeout(res, HIVE_BLOCK_INTERVAL * 4); }),
+      ]);
+
+      await bot.stop();
+      await bot.delete();
+    }, HIVE_BLOCK_INTERVAL);
   });
 
   test.afterAll(async() => {

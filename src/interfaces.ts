@@ -1,4 +1,6 @@
-import type { ApiBlock } from "@hive-staging/wax";
+import type EventEmitter from "events";
+import type { ApiBlock, ApiTransaction } from "@hive-staging/wax";
+import type { Subscribable } from "rxjs";
 import type { IStartConfiguration } from "./bot";
 
 export interface IBlockData {
@@ -6,7 +8,21 @@ export interface IBlockData {
   block: ApiBlock;
 }
 
-export interface IAutoBee {
+export interface ITransactionData {
+  id: string;
+  transaction: ApiTransaction;
+}
+
+export interface IQueenBee {
+  block(blockId: string): Subscribable<ApiBlock>;
+  block(blockNumber: number): Subscribable<ApiBlock>;
+
+  transaction(transactionId: string): Subscribable<ApiTransaction>;
+
+  // TODO: Account
+}
+
+export interface IAutoBee extends EventEmitter {
   readonly running: boolean;
   readonly configuration: Readonly<IStartConfiguration>;
 
@@ -24,6 +40,8 @@ export interface IAutoBee {
    * Deletes the current bot instance and underlying wax and beekepeer objects
    */
   delete(): Promise<void>;
+
+  readonly observe: IQueenBee;
 
   /**
    * Allows you to iterate over blocks indefinitely
@@ -58,6 +76,13 @@ export interface IAutoBee {
    * @param handler handler to be called on new block event
    */
   on(event: "block", handler: (data: IBlockData) => void): this;
+  /**
+   * Triggers on new transaction detected
+   *
+   * @param event event name
+   * @param handler handler to be called on new block event
+   */
+  on(event: "transaction", handler: (data: ITransactionData) => void): this;
 }
 
 export interface IAutoBeeConstructor {

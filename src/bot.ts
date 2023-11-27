@@ -1,6 +1,7 @@
 import EventEmitter from "events";
 import beekeeperFactory, { IBeekeeperInstance, IBeekeeperUnlockedWallet } from "@hive-staging/beekeeper";
-import { IHiveChainInterface, IWaxOptionsChain, createHiveChain } from "@hive-staging/wax";
+import { ApiBlock, ApiTransaction, IHiveChainInterface, IWaxOptionsChain, createHiveChain } from "@hive-staging/wax";
+import type { Observer, Subscribable, Unsubscribable } from "rxjs";
 
 import type { IAutoBee, IBlockData } from "./interfaces";
 
@@ -27,6 +28,63 @@ export const DEFAULT_AUTOBEE_OPTIONS = {
 
 export const DEFAULT_BLOCK_INTERVAL_TIMEOUT = 1500;
 
+export class QueenBee {
+  public constructor(
+    private readonly worker: AutoBee
+  ) {}
+
+  public block(idOrNumber: string | number): Subscribable<ApiBlock> {
+    return {
+      subscribe: (observer: Partial<Observer<ApiBlock>>): Unsubscribable => {
+        const listener = ({ block, number }): void => {
+          const confirm = (): void => {
+            observer.next?.(block);
+            observer.complete?.();
+            this.worker.off("block", listener);
+          };
+
+          if(typeof idOrNumber === "string") {
+            if(idOrNumber === block.block_id)
+              confirm();
+          } else if(idOrNumber === number)
+            confirm();
+        };
+        this.worker.on("block", listener);
+
+        return {
+          unsubscribe: (): void => {
+            this.worker.off("block", listener);
+          }
+        };
+      }
+    };
+  }
+
+  public transaction(txId: string): Subscribable<ApiTransaction> {
+    return {
+      subscribe: (observer: Partial<Observer<ApiTransaction>>): Unsubscribable => {
+        const listener = ({ id, transaction }): void => {
+          const confirm = (): void => {
+            observer.next?.(transaction);
+            observer.complete?.();
+            this.worker.off("transaction", listener);
+          };
+
+          if(txId === id)
+            confirm();
+        };
+        this.worker.on("transaction", listener);
+
+        return {
+          unsubscribe: (): void => {
+            this.worker.off("transaction", listener);
+          }
+        };
+      }
+    };
+  }
+}
+
 export class AutoBee extends EventEmitter implements IAutoBee {
   public running: boolean = false;
 
@@ -39,6 +97,8 @@ export class AutoBee extends EventEmitter implements IAutoBee {
   private wallet?: IBeekeeperUnlockedWallet;
 
   private headBlockNumber: number = 0;
+
+  public readonly observe: QueenBee = new QueenBee(this);
 
   public constructor(
     configuration: IStartConfiguration
@@ -97,6 +157,12 @@ export class AutoBee extends EventEmitter implements IAutoBee {
           number: this.headBlockNumber,
           block
         });
+
+        for(let i = 0; i < block.transaction_ids.length; ++i)
+          super.emit("transaction", {
+            id: block.transaction_ids[i],
+            transaction: block.transactions[i]
+          });
 
         ++this.headBlockNumber;
       } // Else -> no new block

@@ -19,12 +19,43 @@ npm install @hive-staging/autobee
 
 ## Usage
 
-### Simple bot usage
+### Iterating indefinitely over new blocks
 
 ```js
-import bootstrap from '@hive-staging/autobee';
+const bot = new AutoBee({ postingKey: '5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT' });
+bot.on("error", console.error);
 
-await bootstrap();
+await bot.start();
+
+for await(const { block, number } of bot)
+  console.info(`Got block #${block.block_id} (${number})`);
+```
+
+### Wait for the next block using observer
+
+```js
+const bot = new AutoBee({ postingKey: '5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT' });
+bot.on("error", console.error);
+
+await bot.start();
+
+const block = await new Promise(blockResolve => {
+  bot.once("block", blockResolve);
+}); // Get one latest block
+
+console.info(`Waiting for block: #${block.number + 1}`);
+const observer = bot.observe.block(block.number + 1);
+
+const observed = observer.subscribe({
+  next() {
+    console.info('Block detected');
+  },
+  // Complete method is optional
+  complete() {
+    observed.unsubscribe();
+  }
+});
+
 ```
 
 ## API
