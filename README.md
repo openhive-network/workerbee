@@ -76,6 +76,41 @@ observer.subscribe({
 });
 ```
 
+### Broadcast and observe transaction in blockchain
+
+```js
+import WorkerBee from "@hive-staging/workerbee";
+
+const bot = new WorkerBee({ postingKey: "5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT" });
+bot.on("error", console.error);
+
+await bot.start();
+
+// Build transaction
+const builder = await bot.chain.getTransactionBuilder();
+builder.push({
+  vote: {
+    voter: "otom",
+    author: "c0ff33a",
+    permlink: "ewxhnjbj",
+    weight: 2200
+  }
+});
+
+// Broadcast our transaction with custom internal expiration time
+const observer = await bot.broadcast(builder.build(), { throwAfter: "+10m" });
+
+// Observe if our transaction has been applied
+observer.subscribe({
+  next(tx) {
+    console.info(tx, "applied in blockchain");
+  },
+  error() {
+    console.error("Transaction observation time expired");
+  }
+});
+```
+
 ## API
 
 See API definition in [api.md](https://gitlab.syncad.com/mtyszczak/workerbee/-/blob/${CommitSHA}/api.md)

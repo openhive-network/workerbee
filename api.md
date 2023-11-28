@@ -6,6 +6,8 @@
 ## Interfaces
 
 - [IBlockData](#interfacesiblockdatamd)
+- [IBroadcastOptions](#interfacesibroadcastoptionsmd)
+- [IOperationData](#interfacesioperationdatamd)
 - [IQueenBee](#interfacesiqueenbeemd)
 - [IStartConfiguration](#interfacesistartconfigurationmd)
 - [ITransactionData](#interfacesitransactiondatamd)
@@ -48,6 +50,55 @@ ___
 src/interfaces.ts:7
 
 
+<a name="interfacesibroadcastoptionsmd"></a>
+
+# Interface: IBroadcastOptions
+
+## Properties
+
+### throwAfter
+
+• `Optional` **throwAfter**: `string` \| `number` \| `Date`
+
+Can be either absolute time that will be passed to the Date constructor
+or relative time, like: "+10s", "+2m", "+1h"
+
+**`Default`**
+
+```ts
+undefined
+```
+
+#### Defined in
+
+src/interfaces.ts:63
+
+
+<a name="interfacesioperationdatamd"></a>
+
+# Interface: IOperationData
+
+## Properties
+
+### op
+
+• **op**: `operation`
+
+#### Defined in
+
+src/interfaces.ts:18
+
+___
+
+### transaction
+
+• **transaction**: [`ITransactionData`](#interfacesitransactiondatamd)
+
+#### Defined in
+
+src/interfaces.ts:19
+
+
 <a name="interfacesiqueenbeemd"></a>
 
 # Interface: IQueenBee
@@ -56,9 +107,9 @@ src/interfaces.ts:7
 
 ### accountOperations
 
-▸ **accountOperations**(`name`): `Subscribable`\<`operation`\>
+▸ **accountOperations**(`name`): `Subscribable`\<[`IOperationData`](#interfacesioperationdatamd)\>
 
-Observes given account and notifies when new operation in blockchain related to the given account is detected
+Observes given account and notifies when new operation in blockchain related to the given account is detected (no virtual operations for now)
 
 #### Parameters
 
@@ -68,19 +119,19 @@ Observes given account and notifies when new operation in blockchain related to 
 
 #### Returns
 
-`Subscribable`\<`operation`\>
+`Subscribable`\<[`IOperationData`](#interfacesioperationdatamd)\>
 
 subscribable object that will call `next` on every operation related to the given account
 
 #### Defined in
 
-src/interfaces.ts:46
+src/interfaces.ts:52
 
 ___
 
 ### block
 
-▸ **block**(`blockId`): `Subscribable`\<`ApiBlock`\>
+▸ **block**(`blockId`): `Subscribable`\<[`IBlockData`](#interfacesiblockdatamd)\>
 
 Observes block with given id and notifies on its detection
 
@@ -92,15 +143,15 @@ Observes block with given id and notifies on its detection
 
 #### Returns
 
-`Subscribable`\<`ApiBlock`\>
+`Subscribable`\<[`IBlockData`](#interfacesiblockdatamd)\>
 
 subscribable object that will call `next` only once and completes
 
 #### Defined in
 
-src/interfaces.ts:23
+src/interfaces.ts:29
 
-▸ **block**(`blockNumber`): `Subscribable`\<`ApiBlock`\>
+▸ **block**(`blockNumber`): `Subscribable`\<[`IBlockData`](#interfacesiblockdatamd)\>
 
 Observes block with given number and notifies on its detection
 
@@ -112,19 +163,19 @@ Observes block with given number and notifies on its detection
 
 #### Returns
 
-`Subscribable`\<`ApiBlock`\>
+`Subscribable`\<[`IBlockData`](#interfacesiblockdatamd)\>
 
 subscribable object that will call `next` only once and completes
 
 #### Defined in
 
-src/interfaces.ts:30
+src/interfaces.ts:36
 
 ___
 
 ### transaction
 
-▸ **transaction**(`transactionId`): `Subscribable`\<`ApiTransaction`\>
+▸ **transaction**(`transactionId`): `Subscribable`\<[`ITransactionData`](#interfacesitransactiondatamd)\>
 
 Observes transaction with given id and notifies on its detection
 
@@ -136,13 +187,13 @@ Observes transaction with given id and notifies on its detection
 
 #### Returns
 
-`Subscribable`\<`ApiTransaction`\>
+`Subscribable`\<[`ITransactionData`](#interfacesitransactiondatamd)\>
 
 subscribable object that will call `next` only once and completes
 
 #### Defined in
 
-src/interfaces.ts:38
+src/interfaces.ts:44
 
 
 <a name="interfacesistartconfigurationmd"></a>
@@ -165,7 +216,7 @@ Beekeeper wallet options
 
 #### Defined in
 
-src/bot.ts:31
+src/bot.ts:33
 
 ___
 
@@ -183,7 +234,7 @@ Wax chain options
 
 #### Defined in
 
-src/bot.ts:23
+src/bot.ts:25
 
 ___
 
@@ -195,7 +246,7 @@ Posting private key in WIF format
 
 #### Defined in
 
-src/bot.ts:15
+src/bot.ts:17
 
 
 <a name="interfacesitransactiondatamd"></a>
@@ -203,6 +254,16 @@ src/bot.ts:15
 # Interface: ITransactionData
 
 ## Properties
+
+### block
+
+• **block**: [`IBlockData`](#interfacesiblockdatamd)
+
+#### Defined in
+
+src/interfaces.ts:14
+
+___
 
 ### id
 
@@ -235,13 +296,28 @@ src/interfaces.ts:13
 
 ## Properties
 
+### chain
+
+• `Optional` `Readonly` **chain**: `Readonly`\<`IHiveChainInterface`\>
+
+Exposed hive chain interface we are using.
+May be undefined if you have not already started our bot.
+
+Remember that chain property will be initialized during [start](#start) call and uninitialized durin [delete](#delete)
+
+#### Defined in
+
+src/interfaces.ts:76
+
+___
+
 ### configuration
 
 • `Readonly` **configuration**: `Readonly`\<[`IStartConfiguration`](#interfacesistartconfigurationmd)\>
 
 #### Defined in
 
-src/interfaces.ts:51
+src/interfaces.ts:68
 
 ___
 
@@ -251,7 +327,7 @@ ___
 
 #### Defined in
 
-src/interfaces.ts:68
+src/interfaces.ts:93
 
 ___
 
@@ -261,7 +337,7 @@ ___
 
 #### Defined in
 
-src/interfaces.ts:50
+src/interfaces.ts:67
 
 ## Methods
 
@@ -277,7 +353,7 @@ Allows you to iterate over blocks indefinitely
 
 #### Defined in
 
-src/interfaces.ts:73
+src/interfaces.ts:111
 
 ___
 
@@ -312,6 +388,34 @@ node_modules/.pnpm/@types+node@20.7.1/node_modules/@types/node/events.d.ts:462
 
 ___
 
+### broadcast
+
+▸ **broadcast**(`tx`, `options?`): `Promise`\<`Subscribable`\<[`ITransactionData`](#interfacesitransactiondatamd)\>\>
+
+Broadcast given transaction to the remote and returns a subscribable object
+that calls error after [throwAfter](#interfacesibroadcastoptionsmd) time (if given)
+
+If transaction is not already signed (at least one signature is present)
+WorkerBee will try signing the transaction using specified in the configuration
+private key
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `tx` | `transaction` | Protobuf transactoin to broadcast |
+| `options?` | [`IBroadcastOptions`](#interfacesibroadcastoptionsmd) | Options for broadcasting |
+
+#### Returns
+
+`Promise`\<`Subscribable`\<[`ITransactionData`](#interfacesitransactiondatamd)\>\>
+
+#### Defined in
+
+src/interfaces.ts:106
+
+___
+
 ### delete
 
 ▸ **delete**(): `Promise`\<`void`\>
@@ -324,7 +428,7 @@ Deletes the current bot instance and underlying wax and beekepeer objects
 
 #### Defined in
 
-src/interfaces.ts:66
+src/interfaces.ts:91
 
 ___
 
@@ -584,7 +688,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:81
+src/interfaces.ts:119
 
 ▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
@@ -607,7 +711,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:88
+src/interfaces.ts:126
 
 ▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
@@ -630,7 +734,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:95
+src/interfaces.ts:133
 
 ▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
@@ -653,7 +757,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:102
+src/interfaces.ts:140
 
 ▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
@@ -676,7 +780,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:109
+src/interfaces.ts:147
 
 ___
 
@@ -1064,7 +1168,7 @@ Starts the automation with given configuration
 
 #### Defined in
 
-src/interfaces.ts:56
+src/interfaces.ts:81
 
 ___
 
@@ -1080,7 +1184,7 @@ Request automation stop
 
 #### Defined in
 
-src/interfaces.ts:61
+src/interfaces.ts:86
 
 
 <a name="interfacesiworkerbeeconstructormd"></a>
@@ -1107,4 +1211,4 @@ Constructs new WorkerBee bot object
 
 #### Defined in
 
-src/interfaces.ts:118
+src/interfaces.ts:156

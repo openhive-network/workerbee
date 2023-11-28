@@ -1,5 +1,5 @@
 import type EventEmitter from "events";
-import type { ApiBlock, ApiTransaction, operation } from "@hive-staging/wax";
+import type { ApiBlock, ApiTransaction, IHiveChainInterface, operation, transaction } from "@hive-staging/wax";
 import type { Subscribable } from "rxjs";
 import type { IStartConfiguration } from "./bot";
 
@@ -11,6 +11,12 @@ export interface IBlockData {
 export interface ITransactionData {
   id: string;
   transaction: ApiTransaction;
+  block: IBlockData;
+}
+
+export interface IOperationData {
+  op: operation;
+  transaction: ITransactionData;
 }
 
 export interface IQueenBee {
@@ -20,14 +26,14 @@ export interface IQueenBee {
    * @param blockId block id to observe
    * @returns subscribable object that will call `next` only once and completes
    */
-  block(blockId: string): Subscribable<ApiBlock>;
+  block(blockId: string): Subscribable<IBlockData>;
   /**
    * Observes block with given number and notifies on its detection
    *
    * @param blockNumber block number to observe
    * @returns subscribable object that will call `next` only once and completes
    */
-  block(blockNumber: number): Subscribable<ApiBlock>;
+  block(blockNumber: number): Subscribable<IBlockData>;
 
   /**
    * Observes transaction with given id and notifies on its detection
@@ -35,20 +41,39 @@ export interface IQueenBee {
    * @param transactionId transaction id to observe
    * @returns subscribable object that will call `next` only once and completes
    */
-  transaction(transactionId: string): Subscribable<ApiTransaction>;
+  transaction(transactionId: string): Subscribable<ITransactionData>;
 
   /**
-   * Observes given account and notifies when new operation in blockchain related to the given account is detected
+   * Observes given account and notifies when new operation in blockchain related to the given account is detected (no virtual operations for now)
    *
    * @param name account name to observe
    * @returns subscribable object that will call `next` on every operation related to the given account
    */
-  accountOperations(name: string): Subscribable<operation>;
+  accountOperations(name: string): Subscribable<IOperationData>;
+}
+
+export interface IBroadcastOptions {
+  /**
+   * Can be either absolute time that will be passed to the {@link Date} constructor
+   * or relative time, like: "+10s", "+2m", "+1h"
+   *
+   * @type {string | number | Date}
+   * @default undefined
+   */
+  throwAfter?: string | number | Date;
 }
 
 export interface IWorkerBee extends EventEmitter {
   readonly running: boolean;
   readonly configuration: Readonly<IStartConfiguration>;
+
+  /**
+   * Exposed hive chain interface we are using.
+   * May be undefined if you have not already started our bot.
+   *
+   * Remember that chain property will be initialized during {@link start} call and uninitialized durin {@link delete}
+   */
+  readonly chain?: Readonly<IHiveChainInterface>;
 
   /**
    * Starts the automation with given configuration
@@ -66,6 +91,19 @@ export interface IWorkerBee extends EventEmitter {
   delete(): Promise<void>;
 
   readonly observe: IQueenBee;
+
+  /**
+   * Broadcast given transaction to the remote and returns a subscribable object
+   * that calls error after {@link IBroadcastOptions throwAfter} time (if given)
+   *
+   * If transaction is not already signed (at least one signature is present)
+   * WorkerBee will try signing the transaction using specified in the configuration
+   * private key
+   *
+   * @param tx Protobuf transactoin to broadcast
+   * @param options Options for broadcasting
+   */
+  broadcast(tx: transaction, options?: IBroadcastOptions): Promise<Subscribable<ITransactionData>>;
 
   /**
    * Allows you to iterate over blocks indefinitely

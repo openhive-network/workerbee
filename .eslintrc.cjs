@@ -75,7 +75,7 @@ module.exports = {
     "func-name-matching":             2,
     "func-names":                     2,
     "grouped-accessor-pairs":         2,
-    "init-declarations":              2,
+    "init-declarations":              0,
     "no-array-constructor":           2,
     "no-caller":                      2,
     "no-console":                     1,

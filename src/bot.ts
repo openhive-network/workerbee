@@ -1,10 +1,12 @@
 import EventEmitter from "events";
 import beekeeperFactory, { IBeekeeperInstance, IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hive-staging/beekeeper";
-import { ApiBlock, ApiTransaction, IHiveChainInterface, IWaxOptionsChain, createHiveChain, operation } from "@hive-staging/wax";
+import { BroadcastTransactionRequest, IWaxOptionsChain, operation, transaction, TWaxExtended } from "@hive-staging/wax";
 import type { Observer, Subscribable, Unsubscribable } from "rxjs";
 
 import { AccountOperationVisitor } from "./account_observer";
-import type { IWorkerBee, IBlockData, ITransactionData } from "./interfaces";
+import { WorkerBeeError } from "./errors";
+import type { IWorkerBee, IBlockData, ITransactionData, IOperationData, IBroadcastOptions } from "./interfaces";
+import { getWax, WaxExtendTypes } from "./wax/extend";
 
 export interface IStartConfiguration {
   /**
@@ -42,24 +44,24 @@ export class QueenBee {
     private readonly worker: WorkerBee
   ) {}
 
-  public block(idOrNumber: string | number): Subscribable<ApiBlock> {
+  public block(idOrNumber: string | number): Subscribable<IBlockData> {
     return {
-      subscribe: (observer: Partial<Observer<ApiBlock>>): Unsubscribable => {
+      subscribe: (observer: Partial<Observer<IBlockData>>): Unsubscribable => {
         const complete = (): void => {
           observer.complete?.();
           this.worker.off("block", listener);
         };
 
-        const listener = ({ block, number }): void => {
+        const listener = (blockData: IBlockData): void => {
           const confirm = (): void => {
-            observer.next?.(block);
+            observer.next?.(blockData);
             complete();
           };
 
           if(typeof idOrNumber === "string") {
-            if(idOrNumber === block.block_id)
+            if(idOrNumber === blockData.block.block_id)
               confirm();
-          } else if(idOrNumber === number)
+          } else if(idOrNumber === blockData.number)
             confirm();
         };
         this.worker.on("block", listener);
@@ -73,24 +75,31 @@ export class QueenBee {
     };
   }
 
-  public transaction(txId: string): Subscribable<ApiTransaction> {
+  public transaction(txId: string, expireIn?: number): Subscribable<ITransactionData> {
     return {
-      subscribe: (observer: Partial<Observer<ApiTransaction>>): Unsubscribable => {
+      subscribe: (observer: Partial<Observer<ITransactionData>>): Unsubscribable => {
         const complete = (): void => {
           observer.complete?.();
           this.worker.off("transaction", listener);
         };
 
-        const listener = ({ id, transaction }): void => {
+        const listener = (transactionData: ITransactionData): void => {
           const confirm = (): void => {
-            observer.next?.(transaction);
+            observer.next?.(transactionData);
             complete();
           };
 
-          if(txId === id)
+          if(txId === transactionData.id)
             confirm();
         };
         this.worker.on("transaction", listener);
+
+        if(typeof expireIn === "number")
+          setTimeout(() => {
+            observer.error?.(new WorkerBeeError("Transaction expired"));
+
+            complete();
+          }, expireIn);
 
         return {
           unsubscribe: (): void => {
@@ -101,9 +110,9 @@ export class QueenBee {
     };
   }
 
-  public accountOperations(name: string): Subscribable<operation> {
+  public accountOperations(name: string): Subscribable<IOperationData> {
     return {
-      subscribe: (observer: Partial<Observer<operation>>): Unsubscribable => {
+      subscribe: (observer: Partial<Observer<IOperationData>>): Unsubscribable => {
         const complete = (): void => {
           observer.complete?.();
           this.worker.off("transaction", listener);
@@ -111,12 +120,12 @@ export class QueenBee {
 
         const visitor = new AccountOperationVisitor(name);
 
-        const listener = ({ transaction }: ITransactionData): void => {
+        const listener = (transactionData: ITransactionData): void => {
           const confirm = (result: operation): void => {
-            observer.next?.(result);
+            observer.next?.({ op: result, transaction: transactionData });
           };
 
-          const proto = this.worker.chain!.TransactionBuilder.fromApi(transaction).build();
+          const proto = this.worker.chain!.TransactionBuilder.fromApi(transactionData.transaction).build();
 
           for(const op of proto.operations) {
             const result = visitor.accept(op);
@@ -142,7 +151,9 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
 
   public configuration: IStartConfiguration;
 
-  public chain?: IHiveChainInterface;
+  public chain?: TWaxExtended<typeof WaxExtendTypes>;
+
+  private publicKey!: string;
 
   private beekeeper?: IBeekeeperInstance;
 
@@ -169,10 +180,61 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
     return typeof this.configuration.postingKey === "string";
   }
 
+  private getExpirationTime(expirationTime?: Date | string | number): number | void {
+    if(typeof expirationTime === "undefined")
+      return;
+
+    let expiration: Date;
+    if(typeof expirationTime === "string" && expirationTime[0] === "+") {
+      let mul = 1000;
+
+      switch(expirationTime[expirationTime.length - 1]) {
+      case"h":
+        mul *= 60;
+      /* eslint-disable no-fallthrough */
+      case"m":
+        mul *= 60;
+      /* eslint-disable no-fallthrough */
+      default:
+      }
+
+      const num = Number.parseInt((/\d+/).exec(expirationTime)?.[0] as string);
+      if(Number.isNaN(num))
+        throw new WorkerBeeError("Invalid expiration time offset");
+
+      expiration = new Date(Date.now() + (num * mul));
+    } else
+      expiration = new Date(expirationTime);
+
+
+    const final = Date.now() - expiration.getTime();
+    if(final > 0)
+      return final;
+  }
+
+  public async broadcast(tx: transaction, options: IBroadcastOptions = {}): Promise<Subscribable<ITransactionData>> {
+    if(tx.signatures.length === 0) {
+      if(!this.isAuthorized)
+        throw new WorkerBeeError("You are trying to broadcast transaction without signing!");
+
+      tx = new this.chain!.TransactionBuilder(tx).build(this.wallet!, this.publicKey);
+    }
+
+    const apiTx = new this.chain!.TransactionBuilder(tx);
+
+    await this.chain!.api.network_broadcast_api.broadcast_transaction(new BroadcastTransactionRequest(apiTx));
+
+    const expireIn: number | undefined = this.getExpirationTime(options.throwAfter) as number | undefined;
+
+    return this.observe.transaction(apiTx.id, expireIn);
+  }
+
   public async start(): Promise<void> {
     // Initialize chain and beekepeer if required
-    if(typeof this.chain === "undefined" || typeof this.beekeeper === "undefined" || typeof this.wallet === "undefined") {
-      this.chain = await createHiveChain(this.configuration.chainOptions);
+    if(typeof this.chain === "undefined")
+      this.chain = await getWax(this.configuration.chainOptions);
+
+    if(typeof this.beekeeper === "undefined" || typeof this.wallet === "undefined") {
       this.beekeeper = await beekeeperFactory(this.configuration.beekeeperOptions);
 
       const random = Math.random().toString(16)
@@ -180,7 +242,7 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
 
       ({ wallet: this.wallet } = await this.beekeeper.createSession(random).createWallet(random));
       if(this.isAuthorized)
-        await this.wallet.importKey(this.configuration.postingKey as string);
+        this.publicKey = await this.wallet.importKey(this.configuration.postingKey as string);
 
       ({ head_block_number: this.headBlockNumber } = await this.chain.api.database_api.get_dynamic_global_properties({}));
     }
@@ -211,15 +273,18 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
       ]);
 
       if(typeof block === "object") {
-        super.emit("block", {
+        const blockData = {
           number: this.headBlockNumber,
           block
-        });
+        };
+
+        super.emit("block", blockData);
 
         for(let i = 0; i < block.transaction_ids.length; ++i)
           super.emit("transaction", {
             id: block.transaction_ids[i],
-            transaction: block.transactions[i]
+            transaction: block.transactions[i],
+            block: blockData
           });
 
         ++this.headBlockNumber;
