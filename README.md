@@ -98,7 +98,7 @@ builder.push({
 });
 
 // Broadcast our transaction with custom internal expiration time
-const observer = await bot.broadcast(builder.build());
+const observer = await bot.signAndBroadcast(builder.build());
 
 // Observe if our transaction has been applied
 observer.subscribe({

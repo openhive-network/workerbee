@@ -105,7 +105,7 @@ export interface IWorkerBee extends EventEmitter {
    * @param tx Protobuf transactoin to broadcast
    * @param options Options for broadcasting
    */
-  broadcast(tx: transaction, options?: IBroadcastOptions): Promise<Subscribable<ITransactionData>>;
+  signAndBroadcast(tx: transaction, options?: IBroadcastOptions): Promise<Subscribable<ITransactionData>>;
 
   /**
    * Allows you to iterate over blocks indefinitely

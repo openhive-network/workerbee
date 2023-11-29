@@ -388,36 +388,6 @@ node_modules/.pnpm/@types+node@20.7.1/node_modules/@types/node/events.d.ts:462
 
 ___
 
-### broadcast
-
-▸ **broadcast**(`tx`, `options?`): `Promise`\<`Subscribable`\<[`ITransactionData`](#interfacesitransactiondatamd)\>\>
-
-Broadcast given transaction to the remote and returns a subscribable object
-that calls error after [throwAfter](#interfacesibroadcastoptionsmd) time (if given)
-If [throwAfter](#interfacesibroadcastoptionsmd) has not been specified, it is automatically
-set to the transaction expiration time plus one minute
-
-If transaction is not already signed (at least one signature is present)
-WorkerBee will try signing the transaction using specified in the configuration
-private key
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `tx` | `transaction` | Protobuf transactoin to broadcast |
-| `options?` | [`IBroadcastOptions`](#interfacesibroadcastoptionsmd) | Options for broadcasting |
-
-#### Returns
-
-`Promise`\<`Subscribable`\<[`ITransactionData`](#interfacesitransactiondatamd)\>\>
-
-#### Defined in
-
-src/interfaces.ts:108
-
-___
-
 ### delete
 
 ▸ **delete**(): `Promise`\<`void`\>
@@ -1155,6 +1125,36 @@ EventEmitter.setMaxListeners
 #### Defined in
 
 node_modules/.pnpm/@types+node@20.7.1/node_modules/@types/node/events.d.ts:633
+
+___
+
+### signAndBroadcast
+
+▸ **signAndBroadcast**(`tx`, `options?`): `Promise`\<`Subscribable`\<[`ITransactionData`](#interfacesitransactiondatamd)\>\>
+
+Broadcast given transaction to the remote and returns a subscribable object
+that calls error after [throwAfter](#interfacesibroadcastoptionsmd) time (if given)
+If [throwAfter](#interfacesibroadcastoptionsmd) has not been specified, it is automatically
+set to the transaction expiration time plus one minute
+
+If transaction is not already signed (at least one signature is present)
+WorkerBee will try signing the transaction using specified in the configuration
+private key
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `tx` | `transaction` | Protobuf transactoin to broadcast |
+| `options?` | [`IBroadcastOptions`](#interfacesibroadcastoptionsmd) | Options for broadcasting |
+
+#### Returns
+
+`Promise`\<`Subscribable`\<[`ITransactionData`](#interfacesitransactiondatamd)\>\>
+
+#### Defined in
+
+src/interfaces.ts:108
 
 ___
 

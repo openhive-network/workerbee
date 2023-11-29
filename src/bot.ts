@@ -182,7 +182,7 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
     return typeof this.configuration.postingKey === "string";
   }
 
-  public async broadcast(tx: transaction, options: IBroadcastOptions = {}): Promise<Subscribable<ITransactionData>> {
+  public async signAndBroadcast(tx: transaction, options: IBroadcastOptions = {}): Promise<Subscribable<ITransactionData>> {
     if(tx.signatures.length === 0) {
       if(!this.isAuthorized)
         throw new WorkerBeeError("You are trying to broadcast transaction without signing!");
