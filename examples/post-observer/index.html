@@ -55,33 +55,34 @@
     const actualBotWork = async(accountToObserve) => {
       work = bot.observe.accountOperations(accountToObserve).subscribe({
         async next({ op, transaction: { block: { number } } }) {
-          if(typeof op.comment === 'object') {
-            log(`Got new comment in block #${number}: "${op.comment.parent_permlink}/${op.comment.permlink}"`);
+          if(typeof op.comment !== 'object')
+            return;
 
-            // Build transaction
-            const builder = await bot.chain.getTransactionBuilder();
-            builder.push({
-              vote: {
-                voter: "voter",
-                author: "initminer",
-                permlink: op.comment.permlink,
-                weight: 1000
-              }
-            });
+          log(`Got new comment in block #${number}: "${op.comment.parent_permlink}/${op.comment.permlink}"`);
 
-            // Broadcast our transaction with custom internal expiration time
-            const observer = await bot.signAndBroadcast(builder.build());
+          // Build transaction
+          const builder = await bot.chain.getTransactionBuilder();
+          builder.push({
+            vote: {
+              voter: "voter",
+              author: "initminer",
+              permlink: op.comment.permlink,
+              weight: 1000
+            }
+          });
 
-            // Observe if our transaction has been applied
-            observer.subscribe({
-              next({ block: { number: appliedBlockNumber } }) {
-                log(`Transasction from block #${number} ("${op.comment.parent_permlink}/${op.comment.permlink}") applied after ${appliedBlockNumber - number} blocks`);
-              },
-              error() {
-                console.error(`Transaction observation time for post vote "${op.comment.parent_permlink}/${op.comment.permlink}" expired`);
-              }
-            });
-          }
+          // Broadcast our transaction with custom internal expiration time
+          const observer = await bot.signAndBroadcast(builder.build());
+
+          // Observe if our transaction has been applied
+          observer.subscribe({
+            next({ block: { number: appliedBlockNumber } }) {
+              log(`Transasction from block #${number} ("${op.comment.parent_permlink}/${op.comment.permlink}") applied after ${appliedBlockNumber - number} blocks`);
+            },
+            error() {
+              console.error(`Transaction observation time for post vote "${op.comment.parent_permlink}/${op.comment.permlink}" expired`);
+            }
+          });
         }
       });
     };

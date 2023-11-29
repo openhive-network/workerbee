@@ -50,13 +50,13 @@ export class QueenBee {
     return {
       subscribe: (observer: Partial<Observer<IBlockData>>): Unsubscribable => {
         const complete = (): void => {
-          observer.complete?.();
+          try { observer.complete?.(); } catch (error) { try { observer.error?.(error); } catch {} }
           this.worker.off("block", listener);
         };
 
         const listener = (blockData: IBlockData): void => {
           const confirm = (): void => {
-            observer.next?.(blockData);
+            try { observer.next?.(blockData); } catch (error) { try { observer.error?.(error); } catch {} }
             complete();
           };
 
@@ -80,14 +80,17 @@ export class QueenBee {
   public transaction(txId: string, expireIn?: number): Subscribable<ITransactionData> {
     return {
       subscribe: (observer: Partial<Observer<ITransactionData>>): Unsubscribable => {
+        let timeoutId: undefined | NodeJS.Timeout = undefined;
+
         const complete = (): void => {
-          observer.complete?.();
+          try { observer.complete?.(); } catch (error) { try { observer.error?.(error); } catch {} }
           this.worker.off("transaction", listener);
+          clearTimeout(timeoutId);
         };
 
         const listener = (transactionData: ITransactionData): void => {
           const confirm = (): void => {
-            observer.next?.(transactionData);
+            try { observer.next?.(transactionData); } catch (error) { try { observer.error?.(error); } catch {} }
             complete();
           };
 
@@ -97,8 +100,8 @@ export class QueenBee {
         this.worker.on("transaction", listener);
 
         if(typeof expireIn === "number")
-          setTimeout(() => {
-            observer.error?.(new WorkerBeeError("Transaction expired"));
+          timeoutId = setTimeout(() => {
+            try { observer.error?.(new WorkerBeeError("Transaction expired")); } catch {}
 
             complete();
           }, expireIn);
@@ -116,7 +119,7 @@ export class QueenBee {
     return {
       subscribe: (observer: Partial<Observer<IOperationData>>): Unsubscribable => {
         const complete = (): void => {
-          observer.complete?.();
+          try { observer.complete?.(); } catch (error) { try { observer.error?.(error); } catch {} }
           this.worker.off("transaction", listener);
         };
 
@@ -124,7 +127,7 @@ export class QueenBee {
 
         const listener = (transactionData: ITransactionData): void => {
           const confirm = (result: operation): void => {
-            observer.next?.({ op: result, transaction: transactionData });
+            try { observer.next?.({ op: result, transaction: transactionData }); } catch (error) { try { observer.error?.(error); } catch {} }
           };
 
           const proto = this.worker.chain!.TransactionBuilder.fromApi(transactionData.transaction).build();
@@ -269,7 +272,7 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
 
         ++this.headBlockNumber;
       } // Else -> no new block
-    } catch(error) {
+    } catch (error) {
       // Ensure we are emitting the Error instance
       super.emit("error", error instanceof Error ? error : new Error(`Unknown error occurred during automation: ${String(error)}`));
 
