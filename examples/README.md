@@ -23,3 +23,14 @@ Account observer explains how to observe given account on the blockchain using o
 # Run example
 pnpm dlx parcel account-observer/index.html
 ```
+
+## Post observer
+
+**[post-observer/index.html](post-observer/index.html)**
+
+Post observer explains how to observe given account for new posts and automatically vote on them on the blockchain using our libraries
+
+```bash
+# Run example
+pnpm dlx parcel post-observer/index.html
+```

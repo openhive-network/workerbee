@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post observer example</title>
+  <style>
+    #log {
+      border: 3px solid black;
+      height: 50vh;
+      overflow: auto;
+      padding: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: .8rem;
+    }
+    #log .data {
+      margin: 5px;
+      padding: 5px;
+      color: darkslategray;
+      border-bottom: 2px solid gray;
+    }
+    #log .data.error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>WorkerBee Post observer example</h1>
+  <input id="acc" placeholder="Observe account" value="initminer">
+  <input id="key" placeholder="Private Posting key" value="5JqodRzm7Ag1QJgLgsCgEpQpkRKq1NQZGjaxy1Y48WxohCy2u5J">
+  <button id="start">Start</button>
+  <hr>
+  <h2>Log</h2>
+  <div id="log"></div>
+  <script type="module">
+    import WorkerBee from "../../dist/bundle/index.js";
+
+    const startBtn = document.getElementById("start");
+    const logger = document.getElementById("log");
+    const log = (what, error = false) => {
+      console[error ? 'error' : 'info'](what);
+
+      const node = document.createElement('div');
+      node.classList.add('data');
+      if(error)
+        node.classList.add('error');
+
+      node.innerText = typeof what === 'string' ? what : JSON.stringify(what);
+
+      logger.prepend(node);
+    };
+
+    let bot, work;
+
+    const actualBotWork = async(accountToObserve) => {
+      work = bot.observe.accountOperations(accountToObserve).subscribe({
+        async next({ op, transaction: { block: { number } } }) {
+          if(typeof op.comment === 'object') {
+            log(`Got new comment in block #${number}: "${op.comment.parent_permlink}/${op.comment.permlink}"`);
+
+            // Build transaction
+            const builder = await bot.chain.getTransactionBuilder();
+            builder.push({
+              vote: {
+                voter: "voter",
+                author: "initminer",
+                permlink: op.comment.permlink,
+                weight: 1000
+              }
+            });
+
+            // Broadcast our transaction with custom internal expiration time
+            const observer = await bot.signAndBroadcast(builder.build());
+
+            // Observe if our transaction has been applied
+            observer.subscribe({
+              next({ block: { number: appliedBlockNumber } }) {
+                log(`Transasction from block #${number} ("${op.comment.parent_permlink}/${op.comment.permlink}") applied after ${appliedBlockNumber - number} blocks`);
+              },
+              error() {
+                console.error(`Transaction observation time for post vote "${op.comment.parent_permlink}/${op.comment.permlink}" expired`);
+              }
+            });
+          }
+        }
+      });
+    };
+
+    let running = false;
+
+    startBtn.addEventListener('click', async() => {
+      try {
+        startBtn.disabled = true;
+
+        if(running && bot) {
+          await bot.stop();
+          await bot.delete();
+
+          if(work)
+            work.unsubscribe();
+
+          running = false;
+          startBtn.innerText = 'Start';
+          return;
+        }
+
+        bot = new WorkerBee({
+          postingKey: document.getElementById('key').value,
+          chainOptions: {
+            apiEndpoint: 'http://localhost:3000/',
+            chainId: '18dcf0a285365fc58b71f18b3d3fec954aa0c141c44e4e5cb4cf777b9eab274e'
+          }
+        });
+        bot.on("error", error => {
+          log(error, true);
+        });
+
+        await bot.start();
+
+        const accountToObserve = String(document.getElementById("acc").value);
+
+        log(`Observing account posts: "${accountToObserve}"`);
+
+        actualBotWork(accountToObserve).catch((error) => { log(error, true); });
+
+        running = true;
+        startBtn.innerText = 'Stop';
+      } catch(error) {
+        log(error, true);
+      } finally {
+        startBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
