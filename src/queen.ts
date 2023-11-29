@@ -15,14 +15,24 @@ export class QueenBee {
     return {
       subscribe: (observer: Partial<Observer<IBlockData>>): Unsubscribable => {
         const complete = (): void => {
-          try { observer.complete?.(); } catch (error) { try { observer.error?.(error); } catch {} }
-          this.worker.off("block", listener);
+          try {
+            observer.complete?.();
+          } catch (error) {
+            observer.error?.(error);
+          } finally {
+            this.worker.off("block", listener);
+          }
         };
 
         const listener = (blockData: IBlockData): void => {
           const confirm = (): void => {
-            try { observer.next?.(blockData); } catch (error) { try { observer.error?.(error); } catch {} }
-            complete();
+            try {
+              observer.next?.(blockData);
+            } catch (error) {
+              observer.error?.(error);
+            } finally {
+              complete();
+            }
           };
 
           if(typeof idOrNumber === "string") {
@@ -48,15 +58,25 @@ export class QueenBee {
         let timeoutId: undefined | NodeJS.Timeout = undefined;
 
         const complete = (): void => {
-          try { observer.complete?.(); } catch (error) { try { observer.error?.(error); } catch {} }
-          this.worker.off("transaction", listener);
-          clearTimeout(timeoutId);
+          try {
+            observer.complete?.();
+          } catch (error) {
+            observer.error?.(error);
+          } finally {
+            this.worker.off("transaction", listener);
+            clearTimeout(timeoutId);
+          }
         };
 
         const listener = (transactionData: ITransactionData): void => {
           const confirm = (): void => {
-            try { observer.next?.(transactionData); } catch (error) { try { observer.error?.(error); } catch {} }
-            complete();
+            try {
+              observer.next?.(transactionData);
+            } catch (error) {
+              observer.error?.(error);
+            } finally {
+              complete();
+            }
           };
 
           if(txId === transactionData.id)
@@ -66,9 +86,13 @@ export class QueenBee {
 
         if(typeof expireIn === "number")
           timeoutId = setTimeout(() => {
-            try { observer.error?.(new WorkerBeeError("Transaction expired")); } catch {}
-
-            complete();
+            try {
+              observer.error?.(new WorkerBeeError("Transaction expired"));
+            } catch (error) {
+              observer.error?.(error);
+            } finally {
+              complete();
+            }
           }, expireIn);
 
         return {
@@ -84,15 +108,24 @@ export class QueenBee {
     return {
       subscribe: (observer: Partial<Observer<IOperationData>>): Unsubscribable => {
         const complete = (): void => {
-          try { observer.complete?.(); } catch (error) { try { observer.error?.(error); } catch {} }
-          this.worker.off("transaction", listener);
+          try {
+            observer.complete?.();
+          } catch (error) {
+            observer.error?.(error);
+          } finally {
+            this.worker.off("transaction", listener);
+          }
         };
 
         const visitor = new AccountOperationVisitor(name);
 
         const listener = (transactionData: ITransactionData): void => {
           const confirm = (result: operation): void => {
-            try { observer.next?.({ op: result, transaction: transactionData }); } catch (error) { try { observer.error?.(error); } catch {} }
+            try {
+              observer.next?.({ op: result, transaction: transactionData });
+            } catch (error) {
+              observer.error?.(error);
+            }
           };
 
           const proto = this.worker.chain!.TransactionBuilder.fromApi(transactionData.transaction).build();
