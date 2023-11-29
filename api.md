@@ -216,7 +216,7 @@ Beekeeper wallet options
 
 #### Defined in
 
-src/bot.ts:33
+src/bot.ts:35
 
 ___
 
@@ -234,7 +234,7 @@ Wax chain options
 
 #### Defined in
 
-src/bot.ts:25
+src/bot.ts:27
 
 ___
 
@@ -246,7 +246,7 @@ Posting private key in WIF format
 
 #### Defined in
 
-src/bot.ts:17
+src/bot.ts:19
 
 
 <a name="interfacesitransactiondatamd"></a>
@@ -353,7 +353,7 @@ Allows you to iterate over blocks indefinitely
 
 #### Defined in
 
-src/interfaces.ts:111
+src/interfaces.ts:113
 
 ___
 
@@ -394,6 +394,8 @@ ___
 
 Broadcast given transaction to the remote and returns a subscribable object
 that calls error after [throwAfter](#interfacesibroadcastoptionsmd) time (if given)
+If [throwAfter](#interfacesibroadcastoptionsmd) has not been specified, it is automatically
+set to the transaction expiration time plus one minute
 
 If transaction is not already signed (at least one signature is present)
 WorkerBee will try signing the transaction using specified in the configuration
@@ -412,7 +414,7 @@ private key
 
 #### Defined in
 
-src/interfaces.ts:106
+src/interfaces.ts:108
 
 ___
 
@@ -688,7 +690,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:119
+src/interfaces.ts:121
 
 ▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
@@ -711,7 +713,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:126
+src/interfaces.ts:128
 
 ▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
@@ -734,7 +736,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:133
+src/interfaces.ts:135
 
 ▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
@@ -757,7 +759,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:140
+src/interfaces.ts:142
 
 ▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
@@ -780,7 +782,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:147
+src/interfaces.ts:149
 
 ___
 
@@ -1211,4 +1213,4 @@ Constructs new WorkerBee bot object
 
 #### Defined in
 
-src/interfaces.ts:156
+src/interfaces.ts:158

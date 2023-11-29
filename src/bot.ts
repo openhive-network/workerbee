@@ -1,12 +1,14 @@
 import EventEmitter from "events";
 import beekeeperFactory, { IBeekeeperInstance, IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hive-staging/beekeeper";
-import { BroadcastTransactionRequest, IWaxOptionsChain, operation, transaction, TWaxExtended } from "@hive-staging/wax";
+import { BroadcastTransactionRequest, calculateExpiration, IWaxOptionsChain, operation, transaction, TWaxExtended } from "@hive-staging/wax";
 import type { Observer, Subscribable, Unsubscribable } from "rxjs";
 
 import { AccountOperationVisitor } from "./account_observer";
 import { WorkerBeeError } from "./errors";
 import type { IWorkerBee, IBlockData, ITransactionData, IOperationData, IBroadcastOptions } from "./interfaces";
 import { getWax, WaxExtendTypes } from "./wax/extend";
+
+const ONE_MINUTE = 1000 * 60;
 
 export interface IStartConfiguration {
   /**
@@ -180,38 +182,6 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
     return typeof this.configuration.postingKey === "string";
   }
 
-  private getExpirationTime(expirationTime?: Date | string | number): number | void {
-    if(typeof expirationTime === "undefined")
-      return;
-
-    let expiration: Date;
-    if(typeof expirationTime === "string" && expirationTime[0] === "+") {
-      let mul = 1000;
-
-      switch(expirationTime[expirationTime.length - 1]) {
-      case"h":
-        mul *= 60;
-      /* eslint-disable no-fallthrough */
-      case"m":
-        mul *= 60;
-      /* eslint-disable no-fallthrough */
-      default:
-      }
-
-      const num = Number.parseInt((/\d+/).exec(expirationTime)?.[0] as string);
-      if(Number.isNaN(num))
-        throw new WorkerBeeError("Invalid expiration time offset");
-
-      expiration = new Date(Date.now() + (num * mul));
-    } else
-      expiration = new Date(expirationTime);
-
-
-    const final = Date.now() - expiration.getTime();
-    if(final > 0)
-      return final;
-  }
-
   public async broadcast(tx: transaction, options: IBroadcastOptions = {}): Promise<Subscribable<ITransactionData>> {
     if(tx.signatures.length === 0) {
       if(!this.isAuthorized)
@@ -220,13 +190,23 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
       tx = new this.chain!.TransactionBuilder(tx).build(this.wallet!, this.publicKey);
     }
 
+    if(typeof options.throwAfter === "undefined") {
+      const expiration = calculateExpiration(tx.expiration);
+
+      if(typeof expiration === "undefined")
+        throw new WorkerBeeError("Could not deduce the expiration time of the transaction");
+
+      options.throwAfter = expiration.getTime() + ONE_MINUTE;
+    }
+
     const apiTx = new this.chain!.TransactionBuilder(tx);
 
     await this.chain!.api.network_broadcast_api.broadcast_transaction(new BroadcastTransactionRequest(apiTx));
 
-    const expireIn: number | undefined = this.getExpirationTime(options.throwAfter) as number | undefined;
+    // Here options.throwAfter should be defined (throws on invalid value)
+    const expireDate: Date = calculateExpiration(options.throwAfter) as Date;
 
-    return this.observe.transaction(apiTx.id, expireIn);
+    return this.observe.transaction(apiTx.id, expireDate.getTime());
   }
 
   public async start(): Promise<void> {

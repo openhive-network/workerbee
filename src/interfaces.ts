@@ -95,6 +95,8 @@ export interface IWorkerBee extends EventEmitter {
   /**
    * Broadcast given transaction to the remote and returns a subscribable object
    * that calls error after {@link IBroadcastOptions throwAfter} time (if given)
+   * If {@link IBroadcastOptions throwAfter} has not been specified, it is automatically
+   * set to the transaction expiration time plus one minute
    *
    * If transaction is not already signed (at least one signature is present)
    * WorkerBee will try signing the transaction using specified in the configuration
