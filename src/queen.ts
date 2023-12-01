@@ -1,5 +1,4 @@
 import type { ApiAccount, operation } from "@hive-staging/wax";
-import Long from "long";
 import type { Subscribable, Observer, Unsubscribable } from "rxjs";
 
 import { AccountOperationVisitor } from "./account_observer";
@@ -166,7 +165,7 @@ export class QueenBee {
               account.voting_manabar.last_update_time
             );
 
-            if(Long.fromString(value, true).multiply(100)
+            if(value.multiply(100)
               .divide(account.post_voting_power.amount)
               .toNumber() >= 98)
               observer.next?.(account);

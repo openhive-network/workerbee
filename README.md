@@ -76,6 +76,25 @@ observer.subscribe({
 });
 ```
 
+### Observe given account for full manabar regeneration
+
+```js
+import WorkerBee from "@hive-staging/workerbee";
+
+const bot = new WorkerBee();
+bot.on("error", console.error);
+
+await bot.start();
+
+const observer = bot.observe.accountFullManabar("gtg");
+
+observer.subscribe({
+  next(acc) {
+    console.info(acc.voting_manabar); // { "current_mana": "0", "last_update_time": 0 }
+  }
+});
+```
+
 ### Broadcast and observe transaction in blockchain
 
 ```js

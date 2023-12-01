@@ -143,6 +143,34 @@ test.describe("WorkerBee Bot events test", () => {
     }, HIVE_BLOCK_INTERVAL);
   });
 
+  test("Should be able to use full manabar regeneration time observer", async({ page }) => {
+    await page.evaluate(async(HIVE_BLOCK_INTERVAL) => {
+      const bot = new WorkerBee();
+      bot.on("error", console.error);
+
+      await Promise.race([
+        new Promise<void>(async(res) => {
+          await bot.start();
+
+          console.info(`Waiting for full manabar regeneration on initminer`);
+
+          const observer = bot.observe.accountFullManabar("initminer");
+          observer.subscribe({
+            next(acc) {
+              console.info(`Account has full manabar: ${acc.voting_manabar.current_mana}`);
+
+              res();
+            }
+          });
+        }),
+        new Promise((res) => { setTimeout(res, HIVE_BLOCK_INTERVAL * 4); }),
+      ]);
+
+      await bot.stop();
+      await bot.delete();
+    }, HIVE_BLOCK_INTERVAL);
+  });
+
   test.afterAll(async() => {
     await browser.close();
   });
