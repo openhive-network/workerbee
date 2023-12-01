@@ -71,7 +71,7 @@ undefined
 
 #### Defined in
 
-src/interfaces.ts:63
+src/interfaces.ts:72
 
 
 <a name="interfacesioperationdatamd"></a>
@@ -104,6 +104,31 @@ src/interfaces.ts:19
 # Interface: IQueenBee
 
 ## Methods
+
+### accountFullManabar
+
+▸ **accountFullManabar**(`name`): `Subscribable`\<`ApiAccount`\>
+
+Observes given account and notifies when its manabar is 98 percent loaded
+Note: This function will be called on every new block detected if manabar is full on every new block
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `name` | `string` | account name to observe |
+
+#### Returns
+
+`Subscribable`\<`ApiAccount`\>
+
+subscribable object that will call `next` each time time its manabar is 98 percent loaded
+
+#### Defined in
+
+src/interfaces.ts:61
+
+___
 
 ### accountOperations
 
@@ -307,7 +332,7 @@ Remember that chain property will be initialized during [start](#start) call and
 
 #### Defined in
 
-src/interfaces.ts:76
+src/interfaces.ts:85
 
 ___
 
@@ -317,7 +342,7 @@ ___
 
 #### Defined in
 
-src/interfaces.ts:68
+src/interfaces.ts:77
 
 ___
 
@@ -327,7 +352,7 @@ ___
 
 #### Defined in
 
-src/interfaces.ts:93
+src/interfaces.ts:102
 
 ___
 
@@ -337,7 +362,7 @@ ___
 
 #### Defined in
 
-src/interfaces.ts:67
+src/interfaces.ts:76
 
 ## Methods
 
@@ -353,7 +378,7 @@ Allows you to iterate over blocks indefinitely
 
 #### Defined in
 
-src/interfaces.ts:113
+src/interfaces.ts:122
 
 ___
 
@@ -400,7 +425,7 @@ Deletes the current bot instance and underlying wax and beekepeer objects
 
 #### Defined in
 
-src/interfaces.ts:91
+src/interfaces.ts:100
 
 ___
 
@@ -660,7 +685,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:121
+src/interfaces.ts:130
 
 ▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
@@ -683,7 +708,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:128
+src/interfaces.ts:137
 
 ▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
@@ -706,7 +731,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:135
+src/interfaces.ts:144
 
 ▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
@@ -729,7 +754,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:142
+src/interfaces.ts:151
 
 ▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
@@ -752,7 +777,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:149
+src/interfaces.ts:158
 
 ___
 
@@ -1154,7 +1179,7 @@ private key
 
 #### Defined in
 
-src/interfaces.ts:108
+src/interfaces.ts:117
 
 ___
 
@@ -1170,7 +1195,7 @@ Starts the automation with given configuration
 
 #### Defined in
 
-src/interfaces.ts:81
+src/interfaces.ts:90
 
 ___
 
@@ -1186,7 +1211,7 @@ Request automation stop
 
 #### Defined in
 
-src/interfaces.ts:86
+src/interfaces.ts:95
 
 
 <a name="interfacesiworkerbeeconstructormd"></a>
@@ -1213,4 +1238,4 @@ Constructs new WorkerBee bot object
 
 #### Defined in
 
-src/interfaces.ts:158
+src/interfaces.ts:167

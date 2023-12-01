@@ -20,6 +20,9 @@ dependencies:
   events:
     specifier: ^3.3.0
     version: 3.3.0
+  long:
+    specifier: ^5.2.3
+    version: 5.2.3
   rxjs:
     specifier: ^7.8.1
     version: 7.8.1

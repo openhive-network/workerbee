@@ -1,4 +1,5 @@
-import type { operation } from "@hive-staging/wax";
+import type { ApiAccount, operation } from "@hive-staging/wax";
+import Long from "long";
 import type { Subscribable, Observer, Unsubscribable } from "rxjs";
 
 import { AccountOperationVisitor } from "./account_observer";
@@ -138,6 +139,52 @@ export class QueenBee {
           }
         };
         this.worker.on("transaction", listener);
+
+        return {
+          unsubscribe: (): void => {
+            complete();
+          }
+        };
+      }
+    };
+  }
+
+  public accountFullManabar(name: string): Subscribable<ApiAccount> {
+    return {
+      subscribe: (observer: Partial<Observer<ApiAccount>>): Unsubscribable => {
+        const listener = async(): Promise<void> => {
+          try {
+            const { accounts: [ account ] } = await this.worker.chain!.api.database_api.find_accounts({
+              accounts: [ name ]
+            });
+            const dgpo = await this.worker.chain!.api.database_api.get_dynamic_global_properties({});
+
+            const value = this.worker.chain!.calculateCurrentManabarValue(
+              Math.round(new Date(`${dgpo.time}Z`).getTime() / 1000), // Convert API time to seconds
+              account.post_voting_power.amount,
+              account.voting_manabar.current_mana,
+              account.voting_manabar.last_update_time
+            );
+
+            if(Long.fromString(value, true).multiply(100)
+              .divide(account.post_voting_power.amount)
+              .toNumber() >= 98)
+              observer.next?.(account);
+          } catch (error) {
+            observer.error?.(error);
+          }
+        };
+        this.worker.on("block", listener);
+
+        const complete = (): void => {
+          try {
+            observer.complete?.();
+          } catch (error) {
+            observer.error?.(error);
+          } finally {
+            this.worker.off("transaction", listener);
+          }
+        };
 
         return {
           unsubscribe: (): void => {

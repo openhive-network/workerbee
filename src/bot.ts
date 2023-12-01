@@ -194,6 +194,8 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
     // This function actually allows you to actually reset the bot instance
     await this.stop();
 
+    super.removeAllListeners();
+
     this.chain?.delete();
     this.wallet?.close();
     await this.beekeeper?.delete();

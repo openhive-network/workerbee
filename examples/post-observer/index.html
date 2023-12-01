@@ -53,19 +53,22 @@
       logger.prepend(node);
     };
 
-    let bot, work, beneficiaryName;
+    const DAY_MS = 24 * 60 * 60 * 1000;
 
-    const posts = new Map(/* Map<`${Account}/${Permlink}`, { added: Date, fullBeneficiary?: Account }> */);
+    let bot, work, manaWork, beneficiaryName;
+
+    const voted = new Set(/* Set<`${Account}/${Permlink}`> */);
+    const posts = new Map(/* Map<`${Account}/${Permlink}`, { added: Date, beneficiaryMatched?: boolean }> */);
     const getKey = (op) => `${op.account || op.author}/${op.permlink}`;
 
-    const vote = async(op, number) => {
+    const vote = async(op) => {
       try {
         // Build transaction
         const builder = await bot.chain.getTransactionBuilder();
         builder.push({
           vote: {
             voter: "voter",
-            author: "initminer",
+            author: op.author,
             permlink: op.permlink,
             weight: 1000
           }
@@ -74,15 +77,14 @@
         // Broadcast our transaction with custom internal expiration time
         const observer = await bot.signAndBroadcast(builder.build());
 
+        voted.add(getKey(op));
+
         // Observe if our transaction has been applied
         observer.subscribe({
           next: ({ block: { number: appliedBlockNumber } }) => {
-            log(`Transasction from block #${number} ("${getKey(op)}") applied after ${appliedBlockNumber - number} blocks`);
-
+            log(`Vote on post ("${getKey(op)}") applied on block #${appliedBlockNumber}`);
           },
           error: (error) => {
-            console.error(error);
-
             log(`Transaction observation time for post vote "${getKey(op)}" expired`, true);
           }
         });
@@ -111,14 +113,15 @@
         if(!post)
           return;
 
-        post.fullBeneficiary = beneficiary.account;
+        post.beneficiaryMatched = true;
         log(`Full beneficiary set on comment "${key}" in block #${this.number}: "${beneficiary.account}"`);
-
-        vote(op, this.number);
       }
 
       comment(op) {
         log(`Got new comment in block #${this.number}: "${getKey(op)}"`);
+
+        if(voted.has(op))
+          return; // Already voted
 
         posts.set(getKey(op), { added: new Date() });
       }
@@ -128,6 +131,32 @@
       work = bot.observe.accountOperations(accountToObserve).subscribe({
         next({ op, transaction: { block: { number } } }) {
           new CommentVisitor(number).accept(op);
+        },
+        error(error) {
+          log(error, true);
+        }
+      });
+
+      manaWork = bot.observe.accountFullManabar(accountToObserve).subscribe({
+        next() {
+          const key = posts.keys().next().value;
+          if(!key)
+            return;
+
+          const post = posts.get(key);
+          log(`Full manabar - Trying to vote for "${key}"`);
+          const [ author, permlink ] = key.split('/');
+
+          if(post.beneficiaryMatched === true && Date.now() - post.added.getTime() <= DAY_MS) {
+            vote({ author, permlink });
+
+            posts.delete(key);
+          }
+          else
+            log(`Properties for post "${key}" not sufficient`);
+        },
+        error(error) {
+          log(error, true);
         }
       });
     };
@@ -144,6 +173,8 @@
 
           if(work)
             work.unsubscribe();
+          if(manaWork)
+            manaWork.unsubscribe();
 
           running = false;
           startBtn.innerText = 'Start';

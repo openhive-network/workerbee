@@ -1,5 +1,5 @@
 import type EventEmitter from "events";
-import type { ApiBlock, ApiTransaction, IHiveChainInterface, operation, transaction } from "@hive-staging/wax";
+import type { ApiAccount, ApiBlock, ApiTransaction, IHiveChainInterface, operation, transaction } from "@hive-staging/wax";
 import type { Subscribable } from "rxjs";
 import type { IStartConfiguration } from "./bot";
 
@@ -50,6 +50,15 @@ export interface IQueenBee {
    * @returns subscribable object that will call `next` on every operation related to the given account
    */
   accountOperations(name: string): Subscribable<IOperationData>;
+
+  /**
+   * Observes given account and notifies when its manabar is 98 percent loaded
+   * Note: This function will be called on every new block detected if manabar is full on every new block
+   *
+   * @param name account name to observe
+   * @returns subscribable object that will call `next` each time time its manabar is 98 percent loaded
+   */
+  accountFullManabar(name: string): Subscribable<ApiAccount>;
 }
 
 export interface IBroadcastOptions {
