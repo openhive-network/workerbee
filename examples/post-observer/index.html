@@ -12,6 +12,7 @@
       padding: 5px;
       font-family: 'Courier New', monospace;
       font-size: .8rem;
+      word-break: break-word;
     }
     #log .data {
       margin: 5px;
@@ -27,6 +28,7 @@
 <body>
   <h1>WorkerBee Post observer example</h1>
   <input id="acc" placeholder="Observe account" value="initminer">
+  <input id="beneficiary" placeholder="Beneficiary account" value="initminer">
   <input id="key" placeholder="Private Posting key" value="5JqodRzm7Ag1QJgLgsCgEpQpkRKq1NQZGjaxy1Y48WxohCy2u5J">
   <button id="start">Start</button>
   <hr>
@@ -34,6 +36,7 @@
   <div id="log"></div>
   <script type="module">
     import WorkerBee from "../../dist/bundle/index.js";
+    import { OperationVisitor } from "@hive-staging/wax";
 
     const startBtn = document.getElementById("start");
     const logger = document.getElementById("log");
@@ -50,39 +53,81 @@
       logger.prepend(node);
     };
 
-    let bot, work;
+    let bot, work, beneficiaryName;
+
+    const posts = new Map(/* Map<`${Account}/${Permlink}`, { added: Date, fullBeneficiary?: Account }> */);
+    const getKey = (op) => `${op.account || op.author}/${op.permlink}`;
+
+    const vote = async(op, number) => {
+      try {
+        // Build transaction
+        const builder = await bot.chain.getTransactionBuilder();
+        builder.push({
+          vote: {
+            voter: "voter",
+            author: "initminer",
+            permlink: op.permlink,
+            weight: 1000
+          }
+        });
+
+        // Broadcast our transaction with custom internal expiration time
+        const observer = await bot.signAndBroadcast(builder.build());
+
+        // Observe if our transaction has been applied
+        observer.subscribe({
+          next: ({ block: { number: appliedBlockNumber } }) => {
+            log(`Transasction from block #${number} ("${getKey(op)}") applied after ${appliedBlockNumber - number} blocks`);
+
+          },
+          error: (error) => {
+            console.error(error);
+
+            log(`Transaction observation time for post vote "${getKey(op)}" expired`, true);
+          }
+        });
+      } catch(error) {
+        log(error, true);
+      }
+    }
+
+    class CommentVisitor extends OperationVisitor {
+      constructor(number) {
+        super();
+
+        this.number = number;
+      }
+
+      comment_options(op) {
+        const beneficiary = op.extensions
+                                  .filter(ext => typeof ext.comment_payout_beneficiaries === "object")
+                                  .flatMap(ext => ext.comment_payout_beneficiaries.beneficiaries)
+                                  .find(beneficiary => beneficiary.account === beneficiaryName);
+        if(beneficiary.weight < 10000)
+          return; // Beneficiary for selected account should be 100%
+
+        const key = getKey(op);
+        const post = posts.get(key);
+        if(!post)
+          return;
+
+        post.fullBeneficiary = beneficiary.account;
+        log(`Full beneficiary set on comment "${key}" in block #${this.number}: "${beneficiary.account}"`);
+
+        vote(op, this.number);
+      }
+
+      comment(op) {
+        log(`Got new comment in block #${this.number}: "${getKey(op)}"`);
+
+        posts.set(getKey(op), { added: new Date() });
+      }
+    }
 
     const actualBotWork = async(accountToObserve) => {
       work = bot.observe.accountOperations(accountToObserve).subscribe({
-        async next({ op, transaction: { block: { number } } }) {
-          if(typeof op.comment !== 'object')
-            return;
-
-          log(`Got new comment in block #${number}: "${op.comment.parent_permlink}/${op.comment.permlink}"`);
-
-          // Build transaction
-          const builder = await bot.chain.getTransactionBuilder();
-          builder.push({
-            vote: {
-              voter: "voter",
-              author: "initminer",
-              permlink: op.comment.permlink,
-              weight: 1000
-            }
-          });
-
-          // Broadcast our transaction with custom internal expiration time
-          const observer = await bot.signAndBroadcast(builder.build());
-
-          // Observe if our transaction has been applied
-          observer.subscribe({
-            next({ block: { number: appliedBlockNumber } }) {
-              log(`Transasction from block #${number} ("${op.comment.parent_permlink}/${op.comment.permlink}") applied after ${appliedBlockNumber - number} blocks`);
-            },
-            error() {
-              console.error(`Transaction observation time for post vote "${op.comment.parent_permlink}/${op.comment.permlink}" expired`);
-            }
-          });
+        next({ op, transaction: { block: { number } } }) {
+          new CommentVisitor(number).accept(op);
         }
       });
     };
@@ -104,6 +149,8 @@
           startBtn.innerText = 'Start';
           return;
         }
+
+        beneficiaryName = document.getElementById('beneficiary').value;
 
         bot = new WorkerBee({
           postingKey: document.getElementById('key').value,
