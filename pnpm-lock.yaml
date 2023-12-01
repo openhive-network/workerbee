@@ -9,8 +9,8 @@ dependencies:
     specifier: ^0.1.0
     version: 0.1.0
   '@hive-staging/wax':
-    specifier: ^0.3.6
-    version: 0.3.6
+    specifier: ^0.3.7
+    version: 0.3.7
   class-transformer:
     specifier: ^0.5.1
     version: 0.5.1
@@ -158,8 +158,8 @@ packages:
     engines: {node: '>= 12'}
     dev: false
 
-  /@hive-staging/wax@0.3.6:
-    resolution: {integrity: sha512-mPxSvujw38vsakedgnUn0ScnZdzBdEglPA6L7hzVLu4RppRVgpZhfkKDW4PHD4M5XBut0SW7Bwgruv61uuAc8Q==}
+  /@hive-staging/wax@0.3.7:
+    resolution: {integrity: sha512-ZwEYxTut0fd7mgFgdfOLOSOJE8xPCiAZaqXvZ/lVKfJaVKbkYxCodJogLVKPeBDISYteoOyvV3/l8gF+tykQbA==}
     engines: {node: '>= 12'}
     dependencies:
       '@hive-staging/beekeeper': 0.1.0
