@@ -1,0 +1,64 @@
+# syntax=docker/dockerfile:1.4
+
+ARG HIVE_TESTNET_IMAGE_VERSION=testnet-instance-infinite-post-creator
+
+FROM registry.gitlab.syncad.com/hive/hive/testnet-instance:${HIVE_TESTNET_IMAGE_VERSION} as pure_testnet
+
+USER hived
+WORKDIR /home/hived/
+
+ENV PATH="/home/hived/.local/bin:$PATH"
+ENV PYPROJECT_DIR=/home/hived/hive-local-tools
+ENV TESTNET_GENERATOR_DIR=/home/hived/infinite_post_creator
+
+FROM pure_testnet AS python_tools
+
+# install poetry in an isolated environment
+RUN curl -sSL https://install.python-poetry.org | python3 - && \
+    poetry self update 1.7.1 && \
+    poetry self add "poetry-dynamic-versioning[plugin]@>=1.0.0,<2.0.0"
+
+FROM python_tools AS python_builder
+
+COPY --chown=hived ./hive/tests/python/hive-local-tools "${PYPROJECT_DIR}"
+COPY --chown=hived ./hive/tests/python/functional/comment_payment_tests/infinite_post_creator "${TESTNET_GENERATOR_DIR}"
+
+ENV PIP_DEFAULT_TIMEOUT=300
+
+RUN pushd "${TESTNET_GENERATOR_DIR}" && \
+    poetry -C "${PYPROJECT_DIR}" env use python3 && \
+    source $(poetry -C "${PYPROJECT_DIR}" env info --path)/bin/activate && \
+    python3 -V && \
+    poetry -C "${PYPROJECT_DIR}" -V && \
+    poetry -C "${PYPROJECT_DIR}" install && \
+    mkdir -p /home/hived/pyenv && ln -sf $(poetry -C "${PYPROJECT_DIR}" env info --path) /home/hived/pyenv/hive_venv
+
+RUN cat <<EOF >>/home/hived/start_instance.sh
+    #! /bin/bash
+    set -e
+    source /home/hived/pyenv/hive_venv/bin/activate
+    cd "\${TESTNET_GENERATOR_DIR}"
+    python "\${TESTNET_GENERATOR_DIR}/infinite_post_creator.py"
+EOF
+
+FROM pure_testnet as runtime
+
+USER hived
+WORKDIR /home/hived
+SHELL ["/bin/bash", "-c"]
+
+ENV HIVE_BIN_ROOT_PATH="/home/hived/bin"
+ENV HIVED_PATH="${HIVE_BIN_ROOT_PATH}/hived"
+ENV CLI_WALLET_PATH="${HIVE_BIN_ROOT_PATH}/cli_wallet"
+ENV GET_DEV_KEY_PATH="${HIVE_BIN_ROOT_PATH}/get_dev_key"
+ENV SIGN_TRANSACTION_PATH="${HIVE_BIN_ROOT_PATH}/sign_transaction"
+
+# copy prepared environment from builder, just to start it
+COPY --chown=hived --from=python_builder "${PYPROJECT_DIR}" "${PYPROJECT_DIR}"
+COPY --chown=hived --from=python_builder "${TESTNET_GENERATOR_DIR}" "${TESTNET_GENERATOR_DIR}"
+COPY --chown=hived --from=python_builder "/home/hived/.cache" "/home/hived/.cache"
+COPY --chown=hived --from=python_builder /home/hived/pyenv /home/hived/pyenv
+COPY --chmod=755 --chown=hived --from=python_builder "/home/hived/start_instance.sh" "/home/hived/start_instance.sh"
+
+ENTRYPOINT [ "/bin/bash", "-c", "/home/hived/start_instance.sh" ]
+
