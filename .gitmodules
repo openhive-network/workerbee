@@ -1,0 +1,4 @@
+[submodule "examples/hive"]
+	path = examples/hive
+	url = ../../hive/hive.git
+    	shallow = true
