@@ -8,6 +8,7 @@ var require$$3 = require('stream');
 var require$$4 = require('assert');
 var require$$0$2 = require('tty');
 var require$$0$1 = require('os');
+var require$$5 = require('dotenv').config();
 
 var proxy$1 = {};
 
@@ -3259,9 +3260,11 @@ var httpProxy$1 = httpProxy$2;
 
 // npm i http-proxy
 
+const target_api_endpoint = process.env.TARGET_API_ENDPOINT;
+
 const options = {
 	port: 3000,
-	target: "http://localhost:2500"
+	target: target_api_endpoint
 };
 
 // Start the proxy
