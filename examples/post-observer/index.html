@@ -38,6 +38,11 @@
     import WorkerBee from "../../dist/bundle/index.js";
     import { OperationVisitor } from "@hive-staging/wax";
 
+    const hostname = document.location.hostname;
+    const used_protocol = document.location.protocol;
+
+    console.log(`Received protocol: ${used_protocol}, hostname: ${hostname}`);
+
     const startBtn = document.getElementById("start");
     const logger = document.getElementById("log");
     const log = (what, error = false) => {
@@ -186,7 +191,7 @@
         bot = new WorkerBee({
           postingKey: document.getElementById('key').value,
           chainOptions: {
-            apiEndpoint: 'http://localhost:3000/',
+            apiEndpoint: used_protocol + '//' + hostname + ':3000',
             chainId: '18dcf0a285365fc58b71f18b3d3fec954aa0c141c44e4e5cb4cf777b9eab274e'
           }
         });
