@@ -34,3 +34,23 @@ Post observer explains how to observe given account for new posts and automatica
 # Run example
 pnpm dlx parcel post-observer/index.html
 ```
+
+# Starting WorkerBee examples using provided docker compose stack
+
+Before starting compose stack, you have to:
+1. update hive submodule by running:
+``` bash
+git submodule update --init --recursive
+```
+2. Build a testnet instance, being a base for the one created by compose stack:
+```bash
+cd examples
+./hive/scripts/ci-helpers/build_instance.sh --network-type=testnet infinite-post-creator ./hive registry.gitlab.syncad.com/hive/hive
+```
+3. Start compose stack by spawning a helper script:
+```bash
+./examples/start.sh
+```
+If you would like to force helper images rebuild (except the one created in step #2) you can additionally pass `--build` option to the `start.sh` script.
+
+
