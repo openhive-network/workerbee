@@ -1,0 +1,74 @@
+# syntax=docker/dockerfile:1.4
+
+FROM node:21-slim as pure_node
+
+FROM pure_node as rootless_node
+
+# User hosts user ids...
+ARG USER_NAME=user
+ENV USER_NAME=${USER_NAME}
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+USER root
+
+# so that it will be able to mount local directory with valid privilages
+RUN groupadd -o -g $GROUP_ID usergroup && \
+    useradd -o -m -s /bin/bash -u $USER_ID -g $GROUP_ID ${USER_NAME}
+
+# Switch to created user
+USER ${USER_NAME}
+WORKDIR "/home/${USER_NAME}"
+SHELL ["/bin/bash", "-c"]
+
+FROM rootless_node AS preconfigured_node
+
+USER root
+
+RUN DEBIAN_FRONTEND=noniteractive apt-get update && \
+  apt-get install -y curl && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/* && \
+  npm install -g pnpm
+
+USER ${USER_NAME}
+WORKDIR "/home/${USER_NAME}"
+
+ENV PNPM_HOME="/home/${USER_NAME}/.local/share/pnpm"
+ENV PATH="${PNPM_HOME}:${PATH}"
+
+RUN pnpm add -g \
+    "@parcel/config-default@^2.9.3" \
+    "@parcel/core@^2.9.3" \
+    "parcel@^2.9.3"
+
+FROM preconfigured_node AS runtime
+
+FROM runtime AS proxy_container
+
+#COPY --chown=${USER_NAME} ./proxy "/home/${USER_NAME}/proxy"
+#COPY --chown=${USER_NAME} ./examples/ "/home/${USER_NAME}/examples/"
+COPY --chown=${USER_NAME} . "/home/${USER_NAME}"
+
+STOPSIGNAL SIGINT
+
+RUN pnpm install && \
+    npm run build && \
+    touch "/home/${USER_NAME}/start_instance.sh" && chmod a+x "/home/${USER_NAME}/start_instance.sh" && \
+    cat <<EOF >>"/home/${USER_NAME}/start_instance.sh"
+    #! /bin/bash
+    set -e
+    {
+      echo "Attempting to start a redirect proxy to the hived node..."
+      node ./examples/proxy/proxy.js
+    } &
+
+    job_pid=\$!
+
+    EXAMPLE_TO_RUN=\${1:-post-observer}
+    echo "Attempting to start example: ${EXAMPLE_TO_RUN}"
+    pnpm dlx parcel "./examples/\${EXAMPLE_TO_RUN}/index.html"
+EOF
+
+ENTRYPOINT [ "/bin/bash", "-c", "/home/${USER_NAME}/start_instance.sh" ]
+
