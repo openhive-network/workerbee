@@ -1,0 +1,55 @@
+version: "3.7"
+name: "hive-bot-world"
+
+services:
+  workerbee-npm:
+    build:
+      context: ..
+      dockerfile: examples/Dockerfile.npm
+      args:
+        USER_NAME: user
+      tags:
+        - hive/workerbee:npm
+
+    ports:
+      - "31234:1234"
+      - "3000:3000"
+
+    tty: true
+    stdin_open: true
+    init: true
+ 
+    healthcheck:
+      test: "curl -f localhost:1234"
+      interval: 10s
+      timeout: 2s
+      retries: 10
+      start_period: 30s
+
+    depends_on:
+      workerbee-testnet:
+        condition: service_healthy
+
+  workerbee-testnet:
+    build:
+      context: .
+      dockerfile: Dockerfile.testnet
+      args:
+        HIVE_TESTNET_IMAGE_VERSION: testnet-instance-infinite-post-creator
+      tags:
+        - hive/workerbee:testnet-instance
+
+    ports:
+      - "2500:2500"
+
+    tty: true
+    stdin_open: true
+    init: true
+
+    healthcheck:
+      test: "curl -f localhost:2500"
+      interval: 10s
+      timeout: 2s
+      retries: 10
+      start_period: 30s
+
