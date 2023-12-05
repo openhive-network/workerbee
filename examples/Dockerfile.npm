@@ -60,7 +60,7 @@ RUN pnpm install && \
     set -e
     {
       echo "Attempting to start a redirect proxy to the hived node (to supplement CORS headers) ..."
-      node ./examples/proxy/proxy.cjs 2>&1 | tee -i proxy.log
+      node --env-file=.env ./examples/proxy/proxy.cjs 2>&1 | tee -i proxy.log
     } &
 
     job_pid=\$!
