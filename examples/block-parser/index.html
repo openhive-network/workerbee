@@ -71,7 +71,11 @@
           return;
         }
 
-        bot = new WorkerBee();
+        bot = new WorkerBee({
+          chainOptions: {
+            apiEndpoint: process.env.HIVE_API_HOST || 'https://api.hive.blog/'
+          }
+        });
         bot.on("error", error => {
           log(error, true);
         });
