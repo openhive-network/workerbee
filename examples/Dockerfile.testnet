@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-ARG HIVE_TESTNET_IMAGE_VERSION=testnet-instance-infinite-post-creator
+ARG HIVE_TESTNET_IMAGE_VERSION=testnet
 
 FROM registry.gitlab.syncad.com/hive/hive/testnet-instance:${HIVE_TESTNET_IMAGE_VERSION} as pure_testnet
 
@@ -8,20 +8,30 @@ USER hived
 WORKDIR /home/hived/
 
 ENV PATH="/home/hived/.local/bin:$PATH"
-ENV PYPROJECT_DIR=/home/hived/hive-local-tools
+ENV PYPROJECT_DIR=/home/hived/workerbee/examples/hive/tests/python/hive-local-tools
 ENV TESTNET_GENERATOR_DIR=/home/hived/infinite_post_creator
 
 FROM pure_testnet AS python_tools
 
-# install poetry in an isolated environment
-RUN curl -sSL https://install.python-poetry.org | python3 - && \
+USER root
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noniteractive apt-get install -y \
+      git
+
+USER hived
+WORKDIR /home/hived/
+
+# Configure git to accept dubious ownership repos && install poetry in an isolated environment
+RUN git config --global --add safe.directory '*' && \
+    curl -sSL https://install.python-poetry.org | python3 - && \
     poetry self update 1.7.1 && \
     poetry self add "poetry-dynamic-versioning[plugin]@>=1.0.0,<2.0.0"
 
 FROM python_tools AS python_builder
 
-COPY --chown=hived ./hive/tests/python/hive-local-tools "${PYPROJECT_DIR}"
-COPY --chown=hived ./hive/tests/python/functional/comment_payment_tests/infinite_post_creator "${TESTNET_GENERATOR_DIR}"
+COPY --chown=hived . ./workerbee
+COPY --chown=hived ./examples/infinite_post_creator "${TESTNET_GENERATOR_DIR}"
 
 ENV PIP_DEFAULT_TIMEOUT=300
 
