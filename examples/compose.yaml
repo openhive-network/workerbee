@@ -32,10 +32,11 @@ services:
 
   workerbee-testnet:
     build:
-      context: .
-      dockerfile: Dockerfile.testnet
+      context: ..
+      dockerfile: examples/Dockerfile.testnet
       args:
-        HIVE_TESTNET_IMAGE_VERSION: testnet-instance-infinite-post-creator
+        HIVE_TESTNET_IMAGE_VERSION: testnet
+        BUILDKIT_CONTEXT_KEEP_GIT_DIR: 1
       tags:
         - hive/workerbee:testnet-instance
 
