@@ -6,7 +6,9 @@ from random import randint
 import test_tools as tt
 from hive_local_tools.constants import ALTERNATE_CHAIN_JSON_FILENAME
 from hive_local_tools.functional.python.operation import create_transaction_with_any_operation
-
+from schemas.operations.comment_options_operation import CommentOptionsOperation
+from schemas.operations.extensions.comment_options_extensions import (CommentPayoutBeneficiaries, BeneficiaryRoute)
+from schemas.fields.assets.hbd import AssetTbdHF26
 
 def infinite_post_creator():
     node = tt.InitNode()
@@ -50,23 +52,24 @@ def infinite_post_creator():
 def generate_comment_options_operation(wallet, permlink_num):
     create_transaction_with_any_operation(
         wallet,
-        "comment_options",
+        CommentOptionsOperation(
         author="initminer",
         permlink=f"permlink-{permlink_num}",
-        max_accepted_payout="1000000.000 TBD",
+        max_accepted_payout=tt.Asset.Tbd(1000000),
         percent_hbd=50,
         allow_votes=True,
         allow_curation_rewards=True,
-        extensions=[
+        extensions=
             [
-                "comment_payout_beneficiaries",
-                {
-                    "beneficiaries": [
-                        {"account": "initminer", "weight": 10000},
-                    ]
-                },
+                [
+                    "comment_payout_beneficiaries",
+                    CommentPayoutBeneficiaries(beneficiaries=
+                    [
+                        BeneficiaryRoute(account="initminer", weight=10000)
+                    ])
+                ]
             ]
-        ],
+        )
     )
 
 
