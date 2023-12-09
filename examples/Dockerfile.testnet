@@ -15,7 +15,8 @@ FROM pure_testnet AS python_tools
 
 USER root
 
-RUN apt-get update && \
+RUN --mount=type=cache,target=/var/cache/apt \
+    apt-get update && \
     DEBIAN_FRONTEND=noniteractive apt-get install -y \
       git
 
@@ -30,28 +31,34 @@ RUN git config --global --add safe.directory '*' && \
 
 FROM python_tools AS python_builder
 
+# use root here since others have problens with accessing a .cache directory mounted as docker cache
+USER root
+WORKDIR /home/hived/
+
+ENV POETRY_CACHE_DIR=/home/hived/.cache/pypoetry
+ENV PATH="/home/hived/.local/bin:$PATH"
+
+# we need whole project here since installation of few Hive specific packages (HELpy, schemas) will require a .git dir access
 COPY --chown=hived . ./workerbee
-COPY --chown=hived ./examples/infinite_post_creator "${TESTNET_GENERATOR_DIR}"
 
-ENV PIP_DEFAULT_TIMEOUT=300
+ENV PIP_DEFAULT_TIMEOUT=900
 
-RUN pushd "${TESTNET_GENERATOR_DIR}" && \
+RUN --mount=type=cache,target=/root/.cache \
+    git config --global --add safe.directory '*' && \
+    mkdir -vp "${TESTNET_GENERATOR_DIR}" && \
+    pushd "${TESTNET_GENERATOR_DIR}" && \
     poetry -C "${PYPROJECT_DIR}" env use python3 && \
     source $(poetry -C "${PYPROJECT_DIR}" env info --path)/bin/activate && \
     python3 -V && \
     poetry -C "${PYPROJECT_DIR}" -V && \
-    poetry -C "${PYPROJECT_DIR}" install && \
-    mkdir -p /home/hived/pyenv && ln -sf $(poetry -C "${PYPROJECT_DIR}" env info --path) /home/hived/pyenv/hive_venv
-
-RUN cat <<EOF >>/home/hived/start_instance.sh
-    #! /bin/bash
-    set -e
-    source /home/hived/pyenv/hive_venv/bin/activate
-    cd "\${TESTNET_GENERATOR_DIR}"
-    python "\${TESTNET_GENERATOR_DIR}/infinite_post_creator.py"
-EOF
+    poetry -C "${PYPROJECT_DIR}" install --only main && \
+    mkdir -p /home/hived/pyenv && ln -sf $(poetry -C "${PYPROJECT_DIR}" env info --path) /home/hived/pyenv/hive_venv && \
+    chown -R hived:users /home/hived/.cache && \
+    chown -R hived:users /home/hived/pyenv
 
 FROM pure_testnet as runtime
+
+COPY --chown=hived ./examples/infinite_post_creator "${TESTNET_GENERATOR_DIR}"
 
 USER hived
 WORKDIR /home/hived
@@ -68,7 +75,16 @@ COPY --chown=hived --from=python_builder "${PYPROJECT_DIR}" "${PYPROJECT_DIR}"
 COPY --chown=hived --from=python_builder "${TESTNET_GENERATOR_DIR}" "${TESTNET_GENERATOR_DIR}"
 COPY --chown=hived --from=python_builder "/home/hived/.cache" "/home/hived/.cache"
 COPY --chown=hived --from=python_builder /home/hived/pyenv /home/hived/pyenv
-COPY --chmod=755 --chown=hived --from=python_builder "/home/hived/start_instance.sh" "/home/hived/start_instance.sh"
+
+RUN cat <<EOF >>/home/hived/start_instance.sh
+    #! /bin/bash
+    set -e
+    source /home/hived/pyenv/hive_venv/bin/activate
+    cd "\${TESTNET_GENERATOR_DIR}"
+    python "\${TESTNET_GENERATOR_DIR}/infinite_post_creator.py"
+EOF
+
+RUN chmod a+x /home/hived/start_instance.sh
 
 ENTRYPOINT [ "/bin/bash", "-c", "/home/hived/start_instance.sh" ]
 
