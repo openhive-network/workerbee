@@ -27,10 +27,14 @@
 </head>
 <body>
   <h1>WorkerBee Post observer example</h1>
-  <input id="acc" placeholder="Observe account" value="initminer">
-  <input id="beneficiary" placeholder="Beneficiary account" value="initminer">
-  <input id="key" placeholder="Private Posting key" value="5JqodRzm7Ag1QJgLgsCgEpQpkRKq1NQZGjaxy1Y48WxohCy2u5J">
+  Observed account:<input id="acc" placeholder="Observe account" value="initminer">
+  Beneficiary account:<input id="beneficiary" placeholder="Beneficiary account" value="initminer">
+  Voting account:<input id="voter" placeholder="Voting account" value="voter">
+  Private Posting key:<input id="key" placeholder="Private Posting key" value="5JqodRzm7Ag1QJgLgsCgEpQpkRKq1NQZGjaxy1Y48WxohCy2u5J">
   <button id="start">Start</button>
+  <hr>
+  API endpoint:<input id="api-endpoint" placeholder="API endpoint" value="https://api.hive.blog">
+  ChainID:<input id="chain-id" placeholder="Chain-id" value="beeab0de00000000000000000000000000000000000000000000000000000000">
   <hr>
   <h2>Log</h2>
   <div id="log"></div>
@@ -50,7 +54,7 @@
 
       const node = document.createElement('div');
       node.classList.add('data');
-      if(error)
+      if (error)
         node.classList.add('error');
 
       node.innerText = typeof what === 'string' ? what : JSON.stringify(what);
@@ -60,19 +64,36 @@
 
     const DAY_MS = 24 * 60 * 60 * 1000;
 
-    let bot, work, manaWork, beneficiaryName;
+    let bot, work, manaWork, beneficiaryName, voterName;
+
+    let chainId = process.env.CHAIN_ID;
+    if (chainId !== "") {
+      const chainIdInput = document.getElementById("chain-id");
+      chainIdInput.value = String(chainId);
+
+      console.log(`Using custom chain-id: ${chainId}`);
+    }
+
+    let apiEndpoint = process.env.DIRECT_API_ENDPOINT;
+    if (apiEndpoint === "") {
+      apiEndpoint=used_protocol + '//' + hostname + ':3000';
+      console.log(`Using implicit direct api endpoint: ${apiEndpoint}`);
+    }
+
+    const apiEndpointInput = document.getElementById("api-endpoint");
+    apiEndpointInput.value = apiEndpoint;
 
     const voted = new Set(/* Set<`${Account}/${Permlink}`> */);
     const posts = new Map(/* Map<`${Account}/${Permlink}`, { added: Date, beneficiaryMatched?: boolean }> */);
     const getKey = (op) => `${op.account || op.author}/${op.permlink}`;
 
-    const vote = async(op) => {
+    const vote = async (op) => {
       try {
         // Build transaction
         const builder = await bot.chain.getTransactionBuilder();
         builder.push({
           vote: {
-            voter: "voter",
+            voter: voterName,
             author: op.author,
             permlink: op.permlink,
             weight: 1000
@@ -93,7 +114,7 @@
             log(`Transaction observation time for post vote "${getKey(op)}" expired`, true);
           }
         });
-      } catch(error) {
+      } catch (error) {
         log(error, true);
       }
     }
@@ -107,15 +128,15 @@
 
       comment_options(op) {
         const beneficiary = op.extensions
-                                  .filter(ext => typeof ext.comment_payout_beneficiaries === "object")
-                                  .flatMap(ext => ext.comment_payout_beneficiaries.beneficiaries)
-                                  .find(beneficiary => beneficiary.account === beneficiaryName);
-        if(beneficiary.weight < 10000)
+          .filter(ext => typeof ext.comment_payout_beneficiaries === "object")
+          .flatMap(ext => ext.comment_payout_beneficiaries.beneficiaries)
+          .find(beneficiary => beneficiary.account === beneficiaryName);
+        if (beneficiary.weight < 10000)
           return; // Beneficiary for selected account should be 100%
 
         const key = getKey(op);
         const post = posts.get(key);
-        if(!post)
+        if (!post)
           return;
 
         post.beneficiaryMatched = true;
@@ -125,14 +146,14 @@
       comment(op) {
         log(`Got new comment in block #${this.number}: "${getKey(op)}"`);
 
-        if(voted.has(op))
+        if (voted.has(op))
           return; // Already voted
 
         posts.set(getKey(op), { added: new Date() });
       }
     }
 
-    const actualBotWork = async(accountToObserve) => {
+    const actualBotWork = async (accountToObserve) => {
       work = bot.observe.accountOperations(accountToObserve).subscribe({
         next({ op, transaction: { block: { number } } }) {
           new CommentVisitor(number).accept(op);
@@ -145,14 +166,14 @@
       manaWork = bot.observe.accountFullManabar(accountToObserve).subscribe({
         next() {
           const key = posts.keys().next().value;
-          if(!key)
+          if (!key)
             return;
 
           const post = posts.get(key);
           log(`Full manabar - Trying to vote for "${key}"`);
-          const [ author, permlink ] = key.split('/');
+          const [author, permlink] = key.split('/');
 
-          if(post.beneficiaryMatched === true && Date.now() - post.added.getTime() <= DAY_MS) {
+          if (post.beneficiaryMatched === true && Date.now() - post.added.getTime() <= DAY_MS) {
             vote({ author, permlink });
 
             posts.delete(key);
@@ -168,17 +189,17 @@
 
     let running = false;
 
-    startBtn.addEventListener('click', async() => {
+    startBtn.addEventListener('click', async () => {
       try {
         startBtn.disabled = true;
 
-        if(running && bot) {
+        if (running && bot) {
           await bot.stop();
           await bot.delete();
 
-          if(work)
+          if (work)
             work.unsubscribe();
-          if(manaWork)
+          if (manaWork)
             manaWork.unsubscribe();
 
           running = false;
@@ -187,12 +208,16 @@
         }
 
         beneficiaryName = document.getElementById('beneficiary').value;
+        voterName = document.getElementById('voter').value;
+
+        chainId = document.getElementById('chain-id').value;
+	apiEndpoint = document.getElementById('api-endpoint').value;
 
         bot = new WorkerBee({
           postingKey: document.getElementById('key').value,
           chainOptions: {
-            apiEndpoint: used_protocol + '//' + hostname + ':3000',
-            chainId: '18dcf0a285365fc58b71f18b3d3fec954aa0c141c44e4e5cb4cf777b9eab274e'
+            apiEndpoint: apiEndpoint, //used_protocol + '//' + hostname + ':3000',
+            chainId: chainId //'18dcf0a285365fc58b71f18b3d3fec954aa0c141c44e4e5cb4cf777b9eab274e'
           }
         });
         bot.on("error", error => {
@@ -209,7 +234,7 @@
 
         running = true;
         startBtn.innerText = 'Stop';
-      } catch(error) {
+      } catch (error) {
         log(error, true);
       } finally {
         startBtn.disabled = false;
