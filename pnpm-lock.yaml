@@ -8,9 +8,9 @@ dependencies:
   '@hive-staging/beekeeper':
     specifier: ^0.1.0
     version: 0.1.0
-  '@hive-staging/wax':
-    specifier: ^0.3.7
-    version: 0.3.7
+  '@hive/wax':
+    specifier: ^0.3.8-a1a00db
+    version: 0.3.8-a1a00db
   class-transformer:
     specifier: ^0.5.1
     version: 0.5.1
@@ -161,11 +161,16 @@ packages:
     engines: {node: '>= 12'}
     dev: false
 
-  /@hive-staging/wax@0.3.7:
-    resolution: {integrity: sha512-ZwEYxTut0fd7mgFgdfOLOSOJE8xPCiAZaqXvZ/lVKfJaVKbkYxCodJogLVKPeBDISYteoOyvV3/l8gF+tykQbA==}
+  /@hive/beekeeper@1.27.5-rc0-stable.766d1d7bd:
+    resolution: {integrity: sha1-xM1bqNHtxT3rELVhT0qBBZ/9XPg=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hive/beekeeper/-/@hive/beekeeper-1.27.5-rc0-stable.766d1d7bd.tgz}
+    engines: {node: '>= 12'}
+    dev: false
+
+  /@hive/wax@0.3.8-a1a00db:
+    resolution: {integrity: sha1-ltSQ0mJuCrGNtMltYAWGfDf1OHk=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hive/wax/-/@hive/wax-0.3.8-a1a00db.tgz}
     engines: {node: '>= 12'}
     dependencies:
-      '@hive-staging/beekeeper': 0.1.0
+      '@hive/beekeeper': 1.27.5-rc0-stable.766d1d7bd
       axios: 1.6.2
       class-transformer: 0.5.1
       class-validator: 0.14.0
