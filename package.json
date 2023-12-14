@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "@hive-staging/beekeeper": "^0.1.0",
-    "@hive/wax": "^0.3.8-a1a00db",
+    "@hive/wax": "~0.3.8-741b616",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "events": "^3.3.0",

@@ -9,8 +9,8 @@ dependencies:
     specifier: ^0.1.0
     version: 0.1.0
   '@hive/wax':
-    specifier: ^0.3.8-a1a00db
-    version: 0.3.8-a1a00db
+    specifier: ~0.3.8-741b616
+    version: 0.3.8-741b616
   class-transformer:
     specifier: ^0.5.1
     version: 0.5.1
@@ -166,8 +166,8 @@ packages:
     engines: {node: '>= 12'}
     dev: false
 
-  /@hive/wax@0.3.8-a1a00db:
-    resolution: {integrity: sha1-ltSQ0mJuCrGNtMltYAWGfDf1OHk=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hive/wax/-/@hive/wax-0.3.8-a1a00db.tgz}
+  /@hive/wax@0.3.8-741b616:
+    resolution: {integrity: sha1-ltSQ0mJuCrGNtMltYAWGfDf1OHk=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hive/wax/-/@hive/wax-0.3.8-741b616.tgz}
     engines: {node: '>= 12'}
     dependencies:
       '@hive/beekeeper': 1.27.5-rc0-stable.766d1d7bd
