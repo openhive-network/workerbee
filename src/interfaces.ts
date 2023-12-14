@@ -1,5 +1,5 @@
 import type EventEmitter from "events";
-import type { ApiAccount, ApiBlock, ApiTransaction, IHiveChainInterface, operation, transaction } from "@hive-staging/wax";
+import type { ApiAccount, ApiBlock, ApiTransaction, IHiveChainInterface, operation, transaction } from "@hive/wax";
 import type { Subscribable } from "rxjs";
 import type { IStartConfiguration } from "./bot";
 

@@ -1,4 +1,4 @@
-import { createHiveChain, IWaxOptionsChain, TWaxExtended } from "@hive-staging/wax";
+import { createHiveChain, IWaxOptionsChain, TWaxExtended } from "@hive/wax";
 
 export const WaxExtendTypes = {};
 

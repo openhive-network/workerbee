@@ -7,7 +7,7 @@ import {
   limit_order_create, limit_order_create2, operation, pow, pow2, recover_account, recurrent_transfer, remove_proposal,
   request_account_recovery, set_withdraw_vesting_route, transfer, transfer_from_savings, transfer_to_savings,
   transfer_to_vesting, update_proposal, update_proposal_votes, vote, withdraw_vesting, witness_block_approve,
-  witness_set_properties, witness_update } from "@hive-staging/wax";
+  witness_set_properties, witness_update } from "@hive/wax";
 
 export class AccountOperationVisitor extends OperationVisitor<operation | void> {
   public constructor(
