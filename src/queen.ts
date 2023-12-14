@@ -158,16 +158,14 @@ export class QueenBee {
             });
             const dgpo = await this.worker.chain!.api.database_api.get_dynamic_global_properties({});
 
-            const value = this.worker.chain!.calculateCurrentManabarValue(
+            const { percent } = this.worker.chain!.calculateCurrentManabarValue(
               Math.round(new Date(`${dgpo.time}Z`).getTime() / 1000), // Convert API time to seconds
               account.post_voting_power.amount,
               account.voting_manabar.current_mana,
               account.voting_manabar.last_update_time
             );
 
-            if(value.multiply(100)
-              .divide(account.post_voting_power.amount)
-              .toNumber() >= 98)
+            if(percent >= 98)
               observer.next?.(account);
           } catch (error) {
             observer.error?.(error);

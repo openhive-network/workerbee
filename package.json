@@ -1,6 +1,6 @@
 {
   "name": "@hive-staging/workerbee",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Example bot to use in your browser app based on the wax and beekeeper library",
   "main": "dist/bundle/index.js",
   "types": "dist/bundle/index.d.ts",
@@ -45,8 +45,8 @@
     "typescript": "5.2.2"
   },
   "dependencies": {
-    "@hive-staging/beekeeper": "^0.1.0",
-    "@hive-staging/wax": "^0.3.7",
+    "@hive-staging/beekeeper": "^0.1.2",
+    "@hive-staging/wax": "^0.3.23",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "events": "^3.3.0",
