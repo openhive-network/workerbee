@@ -33,7 +33,7 @@
   Private Posting key:<input id="key" placeholder="Private Posting key" value="5JqodRzm7Ag1QJgLgsCgEpQpkRKq1NQZGjaxy1Y48WxohCy2u5J">
   <button id="start">Start</button>
   <hr>
-  API endpoint:<input id="api-endpoint" placeholder="API endpoint" value="https://api.hive.blog">
+  API endpoint:<input id="api-endpoint" placeholder="API endpoint">
   ChainID:<input id="chain-id" placeholder="Chain-id" value="beeab0de00000000000000000000000000000000000000000000000000000000">
   <hr>
   <h2>Log</h2>
@@ -42,13 +42,11 @@
     import WorkerBee from "../../dist/bundle/index.js";
     import { OperationVisitor } from "@hive-staging/wax";
 
-    const hostname = document.location.hostname;
-    const used_protocol = document.location.protocol;
-
-    console.log(`Received protocol: ${used_protocol}, hostname: ${hostname}`);
-
     const startBtn = document.getElementById("start");
     const logger = document.getElementById("log");
+    const chainIdNode = document.getElementById("chain-id");
+    const apiEndpointInput = document.getElementById("api-endpoint");
+
     const log = (what, error = false) => {
       console[error ? 'error' : 'info'](what);
 
@@ -67,21 +65,12 @@
     let bot, work, manaWork, beneficiaryName, voterName;
 
     let chainId = process.env.CHAIN_ID;
-    if (chainId !== "") {
-      const chainIdInput = document.getElementById("chain-id");
-      chainIdInput.value = String(chainId);
+    if (typeof chainId === "string" && chainId.length > 0)
+      chainIdNode.value = chainId;
 
-      console.log(`Using custom chain-id: ${chainId}`);
-    }
-
-    let apiEndpoint = process.env.DIRECT_API_ENDPOINT;
-    if (apiEndpoint === "") {
-      apiEndpoint=used_protocol + '//' + hostname + ':3000';
-      console.log(`Using implicit direct api endpoint: ${apiEndpoint}`);
-    }
-
-    const apiEndpointInput = document.getElementById("api-endpoint");
-    apiEndpointInput.value = apiEndpoint;
+    const implicitApiEndpoint = document.location.protocol + '//' + document.location.hostname + ':3000';
+    let apiEndpoint = apiEndpointInput.value = process.env.DIRECT_API_ENDPOINT || implicitApiEndpoint;
+    console.log(`Using API endpoint: "${apiEndpoint}" with chain id: "${chainId}"`);
 
     const voted = new Set(/* Set<`${Account}/${Permlink}`> */);
     const posts = new Map(/* Map<`${Account}/${Permlink}`, { added: Date, beneficiaryMatched?: boolean }> */);
@@ -210,14 +199,14 @@
         beneficiaryName = document.getElementById('beneficiary').value;
         voterName = document.getElementById('voter').value;
 
-        chainId = document.getElementById('chain-id').value;
-	apiEndpoint = document.getElementById('api-endpoint').value;
+        chainId = chainIdNode.value;
+        apiEndpoint = apiEndpointInput.value;
 
         bot = new WorkerBee({
           postingKey: document.getElementById('key').value,
           chainOptions: {
-            apiEndpoint: apiEndpoint, //used_protocol + '//' + hostname + ':3000',
-            chainId: chainId //'18dcf0a285365fc58b71f18b3d3fec954aa0c141c44e4e5cb4cf777b9eab274e'
+            apiEndpoint,
+            chainId
           }
         });
         bot.on("error", error => {
