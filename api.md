@@ -37,7 +37,7 @@ src/index.ts:8
 
 #### Defined in
 
-src/interfaces.ts:8
+src/interfaces.ts:9
 
 ___
 
@@ -47,7 +47,7 @@ ___
 
 #### Defined in
 
-src/interfaces.ts:7
+src/interfaces.ts:8
 
 
 <a name="interfacesibroadcastoptionsmd"></a>
@@ -71,7 +71,7 @@ undefined
 
 #### Defined in
 
-src/interfaces.ts:72
+src/interfaces.ts:73
 
 
 <a name="interfacesioperationdatamd"></a>
@@ -86,7 +86,7 @@ src/interfaces.ts:72
 
 #### Defined in
 
-src/interfaces.ts:18
+src/interfaces.ts:19
 
 ___
 
@@ -96,7 +96,7 @@ ___
 
 #### Defined in
 
-src/interfaces.ts:19
+src/interfaces.ts:20
 
 
 <a name="interfacesiqueenbeemd"></a>
@@ -126,7 +126,7 @@ subscribable object that will call `next` each time time its manabar is 98 perce
 
 #### Defined in
 
-src/interfaces.ts:61
+src/interfaces.ts:62
 
 ___
 
@@ -150,7 +150,7 @@ subscribable object that will call `next` on every operation related to the give
 
 #### Defined in
 
-src/interfaces.ts:52
+src/interfaces.ts:53
 
 ___
 
@@ -174,7 +174,7 @@ subscribable object that will call `next` only once and completes
 
 #### Defined in
 
-src/interfaces.ts:29
+src/interfaces.ts:30
 
 ▸ **block**(`blockNumber`): `Subscribable`\<[`IBlockData`](#interfacesiblockdatamd)\>
 
@@ -194,7 +194,7 @@ subscribable object that will call `next` only once and completes
 
 #### Defined in
 
-src/interfaces.ts:36
+src/interfaces.ts:37
 
 ___
 
@@ -218,7 +218,7 @@ subscribable object that will call `next` only once and completes
 
 #### Defined in
 
-src/interfaces.ts:44
+src/interfaces.ts:45
 
 
 <a name="interfacesistartconfigurationmd"></a>
@@ -241,7 +241,7 @@ Beekeeper wallet options
 
 #### Defined in
 
-src/bot.ts:35
+src/bot.ts:28
 
 ___
 
@@ -259,19 +259,7 @@ Wax chain options
 
 #### Defined in
 
-src/bot.ts:27
-
-___
-
-### postingKey
-
-• `Optional` **postingKey**: `string`
-
-Posting private key in WIF format
-
-#### Defined in
-
-src/bot.ts:19
+src/bot.ts:20
 
 
 <a name="interfacesitransactiondatamd"></a>
@@ -286,7 +274,7 @@ src/bot.ts:19
 
 #### Defined in
 
-src/interfaces.ts:14
+src/interfaces.ts:15
 
 ___
 
@@ -296,7 +284,7 @@ ___
 
 #### Defined in
 
-src/interfaces.ts:12
+src/interfaces.ts:13
 
 ___
 
@@ -306,7 +294,7 @@ ___
 
 #### Defined in
 
-src/interfaces.ts:13
+src/interfaces.ts:14
 
 
 <a name="interfacesiworkerbeemd"></a>
@@ -332,7 +320,7 @@ Remember that chain property will be initialized during [start](#start) call and
 
 #### Defined in
 
-src/interfaces.ts:85
+src/interfaces.ts:86
 
 ___
 
@@ -342,7 +330,7 @@ ___
 
 #### Defined in
 
-src/interfaces.ts:77
+src/interfaces.ts:78
 
 ___
 
@@ -352,7 +340,7 @@ ___
 
 #### Defined in
 
-src/interfaces.ts:102
+src/interfaces.ts:105
 
 ___
 
@@ -362,7 +350,7 @@ ___
 
 #### Defined in
 
-src/interfaces.ts:76
+src/interfaces.ts:77
 
 ## Methods
 
@@ -378,7 +366,7 @@ Allows you to iterate over blocks indefinitely
 
 #### Defined in
 
-src/interfaces.ts:122
+src/interfaces.ts:123
 
 ___
 
@@ -413,6 +401,34 @@ node_modules/.pnpm/@types+node@20.7.1/node_modules/@types/node/events.d.ts:462
 
 ___
 
+### broadcast
+
+▸ **broadcast**(`tx`, `options?`): `Promise`\<`Subscribable`\<[`ITransactionData`](#interfacesitransactiondatamd)\>\>
+
+Broadcast given transaction to the remote and returns a subscribable object
+that calls error after [throwAfter](#interfacesibroadcastoptionsmd) time (if given)
+If [throwAfter](#interfacesibroadcastoptionsmd) has not been specified, it is automatically
+set to the transaction expiration time plus one minute
+
+Requires signed transaction
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `tx` | `transaction` | Protobuf transactoin to broadcast |
+| `options?` | [`IBroadcastOptions`](#interfacesibroadcastoptionsmd) | Options for broadcasting |
+
+#### Returns
+
+`Promise`\<`Subscribable`\<[`ITransactionData`](#interfacesitransactiondatamd)\>\>
+
+#### Defined in
+
+src/interfaces.ts:118
+
+___
+
 ### delete
 
 ▸ **delete**(): `Promise`\<`void`\>
@@ -425,7 +441,7 @@ Deletes the current bot instance and underlying wax and beekepeer objects
 
 #### Defined in
 
-src/interfaces.ts:100
+src/interfaces.ts:103
 
 ___
 
@@ -685,7 +701,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:130
+src/interfaces.ts:131
 
 ▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
@@ -708,7 +724,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:137
+src/interfaces.ts:138
 
 ▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
@@ -731,7 +747,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:144
+src/interfaces.ts:145
 
 ▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
@@ -754,7 +770,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:151
+src/interfaces.ts:152
 
 ▸ **on**(`event`, `handler`): [`IWorkerBee`](#interfacesiworkerbeemd)
 
@@ -777,7 +793,7 @@ EventEmitter.on
 
 #### Defined in
 
-src/interfaces.ts:158
+src/interfaces.ts:159
 
 ___
 
@@ -1153,41 +1169,17 @@ node_modules/.pnpm/@types+node@20.7.1/node_modules/@types/node/events.d.ts:633
 
 ___
 
-### signAndBroadcast
+### start
 
-▸ **signAndBroadcast**(`tx`, `options?`): `Promise`\<`Subscribable`\<[`ITransactionData`](#interfacesitransactiondatamd)\>\>
+▸ **start**(`wallet?`): `Promise`\<`void`\>
 
-Broadcast given transaction to the remote and returns a subscribable object
-that calls error after [throwAfter](#interfacesibroadcastoptionsmd) time (if given)
-If [throwAfter](#interfacesibroadcastoptionsmd) has not been specified, it is automatically
-set to the transaction expiration time plus one minute
-
-If transaction is not already signed (at least one signature is present)
-WorkerBee will try signing the transaction using specified in the configuration
-private key
+Starts the automation with given configuration
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `tx` | `transaction` | Protobuf transactoin to broadcast |
-| `options?` | [`IBroadcastOptions`](#interfacesibroadcastoptionsmd) | Options for broadcasting |
-
-#### Returns
-
-`Promise`\<`Subscribable`\<[`ITransactionData`](#interfacesitransactiondatamd)\>\>
-
-#### Defined in
-
-src/interfaces.ts:117
-
-___
-
-### start
-
-▸ **start**(): `Promise`\<`void`\>
-
-Starts the automation with given configuration
+| `wallet?` | `IBeekeeperUnlockedWallet` | optional unlocked beekeper wallet for bot operations |
 
 #### Returns
 
@@ -1195,7 +1187,7 @@ Starts the automation with given configuration
 
 #### Defined in
 
-src/interfaces.ts:90
+src/interfaces.ts:93
 
 ___
 
@@ -1211,7 +1203,7 @@ Request automation stop
 
 #### Defined in
 
-src/interfaces.ts:95
+src/interfaces.ts:98
 
 
 <a name="interfacesiworkerbeeconstructormd"></a>
@@ -1238,4 +1230,4 @@ Constructs new WorkerBee bot object
 
 #### Defined in
 
-src/interfaces.ts:167
+src/interfaces.ts:168

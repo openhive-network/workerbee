@@ -65,6 +65,17 @@ pnpm dlx parcel account-observer/index.html
 
 ### Post observer
 
+Run the wallet manager first, create wallet and import key, then run the `index.html` page
+
+**[post-observer/wallet.html](post-observer/wallet.html)**
+
+Wallet manager for post observer creates wallet and imports keys for given account using our libraries
+
+```bash
+# Run example
+pnpm dlx parcel post-observer/wallet.html
+```
+
 **[post-observer/index.html](post-observer/index.html)**
 
 Post observer explains how to observe given account for new posts and automatically vote on them on the blockchain using our libraries

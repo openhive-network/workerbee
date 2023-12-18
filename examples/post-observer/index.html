@@ -30,7 +30,9 @@
   Observed account:<input id="acc" placeholder="Observe account" value="initminer">
   Beneficiary account:<input id="beneficiary" placeholder="Beneficiary account" value="initminer">
   Voting account:<input id="voter" placeholder="Voting account" value="voter">
-  Private Posting key:<input id="key" placeholder="Private Posting key" value="5JqodRzm7Ag1QJgLgsCgEpQpkRKq1NQZGjaxy1Y48WxohCy2u5J">
+  Wallet name:<input id="wallet" placeholder="Wallet name" value="wallet0">
+  Wallet password:<input id="password" placeholder="Wallet password" value="password">
+  Public key:<input id="key" placeholder="Public key for signing" value="8BcysuXFFHMx3fcSzTH2Xpg1rtpPZ2oakaWe2LbKY1bCZH5HQJ">
   <button id="start">Start</button>
   <hr>
   API endpoint:<input id="api-endpoint" placeholder="API endpoint">
@@ -41,11 +43,14 @@
   <script type="module">
     import WorkerBee from "../../dist/bundle/index.js";
     import { OperationVisitor } from "@hive-staging/wax";
+    import beekeeperFactory from "@hive-staging/beekeeper";
 
     const startBtn = document.getElementById("start");
     const logger = document.getElementById("log");
     const chainIdNode = document.getElementById("chain-id");
     const apiEndpointInput = document.getElementById("api-endpoint");
+
+    let publicKey, wallet;
 
     const log = (what, error = false) => {
       console[error ? 'error' : 'info'](what);
@@ -90,7 +95,7 @@
         });
 
         // Broadcast our transaction with custom internal expiration time
-        const observer = await bot.signAndBroadcast(builder.build());
+        const observer = await bot.broadcast(builder.build(wallet, publicKey));
 
         voted.add(getKey(op));
 
@@ -203,7 +208,6 @@
         apiEndpoint = apiEndpointInput.value;
 
         bot = new WorkerBee({
-          postingKey: document.getElementById('key').value,
           chainOptions: {
             apiEndpoint,
             chainId
@@ -213,7 +217,13 @@
           log(error, true);
         });
 
-        await bot.start();
+        const beekeeper = await beekeeperFactory();
+        const session = await beekeeper.createSession("my.salt");
+        const lockedWallet = await session.openWallet(document.getElementById('wallet').value);
+        wallet = lockedWallet.unlock(document.getElementById('password').value);
+        await bot.start(wallet);
+
+        publicKey = document.getElementById('key').value;
 
         const accountToObserve = String(document.getElementById("acc").value);
 

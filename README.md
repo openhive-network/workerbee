@@ -99,8 +99,14 @@ observer.subscribe({
 
 ```js
 import WorkerBee from "@hive-staging/workerbee";
+import beekeeperFactory from "@hive-staging/beekeeper";
 
-const bot = new WorkerBee({ postingKey: "5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT" });
+const beekeeper = await beekeeperFactory();
+const session = await beekeeper.createSession("my.salt");
+const { wallet } = await session.createWallet("w0", "mypassword");
+await wallet.importKey("5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT");
+
+const bot = new WorkerBee();
 bot.on("error", console.error);
 
 await bot.start();
@@ -117,7 +123,7 @@ builder.push({
 });
 
 // Broadcast our transaction with custom internal expiration time
-const observer = await bot.signAndBroadcast(builder.build());
+const observer = await bot.broadcast(builder.build(wallet, "5RqVBAVNp5ufMCetQtvLGLJo7unX9nyCBMMrTXRWQ9i1Zzzizh"));
 
 // Observe if our transaction has been applied
 observer.subscribe({

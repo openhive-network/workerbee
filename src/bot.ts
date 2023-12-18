@@ -1,5 +1,5 @@
 import EventEmitter from "events";
-import beekeeperFactory, { IBeekeeperInstance, IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hive-staging/beekeeper";
+import type { IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hive-staging/beekeeper";
 import { BroadcastTransactionRequest, calculateExpiration, IWaxOptionsChain, transaction, TWaxExtended } from "@hive-staging/wax";
 import type { Subscribable } from "rxjs";
 
@@ -11,13 +11,6 @@ import { getWax, WaxExtendTypes } from "./wax/extend";
 const ONE_MINUTE = 1000 * 60;
 
 export interface IStartConfiguration {
-  /**
-   * Posting private key in WIF format
-   *
-   * @type {?string}
-   */
-  postingKey?: string;
-
   /**
    * Wax chain options
    *
@@ -48,10 +41,6 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
 
   public chain?: TWaxExtended<typeof WaxExtendTypes>;
 
-  private publicKey!: string;
-
-  private beekeeper?: IBeekeeperInstance;
-
   private wallet?: IBeekeeperUnlockedWallet;
 
   private headBlockNumber: number = 0;
@@ -71,17 +60,9 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
     });
   }
 
-  private get isAuthorized(): boolean {
-    return typeof this.configuration.postingKey === "string";
-  }
-
-  public async signAndBroadcast(tx: transaction, options: IBroadcastOptions = {}): Promise<Subscribable<ITransactionData>> {
-    if(tx.signatures.length === 0) {
-      if(!this.isAuthorized)
-        throw new WorkerBeeError("You are trying to broadcast transaction without signing!");
-
-      tx = new this.chain!.TransactionBuilder(tx).build(this.wallet!, this.publicKey);
-    }
+  public async broadcast(tx: transaction, options: IBroadcastOptions = {}): Promise<Subscribable<ITransactionData>> {
+    if(tx.signatures.length === 0)
+      throw new WorkerBeeError("You are trying to broadcast transaction without signing!");
 
     if(typeof options.throwAfter === "undefined") {
       const expiration = calculateExpiration(tx.expiration);
@@ -102,23 +83,16 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
     return this.observe.transaction(apiTx.id, expireDate.getTime());
   }
 
-  public async start(): Promise<void> {
+  public async start(wallet?: IBeekeeperUnlockedWallet): Promise<void> {
     // Initialize chain and beekepeer if required
-    if(typeof this.chain === "undefined")
+    if(typeof this.chain === "undefined") {
       this.chain = await getWax(this.configuration.chainOptions);
-
-    if(typeof this.beekeeper === "undefined" || typeof this.wallet === "undefined") {
-      this.beekeeper = await beekeeperFactory(this.configuration.beekeeperOptions);
-
-      const random = Math.random().toString(16)
-        .slice(2);
-
-      ({ wallet: this.wallet } = await this.beekeeper.createSession(random).createWallet(random));
-      if(this.isAuthorized)
-        this.publicKey = await this.wallet.importKey(this.configuration.postingKey as string);
 
       ({ head_block_number: this.headBlockNumber } = await this.chain.api.database_api.get_dynamic_global_properties({}));
     }
+
+    if(typeof this.wallet === "undefined")
+      this.wallet = wallet;
 
     // Ensure the app is not running
     await this.stop();
@@ -198,10 +172,8 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
 
     this.chain?.delete();
     this.wallet?.close();
-    await this.beekeeper?.delete();
 
     this.chain = undefined;
-    this.beekeeper = undefined;
     this.wallet = undefined;
   }
 }

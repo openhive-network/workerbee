@@ -6,11 +6,11 @@ settings:
 
 dependencies:
   '@hive-staging/beekeeper':
-    specifier: ^0.1.2
-    version: 0.1.2
+    specifier: ^0.1.3
+    version: 0.1.3
   '@hive-staging/wax':
-    specifier: ^0.3.23
-    version: 0.3.23
+    specifier: ^0.3.24
+    version: 0.3.24
   class-transformer:
     specifier: ^0.5.1
     version: 0.5.1
@@ -156,16 +156,16 @@ packages:
       - supports-color
     dev: true
 
-  /@hive-staging/beekeeper@0.1.2:
-    resolution: {integrity: sha512-+9zfaai+4TZzWNNr1jwaTJr4e0bGNbEuB7h1HEadIyk+w77lqKN4/UDPC6N5NSGbtr+SLEGXEjSX6LG8Rjx3Sg==}
+  /@hive-staging/beekeeper@0.1.3:
+    resolution: {integrity: sha512-G3KRlZCo0H+RgWCov/7kcWEfo+4gTt6n/Pqr7FhDEjyRSGgvgDeJeVls01HLvsj3lndEPFqOA3hSkZV2qyydeQ==}
     engines: {node: '>= 12'}
     dev: false
 
-  /@hive-staging/wax@0.3.23:
-    resolution: {integrity: sha512-aKQO9UrvPfOspKR0WkiePckib03F7uycgKAShrdta5Hd9aLoug8W/KN5A3smFnAhepyZjCadra7jpRKdviF9IQ==}
+  /@hive-staging/wax@0.3.24:
+    resolution: {integrity: sha512-xhi5edmu7awusgA78NCvjJdewZEhbAP3Z6IwCNt8PMiq6DXSHmlB4J4cuVknfUXRmcdZQo1uUWXmtLaUAKhKRA==}
     engines: {node: '>= 12'}
     dependencies:
-      '@hive-staging/beekeeper': 0.1.2
+      '@hive-staging/beekeeper': 0.1.3
       class-transformer: 0.5.1
       class-validator: 0.14.0
       long: 5.2.3

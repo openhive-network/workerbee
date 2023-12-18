@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post observer wallet manager</title>
+  <style>
+    #log {
+      border: 3px solid black;
+      height: 50vh;
+      overflow: auto;
+      padding: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: .8rem;
+      word-break: break-word;
+    }
+    #log .data {
+      margin: 5px;
+      padding: 5px;
+      color: darkslategray;
+      border-bottom: 2px solid gray;
+    }
+    #log .data.error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>WorkerBee Post observer wallet manager</h1>
+  Wallet name:<input id="wallet" placeholder="Wallet name" value="wallet0">
+  Wallet password:<input id="password" placeholder="Wallet password" value="password">
+  Private Posting key:<input id="key" placeholder="Private Posting key" value="5JqodRzm7Ag1QJgLgsCgEpQpkRKq1NQZGjaxy1Y48WxohCy2u5J">
+  <button id="start">Import</button>
+  <hr>
+  <h2>Log</h2>
+  <div id="log"></div>
+  <script type="module">
+    import beekeeperFactory from "@hive-staging/beekeeper";
+
+    const startBtn = document.getElementById("start");
+    const logger = document.getElementById("log");
+
+    const log = (what, error = false) => {
+      console[error ? 'error' : 'info'](what);
+
+      const node = document.createElement('div');
+      node.classList.add('data');
+      if (error)
+        node.classList.add('error');
+
+      node.innerText = typeof what === 'string' ? what : JSON.stringify(what);
+
+      logger.prepend(node);
+    };
+
+    startBtn.addEventListener('click', async () => {
+      try {
+        const beekeeper = await beekeeperFactory();
+        const session = await beekeeper.createSession("my.salt");
+
+        const walletName = document.getElementById('wallet').value;
+        log(`Creating wallet: "${walletName}"`);
+        const { wallet } = await session.createWallet(walletName, document.getElementById('password').value);
+        log("Wallet created.");
+        const publicKey = await wallet.importKey(document.getElementById('key').value);
+        log(`Imported key wallet: "${publicKey}"`);
+        await wallet.close();
+        log(`Closed wallet "${walletName}"`);
+
+        await beekeeper.delete();
+      } catch (error) {
+        log(error, true);
+      }
+    });
+  </script>
+</body>
+</html>

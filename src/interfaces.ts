@@ -1,4 +1,5 @@
 import type EventEmitter from "events";
+import type { IBeekeeperUnlockedWallet } from "@hive-staging/beekeeper";
 import type { ApiAccount, ApiBlock, ApiTransaction, IHiveChainInterface, operation, transaction } from "@hive-staging/wax";
 import type { Subscribable } from "rxjs";
 import type { IStartConfiguration } from "./bot";
@@ -86,8 +87,10 @@ export interface IWorkerBee extends EventEmitter {
 
   /**
    * Starts the automation with given configuration
+   *
+   * @param {?IBeekeeperUnlockedWallet} wallet optional unlocked beekeper wallet for bot operations
    */
-  start(): Promise<void>;
+  start(wallet?: IBeekeeperUnlockedWallet): Promise<void>;
 
   /**
    * Request automation stop
@@ -107,14 +110,12 @@ export interface IWorkerBee extends EventEmitter {
    * If {@link IBroadcastOptions throwAfter} has not been specified, it is automatically
    * set to the transaction expiration time plus one minute
    *
-   * If transaction is not already signed (at least one signature is present)
-   * WorkerBee will try signing the transaction using specified in the configuration
-   * private key
+   * Requires signed transaction
    *
    * @param tx Protobuf transactoin to broadcast
    * @param options Options for broadcasting
    */
-  signAndBroadcast(tx: transaction, options?: IBroadcastOptions): Promise<Subscribable<ITransactionData>>;
+  broadcast(tx: transaction, options?: IBroadcastOptions): Promise<Subscribable<ITransactionData>>;
 
   /**
    * Allows you to iterate over blocks indefinitely
