@@ -44,9 +44,11 @@ build:
     - pnpm install
   script:
     - npm run build
+  after_script:
+    - npm pack --pack-destination "$CI_PROJECT_DIR/dist"
   artifacts:
     paths:
-      - "$CI_PROJECT_DIR/dist"
+      - "$CI_PROJECT_DIR/dist/*.tgz"
 
     when: always
     expire_in: 1 week
@@ -59,6 +61,7 @@ test:
   # emscripten image can be used as it contains all needed tools.
   image: ${EMSCRIPTEN_IMAGE}
   before_script:
+    - tar -xf "$CI_PROJECT_DIR"/dist/hive-staging-workerbee-*.tgz --strip-components=1
     - pnpm install
   script:
     - npm run test
