@@ -27,9 +27,28 @@
 </head>
 <body>
   <h1>WorkerBee Post observer wallet manager</h1>
-  Wallet name:<input id="wallet" placeholder="Wallet name" value="wallet0">
-  Wallet password:<input id="password" placeholder="Wallet password" value="password">
-  Private Posting key:<input id="key" placeholder="Private Posting key" value="5JqodRzm7Ag1QJgLgsCgEpQpkRKq1NQZGjaxy1Y48WxohCy2u5J">
+  <h2>How to use Wallet manager?</h2>
+  <ul>
+    <li>Offline stage:
+      <ol>
+        <li>Run and watch <code>wallet.html</code> using parcel locally as mentioned in the <code>README.md</code> file</li>
+        <li>Enter desired wallet name and password you will later have to provide in the post observer <code>index.html</code> file</li>
+        <li>Provide your voting account private posting key to import into the mentioned wallet and click <code>Import</code></li>
+        <li>Upon success copy the generated public key from the <code>Log</code></li>
+        <li>Close this website and parcel watch and now watch the post observer <code>index.html</code> webpage (it has to be on the same origin - host and port)</li>
+      </ol>
+    </li>
+    <li>Online stage:
+      <ol start="6">
+        <li>On the <code>index.html</code> webpage provide your configuration and public key to match your private key from the previously imported private key</li>
+        <li>When you are ready, click <code>Start</code> and enjoy the automation 😊</li>
+      </ol>
+    </li>
+  </ul>
+  <hr>
+  Wallet name: <input id="wallet" placeholder="Wallet name" value="wallet0"><br>
+  Wallet password: <input id="password" placeholder="Wallet password" value="password"><br>
+  Private Posting key: <input id="key" placeholder="Private Posting key" value="5JqodRzm7Ag1QJgLgsCgEpQpkRKq1NQZGjaxy1Y48WxohCy2u5J"><br>
   <button id="start">Import</button>
   <hr>
   <h2>Log</h2>
