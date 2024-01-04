@@ -147,7 +147,7 @@
       }
     }
 
-    const actualBotWork = async (accountToObserve) => {
+    const actualBotWork = async (accountToObserve, voterAccount) => {
       work = bot.observe.accountOperations(accountToObserve).subscribe({
         next({ op, transaction: { block: { number } } }) {
           new CommentVisitor(number).accept(op);
@@ -157,7 +157,7 @@
         }
       });
 
-      manaWork = bot.observe.accountFullManabar(accountToObserve).subscribe({
+      manaWork = bot.observe.accountFullManabar(voterAccount).subscribe({
         next() {
           const key = posts.keys().next().value;
           if (!key)
@@ -229,7 +229,7 @@
 
         log(`Observing account posts: "${accountToObserve}"`);
 
-        actualBotWork(accountToObserve).catch((error) => { log(error, true); });
+        actualBotWork(accountToObserve, voterName).catch((error) => { log(error, true); });
 
         running = true;
         startBtn.innerText = 'Stop';
