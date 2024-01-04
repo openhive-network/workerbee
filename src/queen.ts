@@ -2,13 +2,12 @@ import type { ApiAccount, operation } from "@hive-staging/wax";
 import type { Subscribable, Observer, Unsubscribable } from "rxjs";
 
 import { AccountOperationVisitor } from "./account_observer";
-import type { WorkerBee } from "./bot";
 import { WorkerBeeError } from "./errors";
-import type { IBlockData, ITransactionData, IOperationData } from "./interfaces";
+import type { IBlockData, ITransactionData, IOperationData, IWorkerBee } from "./interfaces";
 
 export class QueenBee {
   public constructor(
-    private readonly worker: WorkerBee
+    private readonly worker: IWorkerBee
   ) {}
 
   public block(idOrNumber: string | number): Subscribable<IBlockData> {

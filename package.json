@@ -1,9 +1,37 @@
 {
   "name": "@hive-staging/workerbee",
-  "version": "0.3.11",
-  "description": "Example bot to use in your browser app based on the wax and beekeeper library",
-  "main": "dist/bundle/index.js",
-  "types": "dist/bundle/index.d.ts",
+  "version": "0.4.0",
+  "description": "Hive automation library based on the wax and beekeeper",
+  "main": "dist/bundle/web.js",
+  "types": "dist/bundle/web.d.ts",
+  "exports": {
+    ".": {
+      "node": {
+        "import": {
+          "types": "./dist/bundle/node.d.ts",
+          "default": "./dist/bundle/node.js"
+        }
+      },
+      "default": {
+        "import": {
+          "types": "./dist/bundle/web.d.ts",
+          "default": "./dist/bundle/web.js"
+        }
+      }
+    },
+    "./web": {
+      "import": {
+        "types": "./dist/bundle/web.d.ts",
+        "default": "./dist/bundle/web.js"
+      }
+    },
+    "./node": {
+      "import": {
+        "types": "./dist/bundle/node.d.ts",
+        "default": "./dist/bundle/node.js"
+      }
+    }
+  },
   "type": "module",
   "license": "SEE LICENSE IN LICENSE.md",
   "private": false,
@@ -45,8 +73,8 @@
     "typescript": "5.2.2"
   },
   "dependencies": {
-    "@hive-staging/beekeeper": "^0.1.3",
-    "@hive-staging/wax": "^0.3.24",
+    "@hive-staging/beekeeper": "^0.1.6",
+    "@hive-staging/wax": "^0.3.28",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "events": "^3.3.0",

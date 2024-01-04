@@ -1,12 +1,12 @@
 import EventEmitter from "events";
 import type { IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hive-staging/beekeeper";
-import { BroadcastTransactionRequest, calculateExpiration, IWaxOptionsChain, transaction, TWaxExtended } from "@hive-staging/wax";
+import { BroadcastTransactionRequest, calculateExpiration, IWaxOptionsChain, transaction, TWaxExtended } from "@hive-staging/wax/web";
 import type { Subscribable } from "rxjs";
 
 import { WorkerBeeError } from "./errors";
 import type { IWorkerBee, IBlockData, ITransactionData, IBroadcastOptions } from "./interfaces";
 import { QueenBee } from "./queen";
-import { getWax, WaxExtendTypes } from "./wax/extend";
+import { getWax, WaxExtendTypes } from "./wax/web";
 
 const ONE_MINUTE = 1000 * 60;
 

@@ -2,7 +2,7 @@ import type EventEmitter from "events";
 import type { IBeekeeperUnlockedWallet } from "@hive-staging/beekeeper";
 import type { ApiAccount, ApiBlock, ApiTransaction, IHiveChainInterface, operation, transaction } from "@hive-staging/wax";
 import type { Subscribable } from "rxjs";
-import type { IStartConfiguration } from "./bot";
+import type { IStartConfiguration } from "./bot.web";
 
 export interface IBlockData {
   number: number;

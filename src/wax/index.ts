@@ -1,1 +1,0 @@
-export { getWax } from "./extend";

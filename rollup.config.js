@@ -2,19 +2,26 @@ import typescript from 'rollup-plugin-typescript2';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 
-export default {
-  input: 'dist/index.js',
+const commonConfiguration = (env, merge = {}) => ({
+  input: `dist/${env}.js`,
   output: {
-    dir: 'dist/bundle',
     format: 'es',
-    name: 'workerbee'
+    name: 'workerbee',
+    ...(merge.output || {})
   },
   plugins: [
-    nodeResolve({ preferBuiltins: false, browser: true }),
+    nodeResolve({ preferBuiltins: env !== "web", browser: env === "web" }),
+    commonjs(),
+    ...(merge.plugins || [])
+  ]
+});
+
+export default [
+  commonConfiguration('node', { output: { file: 'dist/bundle/node.js' } }),
+  commonConfiguration('web',  { output: { dir: 'dist/bundle' }, plugins: [
     typescript({
       rollupCommonJSResolveHack: false,
       clean: true
-    }),
-    commonjs()
-  ]
-};
+    })
+  ] })
+];

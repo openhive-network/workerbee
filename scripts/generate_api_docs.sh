@@ -9,7 +9,7 @@ PROJECT_DIR="${SCRIPTPATH}/.."
 # https://typedoc.org/guides/installation/#requirements
 pushd "${PROJECT_DIR}"
 mkdir -vp dist/docs
-pnpm exec typedoc --plugin typedoc-plugin-markdown --theme markdown --excludeInternal --hideBreadcrumbs --hideInPageTOC --out dist/docs src/index.ts
+pnpm exec typedoc --plugin typedoc-plugin-markdown --theme markdown --excludeInternal --hideBreadcrumbs --hideInPageTOC --out dist/docs src/web.ts
 mv dist/docs/modules.md dist/docs/_modules.md
 rm dist/docs/README.md
 pnpm exec concat-md --decrease-title-levels dist/docs > api.md

@@ -1,6 +1,6 @@
 # WorkerBee
 
-Example bot to use in your browser app based on the wax and beekeeper library
+Hive automation library based on the wax and beekeeper
 
 ## Install
 
@@ -142,7 +142,7 @@ See API definition in [api.md](https://gitlab.syncad.com/mtyszczak/workerbee/-/b
 
 ## Support and tests
 
-Tested on the latest Chromium (v117)
+Tested on the latest Chromium (v117) and Node.js v18.7.0
 
 [Automated CI test](https://gitlab.syncad.com/mtyszczak/workerbee/-/pipelines) runs are available.
 
