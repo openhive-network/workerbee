@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
 
 import type { IBlockData } from "../../src/interfaces";
-import { WorkerBee } from "../../src/bot.node";
+
+import WorkerBee from "../../dist/bundle/node";
 
 const HIVE_BLOCK_INTERVAL = 3000;
 

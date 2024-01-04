@@ -87,6 +87,6 @@
     "url": "https://gitlab.syncad.com/mtyszczak/workerbee.git"
   },
   "engines": {
-    "node": ">= 12"
+    "node": ">= 18"
   }
 }
