@@ -6,11 +6,11 @@ settings:
 
 dependencies:
   '@hive-staging/beekeeper':
-    specifier: ^0.1.3
-    version: 0.1.3
+    specifier: npm:@hive/beekeeper@1.27.5-rc0-stable.95c83f5c1
+    version: /@hive/beekeeper@1.27.5-rc0-stable.95c83f5c1
   '@hive-staging/wax':
-    specifier: ^0.3.24
-    version: 0.3.24
+    specifier: npm:@hive/wax@0.3.8-stable.44db07f
+    version: /@hive/wax@0.3.8-stable.44db07f
   class-transformer:
     specifier: ^0.5.1
     version: 0.5.1
@@ -82,6 +82,9 @@ devDependencies:
   rollup:
     specifier: ^4.3.0
     version: 4.3.0
+  rollup-plugin-dotenv:
+    specifier: ^0.5.0
+    version: 0.5.0(rollup@4.3.0)
   rollup-plugin-typescript2:
     specifier: ^0.36.0
     version: 0.36.0(rollup@4.3.0)(typescript@5.2.2)
@@ -156,16 +159,21 @@ packages:
       - supports-color
     dev: true
 
-  /@hive-staging/beekeeper@0.1.3:
-    resolution: {integrity: sha512-G3KRlZCo0H+RgWCov/7kcWEfo+4gTt6n/Pqr7FhDEjyRSGgvgDeJeVls01HLvsj3lndEPFqOA3hSkZV2qyydeQ==}
+  /@hive/beekeeper@1.27.5-rc0-dd680784f:
+    resolution: {integrity: sha1-7cOOJ+LYigHrdhTrK34VJoazLRE=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hive/beekeeper/-/@hive/beekeeper-1.27.5-rc0-dd680784f.tgz}
     engines: {node: '>= 12'}
     dev: false
 
-  /@hive-staging/wax@0.3.24:
-    resolution: {integrity: sha512-xhi5edmu7awusgA78NCvjJdewZEhbAP3Z6IwCNt8PMiq6DXSHmlB4J4cuVknfUXRmcdZQo1uUWXmtLaUAKhKRA==}
+  /@hive/beekeeper@1.27.5-rc0-stable.95c83f5c1:
+    resolution: {integrity: sha1-Os8zl9pdqnziCPzh9BJLbBWQFVk=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hive/beekeeper/-/@hive/beekeeper-1.27.5-rc0-stable.95c83f5c1.tgz}
+    engines: {node: '>= 12'}
+    dev: false
+
+  /@hive/wax@0.3.8-stable.44db07f:
+    resolution: {integrity: sha1-1ygz28piKJWO38/jFDFtkbxC8o4=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hive/wax/-/@hive/wax-0.3.8-stable.44db07f.tgz}
     engines: {node: '>= 12'}
     dependencies:
-      '@hive-staging/beekeeper': 0.1.3
+      '@hive/beekeeper': 1.27.5-rc0-dd680784f
       class-transformer: 0.5.1
       class-validator: 0.14.0
       long: 5.2.3
@@ -316,6 +324,20 @@ packages:
       is-builtin-module: 3.2.1
       is-module: 1.0.0
       resolve: 1.22.8
+      rollup: 4.3.0
+    dev: true
+
+  /@rollup/plugin-replace@5.0.5(rollup@4.3.0):
+    resolution: {integrity: sha512-rYO4fOi8lMaTg/z5Jb+hKnrHHVn8j2lwkqwyS4kTRhKyWOLf2wST2sWXr4WzWiTcoHTp2sTjqUbqIj2E39slKQ==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+    dependencies:
+      '@rollup/pluginutils': 5.0.5(rollup@4.3.0)
+      magic-string: 0.30.5
       rollup: 4.3.0
     dev: true
 
@@ -1097,7 +1119,6 @@ packages:
   /dotenv@16.3.1:
     resolution: {integrity: sha512-IPzF4w4/Rd94bA9imS68tZBaYyBWSCE47V1RGuMrB94iyTOIEwRmVL2x/4An+6mETpLrKJ5hQkB8W4kFAadeIQ==}
     engines: {node: '>=12'}
-    dev: false
 
   /eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
@@ -2865,6 +2886,17 @@ packages:
     hasBin: true
     dependencies:
       glob: 10.3.10
+    dev: true
+
+  /rollup-plugin-dotenv@0.5.0(rollup@4.3.0):
+    resolution: {integrity: sha512-M2gZqEZebtcKaA7OBdO4UF3WmkI02wVD6UVwoxFlRKoq4/n1Q9Cw6UV8dPvVZYpGQ+ug2JPoogrCLaydIKU96A==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      rollup: ^1.20.0 || ^2.0.0 || ^3.0.0
+    dependencies:
+      '@rollup/plugin-replace': 5.0.5(rollup@4.3.0)
+      dotenv: 16.3.1
+      rollup: 4.3.0
     dev: true
 
   /rollup-plugin-typescript2@0.36.0(rollup@4.3.0)(typescript@5.2.2):
