@@ -41,3 +41,6 @@ config/.env*
 
 # But include debug configuration universal for other users using vscode
 !.vscode/launch.json
+
+# Publish tokens and registries
+.npmrc

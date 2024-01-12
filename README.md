@@ -8,13 +8,13 @@ This is a [Node.js](https://nodejs.org/en/) module available through the
 [npm registry](https://www.npmjs.com/).
 
 Before installing, [download and install Node.js](https://nodejs.org/en/download/).
-Node.js 12 or higher is required.
+Node.js 18 or higher is required.
 
 Installation is done using the
 [`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
 
 ```bash
-npm install @hive-staging/workerbee
+npm install @hive/workerbee
 ```
 
 ## Usage
@@ -22,7 +22,7 @@ npm install @hive-staging/workerbee
 ### Iterating indefinitely over new blocks
 
 ```js
-import WorkerBee from "@hive-staging/workerbee";
+import WorkerBee from "@hive/workerbee";
 
 const bot = new WorkerBee();
 bot.on("error", console.error);
@@ -36,7 +36,7 @@ for await(const { block, number } of bot)
 ### Wait for the next block using observer
 
 ```js
-import WorkerBee from "@hive-staging/workerbee";
+import WorkerBee from "@hive/workerbee";
 
 const bot = new WorkerBee();
 bot.on("error", console.error);
@@ -60,7 +60,7 @@ observer.subscribe({
 ### Observe given account for operations in blockchain
 
 ```js
-import WorkerBee from "@hive-staging/workerbee";
+import WorkerBee from "@hive/workerbee";
 
 const bot = new WorkerBee();
 bot.on("error", console.error);
@@ -79,7 +79,7 @@ observer.subscribe({
 ### Observe given account for full manabar regeneration
 
 ```js
-import WorkerBee from "@hive-staging/workerbee";
+import WorkerBee from "@hive/workerbee";
 
 const bot = new WorkerBee();
 bot.on("error", console.error);
@@ -98,8 +98,8 @@ observer.subscribe({
 ### Broadcast and observe transaction in blockchain
 
 ```js
-import WorkerBee from "@hive-staging/workerbee";
-import beekeeperFactory from "@hive-staging/beekeeper";
+import WorkerBee from "@hive/workerbee";
+import beekeeperFactory from "@hive/beekeeper";
 
 const beekeeper = await beekeeperFactory();
 const session = await beekeeper.createSession("my.salt");
@@ -138,13 +138,13 @@ observer.subscribe({
 
 ## API
 
-See API definition in [api.md](https://gitlab.syncad.com/mtyszczak/workerbee/-/blob/${CommitSHA}/api.md)
+See API definition in [api.md](https://gitlab.syncad.com/hive/workerbee/-/blob/${CommitSHA}/api.md)
 
 ## Support and tests
 
 Tested on the latest Chromium (v117) and Node.js v18.7.0
 
-[Automated CI test](https://gitlab.syncad.com/mtyszczak/workerbee/-/pipelines) runs are available.
+[Automated CI test](https://gitlab.syncad.com/hive/workerbee/-/pipelines) runs are available.
 
 To run the tests on your own, clone the Wax repo and install the dependencies and then compile the project:
 
@@ -167,4 +167,4 @@ npm run test
 
 ## License
 
-See license in the [LICENSE.md](https://gitlab.syncad.com/mtyszczak/workerbee/-/blob/${CommitSHA}/LICENSE.md) file
+See license in the [LICENSE.md](https://gitlab.syncad.com/hive/workerbee/-/blob/${CommitSHA}/LICENSE.md) file

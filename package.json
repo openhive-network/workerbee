@@ -1,6 +1,6 @@
 {
-  "name": "@hive-staging/workerbee",
-  "version": "0.4.1",
+  "name": "@hive/workerbee",
+  "version": "0.0.1-LastGitTagPlaceholder.GitHashPlaceholder",
   "description": "Hive automation library based on the wax and beekeeper",
   "main": "dist/bundle/web.js",
   "types": "dist/bundle/web.d.ts",
@@ -40,8 +40,7 @@
     "prebuild": "husky install",
     "build": "rimraf dist && tsc",
     "postbuild": "rollup -c && scripts/generate_api_docs.sh",
-    "test": "unset CI && playwright test --workers 1 --max-failures 1 --project=workerbee_testsuite",
-    "prepack": "scripts/prepublish_hook.sh"
+    "test": "unset CI && playwright test --workers 1 --max-failures 1 --project=workerbee_testsuite"
   },
   "files": [
     "LICENSE.md",
@@ -85,9 +84,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.syncad.com/mtyszczak/workerbee.git"
+    "url": "https://gitlab.syncad.com/hive/workerbee.git"
   },
   "engines": {
     "node": ">= 18"
+  },
+  "publishConfig": {
+    "registry": "https://RegistryPlaceholder",
+    "tag": "DistTagPlaceholder"
   }
 }

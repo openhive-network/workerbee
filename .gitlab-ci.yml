@@ -2,6 +2,7 @@ stages:
   - .pre
   - build
   - test
+  - deploy
 
 variables:
   GIT_DEPTH: 0
@@ -10,10 +11,12 @@ variables:
   # uses registry.gitlab.syncad.com/hive/hive/ci-base-image:ubuntu22.04-8
   CI_BASE_IMAGE_TAG: "@sha256:e9f16040010ad24fffeabec66abca109b24baa79d912eba3118da58e8130fb26"
   CI_BASE_IMAGE: "registry.gitlab.syncad.com/hive/hive/ci-base-image${CI_BASE_IMAGE_TAG}"
+  # Deploy data
+  NPM_TOKEN: $CI_JOB_TOKEN
 
 include:
   - project: 'hive/common-ci-configuration'
-    ref: 7c58303ffb61d91ef9662ec20e7b498bc6f62b8f
+    ref: 44d0cec8cfa8fb87d0daf5cef1485fb57b9e26fd
     file:
       - '/templates/wasm_build.gitlab-ci.yml'
 
@@ -64,7 +67,7 @@ test:
   image: ${EMSCRIPTEN_IMAGE}
   before_script:
     - . "$NVM_DIR/nvm.sh"  # This loads nvm
-    - tar -xf "$CI_PROJECT_DIR"/dist/hive-staging-workerbee-*.tgz --strip-components=1
+    - tar -xf "$CI_PROJECT_DIR"/dist/hive-workerbee-*.tgz --strip-components=1
     - pnpm install
   script:
     - npm run test
@@ -78,3 +81,43 @@ test:
       - "$CI_PROJECT_DIR/results.json"
   tags:
     - public-runner-docker
+
+deploy_dev_package:
+  stage: deploy
+  # emscripten image can be used as it contains all needed tools.
+  image: ${EMSCRIPTEN_IMAGE}
+  variables:
+    PUBLISH_TOKEN: "$NPM_TOKEN"
+    NPM_SCOPE: "@hive"
+    NPM_REGISTRY: "gitlab.syncad.com/api/v4/projects/${CI_PROJECT_ID}/packages/npm/"
+
+  script:
+    - tar -xf "$CI_PROJECT_DIR"/dist/hive-workerbee-*.tgz --strip-components=1
+    - scripts/bump_npm_version.sh "$PUBLISH_TOKEN" "$NPM_SCOPE" "$NPM_REGISTRY"
+    - scripts/npm_publish.sh
+  needs:
+    - job: test
+    - job: build
+      artifacts: true
+
+deploy_production_public_npm:
+  stage: deploy
+  # emscripten image can be used as it contains all needed tools.
+  image: ${EMSCRIPTEN_IMAGE}
+  variables:
+    PUBLISH_TOKEN: "$INTERNAL_HIDDEN_PUBLISH_TOKEN" # Add token variable here
+    NPM_SCOPE: "@hiveio"
+    NPM_REGISTRY: "registry.npmjs.org/"
+  script:
+    - tar -xf "$CI_PROJECT_DIR"/dist/hive-workerbee-*.tgz --strip-components=1
+    - scripts/bump_npm_version.sh "$PUBLISH_TOKEN" "$NPM_SCOPE" "$NPM_REGISTRY"
+    - scripts/npm_publish.sh
+  needs:
+    - job: lint
+    - job: test
+    - job: build
+      artifacts: true
+  rules:
+    - if: '$CI_COMMIT_TAG && $CI_COMMIT_REF_PROTECTED == "true"'
+      when: manual
+      allow_failure: true
