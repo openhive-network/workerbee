@@ -1,4 +1,4 @@
-import type { ApiAccount, operation } from "@hive-staging/wax";
+import type { ApiAccount, operation } from "@hive/wax";
 import type { Subscribable, Observer, Unsubscribable } from "rxjs";
 
 import { AccountOperationVisitor } from "./account_observer";

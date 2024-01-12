@@ -1,6 +1,6 @@
 import EventEmitter from "events";
-import type { IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hive-staging/beekeeper";
-import { BroadcastTransactionRequest, calculateExpiration, IWaxOptionsChain, transaction, TWaxExtended } from "@hive-staging/wax/web";
+import type { IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hive/beekeeper";
+import { BroadcastTransactionRequest, calculateExpiration, IWaxOptionsChain, transaction, TWaxExtended } from "@hive/wax/web";
 import type { Subscribable } from "rxjs";
 
 import { WorkerBeeError } from "./errors";

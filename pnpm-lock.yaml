@@ -5,12 +5,12 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@hive-staging/beekeeper':
-    specifier: ^0.1.6
-    version: 0.1.6
-  '@hive-staging/wax':
-    specifier: ^0.3.28
-    version: 0.3.28
+  '@hive/beekeeper':
+    specifier: 1.27.2-stable.240111223939
+    version: 1.27.2-stable.240111223939
+  '@hive/wax':
+    specifier: 0.3.8-stable.240111142158
+    version: 0.3.8-stable.240111142158
   class-transformer:
     specifier: ^0.5.1
     version: 0.5.1
@@ -156,21 +156,26 @@ packages:
       - supports-color
     dev: true
 
-  /@hive-staging/beekeeper@0.1.6:
-    resolution: {integrity: sha512-f9xiwn7CfNYaKmBJ+Vg00AKlbNvIf+p5cfIWo5vX21i2m+0LVfczcMAWAdLekf4ey+1yunO9RP4FiL+ahnAAjA==}
+  /@hive/beekeeper@1.27.2-240110132748:
+    resolution: {integrity: sha1-gowsXVxXbN1M3HxCzGHaGFF4BHo=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hive/beekeeper/-/@hive/beekeeper-1.27.2-240110132748.tgz}
     engines: {node: '>= 12'}
     dev: false
 
-  /@hive-staging/wax@0.3.28:
-    resolution: {integrity: sha512-eG8JFCR3/5GWqWs72j2Cu13rwAYNWaWQeKCA/KzO4qZqlyNh0NvKya9hkguiabrDg9ebuyycj1NKq4GhuFy5CQ==}
+  /@hive/beekeeper@1.27.2-stable.240111223939:
+    resolution: {integrity: sha1-st5l6KjJ+6XFiTQ494ju6XVXgpw=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hive/beekeeper/-/@hive/beekeeper-1.27.2-stable.240111223939.tgz}
     engines: {node: '>= 12'}
+    dev: false
+
+  /@hive/wax@0.3.8-stable.240111142158:
+    resolution: {integrity: sha1-PcYeJh8BnQe9gfxCg4sKm7GqWaE=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hive/wax/-/@hive/wax-0.3.8-stable.240111142158.tgz}
+    engines: {node: '>= 18'}
     dependencies:
-      '@hive-staging/beekeeper': 0.1.6
+      '@hive/beekeeper': 1.27.2-240110132748
       class-transformer: 0.5.1
       class-validator: 0.14.0
       long: 5.2.3
       protobufjs: 7.2.5
-      reflect-metadata: 0.1.13
+      reflect-metadata: 0.1.14
     dev: false
 
   /@humanwhocodes/config-array@0.9.5:
@@ -2773,8 +2778,8 @@ packages:
       strip-indent: 3.0.0
     dev: true
 
-  /reflect-metadata@0.1.13:
-    resolution: {integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==}
+  /reflect-metadata@0.1.14:
+    resolution: {integrity: sha512-ZhYeb6nRaXCfhnndflDK8qI6ZQ/YcWZCISRAWICW9XYqMUwjZM9Z0DveWX/ABN01oxSHwVxKQmxeYZSsm0jh5A==}
     dev: false
 
   /regexp.prototype.flags@1.5.1:
