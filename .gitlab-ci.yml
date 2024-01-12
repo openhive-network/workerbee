@@ -63,6 +63,7 @@ test:
   # emscripten image can be used as it contains all needed tools.
   image: ${EMSCRIPTEN_IMAGE}
   before_script:
+    - . "$NVM_DIR/nvm.sh"  # This loads nvm
     - tar -xf "$CI_PROJECT_DIR"/dist/hive-staging-workerbee-*.tgz --strip-components=1
     - pnpm install
   script:
