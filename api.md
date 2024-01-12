@@ -241,7 +241,7 @@ Beekeeper wallet options
 
 #### Defined in
 
-src/bot.web.ts:28
+src/bot.ts:28
 
 ___
 
@@ -259,7 +259,7 @@ Wax chain options
 
 #### Defined in
 
-src/bot.web.ts:20
+src/bot.ts:20
 
 
 <a name="interfacesitransactiondatamd"></a>

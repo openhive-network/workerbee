@@ -1,6 +1,6 @@
 {
   "name": "@hive-staging/workerbee",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Hive automation library based on the wax and beekeeper",
   "main": "dist/bundle/web.js",
   "types": "dist/bundle/web.d.ts",
@@ -51,6 +51,7 @@
   ],
   "devDependencies": {
     "@playwright/test": "^1.39.0",
+    "@rollup/plugin-alias": "^5.1.0",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@types/events": "^3.0.3",
@@ -67,7 +68,7 @@
     "process": "^0.11.10",
     "rimraf": "^5.0.1",
     "rollup": "^4.3.0",
-    "rollup-plugin-typescript2": "^0.36.0",
+    "rollup-plugin-dts": "^6.1.0",
     "typedoc": "0.25.3",
     "typedoc-plugin-markdown": "3.17.1",
     "typescript": "5.2.2"
