@@ -49,11 +49,10 @@ build:
     - npm run build
   after_script:
     - npm pack --pack-destination "$CI_PROJECT_DIR/dist"
-    - cp "$CI_PROJECT_DIR/dist/bundle/web.js" "$CI_PROJECT_DIR/dist/workerbee.js"
   artifacts:
     paths:
       - "$CI_PROJECT_DIR/dist/*.tgz"
-      - "$CI_PROJECT_DIR/dist/workerbee.js"
+      - "$CI_PROJECT_DIR/dist/bundle/web-full.*"
 
     when: always
     expire_in: 1 week

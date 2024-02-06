@@ -11,24 +11,12 @@ dependencies:
   '@hive/wax':
     specifier: 0.3.8-stable.240111142158
     version: 0.3.8-stable.240111142158
-  class-transformer:
-    specifier: ^0.5.1
-    version: 0.5.1
-  class-validator:
-    specifier: ^0.14.0
-    version: 0.14.0
-  dotenv:
-    specifier: ^16.3.1
-    version: 16.3.1
   events:
     specifier: ^3.3.0
     version: 3.3.0
   rxjs:
     specifier: ^7.8.1
     version: 7.8.1
-  tslib:
-    specifier: ^2.6.2
-    version: 2.6.2
 
 devDependencies:
   '@playwright/test':
@@ -61,6 +49,9 @@ devDependencies:
   concat-md:
     specifier: ^0.5.1
     version: 0.5.1
+  dotenv:
+    specifier: ^16.3.1
+    version: 16.3.1
   eslint:
     specifier: ^8.5.0
     version: 8.5.0
@@ -88,6 +79,9 @@ devDependencies:
   rollup-plugin-dts:
     specifier: ^6.1.0
     version: 6.1.0(rollup@4.3.0)(typescript@5.2.2)
+  tslib:
+    specifier: ^2.6.2
+    version: 2.6.2
   typedoc:
     specifier: 0.25.3
     version: 0.25.3(typescript@5.2.2)
@@ -1116,7 +1110,7 @@ packages:
   /dotenv@16.3.1:
     resolution: {integrity: sha512-IPzF4w4/Rd94bA9imS68tZBaYyBWSCE47V1RGuMrB94iyTOIEwRmVL2x/4An+6mETpLrKJ5hQkB8W4kFAadeIQ==}
     engines: {node: '>=12'}
-    dev: false
+    dev: true
 
   /eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
@@ -3171,7 +3165,6 @@ packages:
 
   /tslib@2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
-    dev: false
 
   /type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}

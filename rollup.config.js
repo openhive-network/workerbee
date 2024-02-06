@@ -3,13 +3,13 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import alias from '@rollup/plugin-alias';
 
-const commonConfiguration = env => ([
+const commonConfiguration = (env, packEntire = false) => ([
   {
     input: `dist/${env}.js`,
     output: {
       format: 'es',
       name: 'workerbee',
-      file: `dist/bundle/${env}.js`
+      file: `dist/bundle/${env}${packEntire ? '-full' : ''}.js`
     },
     plugins: [
       alias({
@@ -18,13 +18,17 @@ const commonConfiguration = env => ([
           { find: '@hive/wax', replacement: `@hive/wax/${env}` }
         ]
       }),
-      nodeResolve({ preferBuiltins: env !== "web", browser: env === "web" }),
+      nodeResolve({
+        preferBuiltins: env !== "web",
+        browser: env === "web",
+        resolveOnly: packEntire ? [] : () => false
+      }),
       commonjs()
     ]
   }, {
     input: `dist/${env}.d.ts`,
     output: [
-      { file: `dist/bundle/${env}.d.ts`, format: "es" }
+      { file: `dist/bundle/${env}${packEntire ? '-full' : ''}.d.ts`, format: "es" }
     ],
     plugins: [
       dts()
@@ -34,5 +38,6 @@ const commonConfiguration = env => ([
 
 export default [
   ...commonConfiguration('node'),
-  ...commonConfiguration('web')
+  ...commonConfiguration('web'),
+  ...commonConfiguration('web', true)
 ];
