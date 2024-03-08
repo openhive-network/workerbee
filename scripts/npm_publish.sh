@@ -4,12 +4,15 @@ git config --global --add safe.directory '*'
 
 git fetch --tags
 
-SHORT_HASH=$(git rev-parse --short HEAD)
-CURRENT_BRANCH_IMPL=$(git branch -r --contains "${SHORT_HASH}")
+CURRENT_BRANCH_IMPL=$(git branch -r --contains "${SHORT_HASH}" | head -n 1)
 if [ "${CURRENT_BRANCH_IMPL}" = "" ]; then
   CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 else
-  CURRENT_BRANCH="${CURRENT_BRANCH_IMPL#*/}"
+  if [ " ${CURRENT_BRANCH_IMPL#*-> origin/} " = " ${CURRENT_BRANCH_IMPL} " ]; then
+    CURRENT_BRANCH="${CURRENT_BRANCH_IMPL#*/}"
+  else
+    CURRENT_BRANCH="${CURRENT_BRANCH_IMPL#*-> origin/}"
+  fi
 fi
 
 NAME=$(jq -r '.name' package.json)
@@ -22,7 +25,7 @@ fi
 
 NEW_VERSION=""
 
-if [ "$CURRENT_BRANCH" = "master" ]; then
+if [ "$CURRENT_BRANCH" = "main" ]; then
   NEW_VERSION="latest"
 elif [ "$CURRENT_BRANCH" = "develop" ]; then
   NEW_VERSION="stable"
