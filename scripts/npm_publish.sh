@@ -4,6 +4,7 @@ git config --global --add safe.directory '*'
 
 git fetch --tags
 
+SHORT_HASH=$(git rev-parse --short HEAD)
 CURRENT_BRANCH_IMPL=$(git branch -r --contains "${SHORT_HASH}" | head -n 1)
 if [ "${CURRENT_BRANCH_IMPL}" = "" ]; then
   CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
