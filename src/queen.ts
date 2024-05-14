@@ -178,7 +178,7 @@ export class QueenBee {
           } catch (error) {
             observer.error?.(error);
           } finally {
-            this.worker.off("transaction", listener);
+            this.worker.off("block", listener);
           }
         };
 
