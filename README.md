@@ -155,11 +155,11 @@ observer.subscribe({
 
 ## API
 
-See API definition in [api.md](https://gitlab.syncad.com/hive/workerbee/-/blob/${CommitSHA}/api.md)
+See API definition in our [Wiki](https://gitlab.syncad.com/hive/workerbee/-/wikis/home)
 
 ## Support and tests
 
-Tested on the latest Chromium (v117) and Node.js v18.7.0
+Tested on the latest Chromium (v117) and Node.js v18.19.0
 
 [Automated CI test](https://gitlab.syncad.com/hive/workerbee/-/pipelines) runs are available.
 
