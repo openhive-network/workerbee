@@ -45,6 +45,21 @@ build:
     when: always
     expire_in: 1 week
 
+generate_docs:
+  stage: build
+  extends: .npm_based_job_base
+  variables:
+    DIST_DIR: "$CI_PROJECT_DIR/dist"
+  script:
+    - scripts/generate_api_docs.sh
+
+  artifacts:
+    paths:
+      - "${DIST_DIR}/docs"
+
+    when: always
+    expire_in: 1 week
+
 test:
   stage: test
   extends: .npm_test_template
@@ -52,6 +67,25 @@ test:
     PACKAGE_TGZ_PATH: "${BUILT_PACKAGE_PATH}"
   needs:
     - job: build
+      artifacts: true
+
+push_to_wiki:
+  stage: deploy
+  variables:
+    DIST_DIR: "$CI_PROJECT_DIR/dist"
+    WIKI_REPO_URL: "https://gitlab-ci-token:$WIKI_PUSH_TOKEN@gitlab.syncad.com/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME.wiki.git"
+  script:
+    - echo "Using wiki https://gitlab.syncad.com/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME.wiki.git"
+    - git clone "$WIKI_REPO_URL" "$DIST_DIR/wiki"
+    - cp -r "$DIST_DIR/docs"/* "$DIST_DIR/wiki"
+    - cd "$DIST_DIR/wiki"
+    - git config user.name "$GITLAB_USER_NAME"
+    - git config user.email "$GITLAB_USER_EMAIL"
+    - git add .
+    # Push only on changes:
+    - (git status | grep -q modified && git commit -m "Update generated documentation" && git push origin "HEAD:main") || true
+  needs:
+    - job: generate_docs
       artifacts: true
 
 deploy_dev_package:

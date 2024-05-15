@@ -35,7 +35,7 @@
     "lint": "eslint src --ext .js,.ts --max-warnings=0 --ignore-pattern *.d.ts --fix",
     "prebuild": "husky install",
     "build": "tsc",
-    "postbuild": "rollup -c && scripts/generate_api_docs.sh",
+    "postbuild": "rollup -c",
     "test": "unset CI && playwright test --workers 1 --max-failures 1 --project=workerbee_testsuite"
   },
   "files": [
