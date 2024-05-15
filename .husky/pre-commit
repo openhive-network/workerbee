@@ -3,4 +3,4 @@
 
 scripts/precommit_hook.sh
 
-npm run lint
+npx lint-staged
