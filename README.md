@@ -14,15 +14,32 @@ Installation is done using the
 [`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
 
 ```bash
-npm install @hive/workerbee
+npm install @hiveio/workerbee
+```
+
+If you want to use development versions of our packages, set `@hiveio` scope to use our GitLab registry:
+
+```bash
+echo @hiveio:registry=https://gitlab.syncad.com/api/v4/packages/npm/ >> .npmrc
+npm install @hiveio/workerbee
 ```
 
 ## Usage
 
+Wax is designed to work in web environment by default, so remember to use:
+
+```ts
+import '@hiveio/workerbee/node';
+```
+
+import when you intend to work in the Node.js environment.
+
+You may need to set `moduleResolution` to `Bundler` in your `tsconfig.json` in order to respect the `exports` fields in our `package.json` file
+
 ### Iterating indefinitely over new blocks
 
 ```js
-import WorkerBee from "@hive/workerbee";
+import WorkerBee from "@hiveio/workerbee";
 
 const bot = new WorkerBee();
 bot.on("error", console.error);
@@ -36,7 +53,7 @@ for await(const { block, number } of bot)
 ### Wait for the next block using observer
 
 ```js
-import WorkerBee from "@hive/workerbee";
+import WorkerBee from "@hiveio/workerbee";
 
 const bot = new WorkerBee();
 bot.on("error", console.error);
@@ -60,7 +77,7 @@ observer.subscribe({
 ### Observe given account for operations in blockchain
 
 ```js
-import WorkerBee from "@hive/workerbee";
+import WorkerBee from "@hiveio/workerbee";
 
 const bot = new WorkerBee();
 bot.on("error", console.error);
@@ -79,7 +96,7 @@ observer.subscribe({
 ### Observe given account for full manabar regeneration
 
 ```js
-import WorkerBee from "@hive/workerbee";
+import WorkerBee from "@hiveio/workerbee";
 
 const bot = new WorkerBee();
 bot.on("error", console.error);
@@ -98,8 +115,8 @@ observer.subscribe({
 ### Broadcast and observe transaction in blockchain
 
 ```js
-import WorkerBee from "@hive/workerbee";
-import beekeeperFactory from "@hive/beekeeper";
+import WorkerBee from "@hiveio/workerbee";
+import beekeeperFactory from "@hiveio/beekeeper";
 
 const beekeeper = await beekeeperFactory();
 const session = await beekeeper.createSession("my.salt");

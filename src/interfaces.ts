@@ -1,6 +1,6 @@
 import type EventEmitter from "events";
-import type { IBeekeeperUnlockedWallet } from "@hive/beekeeper";
-import type { ApiAccount, ApiBlock, ApiTransaction, IHiveChainInterface, operation, transaction } from "@hive/wax";
+import type { IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
+import type { ApiAccount, ApiBlock, ApiTransaction, IHiveChainInterface, operation, transaction } from "@hiveio/wax";
 import type { Subscribable } from "rxjs";
 import type { IStartConfiguration } from "./bot";
 

@@ -42,13 +42,11 @@ lint:
 
 build:
   stage: build
-  image: ${EMSCRIPTEN_IMAGE}
-  before_script:
-    - pnpm install
-  script:
-    - npm run build
-  after_script:
-    - npm pack --pack-destination "$CI_PROJECT_DIR/dist"
+  extends: .npm_build_template
+  variables:
+    DIST_DIR: "$CI_PROJECT_DIR/dist"
+    NPM_PACKAGE_SCOPE: "@hiveio"
+    NPM_PACKAGE_NAME: "workerbee"
   artifacts:
     paths:
       - "$CI_PROJECT_DIR/dist/*.tgz"
@@ -87,7 +85,7 @@ deploy_dev_package:
   image: ${EMSCRIPTEN_IMAGE}
   variables:
     PUBLISH_TOKEN: "$NPM_TOKEN"
-    NPM_SCOPE: "@hive"
+    NPM_SCOPE: "@hiveio"
     NPM_REGISTRY: "gitlab.syncad.com/api/v4/projects/${CI_PROJECT_ID}/packages/npm/"
 
   script:
@@ -104,13 +102,9 @@ deploy_production_public_npm:
   # emscripten image can be used as it contains all needed tools.
   image: ${EMSCRIPTEN_IMAGE}
   variables:
-    PUBLISH_TOKEN: "$INTERNAL_HIDDEN_PUBLISH_TOKEN" # Add token variable here
-    NPM_SCOPE: "@hiveio"
-    NPM_REGISTRY: "registry.npmjs.org/"
-  script:
-    - tar -xf "$CI_PROJECT_DIR"/dist/hive-workerbee-*.tgz --strip-components=1
-    - scripts/bump_npm_version.sh "$PUBLISH_TOKEN" "$NPM_SCOPE" "$NPM_REGISTRY"
-    - scripts/npm_publish.sh
+    NPM_PUBLISH_TOKEN: "$INTERNAL_HIDDEN_PUBLISH_TOKEN"
+    NPM_PACKAGE_NAME: "workerbee"
+    PACKAGE_TGZ_PATH: "${BUILT_PACKAGE_PATH}"
   needs:
     - job: lint
     - job: test
