@@ -9,20 +9,11 @@
   <script type="importmap">
     {
       "imports": {
-        "@hiveio/workerbee": "/dist/bundle/web-full.js"
+        "../../dist/bundle/web-full.js": "/dist/bundle/web-full.js",
+        "@hiveio/beekeeper/web": "/node_modules/@hiveio/beekeeper/dist/bundle/web.js"
       }
     }
   </script>
-  <script type="module">
-    import WorkerBee from '@hiveio/workerbee';
-
-    Object.defineProperties(window, {
-      WorkerBee: {
-        get() {
-          return WorkerBee;
-        }
-      }
-    });
-  </script>
+  <script type="module" src="/__tests__/assets/globals.js"></script>
 </body>
 </html>

@@ -1,8 +1,9 @@
-import { test, expect } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { ChromiumBrowser, ConsoleMessage, chromium } from "playwright";
 
-import "../assets/data";
 import type { IBlockData } from "../../src/interfaces";
+import { test } from "../assets/jest-helper";
+
 
 let browser!: ChromiumBrowser;
 
@@ -23,23 +24,23 @@ test.describe("WorkerBee Bot events test", () => {
     await page.goto("http://localhost:8080/__tests__/assets/test.html", { waitUntil: "load" });
   });
 
-  test("Should have a destroyable global module", async({ page }) => {
-    await page.evaluate(async() => {
+  test("Should have a destroyable global module", async({ workerbeeTest }) => {
+    await workerbeeTest(async({ WorkerBee }) => {
       const bot = new WorkerBee();
 
       await bot.delete();
     });
   });
 
-  test("Should call proper events", async({ page }) => {
-    const handlersCalled = await page.evaluate(async() => {
+  test("Should call proper events", async({ workerbeeTest }) => {
+    const handlersCalled = await workerbeeTest(async({ WorkerBee }) => {
       const bot = new WorkerBee();
       bot.on("error", console.error);
 
       let handlersCalled = 0;
 
-      bot.on('start', () => { ++handlersCalled; });
-      bot.on('stop', () => { ++handlersCalled; });
+      bot.on("start", () => { ++handlersCalled; });
+      bot.on("stop", () => { ++handlersCalled; });
 
       await bot.start();
       await bot.stop();
@@ -50,8 +51,8 @@ test.describe("WorkerBee Bot events test", () => {
     expect(handlersCalled).toStrictEqual(2);
   });
 
-  test("Should be able to parse at least 2 blocks from the remote", async({ page }) => {
-    const blocksParsed = await page.evaluate(async(HIVE_BLOCK_INTERVAL) => {
+  test("Should be able to parse at least 2 blocks from the remote", async({ workerbeeTest }) => {
+    const blocksParsed = await workerbeeTest.dynamic(async({ WorkerBee }, HIVE_BLOCK_INTERVAL) => {
       const bot = new WorkerBee();
       bot.on("error", console.error);
 
@@ -64,8 +65,8 @@ test.describe("WorkerBee Bot events test", () => {
       await bot.start();
 
       await Promise.race([
-        new Promise((res) => { setTimeout(res, HIVE_BLOCK_INTERVAL * 4); }),
-        new Promise<void>((res) => {
+        new Promise(res => { setTimeout(res, HIVE_BLOCK_INTERVAL * 4); }),
+        new Promise<void>(res => {
           bot.on("stop", res);
         })
       ]);
@@ -79,15 +80,15 @@ test.describe("WorkerBee Bot events test", () => {
     expect(blocksParsed).toBeGreaterThanOrEqual(1);
   });
 
-  test("Should be able to use async iterator on bot", async({ page }) => {
-    const blocksParsed = await page.evaluate(async(HIVE_BLOCK_INTERVAL) => {
+  test("Should be able to use async iterator on bot", async({ workerbeeTest }) => {
+    const blocksParsed = await workerbeeTest.dynamic(async({ WorkerBee }, HIVE_BLOCK_INTERVAL) => {
       const bot = new WorkerBee();
       bot.on("error", console.error);
 
       let blocksParsed = 0;
 
       await Promise.race([
-        new Promise<void>(async(res) => {
+        new Promise<void>(async res => {
           await bot.start();
 
           for await(const { block, number } of bot) {
@@ -100,7 +101,7 @@ test.describe("WorkerBee Bot events test", () => {
 
           res();
         }),
-        new Promise((res) => { setTimeout(res, HIVE_BLOCK_INTERVAL * 4); }),
+        new Promise(res => { setTimeout(res, HIVE_BLOCK_INTERVAL * 4); })
       ]);
 
       await bot.stop();
@@ -112,13 +113,13 @@ test.describe("WorkerBee Bot events test", () => {
     expect(blocksParsed).toBeGreaterThanOrEqual(1);
   });
 
-  test("Should be able to use block observer", async({ page }) => {
-    await page.evaluate(async(HIVE_BLOCK_INTERVAL) => {
+  test("Should be able to use block observer", async({ workerbeeTest }) => {
+    await workerbeeTest(async({ WorkerBee }, HIVE_BLOCK_INTERVAL) => {
       const bot = new WorkerBee();
       bot.on("error", console.error);
 
       await Promise.race([
-        new Promise<void>(async(res) => {
+        new Promise<void>(async res => {
           await bot.start();
 
           const block = await new Promise(blockResolve => {
@@ -129,13 +130,13 @@ test.describe("WorkerBee Bot events test", () => {
           const observer = bot.observe.block(block.number + 1);
           observer.subscribe({
             next() {
-              console.info('Block detected');
+              console.info("Block detected");
 
               res();
             }
           });
         }),
-        new Promise((res) => { setTimeout(res, HIVE_BLOCK_INTERVAL * 4); }),
+        new Promise(res => { setTimeout(res, HIVE_BLOCK_INTERVAL * 4); })
       ]);
 
       await bot.stop();
@@ -143,16 +144,16 @@ test.describe("WorkerBee Bot events test", () => {
     }, HIVE_BLOCK_INTERVAL);
   });
 
-  test("Should be able to use full manabar regeneration time observer", async({ page }) => {
-    await page.evaluate(async(HIVE_BLOCK_INTERVAL) => {
+  test("Should be able to use full manabar regeneration time observer", async({ workerbeeTest }) => {
+    await workerbeeTest(async({ WorkerBee }, HIVE_BLOCK_INTERVAL) => {
       const bot = new WorkerBee();
       bot.on("error", console.error);
 
       await Promise.race([
-        new Promise<void>(async(res) => {
+        new Promise<void>(async res => {
           await bot.start();
 
-          console.info(`Waiting for full manabar regeneration on initminer`);
+          console.info("Waiting for full manabar regeneration on initminer");
 
           const observer = bot.observe.accountFullManabar("initminer");
           observer.subscribe({
@@ -163,7 +164,7 @@ test.describe("WorkerBee Bot events test", () => {
             }
           });
         }),
-        new Promise((res) => { setTimeout(res, HIVE_BLOCK_INTERVAL * 4); }),
+        new Promise(res => { setTimeout(res, HIVE_BLOCK_INTERVAL * 4); })
       ]);
 
       await bot.stop();
