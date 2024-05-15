@@ -27,7 +27,7 @@
     "outDir": "./dist",
 
     "removeComments": false,
-    "incremental": false,
+    "incremental": true,
     "checkJs": false,
     "strict": true,
     "alwaysStrict": true,
