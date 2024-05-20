@@ -70,20 +70,12 @@ test:
       artifacts: true
 
 push_to_wiki:
+  extends: .npm_push_doc_template
   stage: deploy
   variables:
+    WIKI_PUSH_TOKEN: "$WIKI_PUSH_TOKEN"
     DIST_DIR: "$CI_PROJECT_DIR/dist"
-    WIKI_REPO_URL: "https://gitlab-ci-token:$WIKI_PUSH_TOKEN@gitlab.syncad.com/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME.wiki.git"
-  script:
-    - echo "Using wiki https://gitlab.syncad.com/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME.wiki.git"
-    - git clone "$WIKI_REPO_URL" "$DIST_DIR/wiki"
-    - cp -r "$DIST_DIR/docs"/* "$DIST_DIR/wiki"
-    - cd "$DIST_DIR/wiki"
-    - git config user.name "$GITLAB_USER_NAME"
-    - git config user.email "$GITLAB_USER_EMAIL"
-    - git add .
-    # Push only on changes:
-    - (git status | grep -q modified && git commit -m "Update generated documentation" && git push origin "HEAD:main") || true
+
   needs:
     - job: generate_docs
       artifacts: true
