@@ -1,7 +1,7 @@
 import { expect } from "@playwright/test";
 import { ChromiumBrowser, ConsoleMessage, chromium } from "playwright";
 
-import type { IBlockData } from "../../src/interfaces";
+import type { IBlockData, IStartConfiguration } from "../../src/interfaces";
 import { test } from "../assets/jest-helper";
 
 
@@ -22,6 +22,39 @@ test.describe("WorkerBee Bot events test", () => {
     });
 
     await page.goto("http://localhost:8080/__tests__/assets/test.html", { waitUntil: "load" });
+  });
+
+  test("Allow to pass explicit chain", async ({ workerbeeTest }) => {
+    const explicitChainTest = await workerbeeTest(async ({ WorkerBee, wax }) => {
+
+      /// Prepare helper WorkerBee instance just to provide IHiveChainInterface instance.
+      /// It is a problem in PW tests to reference whole wax, since its dependencies need to be declared at importmap in test.html
+      const customWaxConfig = { apiEndpoint: "https://api.openhive.network", chainId: "badf00d" };
+      const customConfig: IStartConfiguration = { chainOptions: customWaxConfig };
+
+      const chainOwner = new WorkerBee(customConfig);
+      /// call start just to initialize chain member in WorkerBee object.
+      await chainOwner.start();
+      /// stop does not affect chain property, so we can avoid making ineffective api calls.
+      await chainOwner.stop();
+
+      const localChain = chainOwner.chain;
+
+      const bot = new WorkerBee({ explicitChain: localChain });
+
+      await bot.start();
+
+      /// validate endpoints to easily check that instances match
+      const validChainInstance = bot.chain.endpointUrl === localChain.endpointUrl;
+
+      await bot.delete();
+
+      await chainOwner.delete();
+
+      return validChainInstance;
+    });
+
+    expect(explicitChainTest).toEqual(true);
   });
 
   test("Should have a destroyable global module", async({ workerbeeTest }) => {
