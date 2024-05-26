@@ -81,7 +81,7 @@ export interface IWorkerBee extends EventEmitter {
    * Exposed hive chain interface we are using.
    * May be undefined if you have not already started our bot.
    *
-   * Remember that chain property will be initialized during {@link start} call and uninitialized durin {@link delete}
+   * Remember that chain property will be initialized during {@link start} call and uninitialized during {@link delete}
    */
   readonly chain?: Readonly<IHiveChainInterface>;
 
@@ -98,7 +98,8 @@ export interface IWorkerBee extends EventEmitter {
   stop(): Promise<void>;
 
   /**
-   * Deletes the current bot instance and underlying wax and beekepeer objects
+   * Deletes the current bot instance and underlying wax and beekepeer objects.
+   * wax chain object is deleted only when its instance was managed by workerbee itself.
    */
   delete(): Promise<void>;
 

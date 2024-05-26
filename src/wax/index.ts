@@ -1,9 +1,11 @@
-import { createHiveChain, IWaxOptionsChain, TWaxExtended } from "@hiveio/wax";
+import { createHiveChain, IHiveChainInterface, IWaxOptionsChain, TWaxExtended } from "@hiveio/wax";
 
 export const WaxExtendTypes = {};
 
-export const getWax = async(options?: Partial<IWaxOptionsChain>): Promise<TWaxExtended<typeof WaxExtendTypes>> => {
-  const wax = await createHiveChain(options);
+export const getWax = async (explicitHiveChain?: IHiveChainInterface, options?: Partial<IWaxOptionsChain>): Promise<TWaxExtended<typeof WaxExtendTypes>> => {
 
-  return wax.extend(WaxExtendTypes);
+  if(explicitHiveChain === undefined)
+    explicitHiveChain = await createHiveChain(options);
+
+  return explicitHiveChain.extend(WaxExtendTypes);
 };

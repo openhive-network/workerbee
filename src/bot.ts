@@ -1,6 +1,6 @@
 import EventEmitter from "events";
 import type { IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
-import { BroadcastTransactionRequest, calculateExpiration, IWaxOptionsChain, transaction, TWaxExtended } from "@hiveio/wax";
+import { BroadcastTransactionRequest, calculateExpiration, IWaxOptionsChain, IHiveChainInterface, transaction, TWaxExtended } from "@hiveio/wax";
 import type { Subscribable } from "rxjs";
 
 import { WorkerBeeError } from "./errors";
@@ -20,6 +20,12 @@ export interface IStartConfiguration {
   chainOptions?: Partial<IWaxOptionsChain>;
 
   /**
+   * Explicit instance of chain interface to be used by workerbee.
+   * This option is exclusive to {@link chainOptions}
+   */
+  explicitChain?: IHiveChainInterface;
+
+  /**
    * Beekeeper wallet options
    *
    * @type {?Partial<IBeekeeperOptions>}
@@ -37,7 +43,7 @@ export const DEFAULT_BLOCK_INTERVAL_TIMEOUT = 1500;
 export class WorkerBee extends EventEmitter implements IWorkerBee {
   public running: boolean = false;
 
-  public configuration: IStartConfiguration;
+  public readonly configuration: IStartConfiguration;
 
   public chain?: TWaxExtended<typeof WaxExtendTypes>;
 
@@ -53,6 +59,10 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
     super();
 
     this.configuration = { ...DEFAULT_WORKERBEE_OPTIONS, ...configuration };
+
+    if(typeof configuration.explicitChain !== "undefined"
+       && typeof configuration.chainOptions !== "undefined")
+      throw new WorkerBeeError("explicitChain and chainOptions parameters are exclusive");
 
     // When halt is requested, indicate we are not going to do the task again
     super.on("halt", () => {
@@ -86,7 +96,7 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
   public async start(wallet?: IBeekeeperUnlockedWallet): Promise<void> {
     // Initialize chain and beekepeer if required
     if(typeof this.chain === "undefined") {
-      this.chain = await getWax(this.configuration.chainOptions);
+      this.chain = await getWax(this.configuration.explicitChain, this.configuration.chainOptions);
 
       ({ head_block_number: this.headBlockNumber } = await this.chain.api.database_api.get_dynamic_global_properties({}));
     }
@@ -170,7 +180,9 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
 
     super.removeAllListeners();
 
-    this.chain?.delete();
+    if(typeof this.configuration.explicitChain === "undefined")
+      this.chain?.delete();
+
     this.wallet?.close();
 
     this.chain = undefined;
