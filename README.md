@@ -155,7 +155,7 @@ observer.subscribe({
 
 ## API
 
-See API definition in our [Wiki](https://gitlab.syncad.com/hive/workerbee/-/wikis/home)
+See API definition in our [Wiki](${GEN_DOC_URL})
 
 ## Support and tests
 
@@ -184,4 +184,4 @@ npm run test
 
 ## License
 
-See license in the [LICENSE.md](https://gitlab.syncad.com/hive/workerbee/-/blob/${CommitSHA}/LICENSE.md) file
+See license in the [LICENSE.md](https://gitlab.syncad.com/hive/workerbee/-/blob/main/LICENSE.md) file
