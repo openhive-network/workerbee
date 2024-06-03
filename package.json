@@ -76,7 +76,7 @@
   },
   "dependencies": {
     "@hiveio/beekeeper": "1.27.5-rc7-stable.240510204534",
-    "@hiveio/wax": "0.3.8-240514120640",
+    "@hiveio/wax": "0.3.8-stable.240514120640",
     "events": "^3.3.0",
     "rxjs": "^7.8.1"
   },
