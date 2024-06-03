@@ -121,7 +121,7 @@ import beekeeperFactory from "@hiveio/beekeeper";
 const beekeeper = await beekeeperFactory();
 const session = await beekeeper.createSession("my.salt");
 const { wallet } = await session.createWallet("w0", "mypassword");
-await wallet.importKey("5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT");
+const publicKey = await wallet.importKey("5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT");
 
 const bot = new WorkerBee();
 bot.on("error", console.error);
@@ -140,7 +140,7 @@ builder.push({
 });
 
 // Broadcast our transaction with custom internal expiration time
-const observer = await bot.broadcast(builder.build(wallet, "5RqVBAVNp5ufMCetQtvLGLJo7unX9nyCBMMrTXRWQ9i1Zzzizh"));
+const observer = await bot.broadcast(builder.build(wallet, publicKey));
 
 // Observe if our transaction has been applied
 observer.subscribe({

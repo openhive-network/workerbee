@@ -4,7 +4,7 @@
   "description": "Hive automation library based on the wax and beekeeper",
   "main": "dist/bundle/web.js",
   "types": "dist/bundle/web.d.ts",
-  "packageManager": "pnpm@9.0.6+sha256.0624e30eff866cdeb363b15061bdb7fd9425b17bc1bb42c22f5f4efdea21f6b3",
+  "packageManager": "pnpm@9.1.1+sha256.9551e803dcb7a1839fdf5416153a844060c7bce013218ce823410532504ac10b",
   "exports": {
     ".": {
       "default": {
@@ -75,8 +75,8 @@
     "typescript": "5.2.2"
   },
   "dependencies": {
-    "@hiveio/beekeeper": "1.27.5-rc7-stable.240510204534",
-    "@hiveio/wax": "0.3.8-stable.240514120640",
+    "@hiveio/beekeeper": "1.27.5-rc7-stable.240530185524",
+    "@hiveio/wax": "0.3.8-stable.240604171105",
     "events": "^3.3.0",
     "rxjs": "^7.8.1"
   },
