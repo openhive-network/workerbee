@@ -26,16 +26,6 @@ npm install @hiveio/workerbee
 
 ## Usage
 
-Wax is designed to work in web environment by default, so remember to use:
-
-```ts
-import '@hiveio/workerbee/node';
-```
-
-import when you intend to work in the Node.js environment.
-
-You may need to set `moduleResolution` to `Bundler` in your `tsconfig.json` in order to respect the `exports` fields in our `package.json` file
-
 ### Iterating indefinitely over new blocks
 
 ```js

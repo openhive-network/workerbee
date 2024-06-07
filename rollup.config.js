@@ -1,33 +1,27 @@
 import dts from 'rollup-plugin-dts';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import alias from '@rollup/plugin-alias';
 
-const commonConfiguration = (env, packEntire = false) => ([
+const commonConfiguration = (packEntire = false) => ([
   {
-    input: `dist/${env}.js`,
+    input: `dist/index.js`,
     output: {
       format: 'es',
       name: 'workerbee',
-      file: `dist/bundle/${env}${packEntire ? '-full' : ''}.js`
+      file: `dist/bundle/${packEntire ? 'web-full' : 'index'}.js`
     },
     plugins: [
-      alias({
-        entries: [
-          { find: '@hiveio/beekeeper', replacement: `@hiveio/beekeeper/${env}` }
-        ]
-      }),
       nodeResolve({
-        preferBuiltins: env !== "web",
-        browser: env === "web",
+        preferBuiltins: false,
+        browser: true,
         resolveOnly: packEntire ? [] : () => false
       }),
       commonjs()
     ]
   }, {
-    input: `dist/${env}.d.ts`,
+    input: `dist/index.d.ts`,
     output: [
-      { file: `dist/bundle/${env}${packEntire ? '-full' : ''}.d.ts`, format: "es" }
+      { file: `dist/bundle/${packEntire ? 'web-full' : 'index'}.d.ts`, format: "es" }
     ],
     plugins: [
       dts()
@@ -36,7 +30,6 @@ const commonConfiguration = (env, packEntire = false) => ([
 ]);
 
 export default [
-  ...commonConfiguration('node'),
-  ...commonConfiguration('web'),
-  ...commonConfiguration('web', true)
+  ...commonConfiguration(),
+  ...commonConfiguration(true)
 ];

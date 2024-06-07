@@ -1,7 +1,8 @@
 import { expect } from "@playwright/test";
 import { ChromiumBrowser, ConsoleMessage, chromium } from "playwright";
 
-import type { IBlockData, IStartConfiguration } from "../../src/interfaces";
+import type { IBlockData } from "../../src/interfaces";
+import type { IStartConfiguration } from "../../src/bot";
 import { test } from "../assets/jest-helper";
 
 
@@ -25,7 +26,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Allow to pass explicit chain", async ({ workerbeeTest }) => {
-    const explicitChainTest = await workerbeeTest(async ({ WorkerBee, wax }) => {
+    const explicitChainTest = await workerbeeTest(async ({ WorkerBee }) => {
 
       /// Prepare helper WorkerBee instance just to provide IHiveChainInterface instance.
       /// It is a problem in PW tests to reference whole wax, since its dependencies need to be declared at importmap in test.html
@@ -45,7 +46,7 @@ test.describe("WorkerBee Bot events test", () => {
       await bot.start();
 
       /// validate endpoints to easily check that instances match
-      const validChainInstance = bot.chain.endpointUrl === localChain.endpointUrl;
+      const validChainInstance = bot.chain !== undefined && localChain !== undefined && bot.chain.endpointUrl === localChain.endpointUrl;
 
       await bot.delete();
 

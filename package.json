@@ -2,28 +2,16 @@
   "name": "@hiveio/workerbee",
   "version": "0.0.1-LastGitTagPlaceholder.GitHashPlaceholder",
   "description": "Hive automation library based on the wax and beekeeper",
-  "main": "dist/bundle/web.js",
-  "types": "dist/bundle/web.d.ts",
+  "main": "dist/bundle/index.js",
+  "types": "dist/bundle/index.d.ts",
   "packageManager": "pnpm@9.1.1+sha256.9551e803dcb7a1839fdf5416153a844060c7bce013218ce823410532504ac10b",
   "exports": {
     ".": {
       "default": {
         "import": {
-          "types": "./dist/bundle/web.d.ts",
-          "default": "./dist/bundle/web.js"
+          "types": "./dist/bundle/index.d.ts",
+          "default": "./dist/bundle/index.js"
         }
-      }
-    },
-    "./web": {
-      "import": {
-        "types": "./dist/bundle/web.d.ts",
-        "default": "./dist/bundle/web.js"
-      }
-    },
-    "./node": {
-      "import": {
-        "types": "./dist/bundle/node.d.ts",
-        "default": "./dist/bundle/node.js"
       }
     },
     "./package.json": "./package.json"
@@ -42,14 +30,11 @@
     "LICENSE.md",
     "README.md",
     "package.json",
-    "dist/bundle/node.d.ts",
-    "dist/bundle/node.js",
-    "dist/bundle/web.d.ts",
-    "dist/bundle/web.js"
+    "dist/bundle/index.d.ts",
+    "dist/bundle/index.js"
   ],
   "devDependencies": {
     "@playwright/test": "^1.39.0",
-    "@rollup/plugin-alias": "^5.1.0",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@types/events": "^3.0.3",
