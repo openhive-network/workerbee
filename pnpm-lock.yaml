@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@hiveio/beekeeper':
-        specifier: 1.27.5-rc7-stable.240530185524
-        version: 1.27.5-rc7-stable.240530185524
+        specifier: 1.27.6-rc2-stable.240627074427
+        version: 1.27.6-rc2-stable.240627074427
       '@hiveio/wax':
-        specifier: 0.3.8-stable.240604171105
-        version: 0.3.8-stable.240604171105
+        specifier: 1.27.6-rc1-240701124026
+        version: 1.27.6-rc1-240701124026
       events:
         specifier: ^3.3.0
         version: 3.3.0
@@ -126,20 +126,26 @@ packages:
     resolution: {integrity: sha512-XXrH9Uarn0stsyldqDYq8r++mROmWRI1xKMXa640Bb//SY1+ECYX6VzT6Lcx5frD0V30XieqJ0oX9I2Xj5aoMA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
-  '@hiveio/beekeeper@1.27.5-rc7-stable.240530185524':
-    resolution: {integrity: sha1-uNh5rTpcWFPN7fCQsm3b+DRojF4=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.5-rc7-stable.240530185524.tgz}
-    engines: {node: '>= 12'}
+  '@hiveio/beekeeper@1.27.6-rc2':
+    resolution: {integrity: sha1-ROAefT23gneFl3cdXV21q62+eOc=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.6-rc2.tgz}
+    engines: {node: '>= 18'}
 
-  '@hiveio/wax@0.3.8-stable.240604171105':
-    resolution: {integrity: sha1-ZNVesLppjGL6by7mq6yT0DR0uOc=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-0.3.8-stable.240604171105.tgz}
+  '@hiveio/beekeeper@1.27.6-rc2-stable.240627074427':
+    resolution: {integrity: sha1-XGR1WeXpqzVEN2Rxng9B4TXG7tE=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.6-rc2-stable.240627074427.tgz}
+    engines: {node: '>= 18'}
+
+  '@hiveio/wax@1.27.6-rc1-240701124026':
+    resolution: {integrity: sha1-t51cVkQI0UkC8Eak+5V9S0AuTw8=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc1-240701124026.tgz}
     engines: {node: '>= 18'}
 
   '@humanwhocodes/config-array@0.9.5':
     resolution: {integrity: sha512-ObyMyWxZiCu/yTisA7uzx81s40xR2fD5Cg/2Kq7G02ajkNubJf6BopgDTmDyc3U7sXpNKM8cYOw7s7Tyr+DnCw==}
     engines: {node: '>=10.10.0'}
+    deprecated: Use @eslint/config-array instead
 
   '@humanwhocodes/object-schema@1.2.1':
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
+    deprecated: Use @eslint/object-schema instead
 
   '@jridgewell/sourcemap-codec@1.4.15':
     resolution: {integrity: sha512-eF2rxCRulEKXHTRiDrDy6erMYWqNw4LPdQ8UQA4huuxaQsVeRPFl2oM8oDGxMFhJUWZf9McpLtJasDDZb/Bpeg==}
@@ -917,10 +923,12 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
+    deprecated: Glob versions prior to v9 are no longer supported
 
   glob@8.1.0:
     resolution: {integrity: sha512-r8hpEjiQEYlF2QU0df3dS+nxxSIreXQS1qRhMJM0Q5NDdR386C7jb7Hwwod8Fgiuex+k0GFjgft18yvxm5XoCQ==}
     engines: {node: '>=12'}
+    deprecated: Glob versions prior to v9 are no longer supported
 
   globals@13.23.0:
     resolution: {integrity: sha512-XAmF0RjlrjY23MA51q3HltdlGxUpXPvg0GioKiD9X6HD28iMjo2dKC8Vqwm7lne4GNr78+RHTfliktR6ZH09wA==}
@@ -1043,6 +1051,7 @@ packages:
 
   inflight@1.0.6:
     resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
+    deprecated: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
@@ -1613,6 +1622,7 @@ packages:
 
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   rollup-plugin-dts@6.1.0:
@@ -1986,13 +1996,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@hiveio/beekeeper@1.27.5-rc7-stable.240530185524': {}
+  '@hiveio/beekeeper@1.27.6-rc2': {}
 
-  '@hiveio/wax@0.3.8-stable.240604171105':
+  '@hiveio/beekeeper@1.27.6-rc2-stable.240627074427': {}
+
+  '@hiveio/wax@1.27.6-rc1-240701124026':
     dependencies:
-      '@hiveio/beekeeper': 1.27.5-rc7-stable.240530185524
+      '@hiveio/beekeeper': 1.27.6-rc2
       class-transformer: 0.5.1
       class-validator: 0.14.0
+      events: 3.3.0
       long: 5.2.3
       protobufjs: 7.2.5
       reflect-metadata: 0.1.14
