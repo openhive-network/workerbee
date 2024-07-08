@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@hiveio/beekeeper':
-        specifier: 1.27.6-rc2-stable.240627074427
-        version: 1.27.6-rc2-stable.240627074427
+        specifier: 1.27.6-rc2-stable.240708081330
+        version: 1.27.6-rc2-stable.240708081330
       '@hiveio/wax':
-        specifier: 1.27.6-rc1-240701124026
-        version: 1.27.6-rc1-240701124026
+        specifier: 1.27.6-rc1-240708114550
+        version: 1.27.6-rc1-240708114550
       events:
         specifier: ^3.3.0
         version: 3.3.0
@@ -130,12 +130,12 @@ packages:
     resolution: {integrity: sha1-ROAefT23gneFl3cdXV21q62+eOc=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.6-rc2.tgz}
     engines: {node: '>= 18'}
 
-  '@hiveio/beekeeper@1.27.6-rc2-stable.240627074427':
-    resolution: {integrity: sha1-XGR1WeXpqzVEN2Rxng9B4TXG7tE=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.6-rc2-stable.240627074427.tgz}
+  '@hiveio/beekeeper@1.27.6-rc2-stable.240708081330':
+    resolution: {integrity: sha1-H1f6zR9VFzZlS7rz7gCUOPwKxJU=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.6-rc2-stable.240708081330.tgz}
     engines: {node: '>= 18'}
 
-  '@hiveio/wax@1.27.6-rc1-240701124026':
-    resolution: {integrity: sha1-t51cVkQI0UkC8Eak+5V9S0AuTw8=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc1-240701124026.tgz}
+  '@hiveio/wax@1.27.6-rc1-240708114550':
+    resolution: {integrity: sha1-uD6iP6jTnn0J/MPB51Bj2ZSG/Vo=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc1-240708114550.tgz}
     engines: {node: '>= 18'}
 
   '@humanwhocodes/config-array@0.9.5':
@@ -1998,9 +1998,9 @@ snapshots:
 
   '@hiveio/beekeeper@1.27.6-rc2': {}
 
-  '@hiveio/beekeeper@1.27.6-rc2-stable.240627074427': {}
+  '@hiveio/beekeeper@1.27.6-rc2-stable.240708081330': {}
 
-  '@hiveio/wax@1.27.6-rc1-240701124026':
+  '@hiveio/wax@1.27.6-rc1-240708114550':
     dependencies:
       '@hiveio/beekeeper': 1.27.6-rc2
       class-transformer: 0.5.1
