@@ -83,7 +83,7 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
       options.throwAfter = expiration.getTime() + ONE_MINUTE;
     }
 
-    const apiTx = new this.chain!.TransactionBuilder(tx);
+    const apiTx = new this.chain!.Transaction(tx);
 
     await this.chain!.api.network_broadcast_api.broadcast_transaction(new BroadcastTransactionRequest(apiTx));
 

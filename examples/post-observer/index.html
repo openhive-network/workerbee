@@ -84,8 +84,8 @@
     const vote = async (op) => {
       try {
         // Build transaction
-        const builder = await bot.chain.getTransactionBuilder();
-        builder.push({
+        const builder = await bot.chain.createTransaction();
+        builder.pushOperation({
           vote: {
             voter: voterName,
             author: op.author,

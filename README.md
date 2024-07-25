@@ -119,8 +119,8 @@ bot.on("error", console.error);
 await bot.start();
 
 // Build transaction
-const builder = await bot.chain.getTransactionBuilder();
-builder.push({
+const builder = await bot.chain.createTransaction();
+builder.pushOperation({
   vote: {
     voter: "otom",
     author: "c0ff33a",

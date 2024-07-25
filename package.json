@@ -60,8 +60,8 @@
     "typescript": "5.2.2"
   },
   "dependencies": {
-    "@hiveio/beekeeper": "1.27.6-rc2-stable.240708081330",
-    "@hiveio/wax": "1.27.6-rc1-stable.240712101326",
+    "@hiveio/beekeeper": "1.27.6-rc2",
+    "@hiveio/wax": "1.27.6-rc1-stable.240803100048",
     "events": "^3.3.0",
     "rxjs": "^7.8.1"
   },
