@@ -34,6 +34,7 @@
     "dist/bundle/index.js"
   ],
   "devDependencies": {
+    "@hiveio/wax": "1.27.6-rc1-stable.240803100048",
     "@playwright/test": "^1.39.0",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
@@ -61,7 +62,6 @@
   },
   "dependencies": {
     "@hiveio/beekeeper": "1.27.6-rc2-stable.240708081330",
-    "@hiveio/wax": "1.27.6-rc1-stable.240712101326",
     "events": "^3.3.0",
     "rxjs": "^7.8.1"
   },
