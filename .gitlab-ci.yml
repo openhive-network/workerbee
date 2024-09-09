@@ -8,17 +8,12 @@ variables:
   GIT_DEPTH: 0
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
-  # uses registry.gitlab.syncad.com/hive/hive/ci-base-image:ubuntu22.04-8
-  CI_BASE_IMAGE_TAG: "@sha256:e9f16040010ad24fffeabec66abca109b24baa79d912eba3118da58e8130fb26"
-  CI_BASE_IMAGE: "registry.gitlab.syncad.com/hive/hive/ci-base-image${CI_BASE_IMAGE_TAG}"
 
 include:
   - project: 'hive/common-ci-configuration'
-    ref: 20a9454548892608c8d2a4b9f32a2ec406a24a69
+    ref: 9e677544d5e83f655fcf1e3cee8c86c54959e789
     file:
       - '/templates/npm_projects.gitlab-ci.yml'
-
-image: "${CI_BASE_IMAGE}"
 
 default:
   tags:

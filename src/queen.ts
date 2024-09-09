@@ -127,7 +127,7 @@ export class QueenBee {
             }
           };
 
-          const proto = this.worker.chain!.Transaction.fromApi(transactionData.transaction).build();
+          const proto = this.worker.chain!.createTransactionFromJson(transactionData.transaction).transaction;
 
           for(const op of proto.operations) {
             const result = visitor.accept(op);

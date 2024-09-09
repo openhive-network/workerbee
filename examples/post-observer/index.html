@@ -84,8 +84,8 @@
     const vote = async (op) => {
       try {
         // Build transaction
-        const builder = await bot.chain.createTransaction();
-        builder.pushOperation({
+        const transaction = await bot.chain.createTransaction();
+        transaction.pushOperation({
           vote: {
             voter: voterName,
             author: op.author,
@@ -94,8 +94,10 @@
           }
         });
 
+        transaction.sign(wallet, publicKey);
+
         // Broadcast our transaction with custom internal expiration time
-        const observer = await bot.broadcast(builder.build(wallet, publicKey));
+        const observer = await bot.broadcast(transaction);
 
         voted.add(getKey(op));
 

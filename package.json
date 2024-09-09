@@ -24,6 +24,7 @@
     "prebuild": "husky install",
     "build": "tsc",
     "postbuild": "rollup -c",
+    "pretest": "playwright install chromium",
     "test": "unset CI && playwright test --workers 1 --max-failures 1 --project=workerbee_testsuite"
   },
   "files": [
@@ -60,8 +61,8 @@
     "typescript": "5.2.2"
   },
   "dependencies": {
-    "@hiveio/beekeeper": "1.27.6-rc2",
-    "@hiveio/wax": "1.27.6-rc1-stable.240803100048",
+    "@hiveio/beekeeper": "1.27.6-rc3",
+    "@hiveio/wax": "1.27.6-rc4",
     "events": "^3.3.0",
     "rxjs": "^7.8.1"
   },

@@ -1,6 +1,6 @@
 import type EventEmitter from "events";
 import type { IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
-import type { ApiAccount, ApiBlock, ApiTransaction, IHiveChainInterface, operation, transaction } from "@hiveio/wax";
+import type { ApiAccount, ApiBlock, ApiTransaction, IHiveChainInterface, ITransaction, operation } from "@hiveio/wax";
 import type { Subscribable } from "rxjs";
 import type { IStartConfiguration } from "./bot";
 
@@ -116,7 +116,7 @@ export interface IWorkerBee extends EventEmitter {
    * @param tx Protobuf transactoin to broadcast
    * @param options Options for broadcasting
    */
-  broadcast(tx: transaction, options?: IBroadcastOptions): Promise<Subscribable<ITransactionData>>;
+  broadcast(tx: ApiTransaction | object | ITransaction, options?: IBroadcastOptions): Promise<Subscribable<ITransactionData>>;
 
   /**
    * Allows you to iterate over blocks indefinitely

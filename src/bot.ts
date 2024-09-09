@@ -1,6 +1,6 @@
 import EventEmitter from "events";
 import type { IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
-import { BroadcastTransactionRequest, calculateExpiration, IWaxOptionsChain, IHiveChainInterface, transaction, TWaxExtended } from "@hiveio/wax";
+import { calculateExpiration, IWaxOptionsChain, IHiveChainInterface, TWaxExtended, ITransaction, ApiTransaction } from "@hiveio/wax";
 import type { Subscribable } from "rxjs";
 
 import { WorkerBeeError } from "./errors";
@@ -70,12 +70,14 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
     });
   }
 
-  public async broadcast(tx: transaction, options: IBroadcastOptions = {}): Promise<Subscribable<ITransactionData>> {
-    if(tx.signatures.length === 0)
+  public async broadcast(tx: ApiTransaction | object | ITransaction, options: IBroadcastOptions = {}): Promise<Subscribable<ITransactionData>> {
+    const toBroadcast: ApiTransaction = "toApiJson" in tx ? tx.toApiJson() as ApiTransaction : tx as ApiTransaction;
+
+    if(toBroadcast.signatures.length === 0)
       throw new WorkerBeeError("You are trying to broadcast transaction without signing!");
 
     if(typeof options.throwAfter === "undefined") {
-      const expiration = calculateExpiration(tx.expiration);
+      const expiration = calculateExpiration(toBroadcast.expiration);
 
       if(typeof expiration === "undefined")
         throw new WorkerBeeError("Could not deduce the expiration time of the transaction");
@@ -83,12 +85,12 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
       options.throwAfter = expiration.getTime() + ONE_MINUTE;
     }
 
-    const apiTx = new this.chain!.Transaction(tx);
-
-    await this.chain!.api.network_broadcast_api.broadcast_transaction(new BroadcastTransactionRequest(apiTx));
+    await this.chain!.broadcast(toBroadcast);
 
     // Here options.throwAfter should be defined (throws on invalid value)
     const expireDate: Date = calculateExpiration(options.throwAfter) as Date;
+
+    const apiTx = this.chain!.createTransactionFromJson(toBroadcast);
 
     return this.observe.transaction(apiTx.id, expireDate.getTime());
   }

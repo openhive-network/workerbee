@@ -20,7 +20,7 @@ npm install @hiveio/workerbee
 If you want to use development versions of our packages, set `@hiveio` scope to use our GitLab registry:
 
 ```bash
-echo @hiveio:registry=https://gitlab.syncad.com/api/v4/packages/npm/ >> .npmrc
+echo @hiveio:registry=https://gitlab.syncad.com/api/v4/groups/136/-/packages/npm/ >> .npmrc
 npm install @hiveio/workerbee
 ```
 
@@ -119,8 +119,8 @@ bot.on("error", console.error);
 await bot.start();
 
 // Build transaction
-const builder = await bot.chain.createTransaction();
-builder.pushOperation({
+const transaction = await bot.chain.createTransaction();
+transaction.pushOperation({
   vote: {
     voter: "otom",
     author: "c0ff33a",
@@ -129,8 +129,10 @@ builder.pushOperation({
   }
 });
 
+transaction.sign(wallet, publicKey);
+
 // Broadcast our transaction with custom internal expiration time
-const observer = await bot.broadcast(builder.build(wallet, publicKey));
+const observer = await bot.broadcast(transaction);
 
 // Observe if our transaction has been applied
 observer.subscribe({

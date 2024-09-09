@@ -119,7 +119,7 @@ module.exports = {
     "prefer-arrow-callback":        [ 2, { allowNamedFunctions: true } ],
     "object-shorthand":             [ 2, "always", { avoidQuotes: true } ],
     "no-restricted-exports":        [ 2, { restrictedNamedExports: [ "default" ] } ],
-    "no-restricted-syntax":         [ 2, "WithStatement", "BinaryExpression[operator='in']" ],
+    "no-restricted-syntax":         [ 2, "WithStatement" ],
     "id-length":                    [ 2, { min: 2, max: 30, exceptionPatterns: [ "[ei-l]" ] } ],
 
     "@typescript-eslint/typedef": [
