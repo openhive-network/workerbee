@@ -126,10 +126,15 @@ deploy_dev_package:
 deploy_production_public_npm:
   stage: deploy
   extends: .registry_npmjs_org_deploy_package_template
+  id_tokens:
+    SIGSTORE_ID_TOKEN:
+      aud: sigstore
   variables:
     NPM_PUBLISH_TOKEN: "$INTERNAL_HIDDEN_PUBLISH_TOKEN"
     NPM_PACKAGE_NAME: "workerbee"
     PACKAGE_TGZ_PATH: "${BUILT_PACKAGE_PATH}"
+  before_script:
+    echo provenance=true >> .npmrc
   needs:
     - job: lint
     - job: test
