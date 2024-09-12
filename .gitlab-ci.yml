@@ -11,7 +11,7 @@ variables:
 
 include:
   - project: 'hive/common-ci-configuration'
-    ref: 12db226cfde2df929bb8bcb0c7c51d04c8900d32
+    ref: 9ec7fd2e0a2491ed808aa1358788a786db9ec035
     file:
       - '/templates/npm_projects.gitlab-ci.yml'
 
@@ -132,9 +132,8 @@ deploy_production_public_npm:
   variables:
     NPM_PUBLISH_TOKEN: "$INTERNAL_HIDDEN_PUBLISH_TOKEN"
     NPM_PACKAGE_NAME: "workerbee"
+    NPM_PROVENANCE_ENABLE: "1"
     PACKAGE_TGZ_PATH: "${BUILT_PACKAGE_PATH}"
-  before_script:
-    echo provenance=true >> .npmrc
   needs:
     - job: lint
     - job: test
