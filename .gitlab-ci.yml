@@ -132,7 +132,7 @@ deploy_production_public_npm:
   variables:
     NPM_PUBLISH_TOKEN: "$INTERNAL_HIDDEN_PUBLISH_TOKEN"
     NPM_PACKAGE_NAME: "workerbee"
-    NPM_PROVENANCE_ENABLE: "1"
+    NPM_PROVENANCE_ENABLE: "0" # XXX: Temporarly disable as it is not working - we have to find a way to get it working
     PACKAGE_TGZ_PATH: "${BUILT_PACKAGE_PATH}"
   needs:
     - job: lint
