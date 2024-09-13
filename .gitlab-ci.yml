@@ -11,7 +11,7 @@ variables:
 
 include:
   - project: 'hive/common-ci-configuration'
-    ref: 9ec7fd2e0a2491ed808aa1358788a786db9ec035
+    ref: 4c9a8a51b022bb1a206d426333beb2d5d6a978ed
     file:
       - '/templates/npm_projects.gitlab-ci.yml'
 
@@ -137,5 +137,3 @@ deploy_production_public_npm:
   needs:
     - job: lint
     - job: test
-    - job: supplement_documentation_url
-      artifacts: true
