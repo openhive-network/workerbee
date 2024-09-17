@@ -70,7 +70,7 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
     });
   }
 
-  public async broadcast(tx: ApiTransaction | object | ITransaction, options: IBroadcastOptions = {}): Promise<Subscribable<ITransactionData>> {
+  public async broadcast(tx: ApiTransaction | ITransaction, options: IBroadcastOptions = {}): Promise<Subscribable<ITransactionData>> {
     const toBroadcast: ApiTransaction = "toApiJson" in tx ? tx.toApiJson() as ApiTransaction : tx as ApiTransaction;
 
     if(toBroadcast.signatures.length === 0)
