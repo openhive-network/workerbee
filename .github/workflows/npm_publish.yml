@@ -1,0 +1,21 @@
+name: Publish Package to npmjs
+on:
+  push:
+    tags:
+      - "*.*.*" # This ensures the workflow runs on any newly created tag
+  workflow_dispatch: # This allows the workflow to be triggered manually
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+      - run: ./scripts/publish_by_tag.sh 452 "${{ github.ref_name }}" "dist/hiveio-workerbee-${{ github.ref_name }}.tgz" build
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
