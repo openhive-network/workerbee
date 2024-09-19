@@ -17,5 +17,7 @@ jobs:
           node-version: '18'
           registry-url: 'https://registry.npmjs.org'
       - run: |
+            ./scripts/publish_by_tag.sh 452 "${{ github.ref_name }}" "dist/hiveio-workerbee-${{ github.ref_name }}.tgz" build dist
+            cd dist
             echo //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }} >> .npmrc
-            ./scripts/publish_by_tag.sh 452 "${{ github.ref_name }}" "dist/hiveio-workerbee-${{ github.ref_name }}.tgz" build
+            npm publish --access public --provenance

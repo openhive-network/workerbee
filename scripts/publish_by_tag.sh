@@ -5,7 +5,7 @@
 #
 # Example usage for project WorkerBee:
 #
-# ./scripts/publish_by_tag.sh 452 1.27.6-rc5 "dist/hiveio-workerbee-1.27.6-rc5.tgz" build
+# ./scripts/publish_by_tag.sh 452 1.27.6-rc5 "dist/hiveio-workerbee-1.27.6-rc5.tgz" build dist
 
 set -e
 
@@ -13,6 +13,7 @@ PROJECT_ID=${1:?Missing arg \#1 - GitLab project id}
 TAG=${2:?Missing arg \#2 - TAG name}
 TGZ_PATH=${3:?Missing arg \#3 - TGZ Artifacts filepath}
 JOB_NAME=${4:?Missing arg \#4 - Job name containing the tgz artifacts}
+OUTPUT_DIR=${5:?Missing arg \#5 - Output directory}
 
 API_PREFIX="https://gitlab.syncad.com/api/v4/projects/${PROJECT_ID}"
 
@@ -31,6 +32,9 @@ echo "Downloading artifact from \"${TGZ_PULL_URL}\" to \"${TARGET_FILEPATH}\""
 
 curl -o "${TARGET_FILEPATH}" "${TGZ_PULL_URL}"
 
-echo "Publishing artifacts to npm with provenance for tag \"${TAG}\""
+mkdir -vp "${OUTPUT_DIR}"
 
-npm publish --access public --provenance "${TARGET_FILEPATH}"
+echo "Unpacking artifact to \"${OUTPUT_DIR}\""
+
+tar -xvf "${TARGET_FILEPATH}" --strip-components=1 -C "${OUTPUT_DIR}"
+
