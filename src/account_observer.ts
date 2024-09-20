@@ -139,11 +139,11 @@ export class AccountOperationVisitor extends OperationVisitor<operation | void> 
       };
   }
 
-  public custom_json(_op: custom_json): operation | void {
-    /*
-     * XXX: op.required_auths
-     * XXX: op.required_posting_auths
-     */
+  public custom_json(op: custom_json): operation | void {
+    if(op.required_auths.includes(this.account) || op.required_posting_auths.includes(this.account))
+      return {
+        custom_json: op
+      };
   }
 
   public comment_options(op: comment_options): operation | void {

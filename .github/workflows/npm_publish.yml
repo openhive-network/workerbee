@@ -1,9 +1,5 @@
 name: Publish Package to npmjs
-on:
-  push:
-    tags:
-      - "*.*.*" # This ensures the workflow runs on any newly created tag
-  workflow_dispatch: # This allows the workflow to be triggered manually
+on: workflow_dispatch
 jobs:
   publish:
     runs-on: ubuntu-latest

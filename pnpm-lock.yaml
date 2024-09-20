@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@hiveio/beekeeper':
-        specifier: 1.27.6-rc3-stable.240916231926
-        version: 1.27.6-rc3-stable.240916231926
+        specifier: 1.27.6-rc3
+        version: 1.27.6-rc3
       '@hiveio/wax':
-        specifier: 1.27.6-rc4-240917114249
-        version: 1.27.6-rc4-240917114249
+        specifier: 1.27.6-rc4
+        version: 1.27.6-rc4
       events:
         specifier: ^3.3.0
         version: 3.3.0
@@ -126,12 +126,12 @@ packages:
     resolution: {integrity: sha512-XXrH9Uarn0stsyldqDYq8r++mROmWRI1xKMXa640Bb//SY1+ECYX6VzT6Lcx5frD0V30XieqJ0oX9I2Xj5aoMA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
-  '@hiveio/beekeeper@1.27.6-rc3-stable.240916231926':
-    resolution: {integrity: sha1-GhsyYwb56QgPSawZNrgz+24gzRA=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.6-rc3-stable.240916231926.tgz}
+  '@hiveio/beekeeper@1.27.6-rc3':
+    resolution: {integrity: sha1-+tV/0zANMNTgBA7WJAT5DKO9Bk0=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.6-rc3.tgz}
     engines: {node: '>= 18'}
 
-  '@hiveio/wax@1.27.6-rc4-240917114249':
-    resolution: {integrity: sha1-j18QGKOBnErxkQurOlWQ5IgHqkI=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc4-240917114249.tgz}
+  '@hiveio/wax@1.27.6-rc4':
+    resolution: {integrity: sha1-NZnSU6P8zkdBvnkHsWG1uswa6Es=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc4.tgz}
     engines: {node: '>= 18'}
 
   '@humanwhocodes/config-array@0.9.5':
@@ -1961,11 +1961,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@hiveio/beekeeper@1.27.6-rc3-stable.240916231926': {}
+  '@hiveio/beekeeper@1.27.6-rc3': {}
 
-  '@hiveio/wax@1.27.6-rc4-240917114249':
+  '@hiveio/wax@1.27.6-rc4':
     dependencies:
-      '@hiveio/beekeeper': 1.27.6-rc3-stable.240916231926
+      '@hiveio/beekeeper': 1.27.6-rc3
       class-transformer: 0.5.1
       class-validator: 0.14.0
       events: 3.3.0
