@@ -40,6 +40,31 @@ export const DEFAULT_WORKERBEE_OPTIONS = {
 
 export const DEFAULT_BLOCK_INTERVAL_TIMEOUT = 1500;
 
+interface IWorkerBeeEvents {
+  "stop": () => void | Promise<void>;
+  "start": () => void | Promise<void>;
+  "block": (blockData: IBlockData) => void | Promise<void>;
+  "transaction": (transactionData: ITransactionData) => void | Promise<void>;
+  "error": (error: WorkerBeeError) => void | Promise<void>;
+}
+
+/* eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging */
+export declare interface WorkerBee {
+  on<U extends keyof IWorkerBeeEvents>(
+    event: U, listener: IWorkerBeeEvents[U]
+  ): this;
+
+  once<U extends keyof IWorkerBeeEvents>(
+    event: U, listener: IWorkerBeeEvents[U]
+  ): this;
+
+  off<U extends keyof IWorkerBeeEvents>(
+    event: U, listener: IWorkerBeeEvents[U]
+  ): this;
+}
+
+
+/* eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging */
 export class WorkerBee extends EventEmitter implements IWorkerBee {
   public running: boolean = false;
 
@@ -150,7 +175,7 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
       } // Else -> no new block
     } catch (error) {
       // Ensure we are emitting the Error instance
-      super.emit("error", error instanceof Error ? error : new Error(`Unknown error occurred during automation: ${String(error)}`));
+      super.emit("error", new WorkerBeeError(`Error occurred during automation: ${String(error)}`, error));
 
       // Wait before any next operation is performed to reduce spamming the API
       await new Promise(res => { setTimeout(res, DEFAULT_BLOCK_INTERVAL_TIMEOUT); });

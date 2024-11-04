@@ -2,7 +2,7 @@ import { createHiveChain, IHiveChainInterface, IWaxOptionsChain, TWaxExtended } 
 
 export const WaxExtendTypes = {};
 
-export const getWax = async (explicitHiveChain?: IHiveChainInterface, options?: Partial<IWaxOptionsChain>): Promise<TWaxExtended<typeof WaxExtendTypes>> => {
+export const getWax = async(explicitHiveChain?: IHiveChainInterface, options?: Partial<IWaxOptionsChain>): Promise<TWaxExtended<typeof WaxExtendTypes>> => {
 
   if(explicitHiveChain === undefined)
     explicitHiveChain = await createHiveChain(options);
