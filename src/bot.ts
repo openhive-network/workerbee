@@ -102,7 +102,7 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
       throw new WorkerBeeError("You are trying to broadcast transaction without signing!");
 
     if(typeof options.throwAfter === "undefined") {
-      const expiration = calculateExpiration(toBroadcast.expiration);
+      const expiration = calculateExpiration(new Date(), toBroadcast.expiration);
 
       if(typeof expiration === "undefined")
         throw new WorkerBeeError("Could not deduce the expiration time of the transaction");
@@ -113,7 +113,7 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
     await this.chain!.broadcast(toBroadcast);
 
     // Here options.throwAfter should be defined (throws on invalid value)
-    const expireDate: Date = calculateExpiration(options.throwAfter) as Date;
+    const expireDate: Date = calculateExpiration(new Date(), options.throwAfter) as Date;
 
     const apiTx = this.chain!.createTransactionFromJson(toBroadcast);
 
