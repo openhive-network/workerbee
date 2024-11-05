@@ -39,6 +39,8 @@ build:
 
     when: always
     expire_in: 1 week
+  needs:
+    - job: lint
 
 generate_docs:
   stage: build

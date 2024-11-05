@@ -21,7 +21,7 @@
   "private": false,
   "scripts": {
     "lint": "eslint src --ext .js,.ts --max-warnings=0 --ignore-pattern *.d.ts --fix",
-    "prebuild": "husky",
+    "postinstall": "ls-engines && husky",
     "build": "tsc",
     "postbuild": "rollup -c",
     "pretest": "playwright install chromium",
@@ -49,6 +49,7 @@
     "http-server": "^14.1.1",
     "husky": "^9.1.5",
     "lint-staged": "^15.2.2",
+    "ls-engines": "^0.9.3",
     "playwright": "^1.39.0",
     "process": "^0.11.10",
     "rollup": "^4.22.4",
