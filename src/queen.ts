@@ -1,7 +1,6 @@
 import type { ApiAccount, operation } from "@hiveio/wax";
 import type { Subscribable, Observer, Unsubscribable } from "rxjs";
 
-import { AccountOperationVisitor } from "./account_observer";
 import { WorkerBeeError } from "./errors";
 import type { IBlockData, ITransactionData, IOperationData, IWorkerBee } from "./interfaces";
 
@@ -116,8 +115,6 @@ export class QueenBee {
           }
         };
 
-        const visitor = new AccountOperationVisitor(name);
-
         const listener = (transactionData: ITransactionData): void => {
           const confirm = (result: operation): void => {
             try {
@@ -129,12 +126,9 @@ export class QueenBee {
 
           const proto = this.worker.chain!.createTransactionFromJson(transactionData.transaction).transaction;
 
-          for(const op of proto.operations) {
-            const result = visitor.accept(op);
-
-            if(typeof result === "object")
-              confirm(result);
-          }
+          for(const op of proto.operations)
+            if(this.worker.chain!.operationGetImpactedAccounts(op).has(name))
+              confirm(op);
         };
         this.worker.on("transaction", listener);
 
