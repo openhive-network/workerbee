@@ -1,8 +1,10 @@
+/* eslint-disable no-console */
+import type { ApiAccount } from "@hiveio/wax";
 import { expect } from "@playwright/test";
 import { ChromiumBrowser, ConsoleMessage, chromium } from "playwright";
 
-import type { IBlockData } from "../../src/interfaces";
 import type { IStartConfiguration } from "../../src/bot";
+import type { IBlockData } from "../../src/interfaces";
 import { test } from "../assets/jest-helper";
 
 
@@ -25,18 +27,20 @@ test.describe("WorkerBee Bot events test", () => {
     await page.goto("http://localhost:8080/__tests__/assets/test.html", { waitUntil: "load" });
   });
 
-  test("Allow to pass explicit chain", async ({ workerbeeTest }) => {
-    const explicitChainTest = await workerbeeTest(async ({ WorkerBee }) => {
+  test("Allow to pass explicit chain", async({ workerbeeTest }) => {
+    const explicitChainTest = await workerbeeTest(async({ WorkerBee }) => {
 
-      /// Prepare helper WorkerBee instance just to provide IHiveChainInterface instance.
-      /// It is a problem in PW tests to reference whole wax, since its dependencies need to be declared at importmap in test.html
+      /*
+       * Prepare helper WorkerBee instance just to provide IHiveChainInterface instance.
+       * It is a problem in PW tests to reference whole wax, since its dependencies need to be declared at importmap in test.html
+       */
       const customWaxConfig = { apiEndpoint: "https://api.openhive.network", chainId: "badf00d" };
       const customConfig: IStartConfiguration = { chainOptions: customWaxConfig };
 
       const chainOwner = new WorkerBee(customConfig);
-      /// call start just to initialize chain member in WorkerBee object.
+      // Call start just to initialize chain member in WorkerBee object.
       await chainOwner.start();
-      /// stop does not affect chain property, so we can avoid making ineffective api calls.
+      // Stop does not affect chain property, so we can avoid making ineffective api calls.
       await chainOwner.stop();
 
       const localChain = chainOwner.chain;
@@ -45,7 +49,7 @@ test.describe("WorkerBee Bot events test", () => {
 
       await bot.start();
 
-      /// validate endpoints to easily check that instances match
+      // Validate endpoints to easily check that instances match
       const validChainInstance = bot.chain !== undefined && localChain !== undefined && bot.chain.endpointUrl === localChain.endpointUrl;
 
       await bot.delete();
@@ -67,7 +71,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should call proper events", async({ workerbeeTest }) => {
-    const handlersCalled = await workerbeeTest(async({ WorkerBee }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
       const bot = new WorkerBee();
       bot.on("error", console.error);
 
@@ -82,11 +86,11 @@ test.describe("WorkerBee Bot events test", () => {
       return handlersCalled;
     });
 
-    expect(handlersCalled).toStrictEqual(2);
+    expect(result).toStrictEqual(2);
   });
 
   test("Should be able to parse at least 2 blocks from the remote", async({ workerbeeTest }) => {
-    const blocksParsed = await workerbeeTest.dynamic(async({ WorkerBee }, HIVE_BLOCK_INTERVAL) => {
+    const result = await workerbeeTest.dynamic(async({ WorkerBee }, hiveBlockInterval) => {
       const bot = new WorkerBee();
       bot.on("error", console.error);
 
@@ -99,7 +103,7 @@ test.describe("WorkerBee Bot events test", () => {
       await bot.start();
 
       await Promise.race([
-        new Promise(res => { setTimeout(res, HIVE_BLOCK_INTERVAL * 4); }),
+        new Promise(res => { setTimeout(res, hiveBlockInterval * 4); }),
         new Promise<void>(res => {
           bot.on("stop", res);
         })
@@ -111,17 +115,18 @@ test.describe("WorkerBee Bot events test", () => {
       return blocksParsed;
     }, HIVE_BLOCK_INTERVAL);
 
-    expect(blocksParsed).toBeGreaterThanOrEqual(1);
+    expect(result).toBeGreaterThanOrEqual(1);
   });
 
   test("Should be able to use async iterator on bot", async({ workerbeeTest }) => {
-    const blocksParsed = await workerbeeTest.dynamic(async({ WorkerBee }, HIVE_BLOCK_INTERVAL) => {
+    const result = await workerbeeTest.dynamic(async({ WorkerBee }, hiveBlockInterval) => {
       const bot = new WorkerBee();
       bot.on("error", console.error);
 
       let blocksParsed = 0;
 
       await Promise.race([
+        /* eslint-disable-next-line no-async-promise-executor */
         new Promise<void>(async res => {
           await bot.start();
 
@@ -135,7 +140,7 @@ test.describe("WorkerBee Bot events test", () => {
 
           res();
         }),
-        new Promise(res => { setTimeout(res, HIVE_BLOCK_INTERVAL * 4); })
+        new Promise(res => { setTimeout(res, hiveBlockInterval * 4); })
       ]);
 
       await bot.stop();
@@ -144,15 +149,16 @@ test.describe("WorkerBee Bot events test", () => {
       return blocksParsed;
     }, HIVE_BLOCK_INTERVAL);
 
-    expect(blocksParsed).toBeGreaterThanOrEqual(1);
+    expect(result).toBeGreaterThanOrEqual(1);
   });
 
   test("Should be able to use block observer", async({ workerbeeTest }) => {
-    await workerbeeTest(async({ WorkerBee }, HIVE_BLOCK_INTERVAL) => {
+    await workerbeeTest(async({ WorkerBee }, hiveBlockInterval) => {
       const bot = new WorkerBee();
       bot.on("error", console.error);
 
       await Promise.race([
+        /* eslint-disable-next-line no-async-promise-executor */
         new Promise<void>(async res => {
           await bot.start();
 
@@ -170,7 +176,7 @@ test.describe("WorkerBee Bot events test", () => {
             }
           });
         }),
-        new Promise(res => { setTimeout(res, HIVE_BLOCK_INTERVAL * 4); })
+        new Promise(res => { setTimeout(res, hiveBlockInterval * 4); })
       ]);
 
       await bot.stop();
@@ -179,11 +185,12 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to use full manabar regeneration time observer", async({ workerbeeTest }) => {
-    await workerbeeTest(async({ WorkerBee }, HIVE_BLOCK_INTERVAL) => {
+    await workerbeeTest(async({ WorkerBee }, hiveBlockInterval) => {
       const bot = new WorkerBee();
       bot.on("error", console.error);
 
       await Promise.race([
+        /* eslint-disable-next-line no-async-promise-executor */
         new Promise<void>(async res => {
           await bot.start();
 
@@ -191,14 +198,14 @@ test.describe("WorkerBee Bot events test", () => {
 
           const observer = bot.observe.accountFullManabar("initminer");
           observer.subscribe({
-            next(acc) {
+            next(acc: ApiAccount) {
               console.info(`Account has full manabar: ${acc.voting_manabar.current_mana}`);
 
               res();
             }
           });
         }),
-        new Promise(res => { setTimeout(res, HIVE_BLOCK_INTERVAL * 4); })
+        new Promise(res => { setTimeout(res, hiveBlockInterval * 4); })
       ]);
 
       await bot.stop();

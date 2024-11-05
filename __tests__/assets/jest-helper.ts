@@ -30,12 +30,13 @@ const envTestFor = <GlobalType extends IWorkerBeeGlobals>(
 
   const runner = async<R, Args extends any[]>(checkEqual: boolean, fn: TWorkerBeeTestCallable<R, Args>, ...args: Args): Promise<R> => {
 
-    const webData = await page.evaluate(async({ args, globalFunction, webFn, customConfig }) => {
+    const webData = await page.evaluate(async({ args: pageArgs, globalFunction: globalFn, webFn }) => {
+      /* eslint-disable no-eval */
       eval(`window.webEvalFn = ${webFn};`);
 
-      return (window as Window & typeof globalThis & { webEvalFn: Function }).webEvalFn(await globalThis[globalFunction]("web"), ...args);
-    }, { args, globalFunction: globalFunction.name, webFn: fn.toString(), customConfig: globalThis.config });
-    let nodeData = await fn(await (globalFunction as Function)("node"), ...args);
+      return (window as Window & typeof globalThis & { webEvalFn: (...args: any[]) => any }).webEvalFn(await globalThis[globalFn]("web"), ...pageArgs);
+    }, { args, globalFunction: globalFunction.name, webFn: fn.toString() });
+    let nodeData = await fn(await (globalFunction as (...args: any[]) => any)("node"), ...args);
 
     if(typeof nodeData === "object") // Remove prototype data from the node result to match webData
       nodeData = JSON.parse(JSON.stringify(nodeData));
@@ -46,7 +47,7 @@ const envTestFor = <GlobalType extends IWorkerBeeGlobals>(
     return webData;
   };
 
-  const using = function<R, Args extends any[]>(fn: TWorkerBeeTestCallable<R, Args>, ...args: Args) {
+  const using = function<R, Args extends any[]>(fn: TWorkerBeeTestCallable<R, Args>, ...args: Args): Promise<R> {
     return runner.bind(undefined, true)(fn as any, ...args);
   };
   using.dynamic = runner.bind(undefined, false);
@@ -55,7 +56,7 @@ const envTestFor = <GlobalType extends IWorkerBeeGlobals>(
 };
 
 export const test = base.extend<IWorkerBeeTest>({
-  workerbeeTest: async({ page }, use) => {
+  workerbeeTest: ({ page }, use) => {
     use(envTestFor(page, createTestFor));
   }
 });

@@ -23,7 +23,7 @@ lint:
   stage: .pre
   extends: .npm_based_job_base
   script:
-    - npm run lint
+    - npm run lint-ci
 
 build:
   stage: build

@@ -1,6 +1,0 @@
-node_modules
-dist
-
-__tests__
-webpack.config.js
-.eslintrc.js

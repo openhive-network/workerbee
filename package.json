@@ -20,7 +20,8 @@
   "license": "SEE LICENSE IN LICENSE.md",
   "private": false,
   "scripts": {
-    "lint": "eslint src --ext .js,.ts --max-warnings=0 --ignore-pattern *.d.ts --fix",
+    "lint": "npm run lint-ci -- --fix",
+    "lint-ci": "eslint --max-warnings=0",
     "postinstall": "ls-engines && husky",
     "build": "tsc",
     "postbuild": "rollup -c",
@@ -35,17 +36,21 @@
     "dist/bundle/index.js"
   ],
   "devDependencies": {
+    "@eslint/compat": "^1.2.2",
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.14.0",
     "@playwright/test": "^1.39.0",
     "@rollup/plugin-commonjs": "^27.0.0",
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@types/events": "^3.0.3",
     "@types/node": "^18.19.50",
-    "@typescript-eslint/eslint-plugin": "^6.11.0",
-    "@typescript-eslint/parser": "^6.11.0",
+    "@typescript-eslint/eslint-plugin": "^8.13.0",
+    "@typescript-eslint/parser": "^8.13.0",
     "buffer": "^5.5.0||^6.0.0",
     "dotenv": "^16.3.1",
-    "eslint": "^8.5.0",
-    "eslint-plugin-import": "^2.26.0",
+    "eslint": "^9.14.0",
+    "eslint-plugin-import": "^2.31.0",
+    "globals": "^15.12.0",
     "http-server": "^14.1.1",
     "husky": "^9.1.5",
     "lint-staged": "^15.2.2",
@@ -72,6 +77,12 @@
   },
   "engines": {
     "node": ">= 18"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^18.18.0 || ^20.9.0 || >=21.1.0"
+    }
   },
   "publishConfig": {
     "registry": "https://RegistryPlaceholder",

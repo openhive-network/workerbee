@@ -1,14 +1,15 @@
-import dts from 'rollup-plugin-dts';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
+
+import commonjs from "@rollup/plugin-commonjs";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
+import dts from "rollup-plugin-dts";
 
 const commonConfiguration = (packEntire = false) => ([
   {
-    input: `dist/index.js`,
+    input: "dist/index.js",
     output: {
-      format: 'es',
-      name: 'workerbee',
-      file: `dist/bundle/${packEntire ? 'web-full' : 'index'}.js`
+      format: "es",
+      name: "workerbee",
+      file: `dist/bundle/${packEntire ? "web-full" : "index"}.js`
     },
     plugins: [
       nodeResolve({
@@ -19,9 +20,9 @@ const commonConfiguration = (packEntire = false) => ([
       commonjs()
     ]
   }, {
-    input: `dist/index.d.ts`,
+    input: "dist/index.d.ts",
     output: [
-      { file: `dist/bundle/${packEntire ? 'web-full' : 'index'}.d.ts`, format: "es" }
+      { file: `dist/bundle/${packEntire ? "web-full" : "index"}.d.ts`, format: "es" }
     ],
     plugins: [
       dts()
