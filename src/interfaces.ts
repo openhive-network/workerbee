@@ -149,6 +149,8 @@ export interface IWorkerBeeConstructor {
    * Constructs new WorkerBee bot object
    *
    * @param configuration Configuration for the automation
+   *
+   * @note If you do not register an "error" event listener, the error will be dropped silently
    */
   new(configuration?: Partial<IStartConfiguration>): IWorkerBee;
 }

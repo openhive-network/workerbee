@@ -150,7 +150,8 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
       } // Else -> no new block
     } catch (error) {
       // Ensure we are emitting the Error instance
-      super.emit("error", new WorkerBeeError(`Error occurred during automation: ${String(error)}`, error));
+      if (super.listenerCount("error") > 0)
+        super.emit("error", new WorkerBeeError(`Error occurred during automation: ${String(error)}`, error));
 
       // Wait before any next operation is performed to reduce spamming the API
       await new Promise(res => { setTimeout(res, DEFAULT_BLOCK_INTERVAL_TIMEOUT); });
