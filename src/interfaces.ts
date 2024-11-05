@@ -1,8 +1,8 @@
-import type EventEmitter from "events";
 import type { IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
 import type { ApiAccount, ApiBlock, ApiTransaction, IHiveChainInterface, ITransaction, operation } from "@hiveio/wax";
 import type { Subscribable } from "rxjs";
 import type { IStartConfiguration } from "./bot";
+import type { WorkerBeeError } from "./errors";
 
 export interface IBlockData {
   number: number;
@@ -64,7 +64,7 @@ export interface IQueenBee {
 
 export interface IBroadcastOptions {
   /**
-   * Can be either absolute time that will be passed to the {@link Date} constructor
+   * Can be either absolute time that will be passed to the Date constructor
    * or relative time, like: "+10s", "+2m", "+1h"
    *
    * @type {string | number | Date}
@@ -73,7 +73,15 @@ export interface IBroadcastOptions {
   throwAfter?: string | number | Date;
 }
 
-export interface IWorkerBee extends EventEmitter {
+export interface IWorkerBeeEvents {
+  "stop": () => void | Promise<void>;
+  "start": () => void | Promise<void>;
+  "block": (blockData: IBlockData) => void | Promise<void>;
+  "transaction": (transactionData: ITransactionData) => void | Promise<void>;
+  "error": (error: WorkerBeeError) => void | Promise<void>;
+}
+
+export interface IWorkerBee {
   readonly running: boolean;
   readonly configuration: Readonly<IStartConfiguration>;
 
@@ -123,41 +131,17 @@ export interface IWorkerBee extends EventEmitter {
    */
   [Symbol.asyncIterator](): AsyncIterator<IBlockData>;
 
-  /**
-   * Triggers on any bot start
-   *
-   * @param event event name
-   * @param handler handler to be called before automation start
-   */
-  on(event: "start", handler: () => void): this;
-  /**
-   * Triggers on any bot stop
-   *
-   * @param event event name
-   * @param handler handler to be called after complete stop of the automation
-   */
-  on(event: "stop", handler: () => void): this;
-  /**
-   * Triggers on any bot-related error
-   *
-   * @param event event name
-   * @param handler handler to be called on error event
-   */
-  on(event: "error", handler: (error: Error) => void): this;
-  /**
-   * Triggers on new block detected
-   *
-   * @param event event name
-   * @param handler handler to be called on new block event
-   */
-  on(event: "block", handler: (data: IBlockData) => void): this;
-  /**
-   * Triggers on new transaction detected
-   *
-   * @param event event name
-   * @param handler handler to be called on new block event
-   */
-  on(event: "transaction", handler: (data: ITransactionData) => void): this;
+  on<U extends keyof IWorkerBeeEvents>(
+    event: U, listener: IWorkerBeeEvents[U]
+  ): this;
+
+  once<U extends keyof IWorkerBeeEvents>(
+    event: U, listener: IWorkerBeeEvents[U]
+  ): this;
+
+  off<U extends keyof IWorkerBeeEvents>(
+    event: U, listener: IWorkerBeeEvents[U]
+  ): this;
 }
 
 export interface IWorkerBeeConstructor {
