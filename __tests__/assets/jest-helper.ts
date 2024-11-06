@@ -30,13 +30,13 @@ const envTestFor = <GlobalType extends IWorkerBeeGlobals>(
 
   const runner = async<R, Args extends any[]>(checkEqual: boolean, fn: TWorkerBeeTestCallable<R, Args>, ...args: Args): Promise<R> => {
 
+    let nodeData = await fn(await (globalFunction as (...args: any[]) => any)("node"), ...args);
     const webData = await page.evaluate(async({ args: pageArgs, globalFunction: globalFn, webFn }) => {
       /* eslint-disable no-eval */
       eval(`window.webEvalFn = ${webFn};`);
 
       return (window as Window & typeof globalThis & { webEvalFn: (...args: any[]) => any }).webEvalFn(await globalThis[globalFn]("web"), ...pageArgs);
     }, { args, globalFunction: globalFunction.name, webFn: fn.toString() });
-    let nodeData = await fn(await (globalFunction as (...args: any[]) => any)("node"), ...args);
 
     if(typeof nodeData === "object") // Remove prototype data from the node result to match webData
       nodeData = JSON.parse(JSON.stringify(nodeData));

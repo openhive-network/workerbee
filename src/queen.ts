@@ -1,187 +1,197 @@
-import type { ApiAccount, operation } from "@hiveio/wax";
-import type { Subscribable, Observer, Unsubscribable } from "rxjs";
+import type { asset, TAccountName } from "@hiveio/wax";
 
-import { WorkerBeeError } from "./errors";
-import type { IBlockData, ITransactionData, IOperationData, IWorkerBee } from "./interfaces";
+import { WorkerBee } from "./bot";
+import { AccountCreatedFilter } from "./chain-observers/filters/account-created-filter";
+import { AccountFullManabarFilter } from "./chain-observers/filters/account-full-manabar-filter";
+import { AccountMetadataChangeFilter } from "./chain-observers/filters/account-metadata-change-filter";
+import { BalanceChangeFilter } from "./chain-observers/filters/balance-change-filter";
+import { BlockNumberFilter } from "./chain-observers/filters/block-filter";
+import { LogicalAndFilter, LogicalOrFilter } from "./chain-observers/filters/composite-filter";
+import { CustomOperationFilter } from "./chain-observers/filters/custom-operation-filter";
+import type { FilterBase } from "./chain-observers/filters/filter-base";
+import { FollowFilter } from "./chain-observers/filters/follow-filter";
+import { ImpactedAccountFilter } from "./chain-observers/filters/impacted-account-filter";
+import { BlockChangedFilter } from "./chain-observers/filters/new-block-filter";
+import { PostFilter } from "./chain-observers/filters/post-filter";
+import { PostMentionFilter } from "./chain-observers/filters/post-mention";
+import { ReblogFilter } from "./chain-observers/filters/reblog-filter";
+import { TransactionIdFilter } from "./chain-observers/filters/transaction-id-filter";
+import { VoteFilter } from "./chain-observers/filters/vote-filter";
+import { WhaleAlertFilter } from "./chain-observers/filters/whale-alert-filter";
+import { AccountProvider } from "./chain-observers/providers/account-provider";
+import { BlockHeaderProvider } from "./chain-observers/providers/block-header-provider";
+import { BlockProvider } from "./chain-observers/providers/block-provider";
+import { MentionedAccountProvider } from "./chain-observers/providers/mention-provider";
+import { ProviderBase } from "./chain-observers/providers/provider-base";
+import { RcAccountProvider } from "./chain-observers/providers/rc-account-provider";
+import { TransactionByIdProvider } from "./chain-observers/providers/transaction-provider";
+import { WhaleAlertProvider } from "./chain-observers/providers/whale-alert-provider";
+import type { Observer, Unsubscribable } from "./types/subscribable";
 
-export class QueenBee {
+export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public constructor(
-    private readonly worker: IWorkerBee
+    private readonly worker: WorkerBee
   ) {}
 
-  public block(idOrNumber: string | number): Subscribable<IBlockData> {
+  private providers: ProviderBase[] = [];
+  private operands: FilterBase[] = [];
+  private filterContainers: FilterBase[] = [];
+
+  public subscribe(observer: Partial<Observer<TPreviousSubscriberData>>): Unsubscribable {
+    if (this.operands.length > 0) {
+      if (this.operands.length === 1) // Optimize by not creating a logical AND filter for only one filter
+        this.filterContainers.push(this.operands[0]);
+      else
+        this.filterContainers.push(new LogicalAndFilter(this.worker, this.operands));
+      this.operands = [];
+    }
+
+    const committedFilters = this.filterContainers;
+    // Optimize by not creating a logical OR filter for only one filter
+    const orFilter: FilterBase = committedFilters.length === 1 ? committedFilters[0] : new LogicalOrFilter(this.worker, committedFilters);
+
+    this.worker.mediator.registerListener(observer, orFilter, this.providers);
+
+    this.filterContainers = [];
+    this.providers = [];
+
     return {
-      subscribe: (observer: Partial<Observer<IBlockData>>): Unsubscribable => {
-        const complete = (): void => {
-          try {
-            observer.complete?.();
-          } catch (error) {
-            observer.error?.(error);
-          } finally {
-            this.worker.off("block", listener);
-          }
-        };
-
-        const listener = (blockData: IBlockData): void => {
-          const confirm = (): void => {
-            try {
-              observer.next?.(blockData);
-            } catch (error) {
-              observer.error?.(error);
-            } finally {
-              complete();
-            }
-          };
-
-          if(typeof idOrNumber === "string") {
-            if(idOrNumber === blockData.block.block_id)
-              confirm();
-          } else if(idOrNumber === blockData.number)
-            confirm();
-        };
-        this.worker.on("block", listener);
-
-        return {
-          unsubscribe: (): void => {
-            complete();
-          }
-        };
+      unsubscribe: () => {
+        this.worker.mediator.unregisterListener(observer);
+        // XXX: Maybe force cancel here
       }
     };
   }
 
-  public transaction(txId: string, expireIn?: number): Subscribable<ITransactionData> {
-    return {
-      subscribe: (observer: Partial<Observer<ITransactionData>>): Unsubscribable => {
-        let timeoutId: undefined | NodeJS.Timeout = undefined;
+  public get or(): QueenBee<TPreviousSubscriberData> {
+    if (this.operands.length > 0) {
+      if (this.operands.length === 1) // Optimize by not creating a logical AND filter for only one filter
+        this.filterContainers.push(this.operands[0]);
+      else
+        this.filterContainers.push(new LogicalAndFilter(this.worker, this.operands));
+      this.operands = [];
+    }
 
-        const complete = (): void => {
-          try {
-            observer.complete?.();
-          } catch (error) {
-            observer.error?.(error);
-          } finally {
-            this.worker.off("transaction", listener);
-            clearTimeout(timeoutId);
-          }
-        };
-
-        const listener = (transactionData: ITransactionData): void => {
-          const confirm = (): void => {
-            try {
-              observer.next?.(transactionData);
-            } catch (error) {
-              observer.error?.(error);
-            } finally {
-              complete();
-            }
-          };
-
-          if(txId === transactionData.id)
-            confirm();
-        };
-        this.worker.on("transaction", listener);
-
-        if(typeof expireIn === "number")
-          timeoutId = setTimeout(() => {
-            try {
-              observer.error?.(new WorkerBeeError("Transaction expired"));
-            } catch (error) {
-              observer.error?.(error);
-            } finally {
-              complete();
-            }
-          }, expireIn);
-
-        return {
-          unsubscribe: (): void => {
-            complete();
-          }
-        };
-      }
-    };
+    return this as unknown as QueenBee<TPreviousSubscriberData>;
   }
 
-  public accountOperations(name: string): Subscribable<IOperationData> {
-    return {
-      subscribe: (observer: Partial<Observer<IOperationData>>): Unsubscribable => {
-        const complete = (): void => {
-          try {
-            observer.complete?.();
-          } catch (error) {
-            observer.error?.(error);
-          } finally {
-            this.worker.off("transaction", listener);
-          }
-        };
+  public onBlockNumber(number: number): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new BlockNumberFilter(this.worker, number));
 
-        const listener = (transactionData: ITransactionData): void => {
-          const confirm = (result: operation): void => {
-            try {
-              observer.next?.({ op: result, transaction: transactionData });
-            } catch (error) {
-              observer.error?.(error);
-            }
-          };
-
-          const proto = this.worker.chain!.createTransactionFromJson(transactionData.transaction).transaction;
-
-          for(const op of proto.operations)
-            if(this.worker.chain!.operationGetImpactedAccounts(op).has(name))
-              confirm(op);
-        };
-        this.worker.on("transaction", listener);
-
-        return {
-          unsubscribe: (): void => {
-            complete();
-          }
-        };
-      }
-    };
+    return this;
   }
 
-  public accountFullManabar(name: string): Subscribable<ApiAccount> {
-    return {
-      subscribe: (observer: Partial<Observer<ApiAccount>>): Unsubscribable => {
-        const listener = async(): Promise<void> => {
-          try {
-            const { accounts: [ account ] } = await this.worker.chain!.api.database_api.find_accounts({
-              accounts: [ name ]
-            });
-            const dgpo = await this.worker.chain!.api.database_api.get_dynamic_global_properties({});
+  public onTransactionId<
+    TIdTx extends string
+  >(transactionId: TIdTx): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<TransactionByIdProvider<[TIdTx]>["provide"]>>> {
+    this.operands.push(new TransactionIdFilter(this.worker, transactionId));
+    this.providers.push(new TransactionByIdProvider<[TIdTx]>([transactionId]));
 
-            const { percent } = this.worker.chain!.calculateCurrentManabarValue(
-              Math.round(new Date(`${dgpo.time}Z`).getTime() / 1000), // Convert API time to seconds
-              account.post_voting_power.amount,
-              account.voting_manabar.current_mana,
-              account.voting_manabar.last_update_time
-            );
+    return this;
+  }
 
-            if(percent >= 98)
-              observer.next?.(account);
-          } catch (error) {
-            observer.error?.(error);
-          }
-        };
-        this.worker.on("block", listener);
+  public onAccountFullManabar(account: TAccountName): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new AccountFullManabarFilter(this.worker, account));
 
-        const complete = (): void => {
-          try {
-            observer.complete?.();
-          } catch (error) {
-            observer.error?.(error);
-          } finally {
-            this.worker.off("block", listener);
-          }
-        };
+    return this;
+  }
 
-        return {
-          unsubscribe: (): void => {
-            complete();
-          }
-        };
-      }
-    };
+  public onAccountBalanceChange(account: TAccountName, includeInternalTransfers: boolean = false): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new BalanceChangeFilter(this.worker, account, includeInternalTransfers));
+
+    return this;
+  }
+
+  public onAccountMetadataChange(account: TAccountName): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new AccountMetadataChangeFilter(this.worker, account));
+
+    return this;
+  }
+
+  public onVoteCreated(voter: TAccountName): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new VoteFilter(this.worker, voter));
+
+    return this;
+  }
+
+  public onPostCreated(author: TAccountName): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new PostFilter(this.worker, author));
+
+    return this;
+  }
+
+  public onNewAccount(): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new AccountCreatedFilter(this.worker));
+
+    return this;
+  }
+
+  public onCustomOperation(id: string | number): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new CustomOperationFilter(this.worker, id));
+
+    return this;
+  }
+
+  public onReblog(reblogger: TAccountName): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new ReblogFilter(this.worker, reblogger));
+
+    return this;
+  }
+
+  public onFollow(follower: TAccountName): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new FollowFilter(this.worker, follower));
+
+    return this;
+  }
+
+  public onMention<
+    TMention extends TAccountName
+  >(mentionedAccount: TMention): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<MentionedAccountProvider<[TMention]>["provide"]>>> {
+    this.operands.push(new PostMentionFilter(this.worker, mentionedAccount));
+    this.providers.push(new MentionedAccountProvider<[TMention]>([mentionedAccount]));
+
+    return this;
+  }
+
+  public onImpactedAccount(account: TAccountName): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new ImpactedAccountFilter(this.worker, account));
+
+    return this;
+  }
+
+  public onBlock(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<BlockHeaderProvider["provide"]>>> {
+    this.operands.push(new BlockChangedFilter(this.worker));
+    this.providers.push(new BlockHeaderProvider());
+
+    return this;
+  }
+
+  public provideAccounts<
+    TAccounts extends Array<TAccountName>
+  >(...accounts: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<AccountProvider<TAccounts>["provide"]>>> {
+    this.providers.push(new AccountProvider<TAccounts>(accounts));
+
+    return this;
+  }
+
+  public provideRcAccounts<
+    TAccounts extends Array<TAccountName>
+  >(...accounts: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<RcAccountProvider<TAccounts>["provide"]>>> {
+    this.providers.push(new RcAccountProvider<TAccounts>(accounts));
+
+    return this;
+  }
+
+  public onWhaleAlert(asset: asset): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<WhaleAlertProvider["provide"]>>> {
+    this.operands.push(new WhaleAlertFilter(this.worker, asset));
+    this.providers.push(new WhaleAlertProvider(asset));
+
+    return this;
+  }
+
+  public provideBlockData(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<BlockProvider["provide"]>>> {
+    this.providers.push(new BlockProvider());
+
+    return this;
   }
 }

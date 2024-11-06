@@ -20,6 +20,7 @@ export default [ {
   ignores: [
     "**/node_modules",
     "**/dist",
+    "**/build",
     "examples"
   ]
 }, ...compat.extends("eslint:recommended"), {
@@ -37,6 +38,7 @@ export default [ {
   },
 
   rules: {
+    "no-empty-pattern": 0,
     "require-atomic-updates": 1,
     "no-unused-private-class-members": 1,
     "capitalized-comments": 1,
@@ -63,7 +65,7 @@ export default [ {
     "id-length": [ 2, {
       min: 2,
       max: 30,
-      exceptionPatterns: [ "[ei-l]" ]
+      exceptionPatterns: [ "[_ei-l]" ]
     } ],
     "eol-last": 1,
     "no-multiple-empty-lines": 1,
@@ -121,21 +123,13 @@ export default [ {
       varsIgnorePattern: "^_"
     } ],
     "@typescript-eslint/explicit-member-accessibility": 2,
-    "@typescript-eslint/explicit-function-return-type": 2,
+    "@typescript-eslint/explicit-function-return-type": 0,
     "@typescript-eslint/no-non-null-assertion": 0,
     "@typescript-eslint/no-inferrable-types": 0,
     "@typescript-eslint/no-explicit-any": 0,
-    "@typescript-eslint/typedef": [ 2, {
-      arrayDestructuring: false,
-      objectDestructuring: false,
-      arrowParameter: false,
-      memberVariableDeclaration: true,
-      parameter: true,
-      propertyDeclaration: true,
-      variableDeclaration: false,
-      variableDeclarationIgnoreFunction: true
-    } ],
+    "@typescript-eslint/typedef": 0,
     "@typescript-eslint/no-extra-semi": 0,
-    "@typescript-eslint/no-empty-function": 0
+    "@typescript-eslint/no-empty-function": 0,
+    "@typescript-eslint/no-empty-object-type": 0
   }
 } ];

@@ -1,66 +1,10 @@
 import type { IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
-import type { ApiAccount, ApiBlock, ApiTransaction, IHiveChainInterface, ITransaction, operation } from "@hiveio/wax";
-import type { Subscribable } from "rxjs";
+import type { ApiTransaction, IHiveChainInterface, ITransaction, transaction} from "@hiveio/wax";
 import type { IStartConfiguration } from "./bot";
-import type { WorkerBeeError } from "./errors";
-
-export interface IBlockData {
-  number: number;
-  block: ApiBlock;
-}
-
-export interface ITransactionData {
-  id: string;
-  transaction: ApiTransaction;
-  block: IBlockData;
-}
-
-export interface IOperationData {
-  op: operation;
-  transaction: ITransactionData;
-}
-
-export interface IQueenBee {
-  /**
-   * Observes block with given id and notifies on its detection
-   *
-   * @param blockId block id to observe
-   * @returns subscribable object that will call `next` only once and completes
-   */
-  block(blockId: string): Subscribable<IBlockData>;
-  /**
-   * Observes block with given number and notifies on its detection
-   *
-   * @param blockNumber block number to observe
-   * @returns subscribable object that will call `next` only once and completes
-   */
-  block(blockNumber: number): Subscribable<IBlockData>;
-
-  /**
-   * Observes transaction with given id and notifies on its detection
-   *
-   * @param transactionId transaction id to observe
-   * @returns subscribable object that will call `next` only once and completes
-   */
-  transaction(transactionId: string): Subscribable<ITransactionData>;
-
-  /**
-   * Observes given account and notifies when new operation in blockchain related to the given account is detected (no virtual operations for now)
-   *
-   * @param name account name to observe
-   * @returns subscribable object that will call `next` on every operation related to the given account
-   */
-  accountOperations(name: string): Subscribable<IOperationData>;
-
-  /**
-   * Observes given account and notifies when its manabar is 98 percent loaded
-   * Note: This function will be called on every new block detected if manabar is full on every new block
-   *
-   * @param name account name to observe
-   * @returns subscribable object that will call `next` each time time its manabar is 98 percent loaded
-   */
-  accountFullManabar(name: string): Subscribable<ApiAccount>;
-}
+import { IBlockData } from "./chain-observers/classifiers/block-classifier";
+import { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
+import type { QueenBee } from "./queen";
+import type { Subscribable } from "./types/subscribable";
 
 export interface IBroadcastOptions {
   /**
@@ -71,14 +15,6 @@ export interface IBroadcastOptions {
    * @default undefined
    */
   throwAfter?: string | number | Date;
-}
-
-export interface IWorkerBeeEvents {
-  "stop": () => void | Promise<void>;
-  "start": () => void | Promise<void>;
-  "block": (blockData: IBlockData) => void | Promise<void>;
-  "transaction": (transactionData: ITransactionData) => void | Promise<void>;
-  "error": (error: WorkerBeeError) => void | Promise<void>;
 }
 
 export interface IWorkerBee {
@@ -103,15 +39,15 @@ export interface IWorkerBee {
   /**
    * Request automation stop
    */
-  stop(): Promise<void>;
+  stop(): void;
 
   /**
    * Deletes the current bot instance and underlying wax and beekepeer objects.
    * wax chain object is deleted only when its instance was managed by workerbee itself.
    */
-  delete(): Promise<void>;
+  delete(): void;
 
-  readonly observe: IQueenBee;
+  get observe(): QueenBee;
 
   /**
    * Broadcast given transaction to the remote and returns a subscribable object
@@ -124,24 +60,12 @@ export interface IWorkerBee {
    * @param tx Protobuf transactoin to broadcast
    * @param options Options for broadcasting
    */
-  broadcast(tx: ApiTransaction | ITransaction, options?: IBroadcastOptions): Promise<Subscribable<ITransactionData>>;
+  broadcast(tx: ApiTransaction | ITransaction, options?: IBroadcastOptions): Promise<Subscribable<transaction>>;
 
   /**
    * Allows you to iterate over blocks indefinitely
    */
-  [Symbol.asyncIterator](): AsyncIterator<IBlockData>;
-
-  on<U extends keyof IWorkerBeeEvents>(
-    event: U, listener: IWorkerBeeEvents[U]
-  ): this;
-
-  once<U extends keyof IWorkerBeeEvents>(
-    event: U, listener: IWorkerBeeEvents[U]
-  ): this;
-
-  off<U extends keyof IWorkerBeeEvents>(
-    event: U, listener: IWorkerBeeEvents[U]
-  ): this;
+  [Symbol.asyncIterator](): AsyncIterator<IBlockData & IBlockHeaderData>;
 }
 
 export interface IWorkerBeeConstructor {

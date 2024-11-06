@@ -1,11 +1,13 @@
-import EventEmitter from "events";
 import type { IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
-import { calculateExpiration, IWaxOptionsChain, IHiveChainInterface, TWaxExtended, ITransaction, ApiTransaction } from "@hiveio/wax";
-import type { Subscribable } from "rxjs";
+import { calculateExpiration, IWaxOptionsChain, IHiveChainInterface, TWaxExtended, ITransaction, ApiTransaction, transaction } from "@hiveio/wax";
 
+import { IBlockData } from "./chain-observers/classifiers/block-classifier";
+import { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
+import { ObserverMediator } from "./chain-observers/observer-mediator";
 import { WorkerBeeError } from "./errors";
-import type { IWorkerBee, IBlockData, ITransactionData, IBroadcastOptions } from "./interfaces";
+import type { IWorkerBee, IBroadcastOptions } from "./interfaces";
 import { QueenBee } from "./queen";
+import type { Subscribable } from "./types/subscribable";
 import { getWax, WaxExtendTypes } from "./wax";
 
 const ONE_MINUTE = 1000 * 60;
@@ -38,39 +40,38 @@ export const DEFAULT_WORKERBEE_OPTIONS = {
   chainOptions: {}
 };
 
-export const DEFAULT_BLOCK_INTERVAL_TIMEOUT = 1500;
+export const DEFAULT_BLOCK_INTERVAL_TIMEOUT_MS = 2000;
 
-export class WorkerBee extends EventEmitter implements IWorkerBee {
-  public running: boolean = false;
-
+export class WorkerBee implements IWorkerBee {
   public readonly configuration: IStartConfiguration;
 
   public chain?: TWaxExtended<typeof WaxExtendTypes>;
 
   private wallet?: IBeekeeperUnlockedWallet;
 
-  private headBlockNumber: number = 0;
+  private intervalId: NodeJS.Timeout | undefined = undefined;
 
-  public readonly observe: QueenBee = new QueenBee(this);
+  public get running() {
+    return this.intervalId !== undefined;
+  }
+
+  public get observe() {
+    return new QueenBee(this);
+  }
+
+  public mediator = new ObserverMediator(this);
 
   public constructor(
     configuration: IStartConfiguration = {}
   ) {
-    super();
-
     this.configuration = { ...DEFAULT_WORKERBEE_OPTIONS, ...configuration };
 
     if(typeof configuration.explicitChain !== "undefined"
        && typeof configuration.chainOptions !== "undefined")
       throw new WorkerBeeError("explicitChain and chainOptions parameters are exclusive");
-
-    // When halt is requested, indicate we are not going to do the task again
-    super.on("halt", () => {
-      this.running = false;
-    });
   }
 
-  public async broadcast(tx: ApiTransaction | ITransaction, options: IBroadcastOptions = {}): Promise<Subscribable<ITransactionData>> {
+  public async broadcast(tx: ApiTransaction | ITransaction, options: IBroadcastOptions = {}): Promise<Subscribable<transaction>> {
     const toBroadcast: ApiTransaction = "toApiJson" in tx ? tx.toApiJson() as ApiTransaction : tx as ApiTransaction;
 
     if(toBroadcast.signatures.length === 0)
@@ -92,96 +93,76 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
 
     const apiTx = this.chain!.createTransactionFromJson(toBroadcast);
 
-    return this.observe.transaction(apiTx.id, expireDate.getTime());
+    return {
+      subscribe: observer => {
+        const listener = this.observe.onTransactionId(apiTx.id).subscribe({
+          next(val) {
+            observer.next?.(val.transactions[apiTx.id]!);
+          },
+          error(val) {
+            observer.error?.(val);
+          },
+          complete() {
+            observer.complete?.();
+          }
+        });
+        const timeoutId = setTimeout(() => {
+          listener.unsubscribe();
+          observer.error?.(new WorkerBeeError(`Transaction ${apiTx.id} has expired`));
+        }, expireDate.getTime() - Date.now());
+
+        return {
+          unsubscribe: () => {
+            clearTimeout(timeoutId);
+            listener.unsubscribe();
+          }
+        }
+      }
+    };
   }
 
   public async start(wallet?: IBeekeeperUnlockedWallet): Promise<void> {
     // Initialize chain and beekepeer if required
-    if(typeof this.chain === "undefined") {
+    if(typeof this.chain === "undefined")
       this.chain = await getWax(this.configuration.explicitChain, this.configuration.chainOptions);
-
-      ({ head_block_number: this.headBlockNumber } = await this.chain.api.database_api.get_dynamic_global_properties({}));
-    }
 
     if(typeof this.wallet === "undefined")
       this.wallet = wallet;
 
-    // Ensure the app is not running
-    await this.stop();
+    this.stop();
 
-    // Do the first task and run the app
-    this.running = true;
-    super.emit("start");
-
-    this.doTask();
+    setInterval(() => {
+      this.mediator.notify();
+    }, DEFAULT_BLOCK_INTERVAL_TIMEOUT_MS);
   }
 
-  public async *[Symbol.asyncIterator](): AsyncIterator<IBlockData> {
-    while(this.running)
-      yield await new Promise(res => {
-        super.once("block", res);
-      });
-  }
-
-  public async doTask(): Promise<void> {
-    try {
-      // Get the head block, but wait at least DEFAULT_BLOCK_INTERVAL_TIMEOUT ms
-      const [ { block } ] = await Promise.all([
-        this.chain!.api.block_api.get_block({ block_num: this.headBlockNumber }),
-        new Promise(res => { setTimeout(res, DEFAULT_BLOCK_INTERVAL_TIMEOUT); })
-      ]);
-
-      if(typeof block === "object") {
-        const blockData = {
-          number: this.headBlockNumber,
-          block
-        };
-
-        super.emit("block", blockData);
-
-        for(let i = 0; i < block.transaction_ids.length; ++i)
-          super.emit("transaction", {
-            id: block.transaction_ids[i],
-            transaction: block.transactions[i],
-            block: blockData
+  public [Symbol.asyncIterator](): AsyncIterator<IBlockData & IBlockHeaderData> {
+    // TODO: Optimize this
+    return {
+      next: (): Promise<IteratorResult<IBlockData & IBlockHeaderData, void>> => {
+        return new Promise(res => {
+          const listener = this.observe.onBlock().provideBlockData().subscribe({
+            next: block => {
+              listener.unsubscribe();
+              res({ value: block.block, done: false });
+            }
           });
-
-        ++this.headBlockNumber;
-      } // Else -> no new block
-    } catch (error) {
-      // Ensure we are emitting the Error instance
-      if (super.listenerCount("error") > 0)
-        super.emit("error", new WorkerBeeError(`Error occurred during automation: ${String(error)}`, error));
-
-      // Wait before any next operation is performed to reduce spamming the API
-      await new Promise(res => { setTimeout(res, DEFAULT_BLOCK_INTERVAL_TIMEOUT); });
-    } finally {
-      // Do the task if running
-      if(this.running)
-        this.doTask();
-      else // Inform about the application stop otherwise
-        super.emit("stop");
-    }
+        });
+      }
+    };
   }
 
-  public stop(): Promise<void> {
-    return new Promise<void>(res => {
-      if(!this.running)
-        res();
+  public stop(): void {
+    if(!this.running)
+      return;
 
-      // Request application stop
-      super.emit("halt");
-
-      // Wait for the stop and resolve
-      super.once("stop", res);
-    });
+    clearTimeout(this.intervalId);
   }
 
-  public async delete(): Promise<void> {
-    // This function actually allows you to actually reset the bot instance
-    await this.stop();
+  public delete(): void {
+    this.stop();
 
-    super.removeAllListeners();
+    this.mediator.unregisterAllListeners();
 
     if(typeof this.configuration.explicitChain === "undefined")
       this.chain?.delete();
