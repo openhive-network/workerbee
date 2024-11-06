@@ -5,6 +5,7 @@ import type { Subscribable } from "rxjs";
 
 import { WorkerBeeError } from "./errors";
 import type { IWorkerBee, IBlockData, ITransactionData, IBroadcastOptions } from "./interfaces";
+import { WorkerBeeRegister } from "./observers/register";
 import { QueenBee } from "./queen";
 import { getWax, WaxExtendTypes } from "./wax";
 
@@ -52,6 +53,8 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
   private headBlockNumber: number = 0;
 
   public readonly observe: QueenBee = new QueenBee(this);
+
+  public readonly register: WorkerBeeRegister = new WorkerBeeRegister(this);
 
   public constructor(
     configuration: IStartConfiguration = {}
@@ -138,13 +141,6 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
         };
 
         super.emit("block", blockData);
-
-        for(let i = 0; i < block.transaction_ids.length; ++i)
-          super.emit("transaction", {
-            id: block.transaction_ids[i],
-            transaction: block.transactions[i],
-            block: blockData
-          });
 
         ++this.headBlockNumber;
       } // Else -> no new block

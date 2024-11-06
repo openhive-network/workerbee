@@ -1,12 +1,15 @@
 import type { ApiAccount, operation } from "@hiveio/wax";
 import type { Subscribable, Observer, Unsubscribable } from "rxjs";
 
+import type { WorkerBee } from "./bot";
 import { WorkerBeeError } from "./errors";
-import type { IBlockData, ITransactionData, IOperationData, IWorkerBee } from "./interfaces";
+import type { IBlockData, ITransactionData, IOperationData } from "./interfaces";
+import { AccountMetadataObserver } from "./observers/account/metadata";
+import type { TObserverFor } from "./observers/observer-base";
 
 export class QueenBee {
   public constructor(
-    private readonly worker: IWorkerBee
+    private readonly worker: WorkerBee
   ) {}
 
   public block(idOrNumber: string | number): Subscribable<IBlockData> {
@@ -139,6 +142,10 @@ export class QueenBee {
         };
       }
     };
+  }
+
+  public accountMetadata(name: string): TObserverFor<AccountMetadataObserver> {
+    return new AccountMetadataObserver(this.worker, { account: name });
   }
 
   public accountFullManabar(name: string): Subscribable<ApiAccount> {

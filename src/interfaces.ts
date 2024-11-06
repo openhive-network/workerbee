@@ -1,5 +1,8 @@
 import type { IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
-import type { ApiAccount, ApiBlock, ApiTransaction, IHiveChainInterface, ITransaction, operation } from "@hiveio/wax";
+import type {
+  ApiAccount, ApiBlock, ApiTransaction, FindRcAccountsResponse,
+  GetDynamicGlobalPropertiesResponse, IHiveChainInterface,
+  ITransaction, operation } from "@hiveio/wax";
 import type { Subscribable } from "rxjs";
 import type { IStartConfiguration } from "./bot";
 import type { WorkerBeeError } from "./errors";
@@ -18,6 +21,21 @@ export interface ITransactionData {
 export interface IOperationData {
   op: operation;
   transaction: ITransactionData;
+}
+
+export interface IDgpoData {
+  dgpo: GetDynamicGlobalPropertiesResponse;
+  block: IBlockData;
+}
+
+export interface IAccountData {
+  account: ApiAccount;
+  block: IBlockData;
+}
+
+export interface IRcAccountData {
+  rcAccount: FindRcAccountsResponse;
+  block: IBlockData;
 }
 
 export interface IQueenBee {

@@ -1,11 +1,13 @@
-import { ApiAccount } from "@hiveio/wax";
-import { BlockObserver } from "../observer-base";
+import type { ApiAccount } from "@hiveio/wax";
+import { ObserverBase, TDataFromEvents } from "../observer-base";
 
 export interface IAccountMetadataObserverOptions {
   account: string;
 }
 
-export class AccountMetadataObserver extends BlockObserver<ApiAccount, IAccountMetadataObserverOptions> {
+export class AccountMetadataObserver extends ObserverBase<ApiAccount, AccountMetadataObserver, IAccountMetadataObserverOptions> {
+  public readonly listenForAccount = true;
+
   protected hasChanged(current: ApiAccount, previous?: ApiAccount): boolean {
     const jsonMetadataChange = current.json_metadata !== previous?.json_metadata;
     const postingJsonMetadataChange = current.posting_json_metadata !== previous?.posting_json_metadata;
@@ -13,9 +15,7 @@ export class AccountMetadataObserver extends BlockObserver<ApiAccount, IAccountM
     return jsonMetadataChange || postingJsonMetadataChange;
   }
 
-  protected async retrieveData(): Promise<ApiAccount> {
-    const { accounts: [ account ] } = await this.bot.chain!.api.database_api.find_accounts({ accounts: [this.options.account] });
-
-    return account;
+  protected retrieveData(metadata: TDataFromEvents<AccountMetadataObserver>): ApiAccount {
+    return metadata.account.account;
   }
 }
