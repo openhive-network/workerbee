@@ -121,7 +121,7 @@ export default [ {
       varsIgnorePattern: "^_"
     } ],
     "@typescript-eslint/explicit-member-accessibility": 2,
-    "@typescript-eslint/explicit-function-return-type": 2,
+    "@typescript-eslint/explicit-function-return-type": 0,
     "@typescript-eslint/no-non-null-assertion": 0,
     "@typescript-eslint/no-inferrable-types": 0,
     "@typescript-eslint/no-explicit-any": 0,
@@ -136,6 +136,7 @@ export default [ {
       variableDeclarationIgnoreFunction: true
     } ],
     "@typescript-eslint/no-extra-semi": 0,
-    "@typescript-eslint/no-empty-function": 0
+    "@typescript-eslint/no-empty-function": 0,
+    "@typescript-eslint/no-empty-object-type": 0
   }
 } ];
