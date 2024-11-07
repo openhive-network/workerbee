@@ -2,7 +2,7 @@ import type { IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
 import type {
   ApiAccount, ApiBlock, ApiOperation, ApiTransaction, FindRcAccountsResponse,
   GetDynamicGlobalPropertiesResponse, IHiveChainInterface,
-  ITransaction } from "@hiveio/wax";
+  ITransaction, operation } from "@hiveio/wax";
 import type { Subscribable } from "rxjs";
 import type { IStartConfiguration } from "./bot";
 import type { WorkerBeeError } from "./errors";
@@ -23,6 +23,11 @@ export interface ITransactionData extends ITransactionDataBase {
 
 export interface IOperationData {
   operation: ApiOperation;
+  transaction: ITransactionDataBase;
+}
+
+export interface IProtoOperationData {
+  operation: operation;
   transaction: ITransactionDataBase;
 }
 
@@ -71,7 +76,7 @@ export interface IQueenBee {
    * @param name account name to observe
    * @returns subscribable object that will call `next` on every operation related to the given account
    */
-  accountOperations(name: string): Subscribable<IOperationData>;
+  accountOperations(name: string): Subscribable<IProtoOperationData>;
 
   /**
    * Observes given account and notifies when its manabar is 98 percent loaded

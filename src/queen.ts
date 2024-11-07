@@ -3,7 +3,7 @@ import type { Subscribable, Observer, Unsubscribable } from "rxjs";
 
 import type { WorkerBee } from "./bot";
 import { WorkerBeeError } from "./errors";
-import type { IBlockData, ITransactionData, IOperationData } from "./interfaces";
+import type { IBlockData, ITransactionData, IProtoOperationData } from "./interfaces";
 import { AccountMetadataObserver } from "./observers/account/metadata";
 import type { TObserverFor } from "./observers/observer-base";
 
@@ -105,9 +105,9 @@ export class QueenBee {
     };
   }
 
-  public accountOperations(name: string): Subscribable<IOperationData> {
+  public accountOperations(name: string): Subscribable<IProtoOperationData> {
     return {
-      subscribe: (observer: Partial<Observer<IOperationData>>): Unsubscribable => {
+      subscribe: (observer: Partial<Observer<IProtoOperationData>>): Unsubscribable => {
         const complete = (): void => {
           try {
             observer.complete?.();
@@ -121,7 +121,7 @@ export class QueenBee {
         const listener = (transactionData: ITransactionData): void => {
           const confirm = (result: operation): void => {
             try {
-              observer.next?.({ op: result, transaction: transactionData });
+              observer.next?.({ operation: result, transaction: transactionData });
             } catch (error) {
               observer.error?.(error);
             }

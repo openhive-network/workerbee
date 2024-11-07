@@ -1,9 +1,9 @@
-import type { ApiBlock } from "@hiveio/wax";
 import type { Observer, Subscribable, Unsubscribable } from "rxjs";
+import type { IBlockData } from "src/interfaces";
 import type { WorkerBee } from "../bot";
 import { DataProvider, type TDataProviderOptions, TDataProviderForOptions } from "./register";
 
-export type TSubscribableObserverOptions<T> = { current: T, previous?: T; block: ApiBlock; blockNumber: number };
+export type TSubscribableObserverOptions<T> = { current: T, previous?: T; block: IBlockData; };
 
 export type TObserverFor<T extends Subscribable<any>> = Pick<T, "subscribe">;
 
@@ -52,7 +52,7 @@ export abstract class ObserverBase<
         return;
 
       if (this.hasChanged(current, this.previous))
-        this.observer?.next?.({ current, previous: this.previous, block: this.dataProvider.block, blockNumber: this.dataProvider.blockNumber });
+        this.observer?.next?.({ current, previous: this.previous, block: this.dataProvider.block });
 
       this.previous = current;
     })().catch(error => { this.observer?.error?.(error); });
