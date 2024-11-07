@@ -1,27 +1,9 @@
+import type { ApiBlock } from "@hiveio/wax";
 import type { Observer, Subscribable, Unsubscribable } from "rxjs";
 import type { WorkerBee } from "../bot";
-import { WorkerBeeError } from "../errors";
-import { IWorkerBeeRegisterEvents } from "./register";
+import { DataProvider, type TDataProviderOptions, TDataProviderForOptions } from "./register";
 
-export type TSubscribableObserverOptions<T, OtherMetadata extends object = {}> = OtherMetadata & { current: T, previous?: T };
-
-export type TEventTypes = {
-  [key in keyof IWorkerBeeRegisterEvents as `listenFor${Capitalize<string & key>}`]?: boolean;
-};
-
-type RemoveOptional<T> = {
-  [K in keyof T as {} extends Pick<T, K> ? never : K]: T[K];
-};
-
-export type TDataFromEvents<T extends TEventTypes> = {
-  [K in keyof RemoveOptional<T> as Uncapitalize<string & K> extends `listenFor${infer Event}`
-    ? Uncapitalize<Event>
-    : never]: K extends `listenFor${infer Event}`
-    ? (IWorkerBeeRegisterEvents[Uncapitalize<Event> extends keyof IWorkerBeeRegisterEvents ? Uncapitalize<Event> : never] extends (data: infer R) => void ?
-      R
-      : never)
-    : never;
-};
+export type TSubscribableObserverOptions<T> = { current: T, previous?: T; block: ApiBlock; blockNumber: number };
 
 export type TObserverFor<T extends Subscribable<any>> = Pick<T, "subscribe">;
 
@@ -30,85 +12,49 @@ export type TObserverFor<T extends Subscribable<any>> = Pick<T, "subscribe">;
  */
 export abstract class ObserverBase<
   T,
-  TExtendingClass extends TEventTypes,
-  OtherOptions extends object = {},
-> implements TEventTypes, Subscribable<TSubscribableObserverOptions<T, TDataFromEvents<TExtendingClass>>> {
+  DataProviderOption extends TDataProviderOptions
+> implements Subscribable<TSubscribableObserverOptions<T>> {
+  private readonly dataProvider: TDataProviderForOptions<DataProviderOption>;
+
   public constructor(
     protected readonly worker: WorkerBee,
-    protected readonly options: OtherOptions
-  ) {}
-
-  public readonly listenForBlock?: boolean;
-  public readonly listenForTransaction?: boolean;
-  public readonly listenForDgpo?: boolean;
-  public readonly listenForAccount?: boolean;
-  public readonly listenForRc?: boolean;
-
-  protected observer?: Partial<Observer<TSubscribableObserverOptions<T, TDataFromEvents<TExtendingClass>>>>;
-
-  private listenerFn?: (...args: any[]) => void;
-
-  private get listenersRegistered(): keyof IWorkerBeeRegisterEvents {
-    if (this.listenForBlock)
-      return "block";
-    else if (this.listenForTransaction)
-      return "transaction";
-    else if (this.listenForDgpo)
-      return "dgpo";
-    else if (this.listenForAccount)
-      return "account";
-    else if (this.listenForRc)
-      return "rc";
-
-    throw new WorkerBeeError("No listeners registered");
+    protected readonly options: DataProviderOption & Record<string, any>
+  ) {
+    this.dataProvider = DataProvider.for(worker.register, options);
   }
 
-  private registerListeners(): void {
-    const listener = this.listenersRegistered;
+  protected observer?: Partial<Observer<TSubscribableObserverOptions<T>>>;
 
-    this.worker.register.on(listener, this.listenerFn = (data: any) => {
-      this.update({ [listener]: data } as TDataFromEvents<TExtendingClass>);
-    }, this.options);
-  }
-
-  private unregisterListeners(): void {
-    this.worker.register.off(this.listenersRegistered, this.listenerFn!, this.options);
-
-    this.listenerFn = undefined;
-  }
-
-  public subscribe(observer: Partial<Observer<TSubscribableObserverOptions<T, TDataFromEvents<TExtendingClass>>>>): Unsubscribable {
+  public subscribe(observer: Partial<Observer<TSubscribableObserverOptions<T>>>): Unsubscribable {
     this.observer = observer;
 
-    this.registerListeners();
+    this.worker.register.registerListener(this.update, this.options);
 
     return {
       unsubscribe: () => {
-        this.unregisterListeners();
+        this.worker.register.unregisterListener(this.update, this.options);
 
         this.observer?.complete?.();
-
-        this.observer = undefined;
       }
     }
   }
 
-  protected previous?: T;
+  private previous?: T;
 
   protected abstract hasChanged(current?: T, previous?: T): boolean;
 
-  protected abstract retrieveData(metadata: TDataFromEvents<TExtendingClass>): T | Promise<T | undefined | void> | undefined | void;
+  protected abstract retrieveData(dataProvider: TDataProviderForOptions<DataProviderOption>): Promise<T | undefined> | T | undefined;
 
-  protected update(data: TDataFromEvents<TExtendingClass>): void {
+  private update = ((): void => {
     (async () => {
-      const current = await this.retrieveData(data);
+      const current = await this.retrieveData(this.dataProvider);
       if(current === undefined)
         return;
 
       if (this.hasChanged(current, this.previous))
-        this.observer?.next?.({ current, previous: this.previous, ...data });
+        this.observer?.next?.({ current, previous: this.previous, block: this.dataProvider.block, blockNumber: this.dataProvider.blockNumber });
 
       this.previous = current;
     })().catch(error => { this.observer?.error?.(error); });
-  }
+  });
 }
