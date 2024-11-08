@@ -5,6 +5,7 @@ import type { WorkerBee } from "./bot";
 import { WorkerBeeError } from "./errors";
 import type { IBlockData, ITransactionData, IProtoOperationData } from "./interfaces";
 import { AccountMetadataObserver } from "./observers/account/metadata";
+import { VoteObserver } from "./observers/account/vote";
 import type { TObserverFor } from "./observers/observer-base";
 
 export class QueenBee {
@@ -146,6 +147,10 @@ export class QueenBee {
 
   public accountMetadata(name: string): TObserverFor<AccountMetadataObserver> {
     return new AccountMetadataObserver(this.worker, { account: name });
+  }
+
+  public voteByAccount(name: string): TObserverFor<VoteObserver> {
+    return new VoteObserver(this.worker, { account: name });
   }
 
   public accountFullManabar(name: string): Subscribable<ApiAccount> {
