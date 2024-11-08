@@ -40,7 +40,7 @@ export abstract class ObserverBase<
 
   private previous?: T;
 
-  protected abstract hasChanged(current?: T, previous?: T): boolean;
+  protected hasChanged?(current?: T, previous?: T): boolean;
 
   protected abstract retrieveData(dataProvider: TDataProviderForOptions<DataProviderOption>): Promise<T | undefined> | T | undefined;
 
@@ -54,7 +54,12 @@ export abstract class ObserverBase<
         if(current === undefined)
           return;
 
-        if (this.hasChanged(current, this.previous))
+        // If hasChanged is not defined, we assume that the user wants to always emit the current value
+        if (this.hasChanged === undefined)
+          this.observer?.next?.({ current });
+
+        // Emit if the value has changed
+        if (this.hasChanged?.(current, this.previous))
           this.observer?.next?.({ current, previous: this.previous });
 
         this.previous = current;
