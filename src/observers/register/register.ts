@@ -179,7 +179,7 @@ export type TDataProviderForOptions<T> = T extends IDataProviderOptionsForAccoun
 export class DataProvider implements IDataProviderBase, IDataProviderForAccount, IDataProviderForRcAccount {
   private constructor (
     private readonly register: WorkerBeeRegister,
-    private readonly options: IDataProviderOptionsBase & IDataProviderOptionsForAccount & IDataProviderForRcAccount
+    private readonly options: IDataProviderOptionsBase & IDataProviderOptionsForAccount & IDataProviderOptionsForRcAccount
   ) {}
 
   public account!: AccountDataProvider;
@@ -199,7 +199,7 @@ export class DataProvider implements IDataProviderBase, IDataProviderForAccount,
   }
 
   private get rcAccountData(): RcAccount {
-    return this.register.cachedRcAccounts.get(this.options.account)!;
+    return this.register.cachedRcAccounts.get(this.options.rcAccount)!;
   }
 
   private get impactedTransactionsData(): ITransaction[] {
