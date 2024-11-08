@@ -1,6 +1,9 @@
-import type { ApiAccount, ApiTransaction, GetDynamicGlobalPropertiesResponse, RcAccount } from "@hiveio/wax";
-import type { WorkerBee } from "../bot";
-import type { IBlockData, IOperationData, ITransactionDataBase } from "../interfaces";
+import type { ApiAccount, ApiTransaction, GetDynamicGlobalPropertiesResponse, ITransaction, RcAccount } from "@hiveio/wax";
+import type { WorkerBee } from "../../bot";
+import type { IBlockData, IOperationData, ITransactionProtoData } from "../../interfaces";
+import { AccountDataProvider } from "./account";
+import { BlockDataProvider } from "./block";
+import { RcAccountDataProvider } from "./rc-account";
 
 const chunkArray = <T>(array: Array<T>, chunkSize: number): Array<Array<T>> => {
   const numberOfChunks = Math.ceil(array.length / chunkSize)
@@ -16,8 +19,8 @@ export class WorkerBeeRegister {
   public cachedRcAccounts = new Map<string, RcAccount>();
   public cachedDgpo!: GetDynamicGlobalPropertiesResponse;
   public cachedBlock!: IBlockData;
-  public cachedTransactions!: ITransactionDataBase[];
-  public cachedImpactedAccountTransactions: Record<string, ITransactionDataBase[]> = {};
+  public cachedTransactions!: ITransactionProtoData[];
+  public cachedImpactedAccountTransactions: Record<string, ITransaction[]> = {};
   public cachedImpactedAccountOperations: Record<string, IOperationData[]> = {};
 
   public accounts: Record<string, { listenersCount: number }> = {};
@@ -28,13 +31,12 @@ export class WorkerBeeRegister {
   public constructor(
     public readonly worker: WorkerBee
   ) {
-    // TODO: Handle the case when not all of the listeners ended work, but cached data changed
     this.worker.on("block", (blockData: IBlockData) => {
       this.cachedBlock = blockData;
 
       this.cachedTransactions = blockData.block.transactions.map((transaction: ApiTransaction, index: number) => ({
         id: blockData.block.transaction_ids[index],
-        transaction
+        transaction: this.worker.chain!.createTransactionFromJson(transaction)
       }));
 
       Promise.allSettled([
@@ -49,7 +51,7 @@ export class WorkerBeeRegister {
           for(const transaction of this.cachedTransactions) {
             const impactedAccounts = new Set<string>();
 
-            for(const operation of transaction.transaction.operations) {
+            for(const operation of transaction.transaction.transaction.operations) {
               const impactedOperationAccounts = this.worker.chain!.operationGetImpactedAccounts(operation);
 
               for(const account of impactedOperationAccounts) {
@@ -59,7 +61,7 @@ export class WorkerBeeRegister {
                   this.cachedImpactedAccountOperations[account] = [];
 
                 this.cachedImpactedAccountOperations[account].push({
-                  transaction,
+                  transaction: transaction.transaction,
                   operation
                 });
               }
@@ -68,11 +70,11 @@ export class WorkerBeeRegister {
                 if (!this.cachedImpactedAccountTransactions[account])
                   this.cachedImpactedAccountTransactions[account] = [];
 
-                this.cachedImpactedAccountTransactions[account].push(transaction);
+                this.cachedImpactedAccountTransactions[account].push(transaction.transaction);
               }
             }
           }
-        })
+        })().catch(error => { this.worker.emit("error", error); })
       ]).then(() => {
         this.listeners.forEach(listener => listener());
       })
@@ -157,18 +159,15 @@ export interface IDataProviderOptionsForRcAccount extends IDataProviderOptionsBa
 }
 
 export interface IDataProviderBase {
-  block: IBlockData;
-  transactions: ITransactionDataBase[];
+  block: BlockDataProvider;
 }
 
 export interface IDataProviderForAccount extends IDataProviderBase {
-  account: ApiAccount;
-  impactedTransactions: ITransactionDataBase[];
-  impactedOperations: IOperationData[];
+  account: AccountDataProvider;
 }
 
 export interface IDataProviderForRcAccount extends IDataProviderBase {
-  rcAccount: RcAccount;
+  rcAccount: RcAccountDataProvider;
 }
 
 export type TDataProviderOptions = IDataProviderOptionsBase | IDataProviderOptionsForRcAccount | IDataProviderOptionsForAccount;
@@ -183,28 +182,45 @@ export class DataProvider implements IDataProviderBase, IDataProviderForAccount,
     private readonly options: IDataProviderOptionsBase & IDataProviderOptionsForAccount & IDataProviderForRcAccount
   ) {}
 
-  public get block(): IBlockData {
-    return this.register.cachedBlock;
-  }
+  public account!: AccountDataProvider;
+  public rcAccount!: RcAccountDataProvider;
+  public block!: BlockDataProvider;
 
-  public get transactions(): ITransactionDataBase[] {
-    return this.register.cachedTransactions;
-  }
-
-  public get account(): ApiAccount {
+  private get accountData(): ApiAccount {
     return this.register.cachedAccounts.get(this.options.account)!;
   }
 
-  public get rcAccount(): RcAccount {
+  private get blockData(): IBlockData {
+    return this.register.cachedBlock;
+  }
+
+  private get transactionsData(): ITransactionProtoData[] {
+    return this.register.cachedTransactions;
+  }
+
+  private get rcAccountData(): RcAccount {
     return this.register.cachedRcAccounts.get(this.options.account)!;
   }
 
-  public get impactedTransactions(): ITransactionDataBase[] {
+  private get impactedTransactionsData(): ITransaction[] {
     return this.register.cachedImpactedAccountTransactions[this.options.account] || [];
   }
 
-  public get impactedOperations(): IOperationData[] {
+  private get impactedOperationsData(): IOperationData[] {
     return this.register.cachedImpactedAccountOperations[this.options.account] || [];
+  }
+
+  /**
+   * Locks retrieved values to prevent changes during the possibly async event execution
+   */
+  public lock<T extends object>(): TDataProviderForOptions<T> {
+    const provider = new DataProvider(this.register, this.options);
+
+    provider.account = new AccountDataProvider(this.accountData, this.impactedOperationsData, this.impactedTransactionsData);
+    provider.rcAccount = new RcAccountDataProvider(this.rcAccountData);
+    provider.block = new BlockDataProvider(this.blockData, this.transactionsData);
+
+    return provider as unknown as TDataProviderForOptions<T>;
   }
 
   public static for<T extends object>(register: WorkerBeeRegister, options: T): TDataProviderForOptions<T> {

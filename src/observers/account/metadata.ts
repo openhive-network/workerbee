@@ -1,18 +1,18 @@
-import type { ApiAccount } from "@hiveio/wax";
 import { ObserverBase } from "../observer-base";
-import { IDataProviderOptionsForAccount, TDataProviderForOptions } from "../register";
+import type { IAccountMetadata } from "../register/account";
+import type { IDataProviderOptionsForAccount, TDataProviderForOptions } from "../register/register";
 
 export interface IAccountMetadataObserverOptions extends IDataProviderOptionsForAccount {}
 
-export class AccountMetadataObserver extends ObserverBase<ApiAccount, IAccountMetadataObserverOptions> {
-  protected hasChanged(current: ApiAccount, previous?: ApiAccount): boolean {
-    const jsonMetadataChange = current.json_metadata !== previous?.json_metadata;
-    const postingJsonMetadataChange = current.posting_json_metadata !== previous?.posting_json_metadata;
+export class AccountMetadataObserver extends ObserverBase<IAccountMetadata, IAccountMetadataObserverOptions> {
+  protected hasChanged(current: IAccountMetadata, previous?: IAccountMetadata): boolean {
+    const jsonMetadataChange = current.accountMetadata !== previous?.accountMetadata;
+    const postingJsonMetadataChange = current.postingMetadata !== previous?.postingMetadata;
 
     return jsonMetadataChange || postingJsonMetadataChange;
   }
 
-  protected retrieveData(dataProvider: TDataProviderForOptions<IAccountMetadataObserverOptions>): ApiAccount {
-    return dataProvider.account;
+  protected retrieveData(dataProvider: TDataProviderForOptions<IAccountMetadataObserverOptions>): IAccountMetadata {
+    return dataProvider.account.metadata;
   }
 }

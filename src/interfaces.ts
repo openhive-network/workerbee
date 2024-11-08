@@ -1,6 +1,6 @@
 import type { IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
 import type {
-  ApiAccount, ApiBlock, ApiOperation, ApiTransaction, FindRcAccountsResponse,
+  ApiAccount, ApiBlock, ApiTransaction, FindRcAccountsResponse,
   GetDynamicGlobalPropertiesResponse, IHiveChainInterface,
   ITransaction, operation } from "@hiveio/wax";
 import type { Subscribable } from "rxjs";
@@ -21,9 +21,14 @@ export interface ITransactionData extends ITransactionDataBase {
   block: IBlockData;
 }
 
+export interface ITransactionProtoData {
+  id: string;
+  transaction: ITransaction;
+}
+
 export interface IOperationData {
-  operation: ApiOperation;
-  transaction: ITransactionDataBase;
+  operation: operation;
+  transaction: ITransaction;
 }
 
 export interface IProtoOperationData {

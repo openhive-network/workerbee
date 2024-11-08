@@ -5,7 +5,7 @@ import type { Subscribable } from "rxjs";
 
 import { WorkerBeeError } from "./errors";
 import type { IWorkerBee, IBlockData, ITransactionData, IBroadcastOptions } from "./interfaces";
-import { WorkerBeeRegister } from "./observers/register";
+import { WorkerBeeRegister } from "./observers/register/register";
 import { QueenBee } from "./queen";
 import { getWax, WaxExtendTypes } from "./wax";
 
