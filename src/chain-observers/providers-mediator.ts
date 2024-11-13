@@ -1,3 +1,4 @@
+import { type Observer } from "rxjs";
 import { AccountCollector } from "./collectors/account.collector";
 import { BlockCollector } from "./collectors/block.collector";
 import { DataCollectorBase } from "./collectors/collector-base";
@@ -74,7 +75,7 @@ export class ProvidersMediator {
 
   }
 
-  public registerListener(listener: ListenerType, options: CollectorsOptions = {} as CollectorsOptions) {
+  public registerListener(handler: Observer<any>, options: CollectorsOptionsForObservers) {
     // Propagate options to all of the collectors
     for (const key in this.availableCollectors) {
       const collectorName = key as keyof ProvidersMediator["availableCollectors"];
