@@ -2,11 +2,11 @@ import type { ApiAccount, operation } from "@hiveio/wax";
 import type { Subscribable, Observer, Unsubscribable } from "rxjs";
 
 import type { WorkerBee } from "./bot";
+import { AccountMetadataObserver } from "./chain-observers/observers/account/metadata";
+import { VoteObserver } from "./chain-observers/observers/account/vote";
+import type { TObserverFor } from "./chain-observers/observers/observer-base";
 import { WorkerBeeError } from "./errors";
 import type { IBlockData, ITransactionData, IProtoOperationData } from "./interfaces";
-import { AccountMetadataObserver } from "./observers/account/metadata";
-import { VoteObserver } from "./observers/account/vote";
-import type { TObserverFor } from "./observers/observer-base";
 
 export class QueenBee {
   public constructor(
@@ -146,11 +146,11 @@ export class QueenBee {
   }
 
   public accountMetadata(name: string): TObserverFor<AccountMetadataObserver> {
-    return new AccountMetadataObserver(this.worker, { account: name });
+    return new AccountMetadataObserver({ account: name });
   }
 
   public voteByAccount(name: string): TObserverFor<VoteObserver> {
-    return new VoteObserver(this.worker, { account: name });
+    return new VoteObserver({ impactedAccount: name });
   }
 
   public accountFullManabar(name: string): Subscribable<ApiAccount> {

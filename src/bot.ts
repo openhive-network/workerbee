@@ -3,9 +3,9 @@ import type { IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hiveio/beekee
 import { calculateExpiration, IWaxOptionsChain, IHiveChainInterface, TWaxExtended, ITransaction, ApiTransaction } from "@hiveio/wax";
 import type { Subscribable } from "rxjs";
 
+import { ObserversRegistry } from "./chain-observers/registry";
 import { WorkerBeeError } from "./errors";
 import type { IWorkerBee, IBlockData, ITransactionData, IBroadcastOptions } from "./interfaces";
-import { WorkerBeeRegister } from "./observers/register/register";
 import { QueenBee } from "./queen";
 import { getWax, WaxExtendTypes } from "./wax";
 
@@ -54,8 +54,6 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
 
   public readonly observe: QueenBee = new QueenBee(this);
 
-  public readonly register: WorkerBeeRegister = new WorkerBeeRegister(this);
-
   public constructor(
     configuration: IStartConfiguration = {}
   ) {
@@ -71,6 +69,8 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
     super.on("halt", () => {
       this.running = false;
     });
+
+    ObserversRegistry.initialize(this);
   }
 
   public async broadcast(tx: ApiTransaction | ITransaction, options: IBroadcastOptions = {}): Promise<Subscribable<ITransactionData>> {
