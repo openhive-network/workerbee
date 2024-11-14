@@ -5,6 +5,7 @@ import { CollectorsOptions, ProvidersMediator } from "./chain-observers/provider
 import type { WorkerBee } from "./bot";
 import { operation } from "@hiveio/wax";
 import { OperationFilter } from "./chain-observers/filters/operations-filter";
+import { TransactionIdFilter } from "./chain-observers/filters/transaction-id-filter";
 
 type RequireFilterType<T> = T extends {
   registerFilter: any;
@@ -74,6 +75,12 @@ export class QueenBee {
 
   public onOperationType(operationType: keyof operation): this {
     this.pushFilter(OperationFilter, operationType);
+
+    return this;
+  }
+
+  public onTransactionId(transactionId: string): this {
+    this.pushFilter(TransactionIdFilter, transactionId);
 
     return this;
   }
