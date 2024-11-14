@@ -32,6 +32,9 @@ export class OperationFilter extends FilterBase {
   }
 
   public async parse(data: ProvidersData) {
+    if(Object.keys(OperationFilter.filters).length === 0)
+      return;
+
     const tx = await data.transactions;
 
     for(const filterOpName in OperationFilter.filters) {

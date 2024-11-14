@@ -30,6 +30,9 @@ export class TransactionIdFilter extends FilterBase {
   }
 
   public async parse(data: ProvidersData) {
+    if(Object.keys(TransactionIdFilter.filters).length === 0)
+      return;
+
     const tx = await data.transactions;
 
     for(const txId in TransactionIdFilter.filters) {

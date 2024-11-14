@@ -83,14 +83,15 @@ export class ProvidersMediator {
       providersData[providerName] = this.availableProviders[providerName].parseData(collectorsData) as any;
     }
 
-    for(const resolvers of this.resolvers.keys())
-      for(const resolver of resolvers)
-        resolver.initPromises();
-
     void this.applyFilters(providersData);
 
     for(const [resolvers, { listener }] of this.resolvers.entries())
-      Promise.race(resolvers.map(resolver => resolver.startResolve())).then(listener.next).catch(listener.error);
+      Promise.race(resolvers.map(resolver => resolver.startResolve())).then(data => {
+        listener.next(data);
+
+        for(const resolver of resolvers)
+          resolver.cancel();
+      }).catch(listener.error);
   }
 
   private async applyFilters(data: ProvidersData) {
@@ -100,12 +101,15 @@ export class ProvidersMediator {
       });
   }
 
-  public registerListener(listener: Observer<any>,resolvers: Resolver[], options: Record<string, any> | CollectorsOptions) {
+  public registerListener(listener: Observer<any>, resolvers: Resolver[], options: Record<string, any> | CollectorsOptions) {
     for (const key in this.availableCollectors) {
       const collectorName = key as keyof ProvidersMediator["availableCollectors"];
 
       this.availableCollectors[collectorName].pushOptions(options as any);
     }
+
+    for(const resolver of resolvers)
+      resolver.subscribe();
 
     this.resolvers.set(resolvers, {
       options,
@@ -124,6 +128,9 @@ export class ProvidersMediator {
 
       this.availableCollectors[collectorName].popOptions(options.options as any);
     }
+
+    for(const resolver of resolvers)
+      resolver.unsubscribe();
 
     this.resolvers.delete(resolvers);
   }

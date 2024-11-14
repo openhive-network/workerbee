@@ -25,6 +25,8 @@ export class Resolver<T extends object = any> {
   public subscribe() {
     for(let i = 0; i < this.subscribables.length; ++i)
       this.unsubscribable[i] = this.subscribables[i].subscribe(this.nextFns[i] = {});
+
+    this.initPromises();
   }
 
   public unsubscribe() {
@@ -32,7 +34,7 @@ export class Resolver<T extends object = any> {
       this.unsubscribable[i].unsubscribe();
   }
 
-  public initPromises() {
+  private initPromises() {
     for(let i = 0; i < this.subscribables.length; ++i) {
       this.promises.push(new Promise(resolve => {
         this.nextFns[i].next = resolve;
@@ -50,11 +52,14 @@ export class Resolver<T extends object = any> {
 
         resolve(results.reduce((acc, val) => ({ ...acc, ...val }), {}) as T);
       })
-    ]);
+    ]).then(data => {
+      this.initPromises();
+
+      return data;
+    });
   }
 
-  public reset() {
+  public cancel() {
     this.forceReject();
-    this.promises = [];
   }
 }

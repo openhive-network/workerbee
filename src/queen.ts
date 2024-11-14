@@ -2,7 +2,7 @@ import type { Observer, Unsubscribable } from "rxjs";
 
 import { Resolver } from "./chain-observers/resolver";
 import { CollectorsOptions, ProvidersMediator } from "./chain-observers/providers-mediator";
-import type { WorkerBee } from "./bot";
+import { WorkerBee } from "./bot";
 import { operation } from "@hiveio/wax";
 import { OperationFilter } from "./chain-observers/filters/operations-filter";
 import { TransactionIdFilter } from "./chain-observers/filters/transaction-id-filter";
@@ -30,7 +30,7 @@ export class QueenBee {
   private resolvers: Resolver[] = [];
   private options: Record<string, any> | CollectorsOptions = {};
 
-  private pushFilter<T>(FilterClassType: RequireFilterType<T>, ...args: RegisterArgs<T>): this {
+  private pushFilter<T>(FilterClassType: RequireFilterType<T>, ...args: RegisterArgs<T>): void {
     this.currentResolver.push({
       subscribe: (observer: Observer<any>) => {
         FilterClassType.registerFilter(data => {
@@ -46,19 +46,22 @@ export class QueenBee {
         };
       }
     });
-
-    return this;
   }
 
   public subscribe(observer: Observer<any>): Unsubscribable {
     if (this.currentResolver.hasSubscribables)
       this.resolvers.push(this.currentResolver);
 
-    this.mediator.registerListener(observer, this.resolvers, this.options);
+    const committedResolvers = this.resolvers;
+
+    this.mediator.registerListener(observer, committedResolvers, this.options);
+
+    this.resolvers = [];
+    this.currentResolver = new Resolver();
 
     return {
       unsubscribe: () => {
-        for(const resolver of this.resolvers)
+        for(const resolver of committedResolvers)
           resolver.unsubscribe();
       }
     };
@@ -85,3 +88,10 @@ export class QueenBee {
     return this;
   }
 }
+
+const bot = new WorkerBee();
+const queen = new QueenBee(bot);
+queen.onOperationType("transfer").or.onTransactionId("123").subscribe({
+  next(data) {
+  }
+});
