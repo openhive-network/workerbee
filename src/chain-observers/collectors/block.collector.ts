@@ -6,6 +6,6 @@ export class BlockCollector extends DataCollectorBase {
 
   /* eslint-disable-next-line require-await */
   public async fetchData(): Promise<IBlockData> {
-    return this.registry.cachedBlock;
+    return this.mediator.cachedBlock;
   }
 }

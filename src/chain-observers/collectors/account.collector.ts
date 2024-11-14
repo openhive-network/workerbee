@@ -23,7 +23,7 @@ export class AccountCollector extends DataCollectorBase {
       return result;
 
     for (let i = 0; i < accountNames.length; i += MAX_ACCOUNTS_PER_REQUEST) {
-      const { accounts } = await this.registry.chain.api.database_api.find_accounts({ accounts: accountNames.slice(i, i + MAX_ACCOUNTS_PER_REQUEST) });
+      const { accounts } = await this.mediator.chain.api.database_api.find_accounts({ accounts: accountNames.slice(i, i + MAX_ACCOUNTS_PER_REQUEST) });
 
       result.push(...accounts);
     }
