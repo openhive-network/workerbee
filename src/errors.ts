@@ -7,3 +7,10 @@ export class WorkerBeeError extends Error {
     this.name = "WorkerBeeError";
   }
 }
+
+export class FilterTimeoutError extends WorkerBeeError {
+  public constructor(message: string) {
+    super(message);
+    this.name = "FilterTimeoutError";
+  }
+}

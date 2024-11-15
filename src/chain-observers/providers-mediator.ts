@@ -7,8 +7,9 @@ import { BlockProvider } from "./providers/block.provider";
 import { DataProviderBase } from "./providers/provider-base";
 import { TransactionProvider } from "./providers/transaction.provider";
 import type { IBlockData } from "../interfaces";
-import { WorkerBee } from "src/bot";
+import { DEFAULT_BLOCK_INTERVAL_TIMEOUT, WorkerBee } from "src/bot";
 import { FilterContainer } from "./filter-container";
+import { FilterTimeoutError } from "src/errors";
 
 export type CollectorsData = {
   [K in keyof ProvidersMediator["availableCollectors"]]: ReturnType<ProvidersMediator["availableCollectors"][K]["fetchData"]>
@@ -91,14 +92,25 @@ export class ProvidersMediator {
     // Start providing parsed, cached data to filters
     for(const [listener, filters] of this.filters.entries())
       // Apply OR on all filter containers waiting for the first to finish
-      Promise.race(filters.map(resolver => resolver.match(providersData))).then(data => {
+      Promise.race([
+        new Promise<void>((_, reject) => {
+          setTimeout(reject, DEFAULT_BLOCK_INTERVAL_TIMEOUT, new FilterTimeoutError('Filter timed out'));
+        }),
+        ...filters.map(resolver => resolver.match(providersData))
+      ]).then(data => {
         // Call user listener if exists
         listener.next?.(data);
 
         // Cancel all of the filters (canceling the resolved filters does not afect the final result)
         for(const filter of filters)
           filter.cancel();
-      }).catch(listener.error ?? (() => {})); // On any error call user error listener if exists
+      }).catch(error => {
+        // Do not call user error listener if the error is an internal timeout error
+        if(typeof error === "object" && error instanceof FilterTimeoutError)
+          return;
+
+        listener.error?.(error);
+      }); // On any error call user error listener if exists
   }
 
   public registerListener(listener: Partial<Observer<any>>, filters: FilterContainer[]) {
@@ -111,6 +123,8 @@ export class ProvidersMediator {
     const options = this.filters.get(listener);
     if (!options)
       return;
+
+    listener.complete?.();
 
     this.filters.delete(listener);
 
