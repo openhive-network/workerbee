@@ -1,23 +1,11 @@
 import type { Observer, Unsubscribable } from "rxjs";
 
-import { Resolver } from "./chain-observers/resolver";
+import { FilterContainer } from "./chain-observers/filter-container";
 import { CollectorsOptions, ProvidersMediator } from "./chain-observers/providers-mediator";
 import { WorkerBee } from "./bot";
 import { operation } from "@hiveio/wax";
 import { OperationFilter } from "./chain-observers/filters/operations-filter";
 import { TransactionIdFilter } from "./chain-observers/filters/transaction-id-filter";
-
-type RequireFilterType<T> = T extends {
-  registerFilter: any;
-  unregisterFilter: any
-} ? T : never;
-
-type RegisterArgs<T> = T extends {
-  registerFilter: infer RegisterOptions;
-  unregisterFilter: infer UnRegisterOptions;
-} ? (
-  RegisterOptions extends UnRegisterOptions ? (RegisterOptions extends (arg0: (data: any) => void, ...args: infer OtherOptions) => void ? OtherOptions : never) : never
-) : never;
 
 export class QueenBee {
   private mediator = new ProvidersMediator(this.worker);
@@ -26,72 +14,48 @@ export class QueenBee {
     private readonly worker: WorkerBee
   ) {}
 
-  private currentResolver = new Resolver();
-  private resolvers: Resolver[] = [];
-  private options: Record<string, any> | CollectorsOptions = {};
+  private currentFilterContainer = new FilterContainer();
+  private filterContainers: FilterContainer[] = [];
 
-  private pushFilter<T>(FilterClassType: RequireFilterType<T>, ...args: RegisterArgs<T>): void {
-    this.currentResolver.push({
-      subscribe: (observer: Observer<any>) => {
-        FilterClassType.registerFilter(data => {
-          observer.next(data);
-        }, ...args as any[]);
+  public subscribe(observer: Partial<Observer<any>>): Unsubscribable {
+    if (this.currentFilterContainer.hasUnderlyingFilters)
+      this.filterContainers.push(this.currentFilterContainer);
 
-        return {
-          unsubscribe: () => {
-            FilterClassType.unregisterFilter(data => {
-              observer.next(data);
-            },  ...args as any[]);
-          }
-        };
-      }
-    });
-  }
+    const committedFilters = this.filterContainers;
 
-  public subscribe(observer: Observer<any>): Unsubscribable {
-    if (this.currentResolver.hasSubscribables)
-      this.resolvers.push(this.currentResolver);
+    this.mediator.registerListener(observer, committedFilters);
 
-    const committedResolvers = this.resolvers;
-
-    this.mediator.registerListener(observer, committedResolvers, this.options);
-
-    this.resolvers = [];
-    this.currentResolver = new Resolver();
+    this.filterContainers = [];
+    this.currentFilterContainer = new FilterContainer();
 
     return {
       unsubscribe: () => {
-        for(const resolver of committedResolvers)
-          resolver.unsubscribe();
+        this.mediator.unregisterListener(observer);
+
+        for(const resolver of committedFilters)
+          resolver.cancel();
       }
     };
   }
 
   public get or() {
-    if (this.currentResolver.hasSubscribables) {
-      this.resolvers.push(this.currentResolver);
-      this.currentResolver = new Resolver();
+    if (this.currentFilterContainer.hasUnderlyingFilters) {
+      this.filterContainers.push(this.currentFilterContainer);
+      this.currentFilterContainer = new FilterContainer();
     }
 
     return this;
   }
 
   public onOperationType(operationType: keyof operation): this {
-    this.pushFilter(OperationFilter, operationType);
+    this.currentFilterContainer.pushFilter(new OperationFilter(operationType));
 
     return this;
   }
 
   public onTransactionId(transactionId: string): this {
-    this.pushFilter(TransactionIdFilter, transactionId);
+    this.currentFilterContainer.pushFilter(new TransactionIdFilter(transactionId));
 
     return this;
   }
 }
-
-const bot = new WorkerBee();
-const queen = new QueenBee(bot);
-queen.onOperationType("transfer").or.onTransactionId("123").subscribe({
-  next(data) {
-  }
-});

@@ -8,9 +8,7 @@ import { DataProviderBase } from "./providers/provider-base";
 import { TransactionProvider } from "./providers/transaction.provider";
 import type { IBlockData } from "../interfaces";
 import { WorkerBee } from "src/bot";
-import { FilterBase } from "./filters/filter-base";
-import { OperationFilter } from "./filters/operations-filter";
-import { Resolver } from "./resolver";
+import { FilterContainer } from "./filter-container";
 
 export type CollectorsData = {
   [K in keyof ProvidersMediator["availableCollectors"]]: ReturnType<ProvidersMediator["availableCollectors"][K]["fetchData"]>
@@ -51,11 +49,7 @@ export class ProvidersMediator {
     accounts: new AccountCollector(this)
   } satisfies Record<string, DataCollectorBase>;
 
-  private availableFilters: Array<FilterBase> = [
-    new OperationFilter()
-  ];
-
-  private resolvers = new Map<Resolver[], { options: Record<string, any> | CollectorsOptions, listener: Observer<any> }>();
+  private filters = new Map<Partial<Observer<any>>, FilterContainer[]>();
 
   public cachedBlock!: IBlockData;
 
@@ -63,9 +57,22 @@ export class ProvidersMediator {
     return this.worker.chain!;
   }
 
+  public aggregate() {
+    // Aggregate required providers from all filter containers
+    const requiredProviders = new Set<keyof ProvidersData>();
+    for(const [, filters] of this.filters)
+      for(const filter of filters)
+        for(const aggregate of filter.aggregate())
+          requiredProviders.add(aggregate);
+
+    return [...requiredProviders];
+  }
+
   // This should be called on new block:
   public notify(blockData: IBlockData) {
     this.cachedBlock = blockData;
+
+    const requiredProviders = this.aggregate();
 
     const collectorsData: CollectorsData = {} as CollectorsData;
 
@@ -83,55 +90,28 @@ export class ProvidersMediator {
       providersData[providerName] = this.availableProviders[providerName].parseData(collectorsData) as any;
     }
 
-    void this.applyFilters(providersData);
+    // Start providing data to filters
+    for(const [listener, filters] of this.filters.entries())
+      // Apply OR on all filter containers waiting for the first to finish
+      Promise.race(filters.map(resolver => resolver.match(providersData))).then(data => {
+        // Call user listener if exists
+        listener.next?.(data);
 
-    for(const [resolvers, { listener }] of this.resolvers.entries())
-      Promise.race(resolvers.map(resolver => resolver.startResolve())).then(data => {
-        listener.next(data);
-
-        for(const resolver of resolvers)
-          resolver.cancel();
-      }).catch(listener.error);
+        // Cancel all of the filters (canceling the resolved filters does not afect the final result)
+        for(const filter of filters)
+          filter.cancel();
+      }).catch(listener.error ?? (() => {})); // On any error call user error listener if exists
   }
 
-  private async applyFilters(data: ProvidersData) {
-    for (const filter of this.availableFilters)
-      filter.parse(data).catch(error => {
-        this.worker.emit("error", error);
-      });
+  public registerListener(listener: Partial<Observer<any>>, filters: FilterContainer[]) {
+    this.filters.set(listener, filters);
   }
 
-  public registerListener(listener: Observer<any>, resolvers: Resolver[], options: Record<string, any> | CollectorsOptions) {
-    for (const key in this.availableCollectors) {
-      const collectorName = key as keyof ProvidersMediator["availableCollectors"];
-
-      this.availableCollectors[collectorName].pushOptions(options as any);
-    }
-
-    for(const resolver of resolvers)
-      resolver.subscribe();
-
-    this.resolvers.set(resolvers, {
-      options,
-      listener
-    });
-  }
-
-  public unregisterListener(resolvers: Resolver[]) {
-    const options = this.resolvers.get(resolvers);
+  public unregisterListener(listener: Partial<Observer<any>>) {
+    const options = this.filters.get(listener);
     if (!options)
       return;
 
-    // Propagate options unregister to all of the collectors
-    for (const key in this.availableCollectors) {
-      const collectorName = key as keyof ProvidersMediator["availableCollectors"];
-
-      this.availableCollectors[collectorName].popOptions(options.options as any);
-    }
-
-    for(const resolver of resolvers)
-      resolver.unsubscribe();
-
-    this.resolvers.delete(resolvers);
+    this.filters.delete(listener);
   }
 }
