@@ -1,6 +1,10 @@
-import type { ProvidersData } from "../providers-mediator";
+import type { CollectorsOptions, ProvidersData } from "../providers-mediator";
 
 export abstract class FilterBase {
+  public constructor(
+    public readonly collectorOptions: Readonly<Partial<CollectorsOptions>> = {}
+  ) {}
+
   /**
    * Matches the data againts the current providers state
    *

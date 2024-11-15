@@ -10,7 +10,13 @@ export class BlockProvider extends DataProviderBase {
 
   public timestamp!: Date;
 
-  public async parseData(data: CollectorsData): Promise<Omit<this, keyof DataProviderBase>> {
+  public aggregate() {
+    return [
+      "block"
+    ] satisfies Array<keyof CollectorsData>;
+  }
+
+  public async parseData(data: Pick<CollectorsData, ReturnType<BlockProvider['aggregate']>[number]>): Promise<Omit<this, keyof DataProviderBase>> {
     const { number, block: { block_id, timestamp, witness } } = await data.block;
 
     this.witness = witness;

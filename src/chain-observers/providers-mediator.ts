@@ -18,12 +18,8 @@ type UnionToIntersection<U> =
   (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
 
 export type CollectorsOptions = UnionToIntersection<{
-    [K in keyof ProvidersMediator["availableCollectors"]]: Parameters<ProvidersMediator["availableCollectors"][K]["pushOptions"]>[0];
-}[keyof ProvidersMediator["availableCollectors"]]>;
-
-export type CollectorsOptionsForObservers = Record<string, any> | {
   [K in keyof ProvidersMediator["availableCollectors"]]: Parameters<ProvidersMediator["availableCollectors"][K]["pushOptions"]>[0];
-}[keyof ProvidersMediator["availableCollectors"]];
+}[keyof ProvidersMediator["availableCollectors"]]>;
 
 export type ProvidersData = {
   [K in keyof ProvidersMediator["availableProviders"]]: ReturnType<ProvidersMediator["availableProviders"][K]["parseData"]>
@@ -57,7 +53,10 @@ export class ProvidersMediator {
     return this.worker.chain!;
   }
 
-  public aggregate() {
+  private cachedRequiredProviders = new Set<keyof ProvidersData>();
+  private cachedRequiredCollectors = new Set<keyof CollectorsData>();
+
+  private cacheRequiredStructures() {
     // Aggregate required providers from all filter containers
     const requiredProviders = new Set<keyof ProvidersData>();
     for(const [, filters] of this.filters)
@@ -65,32 +64,31 @@ export class ProvidersMediator {
         for(const aggregate of filter.aggregate())
           requiredProviders.add(aggregate);
 
-    return [...requiredProviders];
+    // Aggregate required collectors from all required providers
+    const requiredCollectors = new Set<keyof CollectorsData>();
+    for(const provider of requiredProviders)
+      for(const collector of this.availableProviders[provider].aggregate())
+        requiredCollectors.add(collector);
+
+    this.cachedRequiredProviders = requiredProviders;
+    this.cachedRequiredCollectors = requiredCollectors;
   }
 
   // This should be called on new block:
   public notify(blockData: IBlockData) {
     this.cachedBlock = blockData;
 
-    const requiredProviders = this.aggregate();
-
+    // Fetch data from collectors
     const collectorsData: CollectorsData = {} as CollectorsData;
-
-    for (const key in this.availableCollectors) {
-      const collectorName = key as keyof ProvidersMediator["availableCollectors"];
-
+    for (const collectorName of this.cachedRequiredCollectors)
       collectorsData[collectorName] = this.availableCollectors[collectorName].fetchData() as any;
-    }
 
+    // Parse data from collectors
     const providersData: ProvidersData = {} as ProvidersData;
-
-    for (const key in this.availableProviders) {
-      const providerName = key as keyof ProvidersMediator["availableProviders"];
-
+    for (const providerName of this.cachedRequiredProviders)
       providersData[providerName] = this.availableProviders[providerName].parseData(collectorsData) as any;
-    }
 
-    // Start providing data to filters
+    // Start providing parsed, cached data to filters
     for(const [listener, filters] of this.filters.entries())
       // Apply OR on all filter containers waiting for the first to finish
       Promise.race(filters.map(resolver => resolver.match(providersData))).then(data => {
@@ -105,6 +103,8 @@ export class ProvidersMediator {
 
   public registerListener(listener: Partial<Observer<any>>, filters: FilterContainer[]) {
     this.filters.set(listener, filters);
+
+    this.cacheRequiredStructures();
   }
 
   public unregisterListener(listener: Partial<Observer<any>>) {
@@ -113,5 +113,7 @@ export class ProvidersMediator {
       return;
 
     this.filters.delete(listener);
+
+    this.cacheRequiredStructures();
   }
 }

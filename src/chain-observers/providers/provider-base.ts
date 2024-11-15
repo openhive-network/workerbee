@@ -5,5 +5,10 @@ export abstract class DataProviderBase {
     protected readonly mediator: ProvidersMediator
   ) {}
 
-  public abstract parseData(data: CollectorsData): Promise<any>;
+  /**
+   * Specifies which collectors will be requried for this provider
+   */
+  public abstract aggregate(): Array<keyof CollectorsData>;
+
+  public abstract parseData(data: Pick<CollectorsData, ReturnType<DataProviderBase['aggregate']>[number]>): Promise<any>;
 }

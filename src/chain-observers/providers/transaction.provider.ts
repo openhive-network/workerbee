@@ -62,7 +62,13 @@ export class TransactionProvider extends DataProviderBase {
     }
   }
 
-  public async parseData(data: CollectorsData): Promise<Omit<this, keyof DataProviderBase>> {
+  public aggregate() {
+    return [
+      "block"
+    ] satisfies Array<keyof CollectorsData>;
+  }
+
+  public async parseData(data: Pick<CollectorsData, ReturnType<TransactionProvider['aggregate']>[number]>): Promise<Omit<this, keyof DataProviderBase>> {
     const { block: { transaction_ids, transactions } } = await data.block;
 
     for(const tx of transactions) {
