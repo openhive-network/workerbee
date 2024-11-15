@@ -1,3 +1,4 @@
+import { WorkerBeeUnsatisfiedFilterError } from "../errors";
 import { FilterBase } from "./filters/filter-base";
 import { ProvidersData } from "./providers-mediator";
 
@@ -10,7 +11,7 @@ export class FilterContainer extends FilterBase {
 
   private cachedAggregateData = new Set<keyof ProvidersData>();
 
-  private forceResolve = () => {};
+  private forceReject = () => {};
 
   /**
    * Pushes the single filter to the container and caches aggregated data it requires
@@ -40,12 +41,22 @@ export class FilterContainer extends FilterBase {
   }
 
   public match(data: ProvidersData): Promise<any> {
-    // Either all filters resolve or the container is cancelled
+    /*
+     * If at least one of the filters resolves with undefined value,
+     * throw to reject and ignore rest of the promises (Apply AND logic)
+     */
     return Promise.race([
-      new Promise<void>(resolve => {
-        this.forceResolve = resolve; // Resolve instead of reject to prevent unnecessary error logging
+      new Promise((_, reject) => {
+        this.forceReject = () => {
+          reject(new WorkerBeeUnsatisfiedFilterError());
+        };
       }),
-      Promise.all(this.filters.map(filter => filter.match(data)))
+      Promise.all(this.filters.map(filter => filter.match(data).then(node => {
+        if(node === undefined)
+          throw new WorkerBeeUnsatisfiedFilterError();
+
+        return node;
+      })))
     ]);
   }
 
@@ -53,6 +64,6 @@ export class FilterContainer extends FilterBase {
    * Cancels the filter container and forces instant resolve
    */
   public cancel() {
-    this.forceResolve();
+    this.forceReject();
   }
 }

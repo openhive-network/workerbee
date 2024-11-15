@@ -1,11 +1,11 @@
+import { operation } from "@hiveio/wax";
 import type { Observer, Unsubscribable } from "rxjs";
 
-import { FilterContainer } from "./chain-observers/filter-container";
-import { CollectorsOptions, ProvidersMediator } from "./chain-observers/providers-mediator";
 import { WorkerBee } from "./bot";
-import { operation } from "@hiveio/wax";
+import { FilterContainer } from "./chain-observers/filter-container";
 import { OperationFilter } from "./chain-observers/filters/operations-filter";
 import { TransactionIdFilter } from "./chain-observers/filters/transaction-id-filter";
+import { ProvidersMediator } from "./chain-observers/providers-mediator";
 
 export class QueenBee {
   private mediator = new ProvidersMediator(this.worker);

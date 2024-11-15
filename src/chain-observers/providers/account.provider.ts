@@ -19,7 +19,7 @@ export class AccountProvider extends DataProviderBase {
     ] satisfies Array<keyof CollectorsData>;
   }
 
-  public async parseData(data: Pick<CollectorsData, ReturnType<AccountProvider['aggregate']>[number]>): Promise<Omit<this, keyof DataProviderBase>> {
+  public async parseData(data: Pick<CollectorsData, ReturnType<AccountProvider["aggregate"]>[number]>): Promise<Omit<this, keyof DataProviderBase>> {
     const accounts = await data.accounts;
 
     this.accounts = new Map(accounts.map(account => ([account.name, {

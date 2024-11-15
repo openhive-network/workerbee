@@ -10,7 +10,7 @@ export abstract class FilterBase {
    *
    * @param data Partial providers data based on the {@link aggregate} return method
    */
-  public abstract match(data: Pick<ProvidersData, ReturnType<FilterBase['aggregate']>[number]>): Promise<any>;
+  public abstract match(data: Pick<ProvidersData, ReturnType<FilterBase["aggregate"]>[number]>): Promise<any>;
 
   /**
    * Specifies which providers will be requried for this filter

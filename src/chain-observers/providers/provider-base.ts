@@ -10,5 +10,5 @@ export abstract class DataProviderBase {
    */
   public abstract aggregate(): Array<keyof CollectorsData>;
 
-  public abstract parseData(data: Pick<CollectorsData, ReturnType<DataProviderBase['aggregate']>[number]>): Promise<any>;
+  public abstract parseData(data: Pick<CollectorsData, ReturnType<DataProviderBase["aggregate"]>[number]>): Promise<any>;
 }

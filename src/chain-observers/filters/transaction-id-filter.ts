@@ -1,5 +1,5 @@
+import type { transaction } from "@hiveio/wax";
 import type { ProvidersData } from "../providers-mediator";
-import type { transaction } from '@hiveio/wax';
 import { FilterBase } from "./filter-base";
 
 export class TransactionIdFilter extends FilterBase {
@@ -15,7 +15,7 @@ export class TransactionIdFilter extends FilterBase {
     ] satisfies Array<keyof ProvidersData>;
   }
 
-  public async match(data: Pick<ProvidersData, ReturnType<TransactionIdFilter['aggregate']>[number]>): Promise<transaction | void> {
+  public async match(data: Pick<ProvidersData, ReturnType<TransactionIdFilter["aggregate"]>[number]>): Promise<transaction | void> {
     const tx = await data.transactions;
 
     const transaction = tx.getTransactionId(this.transactionId);

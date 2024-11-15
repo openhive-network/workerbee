@@ -63,7 +63,7 @@ export default [ {
     "id-length": [ 2, {
       min: 2,
       max: 30,
-      exceptionPatterns: [ "[ei-l]" ]
+      exceptionPatterns: [ "[_ei-l]" ]
     } ],
     "eol-last": 1,
     "no-multiple-empty-lines": 1,

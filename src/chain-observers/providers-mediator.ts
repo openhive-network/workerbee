@@ -1,15 +1,15 @@
 import { type Observer } from "rxjs";
+import { WorkerBee } from "src/bot";
+import { WorkerBeeUnsatisfiedFilterError } from "../errors";
+import type { IBlockData } from "../interfaces";
 import { AccountCollector } from "./collectors/account.collector";
 import { BlockCollector } from "./collectors/block.collector";
 import { DataCollectorBase } from "./collectors/collector-base";
+import { FilterContainer } from "./filter-container";
 import { AccountProvider } from "./providers/account.provider";
 import { BlockProvider } from "./providers/block.provider";
 import { DataProviderBase } from "./providers/provider-base";
 import { TransactionProvider } from "./providers/transaction.provider";
-import type { IBlockData } from "../interfaces";
-import { DEFAULT_BLOCK_INTERVAL_TIMEOUT, WorkerBee } from "src/bot";
-import { FilterContainer } from "./filter-container";
-import { FilterTimeoutError } from "src/errors";
 
 export type CollectorsData = {
   [K in keyof ProvidersMediator["availableCollectors"]]: ReturnType<ProvidersMediator["availableCollectors"][K]["fetchData"]>
@@ -50,7 +50,7 @@ export class ProvidersMediator {
 
   public cachedBlock!: IBlockData;
 
-  public get chain (): Exclude<WorkerBee['chain'], undefined> {
+  public get chain (): Exclude<WorkerBee["chain"], undefined> {
     return this.worker.chain!;
   }
 
@@ -91,26 +91,18 @@ export class ProvidersMediator {
 
     // Start providing parsed, cached data to filters
     for(const [listener, filters] of this.filters.entries())
-      // Apply OR on all filter containers waiting for the first to finish
-      Promise.race([
-        new Promise<void>((_, reject) => {
-          setTimeout(reject, DEFAULT_BLOCK_INTERVAL_TIMEOUT, new FilterTimeoutError('Filter timed out'));
-        }),
-        ...filters.map(resolver => resolver.match(providersData))
-      ]).then(data => {
-        // Call user listener if exists
-        listener.next?.(data);
+      for(const filter of filters)
+        // Check for any filter to resolve (Apply OR logic)
+        filter.match(providersData).then(data => {
+          // Call user listener if exists
+          listener.next?.(data);
+        }).catch(error => {
+          // Do not call user error listener if the error is an internal error
+          if(typeof error === "object" && error instanceof WorkerBeeUnsatisfiedFilterError)
+            return;
 
-        // Cancel all of the filters (canceling the resolved filters does not afect the final result)
-        for(const filter of filters)
-          filter.cancel();
-      }).catch(error => {
-        // Do not call user error listener if the error is an internal timeout error
-        if(typeof error === "object" && error instanceof FilterTimeoutError)
-          return;
-
-        listener.error?.(error);
-      }); // On any error call user error listener if exists
+          listener.error?.(error);
+        }); // On any error call user error listener if exists
   }
 
   public registerListener(listener: Partial<Observer<any>>, filters: FilterContainer[]) {
