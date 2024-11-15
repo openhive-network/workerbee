@@ -3,6 +3,8 @@ import type { Observer, Unsubscribable } from "rxjs";
 
 import { WorkerBee } from "./bot";
 import { FilterContainer } from "./chain-observers/filter-container";
+import { AccountNameFilter } from "./chain-observers/filters/account-name-filter";
+import { BlockNumberFilter } from "./chain-observers/filters/block-filter";
 import { OperationFilter } from "./chain-observers/filters/operations-filter";
 import { TransactionIdFilter } from "./chain-observers/filters/transaction-id-filter";
 import { ProvidersMediator } from "./chain-observers/providers-mediator";
@@ -43,6 +45,18 @@ export class QueenBee {
       this.filterContainers.push(this.currentFilterContainer);
       this.currentFilterContainer = new FilterContainer();
     }
+
+    return this;
+  }
+
+  public onBlockNumber(number: number): this {
+    this.currentFilterContainer.pushFilter(new BlockNumberFilter(number));
+
+    return this;
+  }
+
+  public onAccountImpacted(account: string): this {
+    this.currentFilterContainer.pushFilter(new AccountNameFilter(account));
 
     return this;
   }
