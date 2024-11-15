@@ -74,16 +74,26 @@ export class TransactionProvider extends DataProviderBase {
     for(const tx of transactions) {
       const iTx = this.mediator.chain.createTransactionFromJson(tx);
 
-      this.transactions.push(iTx);
-      this.protoTransactions.push(iTx.transaction);
+      const protoTx = iTx.transaction;
 
-      for(const op of tx.operations) {
-        const opType: keyof operation = op.type.slice(0, -10) as keyof operation;
+      this.transactions.push(iTx);
+      this.protoTransactions.push(protoTx);
+
+      for(const op of protoTx.operations) {
+        let opType: keyof operation | undefined;
+        for(const opTypePossiblyUndefined in op)
+          if (op[opTypePossiblyUndefined] !== undefined) {
+            opType = opTypePossiblyUndefined as keyof operation;
+            break;
+          }
+        // This should never happen
+        if (!opType)
+          continue;
 
         if(this.operations[opType] === undefined)
           this.operations[opType] = [];
 
-        this.operations[opType].push(op[opType]);
+        this.operations[opType]!.push(op[opType] as any);
       }
     }
 
