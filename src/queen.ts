@@ -1,6 +1,8 @@
 import { operation } from "@hiveio/wax";
 import type { Observer, Unsubscribable } from "rxjs";
 
+import { IQueenBee } from "./interfaces";
+
 import { WorkerBee } from "./bot";
 import { FilterContainer } from "./chain-observers/filter-container";
 import { AccountNameFilter } from "./chain-observers/filters/account-name-filter";
@@ -9,12 +11,14 @@ import { OperationFilter } from "./chain-observers/filters/operations-filter";
 import { TransactionIdFilter } from "./chain-observers/filters/transaction-id-filter";
 import { ProvidersMediator } from "./chain-observers/providers-mediator";
 
-export class QueenBee {
-  private mediator = new ProvidersMediator(this.worker);
+export class QueenBee implements IQueenBee {
+  private readonly mediator;
 
   public constructor(
     private readonly worker: WorkerBee
-  ) {}
+  ) {
+    this.mediator = new ProvidersMediator(this.worker);
+  }
 
   private currentFilterContainer = new FilterContainer();
   private filterContainers: FilterContainer[] = [];
