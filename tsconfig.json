@@ -36,12 +36,12 @@
 
     "sourceMap": true,
 
-    "target": "ES2020",
+    "target": "ES2022",
     "lib": [
-      "ES2020",
+      "ES2022",
       "DOM"
     ],
-    "module": "ES2020",
+    "module": "ES2022",
     "moduleResolution": "Bundler",
     "esModuleInterop": true,
 

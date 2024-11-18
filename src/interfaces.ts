@@ -2,13 +2,18 @@ import type { IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
 import type {
   ApiAccount, ApiBlock, ApiTransaction, FindRcAccountsResponse,
   GetDynamicGlobalPropertiesResponse, IHiveChainInterface,
-  ITransaction, operation } from "@hiveio/wax";
+  ITransaction, operation, transaction } from "@hiveio/wax";
 import type { Subscribable } from "rxjs";
 import type { IStartConfiguration } from "./bot";
 import type { WorkerBeeError } from "./errors";
 
-export interface IBlockData {
+export interface IBlockHeaderData {
   number: number;
+  timestamp: string;
+  witness: string;
+}
+
+export interface IBlockData extends IBlockHeaderData {
   block: ApiBlock;
 }
 
@@ -21,25 +26,18 @@ export interface ITransactionData extends ITransactionDataBase {
   block: IBlockData;
 }
 
-export interface ITransactionProtoData {
-  id: string;
-  transaction: ITransaction;
-}
-
-export interface IOperationData {
-  operation: operation;
-  transaction: ITransaction;
-}
-
-export interface IProtoOperationData {
-  operation: operation;
-  transaction: ITransactionDataBase;
-}
-
 export interface IDgpoData {
   dgpo: GetDynamicGlobalPropertiesResponse;
   block: IBlockData;
 }
+
+export interface IOperationData {
+  impactedOperations: Iterable<{impactedOperation: operation, containingTransaction: transaction}>;
+}
+
+export interface IImpactedAccountData extends IOperationData {
+  accountName: string;
+};
 
 export interface IAccountData {
   account: ApiAccount;
@@ -58,14 +56,14 @@ export interface IQueenBee {
    * @param blockId block id to observe
    * @returns subscribable object that will call `next` only once and completes
    */
-  block(blockId: string): Subscribable<IBlockData>;
+  //block(blockId: string): Subscribable<IBlockData>;
   /**
    * Observes block with given number and notifies on its detection
    *
    * @param blockNumber block number to observe
    * @returns subscribable object that will call `next` only once and completes
    */
-  block(blockNumber: number): Subscribable<IBlockData>;
+  onBlockNumber(blockNumber: number): Subscribable<IBlockData>;
 
   /**
    * Observes transaction with given id and notifies on its detection
@@ -73,7 +71,7 @@ export interface IQueenBee {
    * @param transactionId transaction id to observe
    * @returns subscribable object that will call `next` only once and completes
    */
-  transaction(transactionId: string): Subscribable<ITransactionData>;
+  onTransactionId(transactionId: string): Subscribable<ITransactionData>;
 
   /**
    * Observes given account and notifies when new operation in blockchain related to the given account is detected (no virtual operations for now)
@@ -81,7 +79,7 @@ export interface IQueenBee {
    * @param name account name to observe
    * @returns subscribable object that will call `next` on every operation related to the given account
    */
-  accountOperations(name: string): Subscribable<IProtoOperationData>;
+  accountOperations(name: string): Subscribable<IOperationData>;
 
   /**
    * Observes given account and notifies when its manabar is 98 percent loaded

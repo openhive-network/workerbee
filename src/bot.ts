@@ -92,7 +92,7 @@ export class WorkerBee extends EventEmitter implements IWorkerBee {
 
     const apiTx = this.chain!.createTransactionFromJson(toBroadcast);
 
-    return this.observe.transaction(apiTx.id, expireDate.getTime());
+    return this.observe.onTransactionId(apiTx.id, expireDate.getTime());
   }
 
   public async start(wallet?: IBeekeeperUnlockedWallet): Promise<void> {
