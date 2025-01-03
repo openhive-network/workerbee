@@ -45,7 +45,7 @@ export const DEFAULT_BLOCK_INTERVAL_TIMEOUT_MS = 2000;
 export class WorkerBee implements IWorkerBee {
   public readonly configuration: IStartConfiguration;
 
-  public chain?: TWaxExtended<typeof WaxExtendTypes>;
+  public chain?: TWaxExtended<WaxExtendTypes>;
 
   private wallet?: IBeekeeperUnlockedWallet;
 

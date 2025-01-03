@@ -1,7 +1,7 @@
 import type { WorkerBee } from "../../../bot";
 import {
   AccountClassifier, BlockClassifier, BlockHeaderClassifier,
-  DynamicGlobalPropertiesClassifier, ImpactedAccountClassifier, OperationClassifier, RcAccountClassifier
+  DynamicGlobalPropertiesClassifier, FeedPriceClassifier, ImpactedAccountClassifier, OperationClassifier, RcAccountClassifier
 } from "../../classifiers";
 import { IEvaluationContextClass } from "../../classifiers/collector-classifier-base";
 import { CollectorBase } from "../../collectors/collector-base";
@@ -11,6 +11,7 @@ import { OperationCollector } from "../../collectors/common/operation-collector"
 import { AccountCollector } from "../../collectors/jsonrpc/account-collector";
 import { BlockCollector } from "../../collectors/jsonrpc/block-collector";
 import { DynamicGlobalPropertiesCollector } from "../../collectors/jsonrpc/dynamic-global-properties-collector";
+import { FeedPriceCollector } from "../../collectors/jsonrpc/feed-price-collector";
 import { RcAccountCollector } from "../../collectors/jsonrpc/rc-account-collector";
 
 export const JsonRpcFactoryData: (worker: WorkerBee) => Array<[IEvaluationContextClass, CollectorBase]> = (worker: WorkerBee) => ([
@@ -20,5 +21,6 @@ export const JsonRpcFactoryData: (worker: WorkerBee) => Array<[IEvaluationContex
   [AccountClassifier, new AccountCollector(worker)],
   [RcAccountClassifier, new RcAccountCollector(worker)],
   [ImpactedAccountClassifier, new ImpactedAccountCollector(worker)],
-  [OperationClassifier, new OperationCollector(worker)]
+  [OperationClassifier, new OperationCollector(worker)],
+  [FeedPriceClassifier, new FeedPriceCollector(worker)]
 ]);
