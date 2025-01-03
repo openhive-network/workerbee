@@ -29,7 +29,8 @@ export class FeedPriceCollector extends CollectorBase {
         marketMedianHistory: feedHistoryData.market_median_history,
         currentMinHistory: feedHistoryData.current_min_history,
         currentMaxHistory: feedHistoryData.current_max_history,
-        priceHistory: feedHistoryData.price_history
+        priceHistory: feedHistoryData.price_history.reverse(),
+        lastFeedPriceRetrievalTimestamp: new Date()
       };
     }
 

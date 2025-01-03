@@ -9,6 +9,8 @@ import { BlockNumberFilter } from "./chain-observers/filters/block-filter";
 import { LogicalAndFilter, LogicalOrFilter } from "./chain-observers/filters/composite-filter";
 import { CustomOperationFilter } from "./chain-observers/filters/custom-operation-filter";
 import { ExchangeTransferFilter } from "./chain-observers/filters/exchange-transfer-filter";
+import { FeedPriceChangeFilter } from "./chain-observers/filters/feed-price-change-percent-filter";
+import { FeedPriceNoChangeFilter } from "./chain-observers/filters/feed-price-no-change-filter";
 import type { FilterBase } from "./chain-observers/filters/filter-base";
 import { FollowFilter } from "./chain-observers/filters/follow-filter";
 import { ImpactedAccountFilter } from "./chain-observers/filters/impacted-account-filter";
@@ -23,6 +25,7 @@ import { AccountProvider } from "./chain-observers/providers/account-provider";
 import { BlockHeaderProvider } from "./chain-observers/providers/block-header-provider";
 import { BlockProvider } from "./chain-observers/providers/block-provider";
 import { ExchangeTransferProvider } from "./chain-observers/providers/exchange-transfer-provider";
+import { FeedPriceProvider } from "./chain-observers/providers/feed-price-provider";
 import { MentionedAccountProvider } from "./chain-observers/providers/mention-provider";
 import { ProviderBase } from "./chain-observers/providers/provider-base";
 import { RcAccountProvider } from "./chain-observers/providers/rc-account-provider";
@@ -130,6 +133,24 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
 
   public onCustomOperation(id: string | number): QueenBee<TPreviousSubscriberData> {
     this.operands.push(new CustomOperationFilter(this.worker, id));
+
+    return this;
+  }
+
+  public onFeedPriceChange(percent: number): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new FeedPriceChangeFilter(this.worker, percent));
+
+    return this;
+  }
+
+  public onFeedPriceNoChange(lastHoursCount: number = 24): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new FeedPriceNoChangeFilter(this.worker, lastHoursCount));
+
+    return this;
+  }
+
+  public provideFeedPriceData(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<FeedPriceProvider["provide"]>>> {
+    this.providers.push(new FeedPriceProvider());
 
     return this;
   }
