@@ -8,6 +8,7 @@ import { BalanceChangeFilter } from "./chain-observers/filters/balance-change-fi
 import { BlockNumberFilter } from "./chain-observers/filters/block-filter";
 import { LogicalAndFilter, LogicalOrFilter } from "./chain-observers/filters/composite-filter";
 import { CustomOperationFilter } from "./chain-observers/filters/custom-operation-filter";
+import { ExchangeTransferFilter } from "./chain-observers/filters/exchange-transfer-filter";
 import type { FilterBase } from "./chain-observers/filters/filter-base";
 import { FollowFilter } from "./chain-observers/filters/follow-filter";
 import { ImpactedAccountFilter } from "./chain-observers/filters/impacted-account-filter";
@@ -21,6 +22,7 @@ import { WhaleAlertFilter } from "./chain-observers/filters/whale-alert-filter";
 import { AccountProvider } from "./chain-observers/providers/account-provider";
 import { BlockHeaderProvider } from "./chain-observers/providers/block-header-provider";
 import { BlockProvider } from "./chain-observers/providers/block-provider";
+import { ExchangeTransferProvider } from "./chain-observers/providers/exchange-transfer-provider";
 import { MentionedAccountProvider } from "./chain-observers/providers/mention-provider";
 import { ProviderBase } from "./chain-observers/providers/provider-base";
 import { RcAccountProvider } from "./chain-observers/providers/rc-account-provider";
@@ -185,6 +187,13 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public onWhaleAlert(asset: asset): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<WhaleAlertProvider["provide"]>>> {
     this.operands.push(new WhaleAlertFilter(this.worker, asset));
     this.providers.push(new WhaleAlertProvider(asset));
+
+    return this;
+  }
+
+  public onExchangeTransfer(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ExchangeTransferProvider["provide"]>>> {
+    this.operands.push(new ExchangeTransferFilter(this.worker));
+    this.providers.push(new ExchangeTransferProvider());
 
     return this;
   }
