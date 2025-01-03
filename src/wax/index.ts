@@ -11,7 +11,17 @@ export type WaxExtendTypes = {
         current_max_history: price;
         price_history: price[];
       }
-    }
+    };
+    find_witnesses: {
+      params: { owners: string[]; };
+      result: { witnesses: Array<{
+        owner: string;
+        total_missed: number;
+        running_version: string;
+        last_confirmed_block_num: number;
+        // ...
+      }>; };
+    };
   }
 };
 

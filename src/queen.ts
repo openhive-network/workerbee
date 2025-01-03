@@ -21,6 +21,7 @@ import { ReblogFilter } from "./chain-observers/filters/reblog-filter";
 import { TransactionIdFilter } from "./chain-observers/filters/transaction-id-filter";
 import { VoteFilter } from "./chain-observers/filters/vote-filter";
 import { WhaleAlertFilter } from "./chain-observers/filters/whale-alert-filter";
+import { WitnessMissedBlocksFilter } from "./chain-observers/filters/witness-miss-block-filter";
 import { AccountProvider } from "./chain-observers/providers/account-provider";
 import { BlockHeaderProvider } from "./chain-observers/providers/block-header-provider";
 import { BlockProvider } from "./chain-observers/providers/block-provider";
@@ -31,6 +32,7 @@ import { ProviderBase } from "./chain-observers/providers/provider-base";
 import { RcAccountProvider } from "./chain-observers/providers/rc-account-provider";
 import { TransactionByIdProvider } from "./chain-observers/providers/transaction-provider";
 import { WhaleAlertProvider } from "./chain-observers/providers/whale-alert-provider";
+import { WitnessProvider } from "./chain-observers/providers/witness-provider";
 import type { Observer, Unsubscribable } from "./types/subscribable";
 
 export class QueenBee<TPreviousSubscriberData extends object = {}> {
@@ -182,6 +184,12 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     return this;
   }
 
+  public onWitnessMissedBlocks(witness: TAccountName, missedBlocksMinCount: number): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new WitnessMissedBlocksFilter(this.worker, witness, missedBlocksMinCount));
+
+    return this;
+  }
+
   public onBlock(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<BlockHeaderProvider["provide"]>>> {
     this.operands.push(new BlockChangedFilter(this.worker));
     this.providers.push(new BlockHeaderProvider());
@@ -193,6 +201,14 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     TAccounts extends Array<TAccountName>
   >(...accounts: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<AccountProvider<TAccounts>["provide"]>>> {
     this.providers.push(new AccountProvider<TAccounts>(accounts));
+
+    return this;
+  }
+
+  public provideWitnesses<
+    TAccounts extends Array<TAccountName>
+  >(...witnesses: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<WitnessProvider<TAccounts>["provide"]>>> {
+    this.providers.push(new WitnessProvider<TAccounts>(witnesses));
 
     return this;
   }
