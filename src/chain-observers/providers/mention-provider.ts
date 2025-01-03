@@ -1,6 +1,5 @@
 import { comment, TAccountName } from "@hiveio/wax";
 import { WorkerBeeIterable } from "../../types/iterator";
-import { mentionedAccount } from "../../utils/mention";
 import { OperationClassifier } from "../classifiers";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { DataEvaluationContext } from "../factories/data-evaluation-context";
@@ -34,8 +33,14 @@ export class MentionedAccountProvider<TMentions extends Array<TAccountName> = Ar
 
     for(const { operation } of (operationsPerType.comment ?? []))
       for(const account of this.accounts)
-        if (mentionedAccount(account, operation.body))
-          mentioned[account].push(operation);
+        try {
+          const jsonMetadata = JSON.parse(operation.json_metadata);
+
+          if ("users" in jsonMetadata && Array.isArray(jsonMetadata.users))
+            if (jsonMetadata.users.indexOf(account) !== -1)
+              mentioned[account].push(operation);
+          // eslint-disable-next-line no-empty
+        } catch {}
 
 
     return {

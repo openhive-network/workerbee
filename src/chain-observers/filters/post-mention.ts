@@ -1,5 +1,4 @@
 import type { WorkerBee } from "../../bot";
-import { mentionedAccount } from "../../utils/mention";
 import { OperationClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { DataEvaluationContext } from "../factories/data-evaluation-context";
@@ -23,8 +22,14 @@ export class PostMentionFilter extends FilterBase {
     const { operationsPerType } = await data.get(OperationClassifier);
 
     for(const { operation } of (operationsPerType.comment ?? []))
-      if (mentionedAccount(this.account, operation.body))
-        return true;
+      try {
+        const jsonMetadata = JSON.parse(operation.json_metadata);
+
+        if ("users" in jsonMetadata && Array.isArray(jsonMetadata.users))
+          if (jsonMetadata.users.indexOf(this.account) !== -1)
+            return true;
+        // eslint-disable-next-line no-empty
+      } catch {}
 
     return false;
   }
