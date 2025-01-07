@@ -4,6 +4,7 @@ import { WorkerBee } from "./bot";
 import { AccountCreatedFilter } from "./chain-observers/filters/account-created-filter";
 import { AccountFullManabarFilter } from "./chain-observers/filters/account-full-manabar-filter";
 import { AccountMetadataChangeFilter } from "./chain-observers/filters/account-metadata-change-filter";
+import { AlarmFilter } from "./chain-observers/filters/alarm-filter";
 import { BalanceChangeFilter } from "./chain-observers/filters/balance-change-filter";
 import { BlockNumberFilter } from "./chain-observers/filters/block-filter";
 import { LogicalAndFilter, LogicalOrFilter } from "./chain-observers/filters/composite-filter";
@@ -24,6 +25,7 @@ import { VoteFilter } from "./chain-observers/filters/vote-filter";
 import { WhaleAlertFilter } from "./chain-observers/filters/whale-alert-filter";
 import { WitnessMissedBlocksFilter } from "./chain-observers/filters/witness-miss-block-filter";
 import { AccountProvider } from "./chain-observers/providers/account-provider";
+import { AlarmProvider } from "./chain-observers/providers/alarm-provider";
 import { BlockHeaderProvider } from "./chain-observers/providers/block-header-provider";
 import { BlockProvider } from "./chain-observers/providers/block-provider";
 import { ExchangeTransferProvider } from "./chain-observers/providers/exchange-transfer-provider";
@@ -176,6 +178,15 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   >(mentionedAccount: TMention): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<MentionedAccountProvider<[TMention]>["provide"]>>> {
     this.operands.push(new PostMentionFilter(this.worker, mentionedAccount));
     this.providers.push(new MentionedAccountProvider<[TMention]>([mentionedAccount]));
+
+    return this;
+  }
+
+  public onAlarm<
+    TAccount extends TAccountName
+  >(watchAccount: TAccount): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<AlarmProvider<[TAccount]>["provide"]>>> {
+    this.operands.push(new AlarmFilter(this.worker, watchAccount));
+    this.providers.push(new AlarmProvider<[TAccount]>([watchAccount]));
 
     return this;
   }

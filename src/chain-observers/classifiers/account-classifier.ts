@@ -29,6 +29,8 @@ export interface IAccount {
   postingJsonMetadata: Record<string, any>;
   jsonMetadata: Record<string, any>;
   balance: IAccountBalance;
+  recoveryAccount: string;
+  governanceVoteExpiration?: Date;
 }
 
 export interface IAccountData {

@@ -32,8 +32,8 @@ export class WitnessCollector extends CollectorBase {
       const { witnesses: owners } = await this.worker.chain!.api.database_api.find_witnesses({ owners: chunk });
 
       for(const account of owners)
-        witnessNames[account.owner] = {
-          name: account.owner,
+        witnesses[account.owner] = {
+          owner: account.owner,
           runningVersion: account.running_version,
           totalMissedBlocks: account.total_missed,
           lastConfirmedBlockNum: account.last_confirmed_block_num

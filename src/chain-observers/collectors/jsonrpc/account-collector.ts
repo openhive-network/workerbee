@@ -39,9 +39,16 @@ export class AccountCollector extends CollectorBase {
 
       const { accounts: apiAccounts } = await this.worker.chain!.api.database_api.find_accounts({ accounts: chunk });
 
-      for(const account of apiAccounts)
+      for(const account of apiAccounts) {
+        let governanceVoteExpiration: Date | undefined = new Date(`${account.governance_vote_expiration_ts}Z`);
+
+        if (governanceVoteExpiration.getTime() <= 0) // Null time
+          governanceVoteExpiration = undefined;
+
         accounts[account.name] = {
           name: account.name,
+          recoveryAccount: account.recovery_account,
+          governanceVoteExpiration,
           postingJsonMetadata: tryParseJson(account.posting_json_metadata),
           jsonMetadata: tryParseJson(account.json_metadata),
           balance: {
@@ -89,6 +96,7 @@ export class AccountCollector extends CollectorBase {
             }
           }
         };
+      }
     }
 
     return {

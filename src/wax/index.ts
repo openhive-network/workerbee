@@ -22,6 +22,21 @@ export type WaxExtendTypes = {
         // ...
       }>; };
     };
+    find_decline_voting_rights_requests: {
+      params: { accounts: string[]; };
+      result: { requests: Array<{
+        account: string;
+        effective_date: string;
+      }>; };
+    };
+    find_change_recovery_account_requests: {
+      params: { accounts: string[]; };
+      result: { requests: Array<{
+        account_to_recover: string;
+        recovery_account: string;
+        effective_on: string;
+      }>; };
+    };
   }
 };
 
