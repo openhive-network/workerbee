@@ -1,5 +1,5 @@
 import { price } from "@hiveio/wax";
-import { WorkerBeeIterable } from "src/types/iterator";
+import { WorkerBeeIterable } from "../../types/iterator";
 import { FeedPriceClassifier } from "../classifiers";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { DataEvaluationContext } from "../factories/data-evaluation-context";

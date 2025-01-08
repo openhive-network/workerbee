@@ -14,6 +14,7 @@ import { FeedPriceNoChangeFilter } from "./chain-observers/filters/feed-price-no
 import type { FilterBase } from "./chain-observers/filters/filter-base";
 import { FollowFilter } from "./chain-observers/filters/follow-filter";
 import { ImpactedAccountFilter } from "./chain-observers/filters/impacted-account-filter";
+import { InternalMarketFilter } from "./chain-observers/filters/internal-market-filter";
 import { BlockChangedFilter } from "./chain-observers/filters/new-block-filter";
 import { PostFilter } from "./chain-observers/filters/post-filter";
 import { PostMentionFilter } from "./chain-observers/filters/post-mention";
@@ -27,6 +28,7 @@ import { BlockHeaderProvider } from "./chain-observers/providers/block-header-pr
 import { BlockProvider } from "./chain-observers/providers/block-provider";
 import { ExchangeTransferProvider } from "./chain-observers/providers/exchange-transfer-provider";
 import { FeedPriceProvider } from "./chain-observers/providers/feed-price-provider";
+import { InternalMarketProvider } from "./chain-observers/providers/internal-market-provider";
 import { MentionedAccountProvider } from "./chain-observers/providers/mention-provider";
 import { ProviderBase } from "./chain-observers/providers/provider-base";
 import { RcAccountProvider } from "./chain-observers/providers/rc-account-provider";
@@ -186,6 +188,13 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
 
   public onWitnessMissedBlocks(witness: TAccountName, missedBlocksMinCount: number): QueenBee<TPreviousSubscriberData> {
     this.operands.push(new WitnessMissedBlocksFilter(this.worker, witness, missedBlocksMinCount));
+
+    return this;
+  }
+
+  public onInternalMarketOperation(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<InternalMarketProvider["provide"]>>> {
+    this.operands.push(new InternalMarketFilter(this.worker));
+    this.providers.push(new InternalMarketProvider());
 
     return this;
   }
