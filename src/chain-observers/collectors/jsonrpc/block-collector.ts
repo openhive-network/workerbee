@@ -1,6 +1,7 @@
 import { transaction } from "@hiveio/wax";
 import { WorkerBeeError } from "../../../errors";
 import { DynamicGlobalPropertiesClassifier } from "../../classifiers";
+import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
@@ -8,6 +9,10 @@ export class BlockCollector extends CollectorBase {
   private currentHeadBlock = -1;
 
   private cachedBlockData!: TAvailableClassifiers["BlockClassifier"];
+
+  public usedContexts(): Array<TRegisterEvaluationContext> {
+    return [DynamicGlobalPropertiesClassifier];
+  }
 
   public async fetchData(data: DataEvaluationContext) {
     const { headBlockNumber } = await data.get(DynamicGlobalPropertiesClassifier);

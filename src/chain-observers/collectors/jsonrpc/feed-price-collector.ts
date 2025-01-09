@@ -1,4 +1,5 @@
 import { DynamicGlobalPropertiesClassifier } from "../../classifiers";
+import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
 import { IFeedPriceData } from "../../classifiers/feed-price-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
@@ -14,6 +15,10 @@ export class FeedPriceCollector extends CollectorBase {
   private cachedFeedHistoryData: IFeedPriceData | undefined;
 
   private previouslyCheckedBlockNumber = 0;
+
+  public usedContexts(): Array<TRegisterEvaluationContext> {
+    return [DynamicGlobalPropertiesClassifier];
+  }
 
   public async fetchData(data: DataEvaluationContext) {
     const { headBlockNumber } = await data.get(DynamicGlobalPropertiesClassifier);
