@@ -42,9 +42,13 @@ export class MentionedAccountProvider<TMentions extends Array<TAccountName> = Ar
           // eslint-disable-next-line no-empty
         } catch {}
 
+    const mentionedOutput = {} as TMentionedAccountProvided<TMentions>;
+
+    for(const account in mentioned)
+      mentionedOutput[account] = new WorkerBeeIterable(mentioned[account]);
 
     return {
-      mentioned: Object.entries(([account, comments]) => [account, { iterate: () => comments }])
+      mentioned: mentionedOutput
     } as IMentionedAccountProviderData<TMentions>;
   }
 }
