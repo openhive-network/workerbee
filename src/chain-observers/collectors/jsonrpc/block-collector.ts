@@ -35,10 +35,10 @@ export class BlockCollector extends CollectorBase {
     }));
 
     return {
-      BlockClassifier: {
+      BlockClassifier: (this.cachedBlockData = {
         transactionsPerId: new Map<string, transaction>(block.transaction_ids.map((id, index) => [id, transactions[index].transaction])),
         transactions
-      }
+      })
     } satisfies Partial<TAvailableClassifiers>;
   };
 }
