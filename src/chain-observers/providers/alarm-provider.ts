@@ -55,9 +55,10 @@ export class AlarmProvider<TAccounts extends Array<TAccountName> = Array<TAccoun
     for(const account of this.accounts) {
       if (accounts[account].recoveryAccount === STEEM_ACCOUNT_NAME)
         result.alarmsPerAccount[account].push(EAlarmType.LEGACY_RECOVERY_ACCOUNT_SET);
+
       if (accounts[account].governanceVoteExpiration === undefined)
         result.alarmsPerAccount[account].push(EAlarmType.GOVERNANCE_VOTE_EXPIRED);
-      if (accounts[account].governanceVoteExpiration!.getTime() < (Date.now() + ONE_MONTH_MS))
+      else if (accounts[account].governanceVoteExpiration!.getTime() < (Date.now() + ONE_MONTH_MS))
         result.alarmsPerAccount[account].push(EAlarmType.GOVERNANCE_VOTE_EXPIRATION_SOON);
     }
 
