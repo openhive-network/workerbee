@@ -8,7 +8,7 @@ export type TTransactionProvider<TIdOfTx extends Array<string>> = {
   [K in TIdOfTx[number]]: transaction;
 };
 
-export interface IAccountProviderData<TIdOfTx extends Array<string>> {
+export interface ITransactionProviderData<TIdOfTx extends Array<string>> {
   transactions: Partial<TTransactionProvider<TIdOfTx>>;
 };
 
@@ -25,7 +25,7 @@ export class TransactionByIdProvider<TIdOfTx extends Array<string> = Array<strin
     ];
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IAccountProviderData<TIdOfTx>> {
+  public async provide(data: DataEvaluationContext): Promise<ITransactionProviderData<TIdOfTx>> {
     const result = {
       transactions: {}
     };
@@ -35,6 +35,6 @@ export class TransactionByIdProvider<TIdOfTx extends Array<string> = Array<strin
       if (block.transactionsPerId.has(txId))
         result.transactions[txId] = block.transactionsPerId.get(txId);
 
-    return result as IAccountProviderData<TIdOfTx>;
+    return result as ITransactionProviderData<TIdOfTx>;
   }
 }

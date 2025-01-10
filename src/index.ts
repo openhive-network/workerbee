@@ -1,6 +1,11 @@
 import { WorkerBee } from "./bot";
 import { IWorkerBeeConstructor } from "./interfaces";
 
+export * from "./types/iterator";
+export * from "./types/subscribable";
+
+export * from "./chain-observers";
+
 export * from "./interfaces";
 export { IStartConfiguration } from "./bot";
 export { WorkerBeeError } from "./errors";

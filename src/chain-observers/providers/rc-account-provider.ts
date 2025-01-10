@@ -8,7 +8,7 @@ export type TRcAccountProvided<TAccounts extends Array<TAccountName>> = {
   [K in TAccounts[number]]: IRcAccount;
 };
 
-export interface IAccountProviderData<TAccounts extends Array<TAccountName>> {
+export interface IRcAccountProviderData<TAccounts extends Array<TAccountName>> {
   rcAccounts: TRcAccountProvided<TAccounts>;
 };
 
@@ -25,7 +25,7 @@ export class RcAccountProvider<TAccounts extends Array<TAccountName> = Array<TAc
     }));
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IAccountProviderData<TAccounts>> {
+  public async provide(data: DataEvaluationContext): Promise<IRcAccountProviderData<TAccounts>> {
     const result = {
       rcAccounts: {}
     };
@@ -34,6 +34,6 @@ export class RcAccountProvider<TAccounts extends Array<TAccountName> = Array<TAc
     for(const rcAccount of this.rcAccounts)
       result.rcAccounts[rcAccount] = rcAccounts.rcAccounts[rcAccount];
 
-    return result as IAccountProviderData<TAccounts>;
+    return result as IRcAccountProviderData<TAccounts>;
   }
 }
