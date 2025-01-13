@@ -12,11 +12,15 @@ export interface IWitnessProviderData<TAccounts extends Array<TAccountName>> {
   witnesses: TWitnessProvider<TAccounts>;
 };
 
-export class WitnessProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase {
-  public constructor(
-    private readonly witnesses: TAccounts
-  ) {
-    super();
+export interface IWitnessProviderOptions {
+  accounts: string[];
+}
+
+export class WitnessProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IWitnessProviderOptions> {
+  public readonly witnesses: string[] = [];
+
+  public pushOptions(options: IWitnessProviderOptions): void {
+    this.witnesses.push(...options.accounts);
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {

@@ -16,11 +16,16 @@ export interface IWhaleAlertProviderData {
   whaleOperations: WorkerBeeIterable<IOperationTransactionPair<IWhaleAlertMetadata>>;
 };
 
-export class WhaleAlertProvider extends ProviderBase {
-  public constructor(
-    private readonly asset: asset
-  ) {
-    super();
+export interface IWhaleAlertProviderOptions {
+  assets: asset[];
+}
+
+export class WhaleAlertProvider extends ProviderBase<IWhaleAlertProviderOptions> {
+  public readonly assets = new Map<string, asset>();
+
+  public pushOptions(options: IWhaleAlertProviderOptions): void {
+    for(const asset of options.assets)
+      this.assets.set(asset.nai, asset);
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
@@ -39,62 +44,64 @@ export class WhaleAlertProvider extends ProviderBase {
 
     const whaleOperations: IOperationTransactionPair<IWhaleAlertMetadata>[] = [];
 
-    if(transfer)
-      for(const op of transfer)
-        if(isGreaterThan(this.asset, op.operation.amount!))
-          whaleOperations.push({
-            operation: {
-              from: op.operation.from_account,
-              to: op.operation.to_account,
-              amount: op.operation.amount!
-            },
-            transaction: op.transaction
-          });
+    for(const asset of this.assets.values()) {
+      if(transfer)
+        for(const op of transfer)
+          if(isGreaterThan(asset, op.operation.amount!))
+            whaleOperations.push({
+              operation: {
+                from: op.operation.from_account,
+                to: op.operation.to_account,
+                amount: op.operation.amount!
+              },
+              transaction: op.transaction
+            });
 
-    if(fromSavings)
-      for(const op of fromSavings)
-        if(isGreaterThan(this.asset, op.operation.amount!))
-          whaleOperations.push({
-            operation: {
-              from: op.operation.from_account,
-              to: op.operation.to_account,
-              amount: op.operation.amount!
-            },
-            transaction: op.transaction
-          });
+      if(fromSavings)
+        for(const op of fromSavings)
+          if(isGreaterThan(asset, op.operation.amount!))
+            whaleOperations.push({
+              operation: {
+                from: op.operation.from_account,
+                to: op.operation.to_account,
+                amount: op.operation.amount!
+              },
+              transaction: op.transaction
+            });
 
-    if(escrow)
-      for(const op of escrow)
-        if(isGreaterThan(this.asset, op.operation.hbd_amount!))
-          whaleOperations.push({
-            operation: {
-              from: op.operation.from_account,
-              to: op.operation.to_account,
-              amount: op.operation.hbd_amount!
-            },
-            transaction: op.transaction
-          });
-        else if(isGreaterThan(this.asset, op.operation.hive_amount!))
-          whaleOperations.push({
-            operation: {
-              from: op.operation.from_account,
-              to: op.operation.to_account,
-              amount: op.operation.hive_amount!
-            },
-            transaction: op.transaction
-          });
+      if(escrow)
+        for(const op of escrow)
+          if(isGreaterThan(asset, op.operation.hbd_amount!))
+            whaleOperations.push({
+              operation: {
+                from: op.operation.from_account,
+                to: op.operation.to_account,
+                amount: op.operation.hbd_amount!
+              },
+              transaction: op.transaction
+            });
+          else if(isGreaterThan(asset, op.operation.hive_amount!))
+            whaleOperations.push({
+              operation: {
+                from: op.operation.from_account,
+                to: op.operation.to_account,
+                amount: op.operation.hive_amount!
+              },
+              transaction: op.transaction
+            });
 
-    if(recurrent)
-      for(const op of recurrent)
-        if(isGreaterThan(this.asset, op.operation.amount!))
-          whaleOperations.push({
-            operation: {
-              from: op.operation.from_account,
-              to: op.operation.to_account,
-              amount: op.operation.amount!
-            },
-            transaction: op.transaction
-          });
+      if(recurrent)
+        for(const op of recurrent)
+          if(isGreaterThan(asset, op.operation.amount!))
+            whaleOperations.push({
+              operation: {
+                from: op.operation.from_account,
+                to: op.operation.to_account,
+                amount: op.operation.amount!
+              },
+              transaction: op.transaction
+            });
+    }
 
     return {
       whaleOperations: new WorkerBeeIterable(whaleOperations)

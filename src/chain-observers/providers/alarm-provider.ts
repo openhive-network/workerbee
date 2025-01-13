@@ -21,11 +21,15 @@ export interface IAlarmAccountsData<TAccounts extends Array<TAccountName>> {
   alarmsPerAccount: TAlarmAccounts<TAccounts>;
 };
 
-export class AlarmProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase {
-  public constructor(
-    private readonly accounts: TAccounts
-  ) {
-    super();
+export interface IAlarmProviderOptions {
+  accounts: string[];
+}
+
+export class AlarmProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IAlarmProviderOptions> {
+  public readonly accounts: string[] = [];
+
+  public pushOptions(options: IAlarmProviderOptions): void {
+    this.accounts.push(...options.accounts);
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {

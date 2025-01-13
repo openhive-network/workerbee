@@ -12,11 +12,15 @@ export interface IRcAccountProviderData<TAccounts extends Array<TAccountName>> {
   rcAccounts: TRcAccountProvided<TAccounts>;
 };
 
-export class RcAccountProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase {
-  public constructor(
-    private readonly rcAccounts: TAccounts
-  ) {
-    super();
+export interface IRcAccountsProviderOptions {
+  accounts: string[];
+}
+
+export class RcAccountProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IRcAccountsProviderOptions> {
+  public readonly rcAccounts: string[] = [];
+
+  public pushOptions(options: IRcAccountsProviderOptions): void {
+    this.rcAccounts.push(...options.accounts);
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {

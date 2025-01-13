@@ -12,11 +12,16 @@ export interface ITransactionProviderData<TIdOfTx extends Array<string>> {
   transactions: Partial<TTransactionProvider<TIdOfTx>>;
 };
 
-export class TransactionByIdProvider<TIdOfTx extends Array<string> = Array<string>> extends ProviderBase {
-  public constructor(
-    private readonly transactionIds: TIdOfTx
-  ) {
-    super();
+export interface ITransactionByIdProviderOptions {
+  transactionIds: string[];
+}
+
+export class TransactionByIdProvider<TIdOfTx extends Array<string> = Array<string>> extends ProviderBase<ITransactionByIdProviderOptions> {
+  public readonly transactionIds = new Set<string>();
+
+  public pushOptions(options: ITransactionByIdProviderOptions): void {
+    for(const id of options.transactionIds)
+      this.transactionIds.add(id);
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {

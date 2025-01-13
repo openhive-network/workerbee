@@ -44,7 +44,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     private readonly worker: WorkerBee
   ) {}
 
-  private providers: ProviderBase[] = [];
+  private providers = new Map<new () => ProviderBase, ProviderBase>();
   private operands: FilterBase[] = [];
   private filterContainers: FilterBase[] = [];
 
@@ -61,10 +61,10 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     // Optimize by not creating a logical OR filter for only one filter
     const orFilter: FilterBase = committedFilters.length === 1 ? committedFilters[0] : new LogicalOrFilter(this.worker, committedFilters);
 
-    this.worker.mediator.registerListener(observer, orFilter, this.providers);
+    this.worker.mediator.registerListener(observer, orFilter, this.providers.values());
 
     this.filterContainers = [];
-    this.providers = [];
+    this.providers = new Map();
 
     return {
       unsubscribe: () => {
@@ -86,6 +86,18 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     return this as unknown as QueenBee<TPreviousSubscriberData>;
   }
 
+  private pushProvider<T extends new () => ProviderBase>(
+    provider: T,
+    options: InstanceType<T>["pushOptions"] extends undefined ? {} : Parameters<Exclude<InstanceType<T>["pushOptions"], undefined>>[0] = {}
+  ) {
+    let instance = this.providers.get(provider);
+
+    if (!instance)
+      this.providers.set(provider, instance = new provider());
+
+    instance.pushOptions?.(options);
+  }
+
   public onBlockNumber(number: number): QueenBee<TPreviousSubscriberData> {
     this.operands.push(new BlockNumberFilter(this.worker, number));
 
@@ -96,7 +108,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     TIdTx extends string
   >(transactionId: TIdTx): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<TransactionByIdProvider<[TIdTx]>["provide"]>>> {
     this.operands.push(new TransactionIdFilter(this.worker, transactionId));
-    this.providers.push(new TransactionByIdProvider<[TIdTx]>([transactionId]));
+    this.pushProvider(TransactionByIdProvider, { transactionIds: [transactionId] });
 
     return this;
   }
@@ -156,7 +168,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   }
 
   public provideFeedPriceData(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<FeedPriceProvider["provide"]>>> {
-    this.providers.push(new FeedPriceProvider());
+    this.pushProvider(FeedPriceProvider);
 
     return this;
   }
@@ -177,7 +189,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     TMention extends TAccountName
   >(mentionedAccount: TMention): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<MentionedAccountProvider<[TMention]>["provide"]>>> {
     this.operands.push(new PostMentionFilter(this.worker, mentionedAccount));
-    this.providers.push(new MentionedAccountProvider<[TMention]>([mentionedAccount]));
+    this.pushProvider(MentionedAccountProvider, { accounts: [mentionedAccount] });
 
     return this;
   }
@@ -186,7 +198,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     TAccount extends TAccountName
   >(watchAccount: TAccount): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<AlarmProvider<[TAccount]>["provide"]>>> {
     this.operands.push(new AlarmFilter(this.worker, watchAccount));
-    this.providers.push(new AlarmProvider<[TAccount]>([watchAccount]));
+    this.pushProvider(AlarmProvider, { accounts: [watchAccount] });
 
     return this;
   }
@@ -205,14 +217,14 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
 
   public onInternalMarketOperation(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<InternalMarketProvider["provide"]>>> {
     this.operands.push(new InternalMarketFilter(this.worker));
-    this.providers.push(new InternalMarketProvider());
+    this.pushProvider(InternalMarketProvider);
 
     return this;
   }
 
   public onBlock(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<BlockHeaderProvider["provide"]>>> {
     this.operands.push(new BlockChangedFilter(this.worker));
-    this.providers.push(new BlockHeaderProvider());
+    this.pushProvider(BlockHeaderProvider);
 
     return this;
   }
@@ -220,7 +232,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public provideAccounts<
     TAccounts extends Array<TAccountName>
   >(...accounts: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<AccountProvider<TAccounts>["provide"]>>> {
-    this.providers.push(new AccountProvider<TAccounts>(accounts));
+    this.pushProvider(AccountProvider, { accounts });
 
     return this;
   }
@@ -228,7 +240,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public provideWitnesses<
     TAccounts extends Array<TAccountName>
   >(...witnesses: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<WitnessProvider<TAccounts>["provide"]>>> {
-    this.providers.push(new WitnessProvider<TAccounts>(witnesses));
+    this.pushProvider(WitnessProvider, { accounts: witnesses });
 
     return this;
   }
@@ -236,27 +248,27 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public provideRcAccounts<
     TAccounts extends Array<TAccountName>
   >(...accounts: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<RcAccountProvider<TAccounts>["provide"]>>> {
-    this.providers.push(new RcAccountProvider<TAccounts>(accounts));
+    this.pushProvider(RcAccountProvider, { accounts });
 
     return this;
   }
 
   public onWhaleAlert(asset: asset): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<WhaleAlertProvider["provide"]>>> {
     this.operands.push(new WhaleAlertFilter(this.worker, asset));
-    this.providers.push(new WhaleAlertProvider(asset));
+    this.pushProvider(WhaleAlertProvider, { assets: [asset] });
 
     return this;
   }
 
   public onExchangeTransfer(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ExchangeTransferProvider["provide"]>>> {
     this.operands.push(new ExchangeTransferFilter(this.worker));
-    this.providers.push(new ExchangeTransferProvider());
+    this.pushProvider(ExchangeTransferProvider);
 
     return this;
   }
 
   public provideBlockData(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<BlockProvider["provide"]>>> {
-    this.providers.push(new BlockProvider());
+    this.pushProvider(BlockProvider);
 
     return this;
   }

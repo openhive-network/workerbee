@@ -20,7 +20,7 @@ export class ObserverMediator {
     this.factory = new factory(worker);
   }
 
-  private filters = new Map<Partial<Observer<any>>, { filter: FilterBase; providers: ProviderBase[]; }>();
+  private filters = new Map<Partial<Observer<any>>, { filter: FilterBase; providers: Iterable<ProviderBase>; }>();
 
   public notify() {
     const context = this.factory.collect();
@@ -46,7 +46,7 @@ export class ObserverMediator {
       }).catch(error => listener.error?.(error));
   }
 
-  public registerListener(listener: Partial<Observer<any>>, filter: FilterBase, providers: ProviderBase[]) {
+  public registerListener(listener: Partial<Observer<any>>, filter: FilterBase, providers: Iterable<ProviderBase>) {
     this.filters.set(listener, { filter, providers });
 
     for(const classifier of filter.usedContexts())

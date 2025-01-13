@@ -13,11 +13,15 @@ export interface IMentionedAccountProviderData<TMentions extends Array<TAccountN
   mentioned: TMentionedAccountProvided<TMentions>;
 };
 
-export class MentionedAccountProvider<TMentions extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase {
-  public constructor(
-    private readonly accounts: TMentions
-  ) {
-    super();
+export interface IMentionedAccountProviderOptions {
+  accounts: string[];
+}
+
+export class MentionedAccountProvider<TMentions extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IMentionedAccountProviderOptions> {
+  public readonly accounts: string[] = [];
+
+  public pushOptions(options: IMentionedAccountProviderOptions): void {
+    this.accounts.push(...options.accounts);
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
