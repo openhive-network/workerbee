@@ -61,7 +61,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     // Optimize by not creating a logical OR filter for only one filter
     const orFilter: FilterBase = committedFilters.length === 1 ? committedFilters[0] : new LogicalOrFilter(this.worker, committedFilters);
 
-    this.worker.mediator.registerListener(observer, orFilter, this.providers.values());
+    this.worker.mediator.registerListener(observer, orFilter, Array.from(this.providers.values()));
 
     this.filterContainers = [];
     this.providers = new Map();

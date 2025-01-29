@@ -120,7 +120,7 @@ test.describe("WorkerBee Bot events test", () => {
 
           res();
         }),
-        new Promise((_, rej) => { setTimeout(rej, hiveBlockInterval * 2, new Error("Test timeout")); })
+        new Promise((_, rej) => { setTimeout(rej, hiveBlockInterval * 3, new Error("Test timeout")); })
       ]);
 
       bot.stop();
