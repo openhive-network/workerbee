@@ -11,7 +11,7 @@ variables:
 
 include:
   - project: 'hive/common-ci-configuration'
-    ref: 9ec7fd2e0a2491ed808aa1358788a786db9ec035
+    ref: 40451cfbe8c2995c66b2d4150dbb3c4d11fd8590
     file:
       - '/templates/npm_projects.gitlab-ci.yml'
 
@@ -35,7 +35,6 @@ build:
   artifacts:
     paths:
       - "${DIST_DIR}/*.tgz"
-      - "${DIST_DIR}/bundle/web-full.*"
 
     when: always
     expire_in: 1 week
