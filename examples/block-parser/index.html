@@ -30,6 +30,13 @@
   <hr>
   <h2>Log</h2>
   <div id="log"></div>
+  <script type="importmap">
+    {
+      "imports": {
+        "@hiveio/wax": "/node_modules/@hiveio/wax/wasm/dist/bundle/web.js"
+      }
+    }
+  </script>
   <script type="module">
     import WorkerBee from "../../dist/bundle/index.js";
 
@@ -51,8 +58,8 @@
     let bot;
 
     const actualBotWork = async() => {
-      for await(const { block, number } of bot) {
-        log(`Got block #${block.block_id} (${number})`);
+      for await(const { id, number } of bot) {
+        log(`Got block #${id} (${number})`);
       }
     };
 
@@ -73,11 +80,8 @@
 
         bot = new WorkerBee({
           chainOptions: {
-            apiEndpoint: process.env.HIVE_API_HOST || 'https://api.hive.blog/'
+            apiEndpoint: (typeof process === "object" && process.env && process.env.HIVE_API_HOST) || 'https://api.hive.blog/'
           }
-        });
-        bot.on("error", error => {
-          log(error, true);
         });
 
         await bot.start();

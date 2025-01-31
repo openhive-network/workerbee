@@ -40,6 +40,14 @@
   <hr>
   <h2>Log</h2>
   <div id="log"></div>
+  <script type="importmap">
+    {
+      "imports": {
+        "@hiveio/wax": "/node_modules/@hiveio/wax/wasm/dist/bundle/web.js",
+        "@hiveio/beekeeper": "/node_modules/@hiveio/beekeeper/dist/bundle/web.js"
+      }
+    }
+  </script>
   <script type="module">
     import WorkerBee from "../../dist/bundle/index.js";
     import { OperationVisitor } from "@hiveio/wax";
@@ -69,12 +77,12 @@
 
     let bot, work, manaWork, beneficiaryName, voterName;
 
-    let chainId = process.env.CHAIN_ID;
+    let chainId = (typeof process === "object" && process.env && process.env.CHAIN_ID) || undefined;
     if (typeof chainId === "string" && chainId.length > 0)
       chainIdNode.value = chainId;
 
     const implicitApiEndpoint = document.location.protocol + '//' + document.location.hostname + ':3000';
-    let apiEndpoint = apiEndpointInput.value = process.env.DIRECT_API_ENDPOINT || implicitApiEndpoint;
+    let apiEndpoint = apiEndpointInput.value = (typeof process === "object" && process.env && process.env.DIRECT_API_ENDPOINT) || implicitApiEndpoint;
     console.log(`Using API endpoint: "${apiEndpoint}" with chain id: "${chainId}"`);
 
     const voted = new Set(/* Set<`${Account}/${Permlink}`> */);
@@ -150,16 +158,18 @@
     }
 
     const actualBotWork = async (accountToObserve) => {
-      work = bot.observe.accountOperations(accountToObserve).subscribe({
-        next({ op, transaction: { block: { number } } }) {
-          new CommentVisitor(number).accept(op);
+      work = bot.observe.onImpactedAccount(accountToObserve).provideBlockHeaderData().subscribe({
+        next(data) {
+          console.log(data);
+          for(const op of data.impactedAccounts[accountToObserve])
+            new CommentVisitor(data.block.number).accept(op);
         },
         error(error) {
           log(error, true);
         }
       });
 
-      manaWork = bot.observe.accountFullManabar(accountToObserve).subscribe({
+      manaWork = bot.observe.onAccountFullManabar(accountToObserve).subscribe({
         next() {
           const key = posts.keys().next().value;
           if (!key)
@@ -214,9 +224,6 @@
             apiEndpoint,
             chainId
           }
-        });
-        bot.on("error", error => {
-          log(error, true);
         });
 
         const beekeeper = await beekeeperFactory();

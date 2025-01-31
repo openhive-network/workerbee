@@ -31,6 +31,13 @@
   <hr>
   <h2>Log</h2>
   <div id="log"></div>
+  <script type="importmap">
+    {
+      "imports": {
+        "@hiveio/wax": "/node_modules/@hiveio/wax/wasm/dist/bundle/web.js"
+      }
+    }
+  </script>
   <script type="module">
     import WorkerBee from "../../dist/bundle/index.js";
 
@@ -52,7 +59,10 @@
     let bot, work;
 
     const actualBotWork = async(accountToObserve) => {
-      work = bot.observe.accountOperations(accountToObserve).subscribe({
+      work = bot.observe.onImpactedAccount(accountToObserve).subscribe({
+        error(error) {
+          log(error, true);
+        },
         next(op) {
           log(op);
         }
@@ -84,9 +94,6 @@
             chainId: '18dcf0a285365fc58b71f18b3d3fec954aa0c141c44e4e5cb4cf777b9eab274e'
           }
           */
-        });
-        bot.on("error", error => {
-          log(error, true);
         });
 
         await bot.start();
