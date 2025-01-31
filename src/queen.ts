@@ -30,6 +30,7 @@ import { BlockHeaderProvider } from "./chain-observers/providers/block-header-pr
 import { BlockProvider } from "./chain-observers/providers/block-provider";
 import { ExchangeTransferProvider } from "./chain-observers/providers/exchange-transfer-provider";
 import { FeedPriceProvider } from "./chain-observers/providers/feed-price-provider";
+import { ImpactedAccountProvider } from "./chain-observers/providers/impacted-account-provider";
 import { InternalMarketProvider } from "./chain-observers/providers/internal-market-provider";
 import { MentionedAccountProvider } from "./chain-observers/providers/mention-provider";
 import { ProviderBase } from "./chain-observers/providers/provider-base";
@@ -203,8 +204,11 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     return this;
   }
 
-  public onImpactedAccount(account: TAccountName): QueenBee<TPreviousSubscriberData> {
+  public onImpactedAccount<
+    TAccount extends TAccountName
+  >(account: TAccountName): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ImpactedAccountProvider<[TAccount]>["provide"]>>> {
     this.operands.push(new ImpactedAccountFilter(this.worker, account));
+    this.pushProvider(ImpactedAccountProvider, { accounts: [ account ] });
 
     return this;
   }
