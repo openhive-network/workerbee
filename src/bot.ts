@@ -1,11 +1,11 @@
 import type { IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
-import { calculateExpiration, IWaxOptionsChain, IHiveChainInterface, TWaxExtended, ITransaction, ApiTransaction, transaction } from "@hiveio/wax";
+import { calculateExpiration, IWaxOptionsChain, IHiveChainInterface, TWaxExtended, ITransaction, ApiTransaction } from "@hiveio/wax";
 
 import { IBlockData } from "./chain-observers/classifiers/block-classifier";
 import { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
 import { ObserverMediator } from "./chain-observers/observer-mediator";
 import { WorkerBeeError } from "./errors";
-import type { IWorkerBee, IBroadcastOptions } from "./interfaces";
+import type { IWorkerBee, IBroadcastOptions, IBroadcastData } from "./interfaces";
 import { QueenBee } from "./queen";
 import type { Subscribable } from "./types/subscribable";
 import { getWax, WaxExtendTypes } from "./wax";
@@ -71,7 +71,7 @@ export class WorkerBee implements IWorkerBee {
       throw new WorkerBeeError("explicitChain and chainOptions parameters are exclusive");
   }
 
-  public async broadcast(tx: ApiTransaction | ITransaction, options: IBroadcastOptions = {}): Promise<Subscribable<transaction>> {
+  public async broadcast(tx: ApiTransaction | ITransaction, options: IBroadcastOptions = {}): Promise<Subscribable<IBroadcastData>> {
     const toBroadcast: ApiTransaction = "toApiJson" in tx ? tx.toApiJson() as ApiTransaction : tx as ApiTransaction;
 
     if(toBroadcast.signatures.length === 0)
@@ -95,9 +95,12 @@ export class WorkerBee implements IWorkerBee {
 
     return {
       subscribe: observer => {
-        const listener = this.observe.onTransactionId(apiTx.id).subscribe({
+        const listener = this.observe.onTransactionId(apiTx.id).provideBlockHeaderData().subscribe({
           next(val) {
-            observer.next?.(val.transactions[apiTx.id]!);
+            observer.next?.({
+              transaction: val.transactions[apiTx.id]!,
+              block: val.block
+            });
           },
           error(val) {
             observer.error?.(val);

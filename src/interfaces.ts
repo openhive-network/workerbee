@@ -17,6 +17,11 @@ export interface IBroadcastOptions {
   throwAfter?: string | number | Date;
 }
 
+export interface IBroadcastData {
+  transaction: transaction;
+  block: IBlockHeaderData;
+}
+
 export interface IWorkerBee {
   readonly running: boolean;
   readonly configuration: Readonly<IStartConfiguration>;
@@ -60,7 +65,7 @@ export interface IWorkerBee {
    * @param tx Protobuf transactoin to broadcast
    * @param options Options for broadcasting
    */
-  broadcast(tx: ApiTransaction | ITransaction, options?: IBroadcastOptions): Promise<Subscribable<transaction>>;
+  broadcast(tx: ApiTransaction | ITransaction, options?: IBroadcastOptions): Promise<Subscribable<IBroadcastData>>;
 
   /**
    * Allows you to iterate over blocks indefinitely
