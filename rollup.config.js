@@ -3,34 +3,29 @@ import commonjs from "@rollup/plugin-commonjs";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import dts from "rollup-plugin-dts";
 
-const commonConfiguration = (packEntire = false) => ([
+export default [
   {
     input: "dist/index.js",
     output: {
       format: "es",
       name: "workerbee",
-      file: `dist/bundle/${packEntire ? "web-full" : "index"}.js`
+      file: "dist/bundle/index.js"
     },
     plugins: [
       nodeResolve({
         preferBuiltins: false,
-        browser: true,
-        resolveOnly: packEntire ? [] : () => false
+        browser: false,
+        resolveOnly: () => false
       }),
       commonjs()
     ]
   }, {
     input: "dist/index.d.ts",
     output: [
-      { file: `dist/bundle/${packEntire ? "web-full" : "index"}.d.ts`, format: "es" }
+      { file: "dist/bundle/index.d.ts", format: "es" }
     ],
     plugins: [
       dts()
     ]
   }
-]);
-
-export default [
-  ...commonConfiguration(),
-  ...commonConfiguration(true)
 ];

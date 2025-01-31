@@ -65,21 +65,15 @@
     "typescript": "5.6.3"
   },
   "dependencies": {
-    "@hiveio/beekeeper": "1.27.6-rc4",
-    "@hiveio/wax": "1.27.6-rc6-250109101012"
+    "@hiveio/beekeeper": "1.27.8-stable.250131103618",
+    "@hiveio/wax": "1.27.6-rc7-stable.250131113706"
   },
   "repository": {
     "type": "git",
     "url": "https://gitlab.syncad.com/hive/workerbee.git"
   },
   "engines": {
-    "node": ">= 18"
-  },
-  "devEngines": {
-    "runtime": {
-      "name": "node",
-      "version": "^18.18.0 || ^20.9.0 || >=21.1.0"
-    }
+    "node": "^20.11 || >= 21.2"
   },
   "publishConfig": {
     "registry": "https://RegistryPlaceholder",

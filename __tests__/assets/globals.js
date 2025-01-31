@@ -1,6 +1,6 @@
 // Use function as we later extract the function name in the jest-helpers
 globalThis.createTestFor = async function createTestFor(env) {
-  const locWorkerBee = env === "web" ? "../../dist/bundle/web-full.js" : "../../dist/bundle/index.js";
+  const locWorkerBee = env === "web" ? "../../dist/bundle/index.js" : "../../dist/bundle/index.js";
   const locBeekeeper = env === "web" ? "@hiveio/beekeeper/web" : "@hiveio/beekeeper/node";
 
   // Import required libraries env-dependent

@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@hiveio/beekeeper':
-        specifier: 1.27.6-rc4
-        version: 1.27.6-rc4
+        specifier: 1.27.8-stable.250131103618
+        version: 1.27.8-stable.250131103618
       '@hiveio/wax':
-        specifier: 1.27.6-rc6-250109101012
-        version: 1.27.6-rc6-250109101012
+        specifier: 1.27.6-rc7-stable.250131113706
+        version: 1.27.6-rc7-stable.250131113706
     devDependencies:
       '@eslint/compat':
         specifier: ^1.2.2
@@ -161,13 +161,13 @@ packages:
   '@gar/promisify@1.1.3':
     resolution: {integrity: sha512-k2Ty1JcVojjJFwrg/ThKi2ujJ7XNLYaFGNB/bWT9wGR+oSMJHMa5w+CUq6p/pVrKeNNgA7pCqEcjSnHVoqJQFw==}
 
-  '@hiveio/beekeeper@1.27.6-rc4':
-    resolution: {integrity: sha1-mj3k3qAgTdIrc6IxzC5VOprhWZs=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.6-rc4.tgz}
-    engines: {node: '>= 18'}
+  '@hiveio/beekeeper@1.27.8-stable.250131103618':
+    resolution: {integrity: sha1-0IYuFBbxIIKfRTrI6ZZc7Jf+qLA=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.8-stable.250131103618.tgz}
+    engines: {node: ^20.11 || >= 21.2}
 
-  '@hiveio/wax@1.27.6-rc6-250109101012':
-    resolution: {integrity: sha1-jr+jSTmhT1/S1rlE5B46KF5zpP8=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc6-250109101012.tgz}
-    engines: {node: '>= 18'}
+  '@hiveio/wax@1.27.6-rc7-stable.250131113706':
+    resolution: {integrity: sha1-Xi2VV8y9T6MdBHOBSzxZNpmGnF8=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc7-stable.250131113706.tgz}
+    engines: {node: ^20.11 || >= 21.2}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -472,9 +472,6 @@ packages:
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
 
-  '@types/validator@13.11.7':
-    resolution: {integrity: sha512-q0JomTsJ2I5Mv7dhHhQLGjMvX0JJm5dyZ1DXQySIUzU1UlwzB8bt+R6+LODUbz0UDIOvEzGc28tk27gBJw2N8Q==}
-
   '@typescript-eslint/eslint-plugin@8.13.0':
     resolution: {integrity: sha512-nQtBLiZYMUPkclSeC3id+x4uVd1SGtHuElTxL++SfP47jR0zfkZBJHc+gL4qPsgTuypz0k8Y2GheaDYn6Gy3rg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -733,12 +730,6 @@ packages:
   chownr@2.0.0:
     resolution: {integrity: sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==}
     engines: {node: '>=10'}
-
-  class-transformer@0.5.1:
-    resolution: {integrity: sha512-SQa1Ws6hUbfC98vKGxZH3KFY0Y1lm5Zm0SY8XX9zbK7FJCyVEac3ATW0RIpwzW+oOfmHE5PMPufDG9hCfoEOMw==}
-
-  class-validator@0.14.0:
-    resolution: {integrity: sha512-ct3ltplN8I9fOwUd8GrP8UQixwff129BkEtuWDKL5W45cQuLd19xqmTLu5ge78YDm/fdje6FMt0hGOhl0lii3A==}
 
   clean-stack@2.2.0:
     resolution: {integrity: sha512-4diC9HaTE+KRAMWhDhrGOECgWZxoevMc5TlkObMqNSsVU62PYzXZ/SMTjzyGAFF1YusgxGcSWTEXBhp0CPwQ1A==}
@@ -1579,9 +1570,6 @@ packages:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
 
-  libphonenumber-js@1.10.50:
-    resolution: {integrity: sha512-AOYOJslxKQ49mpwvpkSFcagoMtxeH1UpUHm+05pmPkenPpFbt6ofdeEvQ+ZylmQiJS99ocRWeEeEp7quVlFyVA==}
-
   lilconfig@3.0.0:
     resolution: {integrity: sha512-K2U4W2Ff5ibV7j7ydLr+zLAkIg5JJ4lPn1Ltsdt+Tz/IjQ8buJ55pZAxoP34lqIiwtF9iAvtLv3JGv7CAyAg+g==}
     engines: {node: '>=14'}
@@ -2062,9 +2050,6 @@ packages:
     resolution: {integrity: sha512-9u/sniCrY3D5WdsERHzHE4G2YCXqoG5FTHUiCC4SIbr6XcLZBY05ya9EKjYek9O5xOAwjGq+1JdGBAS7Q9ScoA==}
     engines: {node: '>= 6'}
 
-  reflect-metadata@0.1.14:
-    resolution: {integrity: sha512-ZhYeb6nRaXCfhnndflDK8qI6ZQ/YcWZCISRAWICW9XYqMUwjZM9Z0DveWX/ABN01oxSHwVxKQmxeYZSsm0jh5A==}
-
   regex@4.4.0:
     resolution: {integrity: sha512-uCUSuobNVeqUupowbdZub6ggI5/JZkYyJdDogddJr60L764oxC2pMZov1fQ3wM9bdyzUILDG+Sqx6NAKAz9rKQ==}
 
@@ -2492,10 +2477,6 @@ packages:
     resolution: {integrity: sha512-OljLrQ9SQdOUqTaQxqL5dEfZWrXExyyWsozYlAWFawPVNuD83igl7uJD2RTkNMbniIYgt8l81eCJGIdQF7avLQ==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
 
-  validator@13.11.0:
-    resolution: {integrity: sha512-Ii+sehpSfZy+At5nPdnyMhx78fEoPDkR2XW/zimHEL3MyGJQOCQ7WeP20jPYRz7ZCpcKLB21NxuXHF3bxjStBQ==}
-    engines: {node: '>= 0.10'}
-
   vfile-message@4.0.2:
     resolution: {integrity: sha512-jRDZ1IMLttGj41KcZvlrYAaI3CfqpLpfpf+Mfig13viT6NKvRzWZ+lXz0Y5D60w6uJIBAOGq9mSHf0gktF0duw==}
 
@@ -2644,16 +2625,13 @@ snapshots:
 
   '@gar/promisify@1.1.3': {}
 
-  '@hiveio/beekeeper@1.27.6-rc4': {}
+  '@hiveio/beekeeper@1.27.8-stable.250131103618': {}
 
-  '@hiveio/wax@1.27.6-rc6-250109101012':
+  '@hiveio/wax@1.27.6-rc7-stable.250131113706':
     dependencies:
-      '@hiveio/beekeeper': 1.27.6-rc4
-      class-transformer: 0.5.1
-      class-validator: 0.14.0
+      '@hiveio/beekeeper': 1.27.8-stable.250131103618
       events: 3.3.0
       long: 5.2.3
-      reflect-metadata: 0.1.14
 
   '@humanfs/core@0.19.1': {}
 
@@ -2990,8 +2968,6 @@ snapshots:
   '@types/resolve@1.20.2': {}
 
   '@types/unist@3.0.3': {}
-
-  '@types/validator@13.11.7': {}
 
   '@typescript-eslint/eslint-plugin@8.13.0(@typescript-eslint/parser@8.13.0(eslint@9.14.0)(typescript@5.6.3))(eslint@9.14.0)(typescript@5.6.3)':
     dependencies:
@@ -3341,14 +3317,6 @@ snapshots:
   character-entities-legacy@3.0.0: {}
 
   chownr@2.0.0: {}
-
-  class-transformer@0.5.1: {}
-
-  class-validator@0.14.0:
-    dependencies:
-      '@types/validator': 13.11.7
-      libphonenumber-js: 1.10.50
-      validator: 13.11.0
 
   clean-stack@2.2.0: {}
 
@@ -4322,8 +4290,6 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
 
-  libphonenumber-js@1.10.50: {}
-
   lilconfig@3.0.0: {}
 
   linkify-it@5.0.0:
@@ -4915,8 +4881,6 @@ snapshots:
       string_decoder: 1.3.0
       util-deprecate: 1.0.2
 
-  reflect-metadata@0.1.14: {}
-
   regex@4.4.0: {}
 
   regexp.prototype.flags@1.5.1:
@@ -5446,8 +5410,6 @@ snapshots:
       spdx-expression-parse: 3.0.1
 
   validate-npm-package-name@5.0.1: {}
-
-  validator@13.11.0: {}
 
   vfile-message@4.0.2:
     dependencies:

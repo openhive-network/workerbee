@@ -25,6 +25,7 @@
     "paths": {},
 
     "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
 
     "removeComments": false,
     "incremental": true,
