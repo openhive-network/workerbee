@@ -271,6 +271,12 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     return this;
   }
 
+  public provideBlockHeaderData(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<BlockHeaderProvider["provide"]>>> {
+    this.pushProvider(BlockHeaderProvider);
+
+    return this;
+  }
+
   public provideBlockData(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<BlockProvider["provide"]>>> {
     this.pushProvider(BlockProvider);
 
