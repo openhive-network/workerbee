@@ -11,7 +11,7 @@ variables:
 
 include:
   - project: 'hive/common-ci-configuration'
-    ref: 40451cfbe8c2995c66b2d4150dbb3c4d11fd8590
+    ref: fae6329387a55aee40c3760a9af95a7705644bf0
     file:
       - '/templates/npm_projects.gitlab-ci.yml'
 
@@ -96,8 +96,12 @@ supplement_documentation_url:
 
   script:
     - |
-      scripts/generate_api_docs.sh "${CI_PROJECT_URL}" "${CI_COMMIT_SHA}" "${GEN_DOC_URL}" tmp_doc
-      npm pack --pack-destination "${DIST_DIR}" --json > "${DIST_DIR}/built_package_info.json" # repack to include updated README in final package
+      set -xe
+      cd "${SOURCE_DIR}"
+      echo "Attempting to replace generated documentation url placeholder: "${GEN_DOC_URL}""
+      sed -i "s<\${GEN_DOC_URL}<${GEN_DOC_URL}<g" README.md
+      if grep -q "\${GEN_DOC_URL}" README.md; then exit 1; fi # Ensure that the placeholder was replaced
+      pnpm pack --pack-destination "${DIST_DIR}" --json > ""${DIST_DIR}/built_package_info.json" # repack to include updated README in final package
       BUILT_PACKAGE_NAME=$(jq -r .[].filename "${DIST_DIR}/built_package_info.json")
       echo BUILT_PACKAGE_PATH="${DIST_DIR}/${BUILT_PACKAGE_NAME}" > built_package_info.env
 

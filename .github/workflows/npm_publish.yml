@@ -16,4 +16,4 @@ jobs:
             ./scripts/publish_by_tag.sh 452 "${{ github.ref_name }}" "dist/hiveio-workerbee-${{ github.ref_name }}.tgz" build dist
             cd dist
             echo //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }} >> .npmrc
-            npm publish --access public --provenance
+            pnpm publish --access public --provenance
