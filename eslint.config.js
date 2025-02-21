@@ -21,6 +21,7 @@ export default [ {
     "**/node_modules",
     "**/dist",
     "**/build",
+    "npm-common-config",
     "examples"
   ]
 }, ...compat.extends("eslint:recommended"), {
