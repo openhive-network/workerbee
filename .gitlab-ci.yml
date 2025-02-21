@@ -25,13 +25,7 @@ lint:
   script:
     - npm run lint-ci
 
-supplement_documentation_url:
-  stage: .pre
-  extends: .npm_generate_doc_url
-  variables:
-    REPLACE_ENV_NAME: "GEN_DOC_URL"
-    REPLACE_FILE_PATH: "${CI_PROJECT_DIR}/README.md"
-
+# Builds and supplements wiki URL so it is available in Wiki and published package README
 build:
   stage: build
   extends: .npm_build_template
@@ -39,12 +33,12 @@ build:
     DIST_DIR: "$CI_PROJECT_DIR/dist"
     NPM_PACKAGE_SCOPE: "@hiveio"
     NPM_PACKAGE_NAME: "workerbee"
+    REPLACE_DOC_URL_ENV: "GEN_DOC_URL"
+    REPLACE_FILE_PATH: "${CI_PROJECT_DIR}/README.md"
   needs:
     - job: lint
-    - job: supplement_documentation_url
-      artifacts: true
 
-# Generates documentation and supplements wiki URL so it is available in Wiki and published package README
+# Generates documentation
 generate_docs:
   stage: build
   extends: .npm_based_job_base
@@ -53,7 +47,7 @@ generate_docs:
   script:
     - scripts/generate_api_docs.sh "${CI_PROJECT_URL}" "${CI_COMMIT_SHA}"
   needs:
-    - job: supplement_documentation_url
+    - job: build
       artifacts: true
   artifacts:
     paths:
@@ -79,6 +73,8 @@ push_to_wiki:
     DIST_DIR: "$CI_PROJECT_DIR/dist"
 
   needs:
+    - job: build
+      artifacts: true
     - job: generate_docs
       artifacts: true
 
