@@ -1,12 +1,13 @@
 /* eslint-disable no-console */
 
-
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type { ApiAccount } from "@hiveio/wax";
+import type { ReplyOperation, ApiAccount } from "@hiveio/wax";
 import { expect } from "@playwright/test";
 import { ChromiumBrowser, ConsoleMessage, chromium } from "playwright";
 
 import type { IStartConfiguration } from "../../src/bot";
+import type { IBroadcastData, ITransactionData } from "../../src/index";
+
 import { test } from "../assets/jest-helper";
 
 
@@ -36,6 +37,81 @@ test.describe("WorkerBee Bot events test", () => {
       bot.delete();
     });
   });
+
+  test("Allow to broadcast to mirronet chain", async({ workerbeeTest }) => {
+    const broadcastTest = await workerbeeTest(async({ WorkerBee, wax, beekeeperFactory }) => {
+
+      /*
+       * Prepare helper WorkerBee instance just to provide IHiveChainInterface instance.
+       * It is a problem in PW tests to reference whole wax, since its dependencies need to be declared at importmap in test.html
+       */
+      const customWaxConfig = { apiEndpoint: "https://api.fake.openhive.network", chainId: "42" };
+      const customConfig: IStartConfiguration = { chainOptions: customWaxConfig };
+
+      const chainOwner = new WorkerBee(customConfig);
+      // Call start just to initialize chain member in WorkerBee object.
+      await chainOwner.start();
+      // Stop does not affect chain property, so we can avoid making ineffective api calls.
+      chainOwner.stop();
+
+      const localChain = chainOwner.chain!;
+
+      const bot = new WorkerBee({ explicitChain: localChain });
+
+      const newTx = await localChain.createTransaction();
+
+      newTx.pushOperation(new wax.ReplyOperation({author: "gtg", permlink: `re-${Date.now()}`, parentAuthor: "hbd.funder",
+        parentPermlink: "re-upvote-this-post-to-fund-hbdstabilizer-20250312t045515z", title: "test", body: "Awesome test!",
+        maxAcceptedPayout: localChain.hbdCoins(1000000), percentHbd: 9000, allowVotes: true, allowCurationRewards: true}));
+
+      const bkInstance = await beekeeperFactory({inMemory: true});
+      const bkSession = bkInstance.createSession("salt and pepper");
+
+      const {wallet} = await bkSession.createWallet("temp", "pass", true);
+      const publicKey = await wallet.importKey("5JNHfZYKGaomSFvd4NUdQ9qMcEAC43kujbfjueTHpVapX1Kzq2n");
+
+      /// Intentionally sign using legacy method
+      const legacySigDigest = newTx.legacy_sigDigest;
+      const signature = await wallet.signDigest(publicKey, legacySigDigest);
+      newTx.sign(signature);
+
+      let signatureIsMatching: boolean = false;
+
+      await Promise.race([
+        /* eslint-disable-next-line no-async-promise-executor */
+        new Promise<void>(async res => {
+          await bot.start();
+
+          const broadcastResultObserver = await bot.broadcast(newTx, { throwAfter: "+20s"});
+
+          const txObserver = broadcastResultObserver.subscribe({
+            next (data: IBroadcastData) {
+              console.log(`Received broadcast data: ${JSON.stringify(data.transaction)}`);
+              if(data.transaction.signatures[0] !== signature)
+                throw new Error("Invalid signature in broadcast result");
+
+              signatureIsMatching = true;
+              txObserver.unsubscribe();
+              res();
+            },
+            error(err) {
+              console.error(err);
+              throw new Error("Transaction broadcast failure");
+            }
+          });
+        }),
+        new Promise(res => { setTimeout(res, 15000); })
+      ]);
+
+      bot.delete();
+      chainOwner.delete();
+
+      return signatureIsMatching;
+    });
+
+    expect(broadcastTest).toEqual(true);
+  });
+
 
   test("Allow to pass explicit chain", async({ workerbeeTest }) => {
     const explicitChainTest = await workerbeeTest(async({ WorkerBee }) => {
