@@ -103,10 +103,14 @@ export class WorkerBee implements IWorkerBee {
 
         const listener = txObserver.provideBlockHeaderData().subscribe({
           next(val) {
-            observer.next?.({
-              transaction: val.transactions[apiTx.id]!,
-              block: val.block
-            });
+            const transaction = val.transactions[txId] ?? val.transactions[legacyId]!;
+            if( transaction!== undefined) {
+              listener.unsubscribe();
+              observer.next?.({
+                transaction,
+                block: val.block
+              });
+            }
           },
           error(val) {
             observer.error?.(val);
