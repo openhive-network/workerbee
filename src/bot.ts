@@ -95,7 +95,13 @@ export class WorkerBee implements IWorkerBee {
 
     return {
       subscribe: observer => {
-        const listener = this.observe.onTransactionId(apiTx.id).provideBlockHeaderData().subscribe({
+        const txId = apiTx.id;
+        let txObserver = this.observe.onTransactionId(txId);
+        const legacyId = apiTx.legacy_id;
+        if(legacyId !== apiTx.id)
+          txObserver = txObserver.or.onTransactionId(legacyId);
+
+        const listener = txObserver.provideBlockHeaderData().subscribe({
           next(val) {
             observer.next?.({
               transaction: val.transactions[apiTx.id]!,
