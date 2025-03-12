@@ -1,5 +1,7 @@
 // We only want to import types here!
 import type beekeeperFactoryType from "@hiveio/beekeeper/web";
+import type Wax from "@hiveio/wax";
+
 import type WorkerBee from "../../dist/bundle/index";
 
 export type TEnvType = "web" | "node";
@@ -8,6 +10,7 @@ export type TEnvType = "web" | "node";
 export interface IWorkerBeeGlobals {
   beekeeperFactory: typeof beekeeperFactoryType;
   WorkerBee: typeof WorkerBee;
+  wax: typeof Wax;
 }
 
 declare global {
