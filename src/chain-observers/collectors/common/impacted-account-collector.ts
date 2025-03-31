@@ -13,11 +13,14 @@ export class ImpactedAccountCollector extends CollectorBase {
   private ensureStructIntegrity(impactedAccounts: Record<string, IImpactedAccount>, accountName: string): Array<IOperationTransactionPair> {
     let struct = impactedAccounts[accountName];
 
+    // TODO: refactor to make this code more clean
     if (struct === undefined)
-      struct = {
+      // Warning: we need to create an entry specific to given account in the Record object passed here by reference...
+      struct = impactedAccounts[accountName] = {
         name: accountName,
         operations: []
       };
+
 
     return struct.operations as IOperationTransactionPair[];
   }
