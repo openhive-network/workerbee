@@ -3,11 +3,14 @@ import { calculateExpiration, IWaxOptionsChain, IHiveChainInterface, TWaxExtende
 
 import { IBlockData } from "./chain-observers/classifiers/block-classifier";
 import { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
+import { JsonRpcFactory } from "./chain-observers/factories/jsonrpc/factory";
 import { ObserverMediator } from "./chain-observers/observer-mediator";
 import { WorkerBeeError } from "./errors";
 import type { IWorkerBee, IBroadcastOptions, IBroadcastData } from "./interfaces";
+import { PastQueen } from "./past-queen";
 import { QueenBee } from "./queen";
 import type { Subscribable } from "./types/subscribable";
+import { calculateRelativeTime } from "./utils/time";
 import { getWax, WaxExtendTypes } from "./wax";
 
 const ONE_MINUTE = 1000 * 60;
@@ -59,7 +62,7 @@ export class WorkerBee implements IWorkerBee {
     return new QueenBee(this);
   }
 
-  public mediator = new ObserverMediator(this);
+  public mediator = new ObserverMediator(new JsonRpcFactory(this));
 
   public constructor(
     configuration: IStartConfiguration = {}
@@ -69,6 +72,29 @@ export class WorkerBee implements IWorkerBee {
     if(typeof configuration.explicitChain !== "undefined"
        && typeof configuration.chainOptions !== "undefined")
       throw new WorkerBeeError("explicitChain and chainOptions parameters are exclusive");
+  }
+
+  public providePastOperations(fromBlock: number, toBlock: number): PastQueen;
+  public providePastOperations(relativeTime: string): Promise<PastQueen>;
+  public providePastOperations(fromBlockOrRelativeTime: number | string, toBlock?: number): PastQueen | Promise<PastQueen> {
+    if(typeof this.chain === "undefined")
+      throw new WorkerBeeError("Chain is not initialized. Either provide explicit chain or run start()");
+
+    if (typeof fromBlockOrRelativeTime === "number" && typeof toBlock === "number")
+      return new PastQueen(this, fromBlockOrRelativeTime, toBlock);
+
+    return this.chain!.api.database_api.get_dynamic_global_properties({}).then(dgp => {
+      const headBlockNumber = dgp.head_block_number;
+
+      const actualTime = calculateRelativeTime(fromBlockOrRelativeTime);
+
+      const blocksBetween = Math.floor((new Date(`${dgp.time}Z`).getTime() - actualTime.getTime()) / (3 * 1000));
+
+      if (blocksBetween <= 0)
+        throw new WorkerBeeError(`Invalid time range: ${fromBlockOrRelativeTime} is in the future`);
+
+      return new PastQueen(this, headBlockNumber - blocksBetween);
+    });
   }
 
   public async broadcast(tx: ApiTransaction | ITransaction, options: IBroadcastOptions = {}): Promise<Subscribable<IBroadcastData>> {

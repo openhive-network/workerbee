@@ -1,6 +1,7 @@
 import type { WorkerBee } from "../../bot";
 import { IEvaluationContextClass, TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { CollectorBase } from "../collectors/collector-base";
+import type { ObserverMediator } from "../observer-mediator";
 import { DataEvaluationContext } from "./data-evaluation-context";
 
 export class FactoryBase {
@@ -9,6 +10,9 @@ export class FactoryBase {
   public constructor(
     protected readonly worker: WorkerBee
   ) {}
+
+  public preNotify(_mediator: ObserverMediator): void {}
+  public postNotify(_mediator: ObserverMediator, _context: DataEvaluationContext): void {}
 
   public pushClassifier(classifier: TRegisterEvaluationContext): void {
     const classifierClass = "class" in classifier ? classifier.class : classifier;

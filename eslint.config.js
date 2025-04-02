@@ -45,6 +45,7 @@ export default [ {
     "capitalized-comments": 1,
     "multiline-comment-style": 1,
     "no-else-return": 1,
+    "no-dupe-class-members": 0,
     "curly": [ 1, "multi" ],
     "default-case": [ 1, {
       commentPattern: "^[sS]kip\\sdefault"

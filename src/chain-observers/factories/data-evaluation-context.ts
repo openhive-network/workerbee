@@ -35,7 +35,9 @@ export class DataEvaluationContext {
     if (cached === undefined) {
       cached = collector.fetchData(this);
 
-      this.cachedFunctions.set(collector, cached!);
+      for(const key in this.collectors)
+        if (this.collectors[key] === collector)
+          this.cachedFunctions.set(collector, cached!);
     }
 
     const result = await cached!;

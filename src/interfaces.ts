@@ -3,6 +3,7 @@ import type { ApiTransaction, IHiveChainInterface, ITransaction, transaction} fr
 import type { IStartConfiguration } from "./bot";
 import { IBlockData } from "./chain-observers/classifiers/block-classifier";
 import { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
+import { TPastQueen } from "./past-queen";
 import type { QueenBee } from "./queen";
 import type { Subscribable } from "./types/subscribable";
 
@@ -51,6 +52,20 @@ export interface IWorkerBee {
    * wax chain object is deleted only when its instance was managed by workerbee itself.
    */
   delete(): void;
+
+  /**
+   * Allows you to iterate over blocks in the past from a given range
+   *
+   * @throws if called before {@link start}
+   */
+  providePastOperations(fromBlock: number, toBlock: number): TPastQueen;
+
+  /**
+   * Allows you to iterate over blocks in the past from a given range
+   *
+   * @throws if called before {@link start}
+   */
+  providePastOperations(relativeTime: string): Promise<TPastQueen>;
 
   get observe(): QueenBee;
 

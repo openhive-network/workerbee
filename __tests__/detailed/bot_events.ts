@@ -329,6 +329,125 @@ test.describe("WorkerBee Bot events test", () => {
     expect(result).toBeLessThanOrEqual(3);
   });
 
+  test("Should be able to parse blocks from the past", async({ workerbeeTest }) => {
+    const result = await workerbeeTest.dynamic(async({ WorkerBee }) => {
+      const bot = new WorkerBee();
+      await bot.start();
+
+      let calls = 0;
+      await new Promise<void>(resolve => {
+        bot.providePastOperations(500017, 500020).onBlock().provideBlockHeaderData().subscribe({
+          next(data) {
+            console.log(`Got block #${data.block.number}`);
+
+            ++calls;
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      })
+
+      bot.stop();
+      bot.delete();
+
+      return calls;
+    });
+
+    expect(result).toBeGreaterThanOrEqual(3);
+  });
+
+  test("Should be able to parse blocks from the past - more than 1000", async({ workerbeeTest }) => {
+    const result = await workerbeeTest.dynamic(async({ WorkerBee }) => {
+      const bot = new WorkerBee();
+      await bot.start();
+
+      let calls = 0;
+      await new Promise<void>(resolve => {
+        bot.providePastOperations(500017, 501020).onBlock().subscribe({
+          next() {
+            ++calls;
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      })
+
+      bot.stop();
+      bot.delete();
+
+      return calls;
+    });
+
+    expect(result).toBeGreaterThanOrEqual(1002);
+  });
+
+  test("Should be able to parse blocks from the past - impacted accounts", async({ workerbeeTest }) => {
+    const result = await workerbeeTest.dynamic(async({ WorkerBee }) => {
+      const bot = new WorkerBee();
+      await bot.start();
+
+      let calls = 0;
+      await new Promise<void>(resolve => {
+        bot.providePastOperations(94704950, 94705000).provideBlockData().onImpactedAccount("lolzbot").subscribe({
+          next(data) {
+            data.impactedAccounts["lolzbot"].forEach(({ transaction }) => {
+              console.log(`Got transaction #${transaction.id} for lolzbot in block #${data.block.number}`);
+
+              ++calls;
+            });
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      })
+
+      bot.stop();
+      bot.delete();
+
+      return calls;
+    });
+
+    expect(result).toBe(6);
+  });
+
+  test("Should be able to parse blocks from the past - more than relative time", async({ workerbeeTest }) => {
+    const result = await workerbeeTest.dynamic(async({ WorkerBee }) => {
+      const bot = new WorkerBee();
+      await bot.start();
+
+      let calls = 0;
+      /* eslint-disable-next-line no-async-promise-executor */
+      await new Promise<void>(async resolve => {
+        const observer = await bot.providePastOperations("-11s");
+
+        observer.onBlock().provideBlockData().subscribe({
+          next(data) {
+            console.log(`Got block #${data.block.number}`);
+
+            ++calls;
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      })
+
+      bot.stop();
+      bot.delete();
+
+      return calls;
+    });
+
+    expect(result).toBeGreaterThanOrEqual(3);
+  });
+
   test.afterAll(async() => {
     await browser.close();
   });
