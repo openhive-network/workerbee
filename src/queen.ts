@@ -24,6 +24,7 @@ import { TransactionIdFilter } from "./chain-observers/filters/transaction-id-fi
 import { VoteFilter } from "./chain-observers/filters/vote-filter";
 import { WhaleAlertFilter } from "./chain-observers/filters/whale-alert-filter";
 import { WitnessMissedBlocksFilter } from "./chain-observers/filters/witness-miss-block-filter";
+import { ObserverMediator } from "./chain-observers/observer-mediator";
 import { AccountProvider } from "./chain-observers/providers/account-provider";
 import { AlarmProvider } from "./chain-observers/providers/alarm-provider";
 import { BlockHeaderProvider } from "./chain-observers/providers/block-header-provider";
@@ -42,12 +43,18 @@ import type { Observer, Unsubscribable } from "./types/subscribable";
 
 export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public constructor(
-    private readonly worker: WorkerBee
+    protected readonly worker: WorkerBee,
+    protected readonly mediator: ObserverMediator = worker.mediator
   ) {}
 
-  private providers = new Map<new () => ProviderBase, ProviderBase>();
-  private operands: FilterBase[] = [];
-  private filterContainers: FilterBase[] = [];
+  protected providers = new Map<new () => ProviderBase, ProviderBase>();
+  protected operands: FilterBase[] = [];
+  protected filterContainers: FilterBase[] = [];
+
+  /**
+   * Internal function to be called when the subscription is created.
+   */
+  protected onSubscribe(): void {}
 
   public subscribe(observer: Partial<Observer<TPreviousSubscriberData>>): Unsubscribable {
     if (this.operands.length > 0) {
@@ -62,14 +69,16 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     // Optimize by not creating a logical OR filter for only one filter
     const orFilter: FilterBase = committedFilters.length === 1 ? committedFilters[0] : new LogicalOrFilter(this.worker, committedFilters);
 
-    this.worker.mediator.registerListener(observer, orFilter, Array.from(this.providers.values()));
+    this.mediator.registerListener(observer, orFilter, Array.from(this.providers.values()));
+
+    this.onSubscribe();
 
     this.filterContainers = [];
     this.providers = new Map();
 
     return {
       unsubscribe: () => {
-        this.worker.mediator.unregisterListener(observer);
+        this.mediator.unregisterListener(observer);
         // XXX: Maybe force cancel here
       }
     };
