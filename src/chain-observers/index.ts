@@ -19,6 +19,7 @@ export type { IFeedPriceData, IFeedPriceProviderData } from "./providers/feed-pr
 export type { PostProvider, IPostProviderData, TPostProvided } from "./providers/post-provider";
 export type { CommentProvider, ICommentProviderData, TCommentProvided } from "./providers/comment-provider";
 export type { IVoteProviderData, TVoteProvided, VoteProvider } from "./providers/vote-provider";
+export type { INewAccountProviderData, NewAccountProvider, TNewAccountProvided } from "./providers/new-account-provider";
 export type { IImpactedAccountProviderData, ImpactedAccountProvider, TImpactedAccountProvided } from "./providers/impacted-account-provider";
 export type {
   IInternalMarketCancelOperation, IInternalMarketCreateOperation,

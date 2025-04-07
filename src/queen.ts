@@ -36,6 +36,7 @@ import { FeedPriceProvider } from "./chain-observers/providers/feed-price-provid
 import { ImpactedAccountProvider } from "./chain-observers/providers/impacted-account-provider";
 import { InternalMarketProvider } from "./chain-observers/providers/internal-market-provider";
 import { MentionedAccountProvider } from "./chain-observers/providers/mention-provider";
+import { NewAccountProvider } from "./chain-observers/providers/new-account-provider";
 import { PostProvider } from "./chain-observers/providers/post-provider";
 import { ProviderBase } from "./chain-observers/providers/provider-base";
 import { RcAccountProvider } from "./chain-observers/providers/rc-account-provider";
@@ -176,8 +177,9 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     return this;
   }
 
-  public onNewAccount(): QueenBee<TPreviousSubscriberData> {
+  public onNewAccount(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<NewAccountProvider["provide"]>>> {
     this.operands.push(new AccountCreatedFilter(this.worker));
+    this.pushProvider(NewAccountProvider);
 
     return this;
   }
