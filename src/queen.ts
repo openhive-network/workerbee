@@ -30,6 +30,7 @@ import { AccountProvider } from "./chain-observers/providers/account-provider";
 import { AlarmProvider } from "./chain-observers/providers/alarm-provider";
 import { BlockHeaderProvider } from "./chain-observers/providers/block-header-provider";
 import { BlockProvider } from "./chain-observers/providers/block-provider";
+import { CommentProvider } from "./chain-observers/providers/comment-provider";
 import { ExchangeTransferProvider } from "./chain-observers/providers/exchange-transfer-provider";
 import { FeedPriceProvider } from "./chain-observers/providers/feed-price-provider";
 import { ImpactedAccountProvider } from "./chain-observers/providers/impacted-account-provider";
@@ -166,8 +167,11 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     return this;
   }
 
-  public onCommentCreated(author: TAccountName, permlink?: string): QueenBee<TPreviousSubscriberData> {
-    this.operands.push(new CommentFilter(this.worker, author, permlink));
+  public onCommentCreated<
+    TAccount extends TAccountName
+  >(author: TAccount, permlink?: string): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CommentProvider<[TAccount]>["provide"]>>> {
+    this.operands.push(new CommentFilter(this.worker, author));
+    this.pushProvider(CommentProvider, { authors: [{ account: author, permlink }] });
 
     return this;
   }

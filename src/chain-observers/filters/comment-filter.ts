@@ -28,7 +28,7 @@ export class CommentFilter extends FilterBase {
       if(operation.comment)
         if (operation.comment.author === this.account)
           if (this.permlink) {
-            if (operation.comment.permlink === this.permlink)
+            if (operation.comment.parent_permlink === this.permlink)
               return true;
           } else
             return true;

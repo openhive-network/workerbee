@@ -33,10 +33,13 @@ export class PostProvider<TAccounts extends Array<TAccountName> = Array<TAccount
     } as IPostProviderData<TAccounts>;
 
     const accounts = await data.get(OperationClassifier);
-    for(const account of this.authors)
-      if (accounts.operationsPerType.comment)
-        for(const operation of accounts.operationsPerType.comment) {
-          if(operation.operation.parent_author !== "" || operation.operation.author !== account)
+    if (accounts.operationsPerType.comment)
+      for(const operation of accounts.operationsPerType.comment) {
+        if (operation.operation.parent_author !== "")
+          continue;
+
+        for(const account of this.authors) {
+          if(operation.operation.author !== account)
             continue;
 
           if (!result.posts[account])
@@ -47,6 +50,7 @@ export class PostProvider<TAccounts extends Array<TAccountName> = Array<TAccount
             transaction: operation.transaction
           });
         }
+      }
 
     return result;
   }
