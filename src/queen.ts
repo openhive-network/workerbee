@@ -7,6 +7,7 @@ import { AccountMetadataChangeFilter } from "./chain-observers/filters/account-m
 import { AlarmFilter } from "./chain-observers/filters/alarm-filter";
 import { BalanceChangeFilter } from "./chain-observers/filters/balance-change-filter";
 import { BlockNumberFilter } from "./chain-observers/filters/block-filter";
+import { CommentFilter } from "./chain-observers/filters/comment-filter";
 import { LogicalAndFilter, LogicalOrFilter } from "./chain-observers/filters/composite-filter";
 import { CustomOperationFilter } from "./chain-observers/filters/custom-operation-filter";
 import { ExchangeTransferFilter } from "./chain-observers/filters/exchange-transfer-filter";
@@ -149,6 +150,12 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
 
   public onPostCreated(author: TAccountName): QueenBee<TPreviousSubscriberData> {
     this.operands.push(new PostFilter(this.worker, author));
+
+    return this;
+  }
+
+  public onCommentCreated(author: TAccountName, permlink?: string): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new CommentFilter(this.worker, author, permlink));
 
     return this;
   }

@@ -4,10 +4,11 @@ import type { TRegisterEvaluationContext } from "../classifiers/collector-classi
 import type { DataEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";
 
-export class PostFilter extends FilterBase {
+export class CommentFilter extends FilterBase {
   public constructor(
     worker: WorkerBee,
-    private readonly account: string
+    private readonly account: string,
+    private readonly permlink?: string
   ) {
     super(worker);
   }
@@ -25,8 +26,12 @@ export class PostFilter extends FilterBase {
 
     for(const { operation } of account.operations)
       if(operation.comment)
-        if (operation.comment.parent_author === "" && operation.comment.author === this.account)
-          return true;
+        if (operation.comment.author === this.account)
+          if (this.permlink) {
+            if (operation.comment.permlink === this.permlink)
+              return true;
+          } else
+            return true;
 
 
     return false;
