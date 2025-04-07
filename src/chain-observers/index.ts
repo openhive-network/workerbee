@@ -16,6 +16,8 @@ export type { IBlockHeaderProviderData } from "./providers/block-header-provider
 export type { IBlockProviderData } from "./providers/block-provider";
 export type { IExchangeTransferMetadata, IExchangeTransferProviderData } from "./providers/exchange-transfer-provider";
 export type { IFeedPriceData, IFeedPriceProviderData } from "./providers/feed-price-provider";
+export type { PostProvider, IPostProviderData, TPostProvided } from "./providers/post-provider";
+export type { IVoteProviderData, TVoteProvided, VoteProvider } from "./providers/vote-provider";
 export type { IImpactedAccountProviderData, ImpactedAccountProvider, TImpactedAccountProvided } from "./providers/impacted-account-provider";
 export type {
   IInternalMarketCancelOperation, IInternalMarketCreateOperation,

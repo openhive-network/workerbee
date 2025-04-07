@@ -35,9 +35,11 @@ import { FeedPriceProvider } from "./chain-observers/providers/feed-price-provid
 import { ImpactedAccountProvider } from "./chain-observers/providers/impacted-account-provider";
 import { InternalMarketProvider } from "./chain-observers/providers/internal-market-provider";
 import { MentionedAccountProvider } from "./chain-observers/providers/mention-provider";
+import { PostProvider } from "./chain-observers/providers/post-provider";
 import { ProviderBase } from "./chain-observers/providers/provider-base";
 import { RcAccountProvider } from "./chain-observers/providers/rc-account-provider";
 import { TransactionByIdProvider } from "./chain-observers/providers/transaction-provider";
+import { VoteProvider } from "./chain-observers/providers/vote-provider";
 import { WhaleAlertProvider } from "./chain-observers/providers/whale-alert-provider";
 import { WitnessProvider } from "./chain-observers/providers/witness-provider";
 import type { Observer, Unsubscribable } from "./types/subscribable";
@@ -146,14 +148,20 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     return this;
   }
 
-  public onVoteCreated(voter: TAccountName): QueenBee<TPreviousSubscriberData> {
+  public onVoteCreated<
+    TAccount extends TAccountName
+  >(voter: TAccountName): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<VoteProvider<[TAccount]>["provide"]>>> {
     this.operands.push(new VoteFilter(this.worker, voter));
+    this.pushProvider(VoteProvider, { voters: [voter] });
 
     return this;
   }
 
-  public onPostCreated(author: TAccountName): QueenBee<TPreviousSubscriberData> {
+  public onPostCreated<
+    TAccount extends TAccountName
+  >(author: TAccountName): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<PostProvider<[TAccount]>["provide"]>>> {
     this.operands.push(new PostFilter(this.worker, author));
+    this.pushProvider(PostProvider, { authors: [author] });
 
     return this;
   }
