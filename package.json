@@ -78,7 +78,8 @@
   },
   "dependencies": {
     "@hiveio/beekeeper": "1.27.10-stable.250310202833",
-    "@hiveio/wax": "1.27.6-rc7-stable.250314180436"
+    "@hiveio/wax": "1.27.6-rc7-stable.250314180436",
+    "long": "^5.3.1"
   },
   "repository": {
     "type": "git",

@@ -1,4 +1,5 @@
 import type { asset } from "@hiveio/wax";
+import Long from "long";
 import { CollectorClassifierBase } from "./collector-classifier-base";
 
 export interface IHiveAssetDetailedBalance {
@@ -7,6 +8,11 @@ export interface IHiveAssetDetailedBalance {
   total: asset;
 }
 
+export interface IManabarData {
+  currentMana: Long;
+  max: Long;
+  lastUpdateTime: Date;
+};
 
 export interface IHiveAssetWithSavingsDetailedBalance extends IHiveAssetDetailedBalance {
   savings: asset;
@@ -26,6 +32,8 @@ export interface IAccountBalance {
 
 export interface IAccount {
   name: string;
+  upvoteManabar: IManabarData;
+  downvoteManabar: IManabarData;
   postingJsonMetadata: Record<string, any>;
   jsonMetadata: Record<string, any>;
   balance: IAccountBalance;

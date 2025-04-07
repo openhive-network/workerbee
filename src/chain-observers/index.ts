@@ -1,6 +1,7 @@
 export type {
   IAccount, IAccountBalance, IHiveAssetDetailedBalance,
-  IHiveAssetWithSavingsDetailedBalance, IHiveHPAssetDetailedBalance
+  IHiveAssetWithSavingsDetailedBalance, IHiveHPAssetDetailedBalance,
+  IManabarData
 } from "./classifiers/account-classifier";
 export type { ITransactionData, IBlockData } from "./classifiers/block-classifier";
 export type { IBlockHeaderData } from "./classifiers/block-header-classifier";

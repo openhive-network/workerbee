@@ -74,6 +74,9 @@ importers:
       '@hiveio/wax':
         specifier: 1.27.6-rc7-stable.250314180436
         version: 1.27.6-rc7-stable.250314180436
+      long:
+        specifier: ^5.3.1
+        version: 5.3.1
     devDependencies:
       '@eslint/compat':
         specifier: ^1.2.7
@@ -1819,8 +1822,8 @@ packages:
     resolution: {integrity: sha512-niTvB4gqvtof056rRIrTZvjNYE4rCUzO6X/X+kYjd7WFxXeJ0NwEFnRxX6ehkvv3jTwrXnNdtAak5XYZuIyPFw==}
     engines: {node: '>=18'}
 
-  long@5.2.3:
-    resolution: {integrity: sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==}
+  long@5.3.1:
+    resolution: {integrity: sha512-ka87Jz3gcx/I7Hal94xaN2tZEOPoUOEVftkQqZx2EeQRN7LGdfLlI3FvZ+7WDplm+vK2Urx9ULrvSowtdCieng==}
 
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
@@ -2898,7 +2901,7 @@ snapshots:
     dependencies:
       '@hiveio/beekeeper': 1.27.10-stable.250305202831
       events: 3.3.0
-      long: 5.2.3
+      long: 5.3.1
 
   '@humanfs/core@0.19.1': {}
 
@@ -4616,7 +4619,7 @@ snapshots:
       strip-ansi: 7.1.0
       wrap-ansi: 9.0.0
 
-  long@5.2.3: {}
+  long@5.3.1: {}
 
   lru-cache@10.4.3: {}
 

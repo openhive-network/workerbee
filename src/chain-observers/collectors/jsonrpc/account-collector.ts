@@ -1,3 +1,4 @@
+import Long from "long";
 import { IAccount } from "../../classifiers/account-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
@@ -47,6 +48,16 @@ export class AccountCollector extends CollectorBase {
 
         accounts[account.name] = {
           name: account.name,
+          upvoteManabar: {
+            currentMana: Long.fromValue(account.voting_manabar.current_mana),
+            max: Long.fromValue(account.post_voting_power.amount),
+            lastUpdateTime: new Date(`${account.voting_manabar.last_update_time}Z`)
+          },
+          downvoteManabar: {
+            currentMana: Long.fromValue(account.downvote_manabar.current_mana),
+            max: Long.fromValue(account.post_voting_power.amount),
+            lastUpdateTime: new Date(`${account.downvote_manabar.last_update_time}Z`)
+          },
           recoveryAccount: account.recovery_account,
           governanceVoteExpiration,
           postingJsonMetadata: tryParseJson(account.posting_json_metadata),

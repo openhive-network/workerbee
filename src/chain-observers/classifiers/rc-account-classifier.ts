@@ -1,12 +1,9 @@
+import { IManabarData } from "./account-classifier";
 import { CollectorClassifierBase } from "./collector-classifier-base";
 
 export interface IRcAccount {
   name: string;
-  manabar: {
-    currentMana: string;
-    lastUpdateTime: Date;
-  };
-  maxRc: string;
+  rcManabar: IManabarData;
 }
 
 export interface IRcAccountData {

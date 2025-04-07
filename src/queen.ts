@@ -1,4 +1,4 @@
-import type { asset, TAccountName } from "@hiveio/wax";
+import { asset, EManabarType, TAccountName } from "@hiveio/wax";
 
 import { WorkerBee } from "./bot";
 import { AccountCreatedFilter } from "./chain-observers/filters/account-created-filter";
@@ -123,8 +123,8 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     return this;
   }
 
-  public onAccountFullManabar(account: TAccountName): QueenBee<TPreviousSubscriberData> {
-    this.operands.push(new AccountFullManabarFilter(this.worker, account));
+  public onAccountFullManabar(account: TAccountName, manabarType: EManabarType = EManabarType.RC): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new AccountFullManabarFilter(this.worker, account, manabarType));
 
     return this;
   }

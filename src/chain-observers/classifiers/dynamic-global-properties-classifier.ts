@@ -5,6 +5,7 @@ export interface IDynamicGlobalPropertiesData {
   currentWitness: string;
   headBlockTime: Date;
   headBlockId: string;
+  downvotePoolPercent: number;
 }
 
 export class DynamicGlobalPropertiesClassifier extends CollectorClassifierBase {

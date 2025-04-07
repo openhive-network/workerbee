@@ -221,9 +221,9 @@ test.describe("WorkerBee Bot events test", () => {
           const observer = bot.observe.onAccountFullManabar("initminer").provideRcAccounts("initminer");
           observer.subscribe({
             next(data) {
-              console.info(`Account has full manabar: ${data.rcAccounts["initminer"].manabar.currentMana}`);
+              console.info(`Account has full manabar: ${data.rcAccounts["initminer"].rcManabar.currentMana}`);
 
-              res(data.rcAccounts["initminer"].manabar.currentMana);
+              res(data.rcAccounts["initminer"].rcManabar.currentMana.toString());
             },
             error(err) {
               console.error(err);

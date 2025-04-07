@@ -14,6 +14,7 @@ export class DynamicGlobalPropertiesCollector extends CollectorBase {
     return {
       DynamicGlobalPropertiesClassifier: {
         currentWitness: witness,
+        downvotePoolPercent: 0,
         headBlockNumber: number,
         headBlockTime: timestamp,
         headBlockId: id

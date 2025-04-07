@@ -1,3 +1,4 @@
+import Long from "long";
 import { IRcAccount } from "../../classifiers/rc-account-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
@@ -34,11 +35,11 @@ export class RcAccountCollector extends CollectorBase {
       for(const rcAccount of apiRcAccounts)
         rcAccounts[rcAccount.account] = {
           name: rcAccount.account,
-          manabar: {
-            currentMana: String(rcAccount.rc_manabar.current_mana),
+          rcManabar: {
+            currentMana: Long.fromValue(rcAccount.rc_manabar.current_mana),
+            max: Long.fromValue(rcAccount.max_rc),
             lastUpdateTime: new Date(rcAccount.rc_manabar.last_update_time * 1000)
-          },
-          maxRc: String(rcAccount.max_rc)
+          }
         };
     }
 
