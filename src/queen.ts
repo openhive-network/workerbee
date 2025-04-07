@@ -85,7 +85,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     };
   }
 
-  public get or(): QueenBee<TPreviousSubscriberData> {
+  private applyOr(): void {
     if (this.operands.length > 0) {
       if (this.operands.length === 1) // Optimize by not creating a logical AND filter for only one filter
         this.filterContainers.push(this.operands[0]);
@@ -93,6 +93,10 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
         this.filterContainers.push(new LogicalAndFilter(this.worker, this.operands));
       this.operands = [];
     }
+  }
+
+  public get or(): QueenBee<TPreviousSubscriberData> {
+    this.applyOr();
 
     return this as unknown as QueenBee<TPreviousSubscriberData>;
   }
@@ -220,11 +224,17 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     return this;
   }
 
-  public onImpactedAccount<
-    TAccount extends TAccountName
-  >(account: TAccountName): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ImpactedAccountProvider<[TAccount]>["provide"]>>> {
-    this.operands.push(new ImpactedAccountFilter(this.worker, account));
-    this.pushProvider(ImpactedAccountProvider, { accounts: [ account ] });
+  public onImpactedAccounts<
+    TAccounts extends TAccountName[]
+  >(...accounts: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ImpactedAccountProvider<TAccounts>["provide"]>>> {
+    for(let i = 0; i < accounts.length; ++i) {
+      if (i > 0)
+        this.applyOr(); // Add logical OR between each account filter to allow multiple accounts to be used in the same subscribe call
+
+      this.operands.push(new ImpactedAccountFilter(this.worker, accounts[i]));
+    }
+
+    this.pushProvider(ImpactedAccountProvider, { accounts });
 
     return this;
   }

@@ -392,7 +392,7 @@ test.describe("WorkerBee Bot events test", () => {
 
       let calls = 0;
       await new Promise<void>(resolve => {
-        bot.providePastOperations(94704950, 94705000).provideBlockData().onImpactedAccount("lolzbot").subscribe({
+        bot.providePastOperations(94704950, 94705000).provideBlockData().onImpactedAccounts("lolzbot").subscribe({
           next(data) {
             data.impactedAccounts["lolzbot"].forEach(({ transaction }) => {
               console.log(`Got transaction #${transaction.id} for lolzbot in block #${data.block.number}`);
