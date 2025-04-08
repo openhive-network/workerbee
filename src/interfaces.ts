@@ -24,7 +24,18 @@ export interface IBroadcastData {
 }
 
 export interface IWorkerBee {
+  /**
+   * Indicates if the bot is running
+   * @type {boolean}
+   * @readonly
+   */
   readonly running: boolean;
+
+  /**
+   * Bot configuration
+   * @type {Readonly<IStartConfiguration>}
+   * @readonly
+   */
   readonly configuration: Readonly<IStartConfiguration>;
 
   /**
@@ -56,6 +67,19 @@ export interface IWorkerBee {
   /**
    * Allows you to iterate over blocks in the past from a given range
    *
+   * @example
+   * ```ts
+   * await new Promise((resolve, reject) => {
+   *   workerbee.providePastOperations(10_000, 10_500).onBlock().subscribe({
+   *     next: (data) => {
+   *       console.log(data);
+   *     },
+   *     error: reject,
+   *     complete: resolve
+   *   });
+   * });
+   * ```
+   *
    * @throws if called before {@link start}
    */
   providePastOperations(fromBlock: number, toBlock: number): TPastQueen;
@@ -63,10 +87,38 @@ export interface IWorkerBee {
   /**
    * Allows you to iterate over blocks in the past from a given range
    *
+   * @example
+   * ```ts
+   * workerbee.providePastOperations('-7d').then((provider) => {
+   *   provider.onBlock().subscribe({
+   *     next: (data) => {
+   *       console.log(data);
+   *     },
+   *     error: console.error,
+   *     complete: () => {
+   *      console.log('Completed');
+   *     }
+   *   });
+   * });
+   * ```
+   *
    * @throws if called before {@link start}
    */
   providePastOperations(relativeTime: string): Promise<TPastQueen>;
 
+  /**
+   * Allows you to iterate over blocks in live mode
+   *
+   * @example
+   * ```ts
+   * workerbee.observe.onBlock().subscribe({
+   *   next: (data) => {
+   *     console.log(data);
+   *   },
+   *   error: console.error
+   * });
+   * ```
+   */
   get observe(): QueenBee;
 
   /**
@@ -84,6 +136,13 @@ export interface IWorkerBee {
 
   /**
    * Allows you to iterate over blocks indefinitely
+   *
+   * @example
+   * ```ts
+   * for await (const block of workerbee) {
+   *   console.log(block);
+   * }
+   * ```
    */
   [Symbol.asyncIterator](): AsyncIterator<IBlockData & IBlockHeaderData>;
 }
