@@ -75,7 +75,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * @example
    * ```ts
-   * workerbee.observe.onPostCreated("test").subscribe({
+   * workerbee.observe.onPost("test").subscribe({
    *   next: (data) => {
    *     console.log(data);
    *   }
@@ -130,7 +130,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * @example
    * ```ts
-   * workerbee.observe.onPostCreated("test").or.onCommentCreated("test").subscribe({
+   * workerbee.observe.onPost("test").or.onComment("test").subscribe({
    *   next: (data) => {
    *     console.log(data);
    *   }
@@ -302,7 +302,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * @example
    * ```ts
-   * workerbee.observe.onPostCreated("username").subscribe({
+   * workerbee.observe.onPost("username").subscribe({
    *   next: (data) => {
    *     for(const { operation } of data.posts["username"])
    *      console.log("Post created:", operation);
@@ -313,7 +313,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @param author The account name of the author to monitor for post creation.
    * @returns itself
    */
-  public onPostCreated<
+  public onPost<
     TAccount extends TAccountName
   >(author: TAccountName): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<PostProvider<[TAccount]>["provide"]>>> {
     this.operands.push(new PostFilter(this.worker, author));
@@ -330,7 +330,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * @example
    * ```ts
-   * workerbee.observe.onCommentCreated("username", "specific-permlink").subscribe({
+   * workerbee.observe.onComment("username", "specific-permlink").subscribe({
    *   next: (data) => {
    *     for(const { operation } of data.comments["username"])
    *      console.log("Comment created:", operation);
@@ -342,7 +342,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @param permlink (Optional) The specific permlink of the comment to monitor.
    * @returns itself
    */
-  public onCommentCreated<
+  public onComment<
     TAccount extends TAccountName
   >(author: TAccount, permlink?: string): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CommentProvider<[TAccount]>["provide"]>>> {
     this.operands.push(new CommentFilter(this.worker, author));
