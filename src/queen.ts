@@ -30,7 +30,7 @@ import { AccountProvider } from "./chain-observers/providers/account-provider";
 import { AlarmProvider } from "./chain-observers/providers/alarm-provider";
 import { BlockHeaderProvider } from "./chain-observers/providers/block-header-provider";
 import { BlockProvider } from "./chain-observers/providers/block-provider";
-import { CommentProvider } from "./chain-observers/providers/comment-provider";
+import { CommentProvider, ICommentData } from "./chain-observers/providers/comment-provider";
 import { CustomOperationProvider } from "./chain-observers/providers/custom-operation-provider";
 import { ExchangeTransferProvider } from "./chain-observers/providers/exchange-transfer-provider";
 import { FeedPriceProvider } from "./chain-observers/providers/feed-price-provider";
@@ -345,14 +345,14 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * ```
    *
    * @param author The account name of the author to monitor for comment creation.
-   * @param permlink (Optional) The specific permlink of the comment to monitor.
+   * @param parentPostOrComment (Optional) The specific data of the parent post/comment to monitor.
    * @returns itself
    */
   public onComment<
     TAccount extends TAccountName
-  >(author: TAccount, permlink?: string): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CommentProvider<[TAccount]>["provide"]>>> {
+  >(author: TAccount, parentPostOrComment?: ICommentData): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CommentProvider<[TAccount]>["provide"]>>> {
     this.operands.push(new CommentFilter(this.worker, author));
-    this.pushProvider(CommentProvider, { authors: [{ account: author, permlink }] });
+    this.pushProvider(CommentProvider, { authors: [{ account: author, parentCommentFilter: parentPostOrComment }] });
 
     return this;
   }

@@ -12,9 +12,14 @@ export interface ICommentProviderData<TAccounts extends Array<TAccountName>> {
   comments: Partial<TCommentProvided<TAccounts>>;
 };
 
+export interface ICommentData {
+  parentAuthor: TAccountName;
+  parentPermlink: string;
+}
+
 export interface ICommentProviderAuthors {
   account: string;
-  permlink?: string;
+  parentCommentFilter?: ICommentData;
 }
 
 export interface ICommentProviderOptions {
@@ -22,11 +27,11 @@ export interface ICommentProviderOptions {
 }
 
 export class CommentProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<ICommentProviderOptions> {
-  public readonly authors = new Map<TAccountName, string | undefined>();
+  public readonly authors = new Map<TAccountName, ICommentData | undefined>();
 
   public pushOptions(options: ICommentProviderOptions): void {
-    for(const { account, permlink } of options.authors)
-      this.authors.set(account, permlink);
+    for(const { account, parentCommentFilter } of options.authors)
+      this.authors.set(account, parentCommentFilter);
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
@@ -44,11 +49,14 @@ export class CommentProvider<TAccounts extends Array<TAccountName> = Array<TAcco
         if (operation.operation.parent_author === "")
           continue;
 
-        for(const [account, permlink] of this.authors) {
+        for(const [account, parentCommentFilter] of this.authors) {
           if (operation.operation.author !== account)
             continue;
 
-          if(permlink && operation.operation.parent_permlink !== permlink)
+          if(parentCommentFilter && (
+            operation.operation.parent_permlink !== parentCommentFilter.parentPermlink
+            || operation.operation.parent_author !== parentCommentFilter.parentAuthor
+          ))
             continue;
 
           if (!result.comments[account])
