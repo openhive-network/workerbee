@@ -1,15 +1,16 @@
 import { TAccountName, vote } from "@hiveio/wax";
+import { WorkerBeeIterable } from "../../types/iterator";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { IOperationTransactionPair, OperationClassifier } from "../classifiers/operation-classifier";
 import { DataEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export type TVoteProvided<TAccounts extends Array<TAccountName>> = {
-  [K in TAccounts[number]]: Array<IOperationTransactionPair<vote>>;
+  [K in TAccounts[number]]: WorkerBeeIterable<IOperationTransactionPair<vote>>;
 };
 
 export interface IVoteProviderData<TAccounts extends Array<TAccountName>> {
-  votes: TVoteProvided<TAccounts>;
+  votes: Partial<TVoteProvided<TAccounts>>;
 };
 
 export interface IVoteProviderOptions {
@@ -17,10 +18,11 @@ export interface IVoteProviderOptions {
 }
 
 export class VoteProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IVoteProviderOptions> {
-  public readonly voters: string[] = [];
+  public readonly voters = new Set<TAccountName>();
 
   public pushOptions(options: IVoteProviderOptions): void {
-    this.voters.push(...options.voters);
+    for(const account of options.voters)
+      this.voters.add(account);
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
@@ -47,6 +49,9 @@ export class VoteProvider<TAccounts extends Array<TAccountName> = Array<TAccount
             transaction: operation.transaction
           });
         }
+
+    for(const account in result.votes)
+      result.votes[account] = new WorkerBeeIterable(result.votes[account]);
 
     return result;
   }

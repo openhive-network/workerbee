@@ -9,7 +9,7 @@ export type TWitnessProvider<TAccounts extends Array<TAccountName>> = {
 };
 
 export interface IWitnessProviderData<TAccounts extends Array<TAccountName>> {
-  witnesses: TWitnessProvider<TAccounts>;
+  witnesses: Partial<TWitnessProvider<TAccounts>>;
 };
 
 export interface IWitnessProviderOptions {
@@ -17,16 +17,19 @@ export interface IWitnessProviderOptions {
 }
 
 export class WitnessProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IWitnessProviderOptions> {
-  public readonly witnesses: string[] = [];
+  public readonly witnesses = new Set<TAccountName>();
 
   public pushOptions(options: IWitnessProviderOptions): void {
-    this.witnesses.push(...options.accounts);
+    for(const account of options.accounts)
+      this.witnesses.add(account);
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
-    return this.witnesses.map(witness => WitnessClassifier.forOptions({
-      witness
-    }));
+    const classifiers: Array<TRegisterEvaluationContext> = [];
+    for(const witness of this.witnesses)
+      classifiers.push(WitnessClassifier.forOptions({ witness }));
+
+    return classifiers;
   }
 
   public async provide(data: DataEvaluationContext): Promise<IWitnessProviderData<TAccounts>> {

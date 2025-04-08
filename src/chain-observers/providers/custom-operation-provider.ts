@@ -9,7 +9,7 @@ export type TCustomOperationProvided<TOperationId extends Array<string>> = {
 };
 
 export interface ICustomOperationProviderData<TOperationId extends Array<string>> {
-  customOperations: TCustomOperationProvided<TOperationId>;
+  customOperations: Partial<TCustomOperationProvided<TOperationId>>;
 };
 
 export interface ICustomOperationProviderOptions {

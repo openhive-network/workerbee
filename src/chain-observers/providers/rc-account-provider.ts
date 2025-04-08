@@ -9,7 +9,7 @@ export type TRcAccountProvided<TAccounts extends Array<TAccountName>> = {
 };
 
 export interface IRcAccountProviderData<TAccounts extends Array<TAccountName>> {
-  rcAccounts: TRcAccountProvided<TAccounts>;
+  rcAccounts: Partial<TRcAccountProvided<TAccounts>>;
 };
 
 export interface IRcAccountsProviderOptions {
@@ -17,16 +17,19 @@ export interface IRcAccountsProviderOptions {
 }
 
 export class RcAccountProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IRcAccountsProviderOptions> {
-  public readonly rcAccounts: string[] = [];
+  public readonly rcAccounts = new Set<TAccountName>();
 
   public pushOptions(options: IRcAccountsProviderOptions): void {
-    this.rcAccounts.push(...options.accounts);
+    for(const account of options.accounts)
+      this.rcAccounts.add(account);
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
-    return this.rcAccounts.map(rcAccount => RcAccountClassifier.forOptions({
-      rcAccount
-    }));
+    const classifiers: Array<TRegisterEvaluationContext> = [];
+    for(const rcAccount of this.rcAccounts)
+      classifiers.push(RcAccountClassifier.forOptions({ rcAccount }));
+
+    return classifiers;
   }
 
   public async provide(data: DataEvaluationContext): Promise<IRcAccountProviderData<TAccounts>> {

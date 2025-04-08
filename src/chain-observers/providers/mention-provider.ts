@@ -10,7 +10,7 @@ export type TMentionedAccountProvided<TMentions extends Array<TAccountName>> = {
 };
 
 export interface IMentionedAccountProviderData<TMentions extends Array<TAccountName>> {
-  mentioned: TMentionedAccountProvided<TMentions>;
+  mentioned: Partial<TMentionedAccountProvided<TMentions>>;
 };
 
 export interface IMentionedAccountProviderOptions {
@@ -18,10 +18,11 @@ export interface IMentionedAccountProviderOptions {
 }
 
 export class MentionedAccountProvider<TMentions extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IMentionedAccountProviderOptions> {
-  public readonly accounts: string[] = [];
+  public readonly accounts = new Set<TAccountName>();
 
   public pushOptions(options: IMentionedAccountProviderOptions): void {
-    this.accounts.push(...options.accounts);
+    for(const account of options.accounts)
+      this.accounts.add(account);
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
@@ -31,28 +32,27 @@ export class MentionedAccountProvider<TMentions extends Array<TAccountName> = Ar
   }
 
   public async provide(data: DataEvaluationContext): Promise<IMentionedAccountProviderData<TMentions>> {
-    const mentioned: Record<string, comment[]> = Object.fromEntries(this.accounts.map(account => [account, []]));
+    const mentioned = {} as IMentionedAccountProviderData<TMentions>["mentioned"];
 
     const { operationsPerType } = await data.get(OperationClassifier);
 
-    for(const { operation } of (operationsPerType.comment ?? []))
-      for(const account of this.accounts)
-        try {
-          const jsonMetadata = JSON.parse(operation.json_metadata);
+    if (operationsPerType.comment)
+      for(const { operation } of operationsPerType.comment)
+        for(const account of this.accounts)
+          try {
+            const jsonMetadata = JSON.parse(operation.json_metadata);
 
-          if ("users" in jsonMetadata && Array.isArray(jsonMetadata.users))
-            if (jsonMetadata.users.indexOf(account) !== -1)
-              mentioned[account].push(operation);
-          // eslint-disable-next-line no-empty
-        } catch {}
-
-    const mentionedOutput = {} as TMentionedAccountProvided<TMentions>;
+            if ("users" in jsonMetadata && Array.isArray(jsonMetadata.users))
+              if (jsonMetadata.users.indexOf(account) !== -1)
+                mentioned[account].push(operation);
+            // eslint-disable-next-line no-empty
+          } catch {}
 
     for(const account in mentioned)
-      mentionedOutput[account] = new WorkerBeeIterable(mentioned[account]);
+      mentioned[account] = new WorkerBeeIterable(mentioned[account]);
 
     return {
-      mentioned: mentionedOutput
+      mentioned
     } as IMentionedAccountProviderData<TMentions>;
   }
 }

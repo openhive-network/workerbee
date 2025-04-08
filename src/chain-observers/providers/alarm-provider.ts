@@ -1,4 +1,5 @@
 import { TAccountName } from "@hiveio/wax";
+import { WorkerBeeIterable } from "../../types/iterator";
 import { AccountClassifier, ChangeRecoveryInProgressClassifier, DeclineVotingRightsClassifier } from "../classifiers";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { DataEvaluationContext } from "../factories/data-evaluation-context";
@@ -14,11 +15,11 @@ export enum EAlarmType {
 }
 
 export type TAlarmAccounts<TAccounts extends Array<TAccountName>> = {
-  [K in TAccounts[number]]: EAlarmType[];
+  [K in TAccounts[number]]: WorkerBeeIterable<EAlarmType>;
 };
 
 export interface IAlarmAccountsData<TAccounts extends Array<TAccountName>> {
-  alarmsPerAccount: TAlarmAccounts<TAccounts>;
+  alarmsPerAccount: Partial<TAlarmAccounts<TAccounts>>;
 };
 
 export interface IAlarmProviderOptions {
@@ -26,59 +27,63 @@ export interface IAlarmProviderOptions {
 }
 
 export class AlarmProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IAlarmProviderOptions> {
-  public readonly accounts: string[] = [];
+  public readonly accounts = new Set<TAccountName>();
 
   public pushOptions(options: IAlarmProviderOptions): void {
-    this.accounts.push(...options.accounts);
+    for(const account of options.accounts)
+      this.accounts.add(account);
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
-    return [
-      ...this.accounts.map(account => AccountClassifier.forOptions({
-        account
-      })),
-      ...this.accounts.map(account => ChangeRecoveryInProgressClassifier.forOptions({
-        changeRecoveryAccount: account
-      })),
-      ...this.accounts.map(account => DeclineVotingRightsClassifier.forOptions({
-        declineVotingRightsAccount: account
-      }))
-    ];
+    const contexts: TRegisterEvaluationContext[] = [];
+
+    for(const account of this.accounts)
+      contexts.push(
+        AccountClassifier.forOptions({ account }),
+        ChangeRecoveryInProgressClassifier.forOptions({ changeRecoveryAccount: account }),
+        DeclineVotingRightsClassifier.forOptions({ declineVotingRightsAccount: account })
+      );
+
+    return contexts;
   }
 
   public async provide(data: DataEvaluationContext): Promise<IAlarmAccountsData<TAccounts>> {
     const result: IAlarmAccountsData<TAccounts> = {
-      alarmsPerAccount: this.accounts.reduce((prev, curr) => {
-        prev[curr]  = [];
+      alarmsPerAccount: {} as TAlarmAccounts<TAccounts>
+    };
 
-        return prev;
-      }, {} as TAlarmAccounts<TAccounts>)
+    const ensureHasAccount = (account: TAccountName) => {
+      if (result.alarmsPerAccount[account] === undefined)
+        result.alarmsPerAccount[account] = [];
+
+      return result.alarmsPerAccount[account];
     };
 
     const { accounts } = await data.get(AccountClassifier);
     for(const account of this.accounts) {
       if (accounts[account].recoveryAccount === STEEM_ACCOUNT_NAME)
-        result.alarmsPerAccount[account].push(EAlarmType.LEGACY_RECOVERY_ACCOUNT_SET);
+        ensureHasAccount(account).push(EAlarmType.LEGACY_RECOVERY_ACCOUNT_SET);
 
       if (accounts[account].governanceVoteExpiration === undefined)
-        result.alarmsPerAccount[account].push(EAlarmType.GOVERNANCE_VOTE_EXPIRED);
+        ensureHasAccount(account).push(EAlarmType.GOVERNANCE_VOTE_EXPIRED);
       else if (accounts[account].governanceVoteExpiration!.getTime() < (Date.now() + ONE_MONTH_MS))
-        result.alarmsPerAccount[account].push(EAlarmType.GOVERNANCE_VOTE_EXPIRATION_SOON);
+        ensureHasAccount(account).push(EAlarmType.GOVERNANCE_VOTE_EXPIRATION_SOON);
     }
 
     const { recoveringAccounts } = await data.get(ChangeRecoveryInProgressClassifier);
 
     for(const account of this.accounts)
       if (recoveringAccounts[account])
-        result.alarmsPerAccount[account].push(EAlarmType.RECOVERY_ACCOUNT_IS_CHANGING);
-
+        ensureHasAccount(account).push(EAlarmType.RECOVERY_ACCOUNT_IS_CHANGING);
 
     const { declineVotingRightsAccounts } = await data.get(DeclineVotingRightsClassifier);
 
     for(const account of this.accounts)
       if (declineVotingRightsAccounts[account])
-        result.alarmsPerAccount[account].push(EAlarmType.DECLINING_VOTING_RIGHTS);
+        ensureHasAccount(account).push(EAlarmType.DECLINING_VOTING_RIGHTS);
 
+    for(const account in result.alarmsPerAccount)
+      result.alarmsPerAccount[account] = new WorkerBeeIterable(result.alarmsPerAccount[account]);
 
     return result;
   }

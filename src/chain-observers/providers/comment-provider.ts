@@ -9,7 +9,7 @@ export type TCommentProvided<TAccounts extends Array<TAccountName>> = {
 };
 
 export interface ICommentProviderData<TAccounts extends Array<TAccountName>> {
-  comments: TCommentProvided<TAccounts>;
+  comments: Partial<TCommentProvided<TAccounts>>;
 };
 
 export interface ICommentProviderAuthors {
@@ -22,10 +22,11 @@ export interface ICommentProviderOptions {
 }
 
 export class CommentProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<ICommentProviderOptions> {
-  public readonly authors: ICommentProviderAuthors[] = [];
+  public readonly authors = new Map<TAccountName, string | undefined>();
 
   public pushOptions(options: ICommentProviderOptions): void {
-    this.authors.push(...options.authors);
+    for(const { account, permlink } of options.authors)
+      this.authors.set(account, permlink);
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
@@ -43,7 +44,7 @@ export class CommentProvider<TAccounts extends Array<TAccountName> = Array<TAcco
         if (operation.operation.parent_author === "")
           continue;
 
-        for(const { account, permlink } of this.authors) {
+        for(const [account, permlink] of this.authors) {
           if (operation.operation.author !== account)
             continue;
 

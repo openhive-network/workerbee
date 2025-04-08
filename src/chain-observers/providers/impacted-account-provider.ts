@@ -11,7 +11,7 @@ export type TImpactedAccountProvided<TAccounts extends Array<TAccountName>> = {
 };
 
 export interface IImpactedAccountProviderData<TAccounts extends Array<TAccountName>> {
-  impactedAccounts: TImpactedAccountProvided<TAccounts>;
+  impactedAccounts: Partial<TImpactedAccountProvided<TAccounts>>;
 };
 
 export interface IImpactedAccountProviderOptions {
@@ -19,10 +19,11 @@ export interface IImpactedAccountProviderOptions {
 }
 
 export class ImpactedAccountProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IImpactedAccountProviderOptions> {
-  public readonly accounts: string[] = [];
+  public readonly accounts = new Set<TAccountName>();
 
   public pushOptions(options: IImpactedAccountProviderOptions): void {
-    this.accounts.push(...options.accounts);
+    for(const account of options.accounts)
+      this.accounts.add(account);
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
@@ -38,9 +39,7 @@ export class ImpactedAccountProvider<TAccounts extends Array<TAccountName> = Arr
 
     const { impactedAccounts } = await data.get(ImpactedAccountClassifier);
     for(const account of this.accounts)
-      if (impactedAccounts[account] === undefined)
-        result.impactedAccounts[account] = new WorkerBeeIterable<IOperationTransactionPair>([]);
-      else // Copy the array to prevent the original from being modified
+      if (impactedAccounts[account] !== undefined)
         result.impactedAccounts[account] = new WorkerBeeIterable<IOperationTransactionPair>(Array.from(impactedAccounts[account].operations));
 
     return result as IImpactedAccountProviderData<TAccounts>;

@@ -1,4 +1,5 @@
 import { TAccountName } from "@hiveio/wax";
+import { WorkerBeeIterable } from "../../types/iterator";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { IOperationTransactionPair, OperationClassifier } from "../classifiers/operation-classifier";
 import { DataEvaluationContext } from "../factories/data-evaluation-context";
@@ -11,11 +12,11 @@ export interface IReblogOperation {
 }
 
 export type TReblogProvided<TAccounts extends Array<TAccountName>> = {
-  [K in TAccounts[number]]: Array<IOperationTransactionPair<IReblogOperation>>;
+  [K in TAccounts[number]]: WorkerBeeIterable<IOperationTransactionPair<IReblogOperation>>;
 };
 
 export interface IReblogProviderData<TAccounts extends Array<TAccountName>> {
-  reblogs: TReblogProvided<TAccounts>;
+  reblogs: Partial<TReblogProvided<TAccounts>>;
 };
 
 export interface IReblogProviderOptions {
@@ -63,6 +64,9 @@ export class ReblogProvider<TAccounts extends Array<TAccountName> = Array<string
           transaction: operation.transaction
         });
       }
+
+    for(const account in result.reblogs)
+      result.reblogs[account] = new WorkerBeeIterable(result.reblogs[account]);
 
     return result;
   }

@@ -10,7 +10,7 @@ export type TAccountProvided<TAccounts extends Array<TAccountName>> = {
 };
 
 export interface IAccountProviderData<TAccounts extends Array<TAccountName>> {
-  accounts: TAccountProvided<TAccounts>;
+  accounts: Partial<TAccountProvided<TAccounts>>;
 };
 
 export interface IAccountProviderOptions {

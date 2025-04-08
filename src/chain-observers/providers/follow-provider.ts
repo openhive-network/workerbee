@@ -15,7 +15,7 @@ export type TFollowProvided<TAccounts extends Array<TAccountName>> = {
 };
 
 export interface IFollowProviderData<TAccounts extends Array<TAccountName>> {
-  follows: TFollowProvided<TAccounts>;
+  follows: Partial<TFollowProvided<TAccounts>>;
 };
 
 export interface IFollowProviderOptions {
