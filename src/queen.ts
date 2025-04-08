@@ -31,8 +31,10 @@ import { AlarmProvider } from "./chain-observers/providers/alarm-provider";
 import { BlockHeaderProvider } from "./chain-observers/providers/block-header-provider";
 import { BlockProvider } from "./chain-observers/providers/block-provider";
 import { CommentProvider } from "./chain-observers/providers/comment-provider";
+import { CustomOperationProvider } from "./chain-observers/providers/custom-operation-provider";
 import { ExchangeTransferProvider } from "./chain-observers/providers/exchange-transfer-provider";
 import { FeedPriceProvider } from "./chain-observers/providers/feed-price-provider";
+import { FollowProvider } from "./chain-observers/providers/follow-provider";
 import { ImpactedAccountProvider } from "./chain-observers/providers/impacted-account-provider";
 import { InternalMarketProvider } from "./chain-observers/providers/internal-market-provider";
 import { MentionedAccountProvider } from "./chain-observers/providers/mention-provider";
@@ -40,6 +42,7 @@ import { NewAccountProvider } from "./chain-observers/providers/new-account-prov
 import { PostProvider } from "./chain-observers/providers/post-provider";
 import { ProviderBase } from "./chain-observers/providers/provider-base";
 import { RcAccountProvider } from "./chain-observers/providers/rc-account-provider";
+import { ReblogProvider } from "./chain-observers/providers/reblog-provider";
 import { TransactionByIdProvider } from "./chain-observers/providers/transaction-provider";
 import { VoteProvider } from "./chain-observers/providers/vote-provider";
 import { WhaleAlertProvider } from "./chain-observers/providers/whale-alert-provider";
@@ -184,8 +187,11 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     return this;
   }
 
-  public onCustomOperation(id: string | number): QueenBee<TPreviousSubscriberData> {
+  public onCustomOperation<
+    TOperationId extends string
+  >(id: TOperationId): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CustomOperationProvider<[TOperationId]>["provide"]>>> {
     this.operands.push(new CustomOperationFilter(this.worker, id));
+    this.pushProvider(CustomOperationProvider, { ids: [id] });
 
     return this;
   }
@@ -208,14 +214,20 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     return this;
   }
 
-  public onReblog(reblogger: TAccountName): QueenBee<TPreviousSubscriberData> {
+  public onReblog<
+    TReblog extends TAccountName
+  >(reblogger: TReblog): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<MentionedAccountProvider<[TReblog]>["provide"]>>> {
     this.operands.push(new ReblogFilter(this.worker, reblogger));
+    this.pushProvider(ReblogProvider, { accounts: [reblogger] });
 
     return this;
   }
 
-  public onFollow(follower: TAccountName): QueenBee<TPreviousSubscriberData> {
+  public onFollow<
+    TFollow extends TAccountName
+  >(follower: TFollow): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<FollowProvider<[TFollow]>["provide"]>>> {
     this.operands.push(new FollowFilter(this.worker, follower));
+    this.pushProvider(FollowProvider, { accounts: [follower] });
 
     return this;
   }
