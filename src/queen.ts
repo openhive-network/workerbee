@@ -216,10 +216,16 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * @param account The account name to monitor for full manabar
    * @param manabarType The type of manabar to monitor (default: {@link EManabarType.RC})
+   * @param manabarLoadPercent The percentage of manabar load to trigger the notification
+   *                           (default: `98`. Note: Setting it to 100 may not always work as expected due to inaccurate floating point math)
    * @returns itself
    */
-  public onAccountFullManabar(account: TAccountName, manabarType: EManabarType = EManabarType.RC): QueenBee<TPreviousSubscriberData> {
-    this.operands.push(new AccountFullManabarFilter(this.worker, account, manabarType));
+  public onAccountFullManabar(
+    account: TAccountName,
+    manabarType: EManabarType = EManabarType.RC,
+    manabarLoadPercent: number = 98
+  ): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new AccountFullManabarFilter(this.worker, account, manabarType, manabarLoadPercent));
 
     return this;
   }

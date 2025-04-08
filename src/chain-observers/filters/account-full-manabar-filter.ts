@@ -16,7 +16,8 @@ export class AccountFullManabarFilter extends FilterBase {
   public constructor(
     worker: WorkerBee,
     private readonly account: string,
-    private readonly manabarType: EManabarType
+    private readonly manabarType: EManabarType,
+    private readonly manabarLoadPercent: number
   ) {
     super(worker);
   }
@@ -70,6 +71,6 @@ export class AccountFullManabarFilter extends FilterBase {
       manabar.lastUpdateTime.getTime() / 1000
     );
 
-    return manabarData.percent >= 98;
+    return manabarData.percent >= this.manabarLoadPercent;
   }
 }
