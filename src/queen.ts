@@ -7,7 +7,7 @@ import { AccountMetadataChangeFilter } from "./chain-observers/filters/account-m
 import { AlarmFilter } from "./chain-observers/filters/alarm-filter";
 import { BalanceChangeFilter } from "./chain-observers/filters/balance-change-filter";
 import { BlockNumberFilter } from "./chain-observers/filters/block-filter";
-import { CommentFilter } from "./chain-observers/filters/comment-filter";
+import { CommentFilter, ICommentData } from "./chain-observers/filters/comment-filter";
 import { LogicalAndFilter, LogicalOrFilter } from "./chain-observers/filters/composite-filter";
 import { CustomOperationFilter } from "./chain-observers/filters/custom-operation-filter";
 import { ExchangeTransferFilter } from "./chain-observers/filters/exchange-transfer-filter";
@@ -30,7 +30,7 @@ import { AccountProvider } from "./chain-observers/providers/account-provider";
 import { AlarmProvider } from "./chain-observers/providers/alarm-provider";
 import { BlockHeaderProvider } from "./chain-observers/providers/block-header-provider";
 import { BlockProvider } from "./chain-observers/providers/block-provider";
-import { CommentProvider, ICommentData } from "./chain-observers/providers/comment-provider";
+import { CommentProvider } from "./chain-observers/providers/comment-provider";
 import { CustomOperationProvider } from "./chain-observers/providers/custom-operation-provider";
 import { ExchangeTransferProvider } from "./chain-observers/providers/exchange-transfer-provider";
 import { FeedPriceProvider } from "./chain-observers/providers/feed-price-provider";
@@ -400,7 +400,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @returns itself
    */
   public onCustomOperation<
-    TOperationId extends string
+    TOperationId extends string | number
   >(id: TOperationId): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CustomOperationProvider<[TOperationId]>["provide"]>>> {
     this.operands.push(new CustomOperationFilter(this.worker, id));
     this.pushProvider(CustomOperationProvider, { ids: [id] });

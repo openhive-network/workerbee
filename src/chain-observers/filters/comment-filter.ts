@@ -1,38 +1,49 @@
+import { TAccountName } from "@hiveio/wax";
 import type { WorkerBee } from "../../bot";
-import { ImpactedAccountClassifier } from "../classifiers";
+import { OperationClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { DataEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";
+
+export interface ICommentData {
+  parentAuthor: TAccountName;
+  parentPermlink: string;
+}
 
 export class CommentFilter extends FilterBase {
   public constructor(
     worker: WorkerBee,
     private readonly account: string,
-    private readonly permlink?: string
+    private readonly parentCommentFilter?: ICommentData
   ) {
     super(worker);
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [
-      ImpactedAccountClassifier
+      OperationClassifier
     ];
   }
 
   public async match(data: DataEvaluationContext): Promise<boolean> {
-    const { impactedAccounts } = await data.get(ImpactedAccountClassifier);
+    const { operationsPerType } = await data.get(OperationClassifier);
 
-    const account = impactedAccounts[this.account];
+    if (operationsPerType.comment)
+      for(const { operation } of operationsPerType.comment) {
+        if (operation.parent_author === "")
+          continue;
 
-    for(const { operation } of account.operations)
-      if(operation.comment)
-        if (operation.comment.author === this.account)
-          if (this.permlink) {
-            if (operation.comment.parent_permlink === this.permlink)
-              return true;
-          } else
-            return true;
+        if (operation.author !== this.account)
+          continue;
 
+        if(this.parentCommentFilter && (
+          operation.parent_permlink !== this.parentCommentFilter.parentPermlink
+          || operation.parent_author !== this.parentCommentFilter.parentAuthor
+        ))
+          continue;
+
+        return true;
+      }
 
     return false;
   }

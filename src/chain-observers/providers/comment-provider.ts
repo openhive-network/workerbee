@@ -2,6 +2,7 @@ import { comment, TAccountName } from "@hiveio/wax";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { IOperationTransactionPair, OperationClassifier } from "../classifiers/operation-classifier";
 import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { ICommentData } from "../filters/comment-filter";
 import { ProviderBase } from "./provider-base";
 
 export type TCommentProvided<TAccounts extends Array<TAccountName>> = {
@@ -11,11 +12,6 @@ export type TCommentProvided<TAccounts extends Array<TAccountName>> = {
 export interface ICommentProviderData<TAccounts extends Array<TAccountName>> {
   comments: Partial<TCommentProvided<TAccounts>>;
 };
-
-export interface ICommentData {
-  parentAuthor: TAccountName;
-  parentPermlink: string;
-}
 
 export interface ICommentProviderAuthors {
   account: string;
