@@ -10,21 +10,6 @@ export class ImpactedAccountCollector extends CollectorBase {
     return [OperationClassifier];
   }
 
-  private ensureStructIntegrity(impactedAccounts: Record<string, IImpactedAccount>, accountName: string): Array<IOperationTransactionPair> {
-    let struct = impactedAccounts[accountName];
-
-    // TODO: refactor to make this code more clean
-    if (struct === undefined)
-      // Warning: we need to create an entry specific to given account in the Record object passed here by reference...
-      struct = impactedAccounts[accountName] = {
-        name: accountName,
-        operations: []
-      };
-
-
-    return struct.operations as IOperationTransactionPair[];
-  }
-
   public async fetchData(data: DataEvaluationContext) {
     const { operations } = await data.get(OperationClassifier);
 
@@ -33,8 +18,15 @@ export class ImpactedAccountCollector extends CollectorBase {
     for(const operation of operations) {
       const impactedOperationAccounts = this.worker.chain!.operationGetImpactedAccounts(operation.operation);
 
-      for(const accountName of impactedOperationAccounts)
-        this.ensureStructIntegrity(impactedAccounts, accountName).push(operation);
+      for(const accountName of impactedOperationAccounts) {
+        if (impactedAccounts[accountName] === undefined)
+          impactedAccounts[accountName] = {
+            name: accountName,
+            operations: []
+          };
+
+        (impactedAccounts[accountName].operations as Array<IOperationTransactionPair>).push(operation);
+      }
     }
 
     return {
