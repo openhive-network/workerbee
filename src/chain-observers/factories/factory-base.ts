@@ -1,8 +1,16 @@
 import type { WorkerBee } from "../../bot";
+import { WorkerBeeError } from "../../errors";
+import { createFactoryCircularDependencyErrorMessage, createFactoryUnsupportedClassifierErrorMessage } from "../../utils/error-helper";
 import { IEvaluationContextClass, TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { CollectorBase } from "../collectors/collector-base";
 import type { ObserverMediator } from "../observer-mediator";
 import { DataEvaluationContext } from "./data-evaluation-context";
+
+export enum EClassifierOrigin {
+  FILTER = "filter",
+  PROVIDER = "provider",
+  FACTORY = "factory"
+}
 
 export class FactoryBase {
   protected collectors!: Map<IEvaluationContextClass, CollectorBase>;
@@ -14,37 +22,46 @@ export class FactoryBase {
   public preNotify(_mediator: ObserverMediator): void {}
   public postNotify(_mediator: ObserverMediator, _context: DataEvaluationContext): void {}
 
-  public pushClassifier(classifier: TRegisterEvaluationContext): void {
+  public pushClassifier(classifier: TRegisterEvaluationContext, origin: EClassifierOrigin, stack: IEvaluationContextClass[] = []): void {
     const classifierClass = "class" in classifier ? classifier.class : classifier;
+
+    if (stack.includes(classifierClass))
+      throw new WorkerBeeError(createFactoryCircularDependencyErrorMessage((this as any).__proto__.constructor.name, classifierClass, origin, stack));
+
+    stack.push(classifierClass);
 
     const instance = this.collectors.get(classifierClass);
     if (instance === undefined)
-      throw new Error(`Classifier "${classifierClass.name}" is not supported by factory "${(this as any).__proto__.constructor.name}"`);
+      throw new WorkerBeeError(createFactoryUnsupportedClassifierErrorMessage((this as any).__proto__.constructor.name, classifierClass, origin, stack));
 
     instance.register("options" in classifier ? classifier.options : undefined);
 
-    for(const dependency of instance.usedContexts())
-      this.pushClassifier(dependency);
+    for(const dependency of instance.usedContexts()) // Rewrite stack to avoid detecting false circular dependencies when on the same nested level
+      this.pushClassifier(dependency, origin, [...stack]);
   }
 
-  public popClassifier(classifier: TRegisterEvaluationContext): void {
+  public popClassifier(classifier: TRegisterEvaluationContext, origin: EClassifierOrigin, stack: IEvaluationContextClass[] = []): void {
     const classifierClass = "class" in classifier ? classifier.class : classifier;
+
+    if (stack.includes(classifierClass))
+      throw new WorkerBeeError(createFactoryCircularDependencyErrorMessage((this as any).__proto__.constructor.name, classifierClass, origin, stack));
+
+    stack.push(classifierClass);
 
     const instance = this.collectors.get(classifierClass);
     if (instance === undefined)
-      throw new Error(`Classifier "${classifierClass.name}" is not supported by factory "${(this as any).__proto__.constructor.name}"`);
+      throw new WorkerBeeError(createFactoryUnsupportedClassifierErrorMessage((this as any).__proto__.constructor.name, classifierClass, origin, stack));
 
     instance.unregister("options" in classifier ? classifier.options : undefined);
 
-    for(const dependency of instance.usedContexts())
-      this.popClassifier(dependency);
+    for(const dependency of instance.usedContexts()) // Rewrite stack to avoid detecting false circular dependencies when on the same nested level
+      this.popClassifier(dependency, origin, [...stack]);
   }
 
   private rebuildDataEvaluationContext(): DataEvaluationContext {
     const context = new DataEvaluationContext();
 
     for(const [contextClass, collectorInstance] of this.collectors) {
-      // XXX: Rewrite this on overriding logic:
       if (!collectorInstance.hasRegistered) // Ignore collectors that have no registered classifiers
         continue;
 

@@ -221,6 +221,9 @@ test.describe("WorkerBee Bot events test", () => {
           const observer = bot.observe.onAccountFullManabar("initminer").provideRcAccounts("initminer");
           observer.subscribe({
             next(data) {
+              if (!data.rcAccounts["initminer"])
+                return;
+
               console.info(`Account has full manabar: ${data.rcAccounts["initminer"].rcManabar.currentMana}`);
 
               res(data.rcAccounts["initminer"].rcManabar.currentMana.toString());
@@ -394,6 +397,9 @@ test.describe("WorkerBee Bot events test", () => {
       await new Promise<void>(resolve => {
         bot.providePastOperations(94704950, 94705000).provideBlockData().onImpactedAccounts("lolzbot").subscribe({
           next(data) {
+            if(!data.impactedAccounts["lolzbot"])
+              return;
+
             data.impactedAccounts["lolzbot"].forEach(({ transaction }) => {
               console.log(`Got transaction #${transaction.id} for lolzbot in block #${data.block.number}`);
 

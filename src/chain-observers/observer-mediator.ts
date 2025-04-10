@@ -1,6 +1,6 @@
 import { type Observer } from "../types/subscribable";
 import { DataEvaluationContext } from "./factories/data-evaluation-context";
-import type { FactoryBase } from "./factories/factory-base";
+import { EClassifierOrigin, type FactoryBase } from "./factories/factory-base";
 import { FilterBase } from "./filters/filter-base";
 import { ProviderBase } from "./providers/provider-base";
 
@@ -45,11 +45,11 @@ export class ObserverMediator {
     this.filters.set(listener, { filter, providers });
 
     for(const classifier of filter.usedContexts())
-      this.factory.pushClassifier(classifier);
+      this.factory.pushClassifier(classifier, EClassifierOrigin.FILTER);
 
     for(const classifier of providers)
       for(const usedContext of classifier.usedContexts())
-        this.factory.pushClassifier(usedContext);
+        this.factory.pushClassifier(usedContext, EClassifierOrigin.PROVIDER);
   }
 
   public unregisterListener(listener: Partial<Observer<any>>) {
@@ -58,11 +58,11 @@ export class ObserverMediator {
       return;
 
     for(const classifier of filter.filter.usedContexts())
-      this.factory.popClassifier(classifier);
+      this.factory.popClassifier(classifier, EClassifierOrigin.FILTER);
 
     for(const classifier of filter.providers)
       for(const usedContext of classifier.usedContexts())
-        this.factory.popClassifier(usedContext);
+        this.factory.popClassifier(usedContext, EClassifierOrigin.PROVIDER);
 
     this.filters.delete(listener);
 

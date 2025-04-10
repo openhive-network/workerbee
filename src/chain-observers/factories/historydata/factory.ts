@@ -2,7 +2,7 @@ import { WorkerBee } from "../../../bot";
 import { DynamicGlobalPropertiesClassifier } from "../../classifiers";
 import { ObserverMediator } from "../../observer-mediator";
 import { DataEvaluationContext } from "../data-evaluation-context";
-import { FactoryBase } from "../factory-base";
+import { EClassifierOrigin, FactoryBase } from "../factory-base";
 import { HistoryDataFactoryData } from "./factory-data";
 
 export class HistoryDataFactory extends FactoryBase {
@@ -24,7 +24,7 @@ export class HistoryDataFactory extends FactoryBase {
     if (this.hasDGPOClassifier)
       return;
 
-    this.pushClassifier(DynamicGlobalPropertiesClassifier);
+    this.pushClassifier(DynamicGlobalPropertiesClassifier, EClassifierOrigin.FACTORY);
     this.hasDGPOClassifier = true;
   }
 
