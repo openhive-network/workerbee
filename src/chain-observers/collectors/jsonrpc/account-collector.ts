@@ -51,12 +51,11 @@ export class AccountCollector extends CollectorBase {
           upvoteManabar: {
             currentMana: Long.fromValue(account.voting_manabar.current_mana),
             max: Long.fromValue(account.post_voting_power.amount),
-            lastUpdateTime: new Date(`${account.voting_manabar.last_update_time}Z`)
+            lastUpdateTime: new Date(account.voting_manabar.last_update_time * 1000)
           },
           downvoteManabar: {
             currentMana: Long.fromValue(account.downvote_manabar.current_mana),
-            max: Long.fromValue(account.post_voting_power.amount),
-            lastUpdateTime: new Date(`${account.downvote_manabar.last_update_time}Z`)
+            lastUpdateTime: new Date(account.downvote_manabar.last_update_time * 1000)
           },
           recoveryAccount: account.recovery_account,
           governanceVoteExpiration,

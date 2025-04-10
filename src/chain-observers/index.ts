@@ -1,9 +1,10 @@
 export type {
   IAccount, IAccountBalance, IHiveAssetDetailedBalance,
   IHiveAssetWithSavingsDetailedBalance, IHiveHPAssetDetailedBalance,
-  IManabarData
+  IManabarData, IAccountData, IMaxManabarData
 } from "./classifiers/account-classifier";
 export type { ITransactionData, IBlockData } from "./classifiers/block-classifier";
+export type { IManabarAccountData, IManabarDataPercent, TManabars } from "./classifiers/manabar-classifier";
 export type { IBlockHeaderData } from "./classifiers/block-header-classifier";
 export type { IImpactedAccount, IImpactedAccountData } from "./classifiers/impacted-account-classifier";
 export type { IOperationBaseData, IOperationData, IOperationTransactionPair } from "./classifiers/operation-classifier";
@@ -19,6 +20,7 @@ export type { IFeedPriceData, IFeedPriceProviderData } from "./providers/feed-pr
 export type { PostProvider, IPostProviderData, TPostProvided } from "./providers/post-provider";
 export type { CommentProvider, ICommentProviderData, TCommentProvided } from "./providers/comment-provider";
 export type { IVoteProviderData, TVoteProvided, VoteProvider } from "./providers/vote-provider";
+export type { ManabarProvider, IManabarProviderData, TManabarProvided } from "./providers/manabar-provider";
 export type { CustomOperationProvider, ICustomOperationProviderData, TCustomOperationProvided } from "./providers/custom-operation-provider";
 export type { IReblogProviderData, IReblogProviderOptions, ReblogProvider, TReblogProvided } from "./providers/reblog-provider";
 export type { FollowProvider, IFollowOperation, IFollowProviderData, TFollowProvided } from "./providers/follow-provider";

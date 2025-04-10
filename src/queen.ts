@@ -37,6 +37,7 @@ import { FeedPriceProvider } from "./chain-observers/providers/feed-price-provid
 import { FollowProvider } from "./chain-observers/providers/follow-provider";
 import { ImpactedAccountProvider } from "./chain-observers/providers/impacted-account-provider";
 import { InternalMarketProvider } from "./chain-observers/providers/internal-market-provider";
+import { ManabarProvider } from "./chain-observers/providers/manabar-provider";
 import { MentionedAccountProvider } from "./chain-observers/providers/mention-provider";
 import { NewAccountProvider } from "./chain-observers/providers/new-account-provider";
 import { PostProvider } from "./chain-observers/providers/post-provider";
@@ -205,11 +206,13 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   /**
    * Notifies when the specified account has reached 98% of its mana/resource credits.
    *
+   * Automatically provides the manabar data in the `next` callback.
+   *
    * @example
    * ```ts
-   * workerbee.observe.onAccountFullManabar("username").subscribe({
+   * workerbee.observe.onAccountFullManabar("username", EManabarType.RC).subscribe({
    *   next: (data) => {
-   *     console.log("Account manabar is now full");
+   *     console.log("Account manabar is now loaded %:", data.manabarData["username"][EManabarType.RC].percent);
    *   }
    * });
    * ```
@@ -220,12 +223,15 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *                           (default: `98`. Note: Setting it to 100 may not always work as expected due to inaccurate floating point math)
    * @returns itself
    */
-  public onAccountFullManabar(
-    account: TAccountName,
+  public onAccountFullManabar<
+    TAccount extends TAccountName
+  >(
+    account: TAccount,
     manabarType: EManabarType = EManabarType.RC,
     manabarLoadPercent: number = 98
-  ): QueenBee<TPreviousSubscriberData> {
+  ): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ManabarProvider<[TAccount]>["provide"]>>> {
     this.operands.push(new AccountFullManabarFilter(this.worker, account, manabarType, manabarLoadPercent));
+    this.pushProvider(ManabarProvider, { manabarData: [{ account, manabarType }] });
 
     return this;
   }
@@ -837,6 +843,33 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    */
   public provideBlockHeaderData(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<BlockHeaderProvider["provide"]>>> {
     this.pushProvider(BlockHeaderProvider);
+
+    return this;
+  }
+
+  /**
+   * {rovides the manabar data in the `next` callback.
+   *
+   * @example
+   * ```ts
+   * workerbee.observe.onBlock().provideManabarData("username", EManabarType.RC).subscribe({
+   *   next: (data) => {
+   *     console.log("Account manabar is now loaded %:", data.manabarData["username"][EManabarType.RC].percent);
+   *   }
+   * });
+   * ```
+   *
+   * @param account The account name to monitor for full manabar
+   * @param manabarType The type of manabar to monitor (default: {@link EManabarType.RC})
+   * @returns itself
+   */
+  public provideManabarData<
+    TAccount extends TAccountName
+  >(
+    account: TAccount,
+    manabarType: EManabarType = EManabarType.RC
+  ): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ManabarProvider<[TAccount]>["provide"]>>> {
+    this.pushProvider(ManabarProvider, { manabarData: [{ account, manabarType }] });
 
     return this;
   }

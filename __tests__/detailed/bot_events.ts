@@ -1,12 +1,10 @@
 /* eslint-disable no-console */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import type { ReplyOperation, ApiAccount } from "@hiveio/wax";
 import { expect } from "@playwright/test";
 import { ChromiumBrowser, ConsoleMessage, chromium } from "playwright";
 
 import type { IStartConfiguration } from "../../src/bot";
-import type { IBroadcastData, ITransactionData } from "../../src/index";
+import type { IBroadcastData } from "../../src/index";
 
 import { test } from "../assets/jest-helper";
 
@@ -213,20 +211,20 @@ test.describe("WorkerBee Bot events test", () => {
       const bot = new WorkerBee();
 
       const result = await Promise.race([
-        new Promise<string>(res => {
+        new Promise<string>((res, rej) => {
           bot.start();
 
           console.info("Waiting for full manabar regeneration on initminer");
 
-          const observer = bot.observe.onAccountFullManabar("initminer").provideRcAccounts("initminer");
+          const observer = bot.observe.onAccountFullManabar("initminer");
           observer.subscribe({
             next(data) {
-              if (!data.rcAccounts["initminer"])
-                return;
+              if (!data.manabarData["initminer"]?.[/* EManabarType.RC */ 2])
+                return rej(new Error("Could not retrieve RC manabar data for initminer"));
 
-              console.info(`Account has full manabar: ${data.rcAccounts["initminer"].rcManabar.currentMana}`);
+              console.info(`Account has full manabar: ${data.manabarData["initminer"][2].percent}%`);
 
-              res(data.rcAccounts["initminer"].rcManabar.currentMana.toString());
+              res(data.manabarData["initminer"][2].currentMana.toString());
             },
             error(err) {
               console.error(err);

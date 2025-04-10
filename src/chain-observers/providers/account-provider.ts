@@ -2,6 +2,7 @@ import { TAccountName } from "@hiveio/wax";
 import { AccountClassifier } from "../classifiers";
 import { IAccount } from "../classifiers/account-classifier";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
+import { IAccountCollectorOptions } from "../collectors/jsonrpc/account-collector";
 import { DataEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
@@ -18,16 +19,19 @@ export interface IAccountProviderOptions {
 }
 
 export class AccountProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IAccountProviderOptions> {
-  public readonly accounts: string[] = [];
+  public readonly accounts = new Set<TAccountName>();
 
   public pushOptions(options: IAccountProviderOptions): void {
-    this.accounts.push(...options.accounts);
+    for(const account of options.accounts)
+      this.accounts.add(account);
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
-    return this.accounts.map(account => AccountClassifier.forOptions({
-      account
-    }));
+    const contexts: TRegisterEvaluationContext[] = [];
+    for(const account of this.accounts)
+      contexts.push(AccountClassifier.forOptions({ account } satisfies IAccountCollectorOptions));
+
+    return contexts;
   }
 
   public async provide(data: DataEvaluationContext): Promise<IAccountProviderData<TAccounts>> {

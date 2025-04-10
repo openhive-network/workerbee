@@ -1,9 +1,9 @@
-import { IManabarData } from "./account-classifier";
+import { IMaxManabarData } from "./account-classifier";
 import { CollectorClassifierBase } from "./collector-classifier-base";
 
 export interface IRcAccount {
   name: string;
-  rcManabar: IManabarData;
+  rcManabar: IMaxManabarData;
 }
 
 export interface IRcAccountData {

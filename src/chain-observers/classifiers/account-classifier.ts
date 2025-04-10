@@ -10,9 +10,12 @@ export interface IHiveAssetDetailedBalance {
 
 export interface IManabarData {
   currentMana: Long;
-  max: Long;
   lastUpdateTime: Date;
 };
+
+export interface IMaxManabarData extends IManabarData {
+  max: Long;
+}
 
 export interface IHiveAssetWithSavingsDetailedBalance extends IHiveAssetDetailedBalance {
   savings: asset;
@@ -32,7 +35,7 @@ export interface IAccountBalance {
 
 export interface IAccount {
   name: string;
-  upvoteManabar: IManabarData;
+  upvoteManabar: IMaxManabarData;
   downvoteManabar: IManabarData;
   postingJsonMetadata: Record<string, any>;
   jsonMetadata: Record<string, any>;

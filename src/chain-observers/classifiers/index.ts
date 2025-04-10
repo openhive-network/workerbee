@@ -9,3 +9,4 @@ export { FeedPriceClassifier } from "./feed-price-classifier";
 export { WitnessClassifier } from "./witness-classifier";
 export { ChangeRecoveryInProgressClassifier } from "./change-recovery-in-progress-classifier";
 export { DeclineVotingRightsClassifier } from "./decline-voting-rights-classifier";
+export { ManabarClassifier } from "./manabar-classifier";

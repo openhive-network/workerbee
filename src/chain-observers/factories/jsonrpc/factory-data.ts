@@ -3,13 +3,14 @@ import {
   AccountClassifier, BlockClassifier, BlockHeaderClassifier,
   ChangeRecoveryInProgressClassifier,
   DeclineVotingRightsClassifier,
-  DynamicGlobalPropertiesClassifier, FeedPriceClassifier, ImpactedAccountClassifier, OperationClassifier, RcAccountClassifier,
+  DynamicGlobalPropertiesClassifier, FeedPriceClassifier, ImpactedAccountClassifier, ManabarClassifier, OperationClassifier, RcAccountClassifier,
   WitnessClassifier
 } from "../../classifiers";
 import { IEvaluationContextClass } from "../../classifiers/collector-classifier-base";
 import { CollectorBase } from "../../collectors/collector-base";
 import { BlockHeaderCollector } from "../../collectors/common/block-header-collector";
 import { ImpactedAccountCollector } from "../../collectors/common/impacted-account-collector";
+import { ManabarCollector } from "../../collectors/common/manabar-collector";
 import { OperationCollector } from "../../collectors/common/operation-collector";
 import { AccountCollector } from "../../collectors/jsonrpc/account-collector";
 import { BlockCollector } from "../../collectors/jsonrpc/block-collector";
@@ -31,5 +32,6 @@ export const JsonRpcFactoryData: (worker: WorkerBee) => Array<[IEvaluationContex
   [FeedPriceClassifier, new FeedPriceCollector(worker)],
   [WitnessClassifier, new WitnessCollector(worker)],
   [ChangeRecoveryInProgressClassifier, new ChangeRecoveryInProgressCollector(worker)],
-  [DeclineVotingRightsClassifier, new DeclineVotingRightsCollector(worker)]
+  [DeclineVotingRightsClassifier, new DeclineVotingRightsCollector(worker)],
+  [ManabarClassifier, new ManabarCollector(worker)],
 ]);
