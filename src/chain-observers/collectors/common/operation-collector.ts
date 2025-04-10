@@ -12,36 +12,32 @@ export class OperationCollector extends CollectorBase {
   public async fetchData(data: DataEvaluationContext) {
     const { transactions } = await data.get(BlockClassifier);
 
-    const operations = transactions.flatMap(transaction =>
-      transaction.transaction.operations.map(operation => ({
-        operation,
-        transaction
-      }))
-    );
+    const operations: Array<IOperationTransactionPair> = [];
+    const operationsPerType: Record<string, Array<IOperationTransactionPair>> = {};
 
-    const operationsPerType = operations.reduce((operations, { operation, transaction }) => {
-      let opType = "";
-      for(const type in operation)
-        if(operation[type] !== undefined) {
-          opType = type;
-          break;
-        }
+    for(const transaction of transactions)
+      for(const operation of transaction.transaction.operations) {
+        operations.push({
+          operation,
+          transaction
+        });
 
-      if(operations[opType] === undefined)
-        operations[opType] = [];
+        let opType = "";
+        for(const type in operation)
+          if(operation[type] !== undefined) {
+            opType = type;
+            break;
+          }
 
-      operations[opType].push({
-        operation: operation[opType],
-        transaction
-      });
+        if(operationsPerType[opType] === undefined)
+          operationsPerType[opType] = [];
 
-      return operations;
-    }, {} as Record<string, Array<IOperationTransactionPair>>);
+        operationsPerType[opType].push({
+          operation: operation[opType],
+          transaction
+        });
+      }
 
-    /*
-     * XXX: Debugging code:
-     * console.log("-", Object.entries(operationsPerType).map(([type, operations]) => `${type}: ${operations.length}`).join("\n- "));
-     */
 
     return {
       OperationClassifier: {
