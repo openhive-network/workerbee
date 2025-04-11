@@ -216,10 +216,10 @@ test.describe("WorkerBee Bot events test", () => {
 
           console.info("Waiting for full manabar regeneration on initminer");
 
-          const observer = bot.observe.onAccountFullManabar("initminer");
+          const observer = bot.observe.onAccountsFullManabar(/* EManabarType.RC */ 2, "initminer");
           observer.subscribe({
             next(data) {
-              if (!data.manabarData["initminer"]?.[/* EManabarType.RC */ 2])
+              if (!data.manabarData["initminer"]?.[2])
                 return rej(new Error("Could not retrieve RC manabar data for initminer"));
 
               console.info(`Account has full manabar: ${data.manabarData["initminer"][2].percent}%`);
@@ -251,7 +251,7 @@ test.describe("WorkerBee Bot events test", () => {
         new Promise<void>(res => {
           bot.start();
 
-          const observer = bot.observe.onAccountFullManabar("initminer").or.onBlockNumber(1);
+          const observer = bot.observe.onAccountsFullManabar(/* EManabarType.RC */ 2, "initminer").or.onBlockNumber(1);
           observer.subscribe({
             next() {
               res();
@@ -277,7 +277,7 @@ test.describe("WorkerBee Bot events test", () => {
         new Promise<void>(res => {
           bot.start();
 
-          const observer = bot.observe.onBlockNumber(1).or.onAccountFullManabar("initminer");
+          const observer = bot.observe.onBlockNumber(1).or.onAccountsFullManabar(/* EManabarType.RC */ 2, "initminer");
           observer.subscribe({
             next() {
               res();

@@ -7,7 +7,7 @@ import { AccountMetadataChangeFilter } from "./chain-observers/filters/account-m
 import { AlarmFilter } from "./chain-observers/filters/alarm-filter";
 import { BalanceChangeFilter } from "./chain-observers/filters/balance-change-filter";
 import { BlockNumberFilter } from "./chain-observers/filters/block-filter";
-import { CommentFilter, ICommentData } from "./chain-observers/filters/comment-filter";
+import { CommentFilter } from "./chain-observers/filters/comment-filter";
 import { LogicalAndFilter, LogicalOrFilter } from "./chain-observers/filters/composite-filter";
 import { CustomOperationFilter } from "./chain-observers/filters/custom-operation-filter";
 import { ExchangeTransferFilter } from "./chain-observers/filters/exchange-transfer-filter";
@@ -204,34 +204,76 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   }
 
   /**
-   * Notifies when the specified account has reached 98% of its mana/resource credits.
+   * Notifies when the specified account(s) has reached 98% of its mana/resource credits.
    *
    * Automatically provides the manabar data in the `next` callback.
    *
+   * Note: This method implicitly applies the OR operator between the specified accounts.
+   *
    * @example
    * ```ts
-   * workerbee.observe.onAccountFullManabar("username", EManabarType.RC).subscribe({
+   * workerbee.observe.onAccountsFullManabar(EManabarType.RC, "username", "username2").subscribe({
    *   next: (data) => {
-   *     console.log("Account manabar is now loaded %:", data.manabarData["username"][EManabarType.RC].percent);
+   *     // Note: When providing multiple accounts with implicit OR, you should check for the actual mana load in the `next` callback
+   *     for(const account in data.manabarData)
+   *       if(data.manabarData[account]?.[EManabarType.RC] && data.manabarData[account].[EManabarType.RC].percent >= 98)
+   *         console.log("Account manabar is now loaded %:", data.manabarData[account][EManabarType.RC].percent);
    *   }
    * });
    * ```
    *
-   * @param account The account name to monitor for full manabar
    * @param manabarType The type of manabar to monitor (default: {@link EManabarType.RC})
-   * @param manabarLoadPercent The percentage of manabar load to trigger the notification
-   *                           (default: `98`. Note: Setting it to 100 may not always work as expected due to inaccurate floating point math)
+   * @param accounts account names to monitor for full manabar
    * @returns itself
    */
-  public onAccountFullManabar<
-    TAccount extends TAccountName
+  public onAccountsFullManabar<
+    TAccounts extends TAccountName[]
   >(
-    account: TAccount,
-    manabarType: EManabarType = EManabarType.RC,
-    manabarLoadPercent: number = 98
-  ): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ManabarProvider<[TAccount]>["provide"]>>> {
-    this.operands.push(new AccountFullManabarFilter(this.worker, account, manabarType, manabarLoadPercent));
-    this.pushProvider(ManabarProvider, { manabarData: [{ account, manabarType }] });
+    manabarType: EManabarType,
+    ...accounts: TAccounts
+  ): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ManabarProvider<TAccounts>["provide"]>>> {
+    return this.onAccountsManabarPercent<TAccounts>(manabarType, 98, ...accounts);
+  }
+
+  /**
+   * Notifies when the specified account(s) has reached request percentage of its mana/resource credits.
+   *
+   * Automatically provides the manabar data in the `next` callback.
+   *
+   * Note: This method implicitly applies the OR operator between the specified accounts.
+   *
+   * @example
+   * ```ts
+   * workerbee.observe.onAccountsFullManabar(EManabarType.RC, 50, "username", "username2").subscribe({
+   *   next: (data) => {
+   *     // Note: When providing multiple accounts with implicit OR, you should check for the actual mana load in the `next` callback
+   *     for(const account in data.manabarData)
+   *       if(data.manabarData[account]?.[EManabarType.RC] && data.manabarData[account][EManabarType.RC].percent >= 50)
+   *         console.log("Account manabar is now loaded %:", data.manabarData[account][EManabarType.RC].percent);
+   *   }
+   * });
+   * ```
+   *
+   * @param manabarType The type of manabar to monitor (default: {@link EManabarType.RC})
+   * @param manabarLoadPercent The percentage of manabar load to trigger the notification
+   * @param account account names to monitor for full manabar
+   * @returns itself
+   */
+  public onAccountsManabarPercent<
+    TAccounts extends TAccountName[]
+  >(
+    manabarType: EManabarType,
+    percent: number,
+    ...accounts: TAccounts
+  ): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ManabarProvider<TAccounts>["provide"]>>> {
+    for(let i = 0; i < accounts.length; ++i) {
+      if (i > 0)
+        this.applyOr(); // Add logical OR between each account filter to allow multiple accounts to be used in the same subscribe call
+
+      this.operands.push(new AccountFullManabarFilter(this.worker, accounts[i], manabarType, percent));
+    }
+
+    this.pushProvider(ManabarProvider, { manabarData: accounts.map(account => ({ account, manabarType })) });
 
     return this;
   }
@@ -281,84 +323,114 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   }
 
   /**
-   * Subscribes to notifications when a vote is created by a specific account.
+   * Subscribes to notifications when a vote is created by a specific account(s).
    *
    * Automatically provides the vote metadata in the `next` callback.
    *
+   * Note: This method implicitly applies the OR operator between the specified accounts.
+   *
    * @example
    * ```ts
-   * workerbee.observe.onVoteCreated("username").subscribe({
+   * workerbee.observe.onVotes("username", "username2").subscribe({
    *   next: (data) => {
-   *     for(const { operation } of data.votes["username"])
-   *      console.log("Vote created:", operation);
+   *     for(const account in data.votes)
+   *       if(data.votes[account] !== undefined)
+   *         for(const { operation } of data.votes[account])
+   *           console.log("Vote created:", operation);
    *   }
    * });
    * ```
    *
-   * @param voter The account name of the voter to monitor for vote creation.
+   * @param voters The account name of the voter to monitor for vote creation.
    * @returns itself
    */
-  public onVoteCreated<
-    TAccount extends TAccountName
-  >(voter: TAccountName): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<VoteProvider<[TAccount]>["provide"]>>> {
-    this.operands.push(new VoteFilter(this.worker, voter));
-    this.pushProvider(VoteProvider, { voters: [voter] });
+  public onVotes<
+    TAccounts extends TAccountName[]
+  >(...voters: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<VoteProvider<TAccounts>["provide"]>>> {
+    for(let i = 0; i < voters.length; ++i) {
+      if (i > 0)
+        this.applyOr(); // Add logical OR between each account filter to allow multiple accounts to be used in the same subscribe call
+
+      this.operands.push(new VoteFilter(this.worker, voters[i]));
+    }
+
+    this.pushProvider(VoteProvider, { voters });
 
     return this;
   }
 
   /**
-   * Subscribes to notifications when a post is created by a specific author.
+   * Subscribes to notifications when a post is created by a specific author(s).
    *
    * Automatically provides the post in the `next` callback.
    *
+   * Note: This method implicitly applies the OR operator between the specified accounts.
+   *
    * @example
    * ```ts
-   * workerbee.observe.onPost("username").subscribe({
+   * workerbee.observe.onPosts("username", "username2").subscribe({
    *   next: (data) => {
-   *     for(const { operation } of data.posts["username"])
-   *      console.log("Post created:", operation);
+   *     for(const account in data.posts)
+   *       if(data.posts[account] !== undefined)
+   *         for(const { operation } of data.posts[account])
+   *           console.log("Post created:", operation);
    *   }
    * });
    * ```
    *
-   * @param author The account name of the author to monitor for post creation.
+   * @param authors account names of the authors to monitor for post creation.
    * @returns itself
    */
-  public onPost<
-    TAccount extends TAccountName
-  >(author: TAccountName): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<PostProvider<[TAccount]>["provide"]>>> {
-    this.operands.push(new PostFilter(this.worker, author));
-    this.pushProvider(PostProvider, { authors: [author] });
+  public onPosts<
+    TAccounts extends TAccountName[]
+  >(...authors: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<PostProvider<TAccounts>["provide"]>>> {
+    for(let i = 0; i < authors.length; ++i) {
+      if (i > 0)
+        this.applyOr(); // Add logical OR between each account filter to allow multiple accounts to be used in the same subscribe call
+
+      this.operands.push(new PostFilter(this.worker, authors[i]));
+    }
+
+    this.pushProvider(PostProvider, { authors });
 
     return this;
   }
 
   /**
-   * Subscribes to notifications when a comment is created by a specific author.
-   * You can optionally provide a filter for a specific permlink.
+   * Subscribes to notifications when a comment is created by a specific author(s).
    *
    * Automatically provides the comment in the `next` callback.
    *
+   * Note: This method implicitly applies the OR operator between the specified accounts.
+   *
    * @example
    * ```ts
-   * workerbee.observe.onComment("username", "specific-permlink").subscribe({
+   * workerbee.observe.onComments("username", "username2").subscribe({
    *   next: (data) => {
-   *     for(const { operation } of data.comments["username"])
-   *      console.log("Comment created:", operation);
+   *     for(const account in data.comments)
+   *       if(data.comments[account] !== undefined)
+   *         for(const { operation } of data.comments[account])
+   *           console.log("Comment created:", operation);
    *   }
    * });
    * ```
    *
-   * @param author The account name of the author to monitor for comment creation.
-   * @param parentPostOrComment (Optional) The specific data of the parent post/comment to monitor.
+   * @param authors account names of the authors to monitor for comment creation.
    * @returns itself
    */
-  public onComment<
-    TAccount extends TAccountName
-  >(author: TAccount, parentPostOrComment?: ICommentData): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CommentProvider<[TAccount]>["provide"]>>> {
-    this.operands.push(new CommentFilter(this.worker, author));
-    this.pushProvider(CommentProvider, { authors: [{ account: author, parentCommentFilter: parentPostOrComment }] });
+  public onComments<
+    TAccounts extends TAccountName[]
+  >(...authors: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CommentProvider<TAccounts>["provide"]>>> {
+    // TODO: Handle parentPostOrComment?: ICommentData
+
+    for(let i = 0; i < authors.length; ++i) {
+      if (i > 0)
+        this.applyOr(); // Add logical OR between each account filter to allow multiple accounts to be used in the same subscribe call
+
+      this.operands.push(new CommentFilter(this.worker, authors[i]));
+    }
+
+    this.pushProvider(CommentProvider, { authors: authors.map(account => ({ account })) });
 
     return this;
   }

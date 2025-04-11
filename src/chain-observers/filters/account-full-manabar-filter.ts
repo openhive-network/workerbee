@@ -11,7 +11,7 @@ export class AccountFullManabarFilter extends FilterBase {
     worker: WorkerBee,
     private readonly account: string,
     private readonly manabarType: EManabarType,
-    private readonly manabarLoadPercent: number
+    private readonly manabarLoadPercent: number = 98
   ) {
     super(worker);
   }
