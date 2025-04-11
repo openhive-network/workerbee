@@ -49,8 +49,12 @@ export class ManabarProvider<TAccounts extends Array<TAccountName> = Array<TAcco
       if (result.manabarData[account] === undefined)
         result.manabarData[account] = {};
 
-      for(const manabarType of manabarTypes)
+      for(const manabarType of manabarTypes) {
+        if (manabarData[account] === undefined)
+          break;
+
         result.manabarData[account][manabarType] = manabarData[account][manabarType];
+      }
     }
 
     return result as IManabarProviderData<TAccounts>;
