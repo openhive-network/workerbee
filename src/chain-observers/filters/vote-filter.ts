@@ -1,5 +1,5 @@
 import type { WorkerBee } from "../../bot";
-import { ImpactedAccountClassifier } from "../classifiers";
+import { OperationClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { DataEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";
@@ -14,23 +14,21 @@ export class VoteFilter extends FilterBase {
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [
-      ImpactedAccountClassifier
+      OperationClassifier
     ];
   }
 
   public async match(data: DataEvaluationContext): Promise<boolean> {
-    const { impactedAccounts } = await data.get(ImpactedAccountClassifier);
+    const { operationsPerType } = await data.get(OperationClassifier);
 
-    const account = impactedAccounts[this.account];
+    if (operationsPerType.vote === undefined)
+      return false;
 
-    for(const { operation } of account.operations)
-      if(operation.vote) {
-        if (operation.vote.author === this.account)
-          return true;
-      } else if (operation.account_witness_vote)
-        if (operation.account_witness_vote.account === this.account && operation.account_witness_vote.approve)
-          return true;
+    for(const { operation } of operationsPerType.vote)
+      if (operation.author === this.account)
+        return true;
 
+    // TODO: Handle witness vote in a separate filter and action in queen
 
     return false;
   }
