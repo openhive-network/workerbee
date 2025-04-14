@@ -1,8 +1,9 @@
 import type { IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
-import type { ApiTransaction, IHiveChainInterface, ITransaction, transaction} from "@hiveio/wax";
+import type { ApiTransaction, IHiveChainInterface, ITransaction, transaction } from "@hiveio/wax";
 import type { IStartConfiguration } from "./bot";
 import { IBlockData } from "./chain-observers/classifiers/block-classifier";
 import { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
+import { WorkerBeeError } from "./errors";
 import { TPastQueen } from "./past-queen";
 import type { QueenBee } from "./queen";
 
@@ -135,6 +136,8 @@ export interface IWorkerBee {
   /**
    * Allows you to iterate over blocks indefinitely
    *
+   * Ignores errors
+   *
    * @example
    * ```ts
    * for await (const block of workerbee) {
@@ -143,6 +146,55 @@ export interface IWorkerBee {
    * ```
    */
   [Symbol.asyncIterator](): AsyncIterator<IBlockData & IBlockHeaderData>;
+
+  /**
+   * Allows you to iterate over blocks indefinitely - alias to async iterator
+   *
+   * Ignores errors
+   *
+   * @example
+   * ```ts
+   * for await (const block of workerbee.iterate()) {
+   *   console.log(block);
+   * }
+   * ```
+   */
+  iterate(): AsyncIterator<IBlockData & IBlockHeaderData>;
+
+  /**
+   * Allows you to iterate over blocks indefinitely - alias to async iterator
+   *
+   * Allows to handle errors via try/catch clause around the async iterator
+   *
+   * @param throwOnError If true, the error will be thrown
+   *
+   * @example
+   * ```ts
+   * try {
+   *   for await (const block of workerbee.iterate(true)) {
+   *     console.log(block);
+   *   }
+   * } catch (error) {
+   *   console.error("Error while iterating:", error);
+   * }
+   * ```
+   */
+  iterate(throwOnError: boolean): AsyncIterator<IBlockData & IBlockHeaderData>;
+
+  /**
+   * Allows you to iterate over blocks indefinitely - alias to async iterator
+   *
+   * Allows to handle errors via callback
+   *
+   * @param errorHandler Callback function to handle errors
+   *
+   * @example
+   * ```ts
+   * for await (const block of workerbee.iterate(console.error))
+   *   console.log(block);
+   * ```
+   */
+  iterate(errorHandler: (error: WorkerBeeError) => void): AsyncIterator<IBlockData & IBlockHeaderData>;
 }
 
 export interface IWorkerBeeConstructor {

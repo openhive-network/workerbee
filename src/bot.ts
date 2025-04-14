@@ -44,6 +44,9 @@ export const DEFAULT_WORKERBEE_OPTIONS = {
 
 export const DEFAULT_BLOCK_INTERVAL_TIMEOUT_MS = 2000;
 
+type TAsyncBlockIteratorResolveCallback = (value: IteratorResult<IBlockData & IBlockHeaderData, void>) => void;
+type TAsyncBlockIteratorPromise = Promise<IteratorResult<IBlockData & IBlockHeaderData, void>>;
+
 export class WorkerBee implements IWorkerBee {
   public readonly configuration: IStartConfiguration;
 
@@ -170,20 +173,63 @@ export class WorkerBee implements IWorkerBee {
     }, DEFAULT_BLOCK_INTERVAL_TIMEOUT_MS);
   }
 
-  public [Symbol.asyncIterator](): AsyncIterator<IBlockData & IBlockHeaderData> {
-    // TODO: Optimize this
+  public iterate(errorHandler?: boolean | ((error: WorkerBeeError) => void)): AsyncIterator<IBlockData & IBlockHeaderData> {
+    /// This variable set to some function indicates that we have waiting promise (for next block)
+    let promiseToResolveCb: TAsyncBlockIteratorResolveCallback|undefined;
+
+    const createWaitingPromise = (): TAsyncBlockIteratorPromise => {
+      return new Promise<IteratorResult<IBlockData & IBlockHeaderData, void>>(resolve => {
+        /// Execution of this callbacl means that client loop requested next block (but we don't have it yet)
+        promiseToResolveCb = resolve;
+      });
+    };
+
+    const promisesQueue: TAsyncBlockIteratorPromise[] = [
+      createWaitingPromise()
+    ];
+
+    // Create a single observer that will listen for block data
+    const observer = this.observe.onBlock().provideBlockData().subscribe({
+      next: data => {
+        if(promiseToResolveCb !== undefined) {
+          // Resolve the waiting promise in queue with the block data and pass it to the next iteration of user loop
+          promiseToResolveCb({ value: data.block, done: false });
+          /*
+           * Clear held callbackFn reference and wait for client loop request for next iteration
+           * (then promise resolution will happen, and will set promiseToResolveCb to actual function again)
+           */
+          promiseToResolveCb = undefined;
+          promisesQueue.push(createWaitingPromise());
+        } else
+          /*
+           * There is no more waiting promises (probably due to client loop blocking.
+           * We can create immediately resolved promise and push it to the queue to be consumed by the next iteration
+           */
+          promisesQueue.push(Promise.resolve({ value: data.block, done: false }));
+
+      },
+      error: (err) => {
+        if (errorHandler === true)
+          promisesQueue.push(Promise.reject(err));
+        else if (typeof errorHandler === "function")
+          errorHandler(err);
+      },
+    });
+
     return {
-      next: (): Promise<IteratorResult<IBlockData & IBlockHeaderData, void>> => {
-        return new Promise(res => {
-          const listener = this.observe.onBlock().provideBlockData().subscribe({
-            next: block => {
-              listener.unsubscribe();
-              res({ value: block.block, done: false });
-            }
-          });
-        });
+      // With each call to the next() method, we return the current (first) promise
+      next: () => {
+        return promisesQueue.shift()!;
+      },
+      return: () => { // Cleanup on break
+        observer.unsubscribe();
+        return Promise.resolve({ done: true, value: undefined });
       }
     };
+  }
+
+  public [Symbol.asyncIterator](): AsyncIterator<IBlockData & IBlockHeaderData> {
+    return this.iterate();
   }
 
   public stop(): void {
