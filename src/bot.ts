@@ -187,18 +187,26 @@ export class WorkerBee implements IWorkerBee {
     }, DEFAULT_BLOCK_INTERVAL_TIMEOUT_MS);
   }
 
+  public iterate(): AsyncIterator<IBlockData & IBlockHeaderData> {
+    return this[Symbol.asyncIterator]();
+  }
+
   public [Symbol.asyncIterator](): AsyncIterator<IBlockData & IBlockHeaderData> {
-    // TODO: Optimize this
+    let currentResolver = (_: IteratorResult<IBlockData & IBlockHeaderData, void>) => {};
+    let currentPromise = new Promise<IteratorResult<IBlockData & IBlockHeaderData, void>>(resolve => { currentResolver = resolve });
+
+    const observer = this.observe.onBlock().provideBlockData().subscribe({
+      next: data => {
+        currentResolver({ value: data.block, done: false });
+        currentPromise = new Promise(resolve => { currentResolver = resolve });
+      }
+    });
+
     return {
-      next: (): Promise<IteratorResult<IBlockData & IBlockHeaderData, void>> => {
-        return new Promise(res => {
-          const listener = this.observe.onBlock().provideBlockData().subscribe({
-            next: block => {
-              listener.unsubscribe();
-              res({ value: block.block, done: false });
-            }
-          });
-        });
+      next: () => currentPromise,
+      return: () => { // Cleanup on break
+        observer.unsubscribe();
+        return Promise.resolve({ done: true, value: undefined });
       }
     };
   }
