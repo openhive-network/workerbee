@@ -4,7 +4,6 @@ import { expect } from "@playwright/test";
 import { ChromiumBrowser, ConsoleMessage, chromium } from "playwright";
 
 import type { IStartConfiguration } from "../../src/bot";
-import type { IBroadcastData } from "../../src/index";
 
 import { test } from "../assets/jest-helper";
 
@@ -36,9 +35,8 @@ test.describe("WorkerBee Bot events test", () => {
     });
   });
 
-  test("Allow to broadcast to mirronet chain", async({ workerbeeTest }) => {
-    const broadcastTest = await workerbeeTest(async({ WorkerBee, wax, beekeeperFactory }) => {
-
+  test("Allow to broadcast to mirronet chain - broadcast on bot should not throw", async({ workerbeeTest }) => {
+    await workerbeeTest(async({ WorkerBee, wax, beekeeperFactory }) => {
       /*
        * Prepare helper WorkerBee instance just to provide IHiveChainInterface instance.
        * It is a problem in PW tests to reference whole wax, since its dependencies need to be declared at importmap in test.html
@@ -70,44 +68,16 @@ test.describe("WorkerBee Bot events test", () => {
 
       /// Intentionally sign using legacy method
       const legacySigDigest = newTx.legacy_sigDigest;
-      const signature = await wallet.signDigest(publicKey, legacySigDigest);
+      const signature = wallet.signDigest(publicKey, legacySigDigest);
       newTx.sign(signature);
 
-      let signatureIsMatching: boolean = false;
+      await bot.start();
 
-      await Promise.race([
-        /* eslint-disable-next-line no-async-promise-executor */
-        new Promise<void>(async res => {
-          await bot.start();
-
-          const broadcastResultObserver = await bot.broadcast(newTx, { throwAfter: "+20s"});
-
-          const txObserver = broadcastResultObserver.subscribe({
-            next (data: IBroadcastData) {
-              console.log(`Received broadcast data: ${JSON.stringify(data.transaction)}`);
-              if(data.transaction.signatures[0] !== signature)
-                throw new Error("Invalid signature in broadcast result");
-
-              signatureIsMatching = true;
-              txObserver.unsubscribe();
-              res();
-            },
-            error(err) {
-              console.error(err);
-              throw new Error("Transaction broadcast failure");
-            }
-          });
-        }),
-        new Promise(res => { setTimeout(res, 15000); })
-      ]);
+      await bot.broadcast(newTx, { verifySignatures: true });
 
       bot.delete();
       chainOwner.delete();
-
-      return signatureIsMatching;
     });
-
-    expect(broadcastTest).toEqual(true);
   });
 
 
@@ -357,6 +327,42 @@ test.describe("WorkerBee Bot events test", () => {
     });
 
     expect(result).toBeGreaterThanOrEqual(3);
+  });
+
+  test("Should be able to parse blocks from the past - transaction id observe", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
+      const bot = new WorkerBee();
+      await bot.start();
+
+      const { head_block_number: headBlock } = await bot.chain!.api.database_api.get_dynamic_global_properties({});
+
+      const { block } = await bot.chain!.api.block_api.get_block({ block_num: headBlock - 1 });
+
+      console.log(`Waiting for transaction id ${block!.transaction_ids[0]} from block ${headBlock - 1}`);
+
+      let gotTx = false;
+      await new Promise<void>(resolve => {
+        bot.providePastOperations(headBlock - 3, headBlock).onTransactionId(block!.transaction_ids[0]).provideBlockHeaderData().subscribe({
+          next(data) {
+            gotTx = true;
+
+            console.log(`Got transaction #${block!.transaction_ids[0]} in block ${data.block.number}: ${
+              data.transactions[block!.transaction_ids[0]]!.operations.length} operations`);
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      })
+
+      bot.stop();
+      bot.delete();
+
+      return gotTx;
+    });
+
+    expect(result).toBeTruthy();
   });
 
   test("Should be able to parse blocks from the past - more than 1000", async({ workerbeeTest }) => {

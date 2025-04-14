@@ -5,17 +5,15 @@ import { IBlockData } from "./chain-observers/classifiers/block-classifier";
 import { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
 import { TPastQueen } from "./past-queen";
 import type { QueenBee } from "./queen";
-import type { Subscribable } from "./types/subscribable";
 
 export interface IBroadcastOptions {
   /**
-   * Can be either absolute time that will be passed to the Date constructor
-   * or relative time, like: "+10s", "+2m", "+1h"
+   * If true, the bot will verify if the signatures in the transaction, applied on chain match the local ones
    *
-   * @type {string | number | Date}
-   * @default undefined
+   * @type {boolean}
+   * @default false
    */
-  throwAfter?: string | number | Date;
+  verifySignatures?: boolean;
 }
 
 export interface IBroadcastData {
@@ -122,17 +120,17 @@ export interface IWorkerBee {
   get observe(): QueenBee;
 
   /**
-   * Broadcast given transaction to the remote and returns a subscribable object
-   * that calls error after {@link IBroadcastOptions throwAfter} time (if given)
-   * If {@link IBroadcastOptions throwAfter} has not been specified, it is automatically
-   * set to the transaction expiration time plus one minute
+   * Broadcast given transaction to the remote and returns a promise resolved when
+   * transaction has been successfully applied on chain.
+   * You can also optionally provide {@link IBroadcastOptions verifySignatures} option
+   * if you want to ensure that the signatures in the transaction, applied on chain match the local ones.
    *
    * Requires signed transaction
    *
    * @param tx Protobuf transactoin to broadcast
    * @param options Options for broadcasting
    */
-  broadcast(tx: ApiTransaction | ITransaction, options?: IBroadcastOptions): Promise<Subscribable<IBroadcastData>>;
+  broadcast(tx: ApiTransaction | ITransaction, options?: IBroadcastOptions): Promise<void>;
 
   /**
    * Allows you to iterate over blocks indefinitely

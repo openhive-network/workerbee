@@ -1,19 +1,18 @@
 import type { IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
-import { calculateExpiration, IWaxOptionsChain, IHiveChainInterface, TWaxExtended, ITransaction, ApiTransaction } from "@hiveio/wax";
+import { IWaxOptionsChain, IHiveChainInterface, TWaxExtended, ITransaction, ApiTransaction, dateFromString } from "@hiveio/wax";
 
 import { IBlockData } from "./chain-observers/classifiers/block-classifier";
 import { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
 import { JsonRpcFactory } from "./chain-observers/factories/jsonrpc/factory";
 import { ObserverMediator } from "./chain-observers/observer-mediator";
 import { WorkerBeeError } from "./errors";
-import type { IWorkerBee, IBroadcastOptions, IBroadcastData } from "./interfaces";
+import type { IWorkerBee, IBroadcastOptions } from "./interfaces";
 import { PastQueen } from "./past-queen";
 import { QueenBee } from "./queen";
-import type { Subscribable } from "./types/subscribable";
 import { calculateRelativeTime } from "./utils/time";
 import { getWax, WaxExtendTypes } from "./wax";
 
-const ONE_MINUTE = 1000 * 60;
+const HIVE_BLOCK_INTERVAL = 1000 * 3;
 
 export interface IStartConfiguration {
   /**
@@ -97,67 +96,63 @@ export class WorkerBee implements IWorkerBee {
     });
   }
 
-  public async broadcast(tx: ApiTransaction | ITransaction, options: IBroadcastOptions = {}): Promise<Subscribable<IBroadcastData>> {
+  public broadcast(tx: ApiTransaction | ITransaction, options: IBroadcastOptions = {}): Promise<void> {
     const toBroadcast: ApiTransaction = "toApiJson" in tx ? tx.toApiJson() as ApiTransaction : tx as ApiTransaction;
 
     if(toBroadcast.signatures.length === 0)
       throw new WorkerBeeError("You are trying to broadcast transaction without signing!");
 
-    if(typeof options.throwAfter === "undefined") {
-      const expiration = calculateExpiration(toBroadcast.expiration, new Date());
-
-      if(typeof expiration === "undefined")
-        throw new WorkerBeeError("Could not deduce the expiration time of the transaction");
-
-      options.throwAfter = expiration.getTime() + ONE_MINUTE;
-    }
-
-    await this.chain!.broadcast(toBroadcast);
-
-    // Here options.throwAfter should be defined (throws on invalid value)
-    const expireDate: Date = calculateExpiration(options.throwAfter, new Date()) as Date;
-
     const apiTx = this.chain!.createTransactionFromJson(toBroadcast);
 
-    return {
-      subscribe: observer => {
-        const txId = apiTx.id;
-        let txObserver = this.observe.onTransactionId(txId);
-        const legacyId = apiTx.legacy_id;
-        if(legacyId !== apiTx.id)
-          txObserver = txObserver.or.onTransactionId(legacyId);
+    let timeoutId: NodeJS.Timeout | undefined = undefined;
 
-        const listener = txObserver.provideBlockHeaderData().subscribe({
-          next(val) {
-            const transaction = val.transactions[txId] ?? val.transactions[legacyId]!;
-            if( transaction!== undefined) {
-              listener.unsubscribe();
-              observer.next?.({
-                transaction,
-                block: val.block
-              });
-            }
-          },
-          error(val) {
-            observer.error?.(val);
-          },
-          complete() {
-            observer.complete?.();
-          }
-        });
-        const timeoutId = setTimeout(() => {
+    return new Promise<void>((resolve, reject) => {
+      const listener = this.observe.onTransactionId(apiTx.id).or.onTransactionId(apiTx.legacy_id).provideBlockHeaderData().subscribe({
+        next(val) {
+          clearTimeout(timeoutId);
           listener.unsubscribe();
-          observer.error?.(new WorkerBeeError(`Transaction ${apiTx.id} has expired`));
-        }, expireDate.getTime() - Date.now());
 
-        return {
-          unsubscribe: () => {
-            clearTimeout(timeoutId);
-            listener.unsubscribe();
+          const transaction = val.transactions[apiTx.id] || val.transactions[apiTx.legacy_id];
+          if (transaction === undefined) {
+            reject(new WorkerBeeError(`Transaction broadcast error: Observer filter matched on block ${val.block.number
+            }, but transaction #${apiTx.id} not found in the provided data. Please report this issue`));
+            return;
           }
+
+          if (options.verifySignatures) {
+            if(transaction.signatures.length !== apiTx.transaction.signatures.length) {
+              reject(new WorkerBeeError("Transaction broadcast error: Signatures length mismatch in broadcast result"));
+              return;
+            }
+
+            for(let i = 0; i < transaction.signatures.length; ++i)
+              if(transaction.signatures[i] !== apiTx.transaction.signatures[i]) {
+                reject(new WorkerBeeError(`Transaction broadcast error: Signatures mismatch in broadcast result at index: ${i}`));
+                return;
+              }
+          }
+
+          resolve();
+        },
+        error(val) {
+          clearTimeout(timeoutId);
+          listener.unsubscribe();
+          reject(val);
         }
-      }
-    };
+      });
+
+      this.chain!.broadcast(apiTx).then(() => {
+        const expireDate = dateFromString(apiTx.transaction.expiration).getTime() + (HIVE_BLOCK_INTERVAL * 2);
+
+        timeoutId = setTimeout(() => {
+          listener.unsubscribe();
+          reject(new WorkerBeeError(`Transaction broadcast error: Transaction #${apiTx.id} has expired`));
+        }, expireDate - Date.now());
+      }).catch(err => {
+        listener.unsubscribe();
+        reject(err);
+      });
+    });
   }
 
   public async start(wallet?: IBeekeeperUnlockedWallet): Promise<void> {
