@@ -1,5 +1,5 @@
 import type { IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
-import { IWaxOptionsChain, IHiveChainInterface, TWaxExtended, ITransaction, ApiTransaction } from "@hiveio/wax";
+import { IWaxOptionsChain, IHiveChainInterface, TWaxExtended, ITransaction, ApiTransaction, dateFromString } from "@hiveio/wax";
 
 import { IBlockData } from "./chain-observers/classifiers/block-classifier";
 import { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
@@ -142,7 +142,7 @@ export class WorkerBee implements IWorkerBee {
       });
 
       this.chain!.broadcast(apiTx).then(() => {
-        const expireDate = new Date(`${apiTx.transaction.expiration}Z`).getTime() + (HIVE_BLOCK_INTERVAL * 2);
+        const expireDate = dateFromString(apiTx.transaction.expiration).getTime() + (HIVE_BLOCK_INTERVAL * 2);
 
         timeoutId = setTimeout(() => {
           listener.unsubscribe();
