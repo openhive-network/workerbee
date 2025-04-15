@@ -175,18 +175,26 @@ export class WorkerBee implements IWorkerBee {
   }
 
   public [Symbol.asyncIterator](): AsyncIterator<IBlockData & IBlockHeaderData> {
-    let currentResolver = (_: IteratorResult<IBlockData & IBlockHeaderData, void>) => {};
-    let currentPromise = new Promise<IteratorResult<IBlockData & IBlockHeaderData, void>>(resolve => { currentResolver = resolve });
+    // This queues system will ensure that we don't miss any blocks
+    const resolversQueue: ((value: IteratorResult<IBlockData & IBlockHeaderData, void>) => void)[] = [];
+    const promisesQueue: Promise<IteratorResult<IBlockData & IBlockHeaderData, void>>[] = [
+      new Promise(resolve => { resolversQueue.push(resolve) })
+    ];
 
+    // Create a single observer that will listen for block data
     const observer = this.observe.onBlock().provideBlockData().subscribe({
       next: data => {
-        currentResolver({ value: data.block, done: false });
-        currentPromise = new Promise(resolve => { currentResolver = resolve });
+        // Resolve the first promise in queue with the block data and pass it to the next iteration of user loop
+        resolversQueue.shift()!({ value: data.block, done: false });
+        // Create a new promise for the next iteration
+        promisesQueue.push(new Promise(resolve => { resolversQueue.push(resolve); }));
       }
+      // No way to report error here, so we just ignore it
     });
 
     return {
-      next: () => currentPromise,
+      // With each call to the next() method, we return the current (first) promise
+      next: () => promisesQueue.shift()!,
       return: () => { // Cleanup on break
         observer.unsubscribe();
         return Promise.resolve({ done: true, value: undefined });
