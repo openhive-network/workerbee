@@ -147,7 +147,7 @@ export class WorkerBee implements IWorkerBee {
         timeoutId = setTimeout(() => {
           listener.unsubscribe();
           reject(new WorkerBeeError(`Transaction broadcast error: Transaction #${apiTx.id} has expired`));
-        }, expireDate);
+        }, expireDate - Date.now());
       }).catch(err => {
         listener.unsubscribe();
         reject(err);
