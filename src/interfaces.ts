@@ -135,9 +135,6 @@ export interface IWorkerBee {
   /**
    * Allows you to iterate over blocks indefinitely
    *
-   * Note: Iterating over blocks using this way does not ensure no blocks missed
-   * If you want to achieve that, you should use {@link IWorkerBee.observe} method
-   *
    * @example
    * ```ts
    * for await (const block of workerbee) {
@@ -149,9 +146,6 @@ export interface IWorkerBee {
 
   /**
    * Allows you to iterate over blocks indefinitely - alias to async iterator
-   *
-   * Note: Iterating over blocks using this way does not ensure no blocks missed
-   * If you want to achieve that, you should use {@link IWorkerBee.observe} method
    *
    * @example
    * ```ts
