@@ -73,7 +73,7 @@ test.describe("WorkerBee Bot events test", () => {
 
       await bot.start();
 
-      await bot.broadcast(newTx, { throwAfter: "+15s", verifySignatures: true });
+      await bot.broadcast(newTx, { verifySignatures: true });
 
       bot.delete();
       chainOwner.delete();

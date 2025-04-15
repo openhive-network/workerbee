@@ -1,5 +1,5 @@
 import type { IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
-import { calculateExpiration, IWaxOptionsChain, IHiveChainInterface, TWaxExtended, ITransaction, ApiTransaction } from "@hiveio/wax";
+import { IWaxOptionsChain, IHiveChainInterface, TWaxExtended, ITransaction, ApiTransaction } from "@hiveio/wax";
 
 import { IBlockData } from "./chain-observers/classifiers/block-classifier";
 import { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
@@ -12,7 +12,7 @@ import { QueenBee } from "./queen";
 import { calculateRelativeTime } from "./utils/time";
 import { getWax, WaxExtendTypes } from "./wax";
 
-const ONE_MINUTE = 1000 * 60;
+const HIVE_BLOCK_INTERVAL = 1000 * 3;
 
 export interface IStartConfiguration {
   /**
@@ -102,23 +102,7 @@ export class WorkerBee implements IWorkerBee {
     if(toBroadcast.signatures.length === 0)
       throw new WorkerBeeError("You are trying to broadcast transaction without signing!");
 
-    if(typeof options.throwAfter === "undefined") {
-      const expiration = calculateExpiration(toBroadcast.expiration, new Date());
-
-      if(typeof expiration === "undefined")
-        throw new WorkerBeeError("Could not deduce the expiration time of the transaction");
-
-      options.throwAfter = expiration.getTime() + ONE_MINUTE;
-    }
-
     const apiTx = this.chain!.createTransactionFromJson(toBroadcast);
-
-    // Here options.throwAfter should be defined (throws on invalid value)
-    const throwAfter = options.throwAfter!;
-
-    // Pre-check if the value is valid to prevent throw after successful broadcast
-    if (calculateExpiration(throwAfter, new Date()).getTime() < Date.now())
-      throw new WorkerBeeError(`Transaction #${apiTx.id} has expired`);
 
     let timeoutId: NodeJS.Timeout | undefined = undefined;
 
@@ -158,13 +142,12 @@ export class WorkerBee implements IWorkerBee {
       });
 
       this.chain!.broadcast(apiTx).then(() => {
-        // Recalculate expiration time to match the actual transaction broadcast time user requested
-        const expireDate: Date = calculateExpiration(throwAfter, new Date()) as Date;
+        const expireDate = new Date(`${apiTx.transaction.expiration}Z`).getTime() + (HIVE_BLOCK_INTERVAL * 2);
 
         timeoutId = setTimeout(() => {
           listener.unsubscribe();
           reject(new WorkerBeeError(`Transaction broadcast error: Transaction #${apiTx.id} has expired`));
-        }, expireDate.getTime() - Date.now());
+        }, expireDate);
       }).catch(err => {
         listener.unsubscribe();
         reject(err);
