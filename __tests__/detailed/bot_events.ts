@@ -266,7 +266,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should call next() only once when all or statements evaluate to true", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }, hiveBlockInterval) => {
+    const result = await workerbeeTest.dynamic(async({ WorkerBee }, hiveBlockInterval) => {
       const bot = new WorkerBee();
 
       let calls = 0;
@@ -367,7 +367,7 @@ test.describe("WorkerBee Bot events test", () => {
 
   test("Should be able to parse blocks from the past - more than 1000", async({ workerbeeTest }) => {
     const result = await workerbeeTest.dynamic(async({ WorkerBee }) => {
-      const bot = new WorkerBee();
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
       await bot.start();
 
       let calls = 0;
@@ -394,7 +394,7 @@ test.describe("WorkerBee Bot events test", () => {
 
   test("Should be able to parse blocks from the past - impacted accounts", async({ workerbeeTest }) => {
     const result = await workerbeeTest.dynamic(async({ WorkerBee }) => {
-      const bot = new WorkerBee();
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
       await bot.start();
 
       let calls = 0;
@@ -428,7 +428,7 @@ test.describe("WorkerBee Bot events test", () => {
 
   test("Should be able to parse blocks from the past - more than relative time", async({ workerbeeTest }) => {
     const result = await workerbeeTest.dynamic(async({ WorkerBee }) => {
-      const bot = new WorkerBee();
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
       await bot.start();
 
       let calls = 0;
