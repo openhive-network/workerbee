@@ -17,8 +17,7 @@ export type { IBlockHeaderProviderData } from "./providers/block-header-provider
 export type { IBlockProviderData } from "./providers/block-provider";
 export type { IExchangeTransferMetadata, IExchangeTransferProviderData } from "./providers/exchange-transfer-provider";
 export type { IFeedPriceData, IFeedPriceProviderData } from "./providers/feed-price-provider";
-export type { PostProvider, IPostProviderData, TPostProvided } from "./providers/post-provider";
-export type { CommentProvider, ICommentProviderData, TCommentProvided } from "./providers/comment-provider";
+export type { PostProvider, IPostProviderData, CommentProvider, ICommentProviderData, TBlogContentProvided } from "./providers/blog-content-provider";
 export type { IVoteProviderData, TVoteProvided, VoteProvider } from "./providers/vote-provider";
 export type { ManabarProvider, IManabarProviderData, TManabarProvided } from "./providers/manabar-provider";
 export type { CustomOperationProvider, ICustomOperationProviderData, TCustomOperationProvided } from "./providers/custom-operation-provider";
