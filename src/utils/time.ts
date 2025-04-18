@@ -1,13 +1,8 @@
 /* eslint-disable no-fallthrough */
+import { dateFromString } from "@hiveio/wax";
 import { WorkerBeeError } from "../errors";
 
-export const dateFromString = (dateTimeString: string): Date => {
-  if (dateTimeString.endsWith("Z"))
-    return new Date(dateTimeString);
-  return new Date(`${dateTimeString}Z`);
-};
-
-export const calculateRelativeTime = (expirationTime: number | string | Date): Date => {
+export const calculateRelativeTime = (expirationTime: number | string | Date, referenceTime?: Date): Date => {
   let expiration: Date;
   if(typeof expirationTime === "string") {
     if (expirationTime[0] !== "-")
@@ -32,7 +27,10 @@ export const calculateRelativeTime = (expirationTime: number | string | Date): D
     if(Number.isNaN(num))
       throw new WorkerBeeError("Invalid expiration time offset");
 
-    expiration = new Date(Date.now() - (num * mul));
+    if (referenceTime === undefined)
+      referenceTime = new Date(Date.now());
+
+    expiration = new Date(referenceTime.getTime() - (num * mul));
   } else
     expiration = new Date(expirationTime);
 
