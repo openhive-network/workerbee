@@ -88,7 +88,7 @@ export class WorkerBee implements IWorkerBee {
     return this.chain!.api.database_api.get_dynamic_global_properties({}).then(dgp => {
       const headBlockNumber = dgp.head_block_number;
 
-      const actualTime = calculateRelativeTime(fromBlockOrRelativeTime);
+      const actualTime = calculateRelativeTime(fromBlockOrRelativeTime, dateFromString(dgp.time));
 
       const blocksBetween = Math.floor((new Date(`${dgp.time}Z`).getTime() - actualTime.getTime()) / (3 * 1000));
 
