@@ -145,12 +145,10 @@ export class WorkerBee implements IWorkerBee {
       });
 
       this.chain!.broadcast(apiTx).then(() => {
-        const expireDate = dateFromString(apiTx.transaction.expiration).getTime() + (HIVE_BLOCK_INTERVAL * 2);
-
         timeoutId = setTimeout(() => {
           listener.unsubscribe();
           reject(new WorkerBeeError(`Transaction broadcast error: Transaction #${apiTx.id} has expired`));
-        }, expireDate - Date.now());
+        }, (HIVE_BLOCK_INTERVAL * 2));
       }).catch(err => {
         listener.unsubscribe();
         reject(err);
