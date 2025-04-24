@@ -13,6 +13,8 @@ export class ImpactedAccountCollector extends CollectorBase {
   public async fetchData(data: DataEvaluationContext) {
     const { operations } = await data.get(OperationClassifier);
 
+    const startImpactedAccounts = Date.now();
+
     const impactedAccounts: Record<string, IImpactedAccount> = {};
 
     for(const operation of operations) {
@@ -28,6 +30,8 @@ export class ImpactedAccountCollector extends CollectorBase {
         (impactedAccounts[accountName].operations as Array<IOperationTransactionPair>).push(operation);
       }
     }
+
+    data.addTiming("operationGetImpactedAccounts", Date.now() - startImpactedAccounts);
 
     return {
       [ImpactedAccountClassifier.name]: {
