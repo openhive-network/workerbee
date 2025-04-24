@@ -1,4 +1,5 @@
 import { transaction } from "@hiveio/wax";
+import { ITransactionData } from "src/chain-observers/classifiers/block-classifier";
 import { WorkerBeeError } from "../../../errors";
 import { DynamicGlobalPropertiesClassifier } from "../../classifiers";
 import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
@@ -32,11 +33,16 @@ export class BlockCollector extends CollectorBase {
       throw new WorkerBeeError(`Block ${headBlockNumber} is not available`);
 
     const startBlockAnalysis = Date.now();
-    const transactions = block.transactions.map((tx, index) => ({
-      id: block.transaction_ids[index],
-      transaction: this.worker.chain!.createTransactionFromJson(tx).transaction
-    }));
-    const transactionsPerId = new Map<string, transaction>(block.transaction_ids.map((id, index) => [id, transactions[index].transaction]));
+    const transactions: ITransactionData[] = [];
+    const transactionsPerId = new Map<string, transaction>();
+    for(const tx of block.transactions) {
+      const transaction = this.worker.chain!.createTransactionFromJson(tx);
+      transactions.push({
+        transaction: transaction.transaction,
+        id: transaction.id,
+      });
+      transactionsPerId.set(transaction.id, transaction.transaction);
+    }
 
     data.addTiming("blockAnalysis", Date.now() - startBlockAnalysis);
 

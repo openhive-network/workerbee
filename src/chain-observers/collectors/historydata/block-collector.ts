@@ -1,6 +1,7 @@
 import { ApiBlock, transaction } from "@hiveio/wax";
 import { WorkerBee } from "../../../bot";
 import { WorkerBeeError } from "../../../errors";
+import { ITransactionData } from "../../classifiers/block-classifier";
 import { IBlockHeaderData } from "../../classifiers/block-header-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
@@ -57,12 +58,16 @@ export class BlockCollector extends CollectorBase {
 
     const block = this.cachedBlocksData[this.currentContainerIndex];
 
-    const transactions = block.transactions.map((tx, index) => ({
-      id: block.transaction_ids[index],
-      transaction: this.worker.chain!.createTransactionFromJson(tx).transaction
-    }));
-
-    const transactionsPerId = new Map<string, transaction>(block.transaction_ids.map((id, index) => [id, transactions[index].transaction]));
+    const transactions: ITransactionData[] = [];
+    const transactionsPerId = new Map<string, transaction>();
+    for(const tx of block.transactions) {
+      const transaction = this.worker.chain!.createTransactionFromJson(tx);
+      transactions.push({
+        transaction: transaction.transaction,
+        id: transaction.id,
+      });
+      transactionsPerId.set(transaction.id, transaction.transaction);
+    }
 
     ++this.currentContainerIndex;
     ++this.currentBlockIndex;
