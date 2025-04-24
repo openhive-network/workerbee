@@ -30,14 +30,13 @@ abstract class CompositeFilter extends FilterBase {
       forceReject = reject;
     });
 
-    this.operands.map((filter) => filter.match(context).then(evaluationResult => {
-      if(evaluationResult === forceResolveValue)
-        forceResolve();
-      else if (evaluationResult === forceCancelValue)
-        forceReject(new WorkerBeeUnsatisfiedFilterError());
-
-      return evaluationResult;
-    }).catch(forceReject));
+    for(const filter of this.operands)
+      filter.match(context).then(evaluationResult => {
+        if(evaluationResult === forceResolveValue)
+          forceResolve();
+        else if (evaluationResult === forceCancelValue)
+          forceReject(new WorkerBeeUnsatisfiedFilterError());
+      }).catch(forceReject);
 
     await forcePromise;
   }
