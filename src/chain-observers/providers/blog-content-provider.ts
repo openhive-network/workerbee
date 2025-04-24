@@ -1,5 +1,5 @@
 import { comment, TAccountName } from "@hiveio/wax";
-import { WorkerBeeIterable } from "../../types/iterator";
+import { WorkerBeeArrayIterable, WorkerBeeIterable } from "../../types/iterator";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { IOperationTransactionPair, OperationClassifier } from "../classifiers/operation-classifier";
 import { DataEvaluationContext } from "../factories/data-evaluation-context";
@@ -64,30 +64,30 @@ export abstract class BlogContentProvider<
         if (this.isPost !== isPostContent)
           continue;
 
-        for (const [account, parentCommentFilter] of this.authors) {
-          if (operation.operation.author !== account)
-            continue;
+        /// If requested account is a post author
+        if(this.authors.has(operation.operation.author) === false)
+          continue;
 
-          // Check parent data if specified (for comments)
-          if (!this.isPost && parentCommentFilter && (
-            operation.operation.parent_permlink !== parentCommentFilter.parentPermlink
-            || operation.operation.parent_author !== parentCommentFilter.parentAuthor
-          ))
-            continue;
+        let account = operation.operation.author;
 
-          if (!result[account])
-            result[account] = [];
+        /// If requested account is a comment parent-author
+        const parentCommentFilter = this.authors.get(operation.operation.author);
 
-          result[account].push({
-            operation: operation.operation,
-            transaction: operation.transaction
-          });
-        }
+        if(!this.isPost && parentCommentFilter && operation.operation.parent_permlink !== parentCommentFilter.parentPermlink)
+          continue;
+        else
+          account = operation.operation.parent_author;
+
+        if (!result[account])
+          result[account] = new WorkerBeeArrayIterable<IOperationTransactionPair<comment>>();
+
+        const storage = result[account] as WorkerBeeArrayIterable<IOperationTransactionPair<comment>>;
+
+        storage.push({
+          operation: operation.operation,
+          transaction: operation.transaction
+        });
       }
-
-
-    for (const account in result)
-      result[account] = new WorkerBeeIterable(result[account] as Array<IOperationTransactionPair<comment>>);
 
     return result;
   }
