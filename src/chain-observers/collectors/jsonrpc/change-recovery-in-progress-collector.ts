@@ -22,14 +22,16 @@ export class ChangeRecoveryInProgressCollector extends CollectorBase {
       delete this.changeRecoveryAccounts[data.changeRecoveryAccount];
   }
 
-  public async fetchData(_: DataEvaluationContext) {
+  public async fetchData(data: DataEvaluationContext) {
     const retrieveChangeRecoveryAccounts: Record<string, IAccountChangingRecovery> = {};
 
     const recoveryAccounts = Object.keys(this.changeRecoveryAccounts);
     for (let i = 0; i < recoveryAccounts.length; i += MAX_CHANGE_RECOVERY_GET_LIMIT) {
       const chunk = recoveryAccounts.slice(i, i + MAX_CHANGE_RECOVERY_GET_LIMIT);
 
+      const startFindChangeRecoveryAccountRequests = Date.now();
       const { requests } = await this.worker.chain!.api.database_api.find_change_recovery_account_requests({ accounts: chunk });
+      data.addTiming("database_api.find_change_recovery_account_requests", Date.now() - startFindChangeRecoveryAccountRequests);
 
       for(const request of requests)
         retrieveChangeRecoveryAccounts[request.account_to_recover] = {

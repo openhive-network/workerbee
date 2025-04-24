@@ -22,14 +22,16 @@ export class DeclineVotingRightsCollector extends CollectorBase {
       delete this.declineVotingRightsAccounts[data.declineVotingRightsAccount];
   }
 
-  public async fetchData(_: DataEvaluationContext) {
+  public async fetchData(data: DataEvaluationContext) {
     const declineVotingRightsAccounts: Record<string, IDeclinedVotingRightsAccount> = {};
 
     const recoveryAccounts = Object.keys(this.declineVotingRightsAccounts);
     for (let i = 0; i < recoveryAccounts.length; i += MAX_DECLINED_VOTING_RIGHTS_GET_LIMIT) {
       const chunk = recoveryAccounts.slice(i, i + MAX_DECLINED_VOTING_RIGHTS_GET_LIMIT);
 
+      const startFindDeclineVotingRightsRequests = Date.now();
       const { requests } = await this.worker.chain!.api.database_api.find_decline_voting_rights_requests({ accounts: chunk });
+      data.addTiming("database_api.find_decline_voting_rights_requests", Date.now() - startFindDeclineVotingRightsRequests);
 
       for(const request of requests)
         declineVotingRightsAccounts[request.account] = {

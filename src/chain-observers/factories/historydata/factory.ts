@@ -10,7 +10,7 @@ export class HistoryDataFactory extends FactoryBase {
   private previousBlockNumber?: number;
 
   public constructor(
-    protected readonly worker: WorkerBee,
+    worker: WorkerBee,
     public readonly fromBlock: number,
     public readonly toBlock?: number
   ) {

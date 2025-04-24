@@ -365,23 +365,25 @@ test.describe("WorkerBee Bot events test", () => {
     expect(result).toBeTruthy();
   });
 
-  test("Should be able to parse blocks from the past - more than 1000", async({ workerbeeTest }) => {
+  test("Should be able to parse blocks from the past and print timings - more than 1000", async({ workerbeeTest }) => {
     const result = await workerbeeTest.dynamic(async({ WorkerBee }) => {
       const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
       await bot.start();
 
       let calls = 0;
-      await new Promise<void>(resolve => {
-        bot.providePastOperations(500017, 501020).onBlock().subscribe({
+      const timings = await new Promise<void>(resolve => {
+        const observer = bot.providePastOperations(500017, 501020).onBlock().subscribe({
           next() {
             ++calls;
           },
           error(err) {
             console.error(err);
           },
-          complete: resolve
+          complete: () => resolve((observer as any).timings) // @internal
         });
       })
+
+      console.log(timings);
 
       bot.stop();
       bot.delete();

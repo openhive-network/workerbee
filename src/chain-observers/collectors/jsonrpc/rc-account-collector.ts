@@ -23,14 +23,16 @@ export class RcAccountCollector extends CollectorBase {
       delete this.rcAccounts[data.rcAccount];
   }
 
-  public async fetchData(_: DataEvaluationContext) {
+  public async fetchData(data: DataEvaluationContext) {
     const rcAccounts: Record<string, IRcAccount> = {};
 
     const accountNames = Object.keys(this.rcAccounts);
     for (let i = 0; i < accountNames.length; i += MAX_RC_ACCOUNT_GET_LIMIT) {
       const chunk = accountNames.slice(i, i + MAX_RC_ACCOUNT_GET_LIMIT);
 
+      const startFindRcAccounts = Date.now();
       const { rc_accounts: apiRcAccounts } = await this.worker.chain!.api.rc_api.find_rc_accounts({ accounts: chunk });
+      data.addTiming("rc_api.find_rc_accounts", Date.now() - startFindRcAccounts);
 
       for(const rcAccount of apiRcAccounts)
         rcAccounts[rcAccount.account] = {

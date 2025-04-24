@@ -28,18 +28,20 @@ export class BlockCollector extends CollectorBase {
 
   private cachedBlocksData: ApiBlock[] = [];
 
-  public async fetchData(_: DataEvaluationContext) {
+  public async fetchData(data: DataEvaluationContext) {
     if (this.toBlock !== undefined && this.currentBlockIndex > this.toBlock)
       throw new WorkerBeeError(`Block Buffer overflow in history data BlockCollector: ${this.currentBlockIndex} > ${this.toBlock}`);
 
     if (this.currentContainerIndex === -1 || this.currentContainerIndex >= this.cachedBlocksData.length) {
       this.currentContainerIndex = 0;
+      const startGetBlockRange = Date.now();
       ({ blocks: this.cachedBlocksData } = await this.worker.chain!.api.block_api.get_block_range({
         starting_block_num: this.currentBlockIndex,
         count: this.toBlock === undefined ? MAX_TAKE_BLOCKS : (
           this.currentBlockIndex + MAX_TAKE_BLOCKS > this.toBlock ? this.toBlock - this.currentBlockIndex + 1 : MAX_TAKE_BLOCKS
         )
       }));
+      data.addTiming("block_api.get_block_range", Date.now() - startGetBlockRange);
 
       if (this.cachedBlocksData.length === 0)
         return {
@@ -51,6 +53,8 @@ export class BlockCollector extends CollectorBase {
         } satisfies Partial<TAvailableClassifiers>;
     }
 
+    const startBlockAnalysis = Date.now();
+
     const block = this.cachedBlocksData[this.currentContainerIndex];
 
     const transactions = block.transactions.map((tx, index) => ({
@@ -58,12 +62,16 @@ export class BlockCollector extends CollectorBase {
       transaction: this.worker.chain!.createTransactionFromJson(tx).transaction
     }));
 
+    const transactionsPerId = new Map<string, transaction>(block.transaction_ids.map((id, index) => [id, transactions[index].transaction]));
+
     ++this.currentContainerIndex;
     ++this.currentBlockIndex;
 
+    data.addTiming("blockAnalysis", Date.now() - startBlockAnalysis);
+
     return {
       BlockClassifier: {
-        transactionsPerId: new Map<string, transaction>(block.transaction_ids.map((id, index) => [id, transactions[index].transaction])),
+        transactionsPerId,
         transactions
       },
       BlockHeaderClassifier: this.previousBlockHeaderData = {

@@ -22,14 +22,16 @@ export class WitnessCollector extends CollectorBase {
       delete this.witnesses[data.witness];
   }
 
-  public async fetchData(_: DataEvaluationContext) {
+  public async fetchData(data: DataEvaluationContext) {
     const witnesses: Record<string, IWitness> = {};
 
     const witnessNames = Object.keys(this.witnesses);
     for (let i = 0; i < witnessNames.length; i += MAX_WITNESS_GET_LIMIT) {
       const chunk = witnessNames.slice(i, i + MAX_WITNESS_GET_LIMIT);
 
+      const startFindWitnesses = Date.now();
       const { witnesses: owners } = await this.worker.chain!.api.database_api.find_witnesses({ owners: chunk });
+      data.addTiming("database_api.find_witnesses", Date.now() - startFindWitnesses);
 
       for(const account of owners)
         witnesses[account.owner] = {

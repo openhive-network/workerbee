@@ -24,19 +24,25 @@ export class BlockCollector extends CollectorBase {
 
     this.currentHeadBlock = headBlockNumber;
 
+    const startBlock = Date.now();
     const { block } = await this.worker.chain!.api.block_api.get_block({ block_num: headBlockNumber });
+    data.addTiming("block_api.get_block", Date.now() - startBlock);
 
     if (block === undefined)
       throw new WorkerBeeError(`Block ${headBlockNumber} is not available`);
 
+    const startBlockAnalysis = Date.now();
     const transactions = block.transactions.map((tx, index) => ({
       id: block.transaction_ids[index],
       transaction: this.worker.chain!.createTransactionFromJson(tx).transaction
     }));
+    const transactionsPerId = new Map<string, transaction>(block.transaction_ids.map((id, index) => [id, transactions[index].transaction]));
+
+    data.addTiming("blockAnalysis", Date.now() - startBlockAnalysis);
 
     return {
       BlockClassifier: (this.cachedBlockData = {
-        transactionsPerId: new Map<string, transaction>(block.transaction_ids.map((id, index) => [id, transactions[index].transaction])),
+        transactionsPerId,
         transactions
       })
     } satisfies Partial<TAvailableClassifiers>;
