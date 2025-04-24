@@ -7,10 +7,14 @@ import { FilterBase } from "./filter-base";
 export class ImpactedAccountFilter extends FilterBase {
   public constructor(
     worker: WorkerBee,
-    private readonly account: string
+    accounts: string[]
   ) {
     super(worker);
+
+    this.accounts = new Set(accounts);
   }
+
+  private readonly accounts: Set<string>;
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [
@@ -21,6 +25,10 @@ export class ImpactedAccountFilter extends FilterBase {
   public async match(data: DataEvaluationContext): Promise<boolean> {
     const impactedAccount = await data.get(ImpactedAccountClassifier);
 
-    return impactedAccount.impactedAccounts[this.account] !== undefined;
+    for(const account of this.accounts)
+      if(impactedAccount.impactedAccounts[account] !== undefined)
+        return true;
+
+    return false;
   }
 }

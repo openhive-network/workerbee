@@ -9,30 +9,42 @@ import { FilterBase } from "./filter-base";
 export class AccountFullManabarFilter extends FilterBase {
   public constructor(
     worker: WorkerBee,
-    private readonly account: string,
+    accounts: string[],
     private readonly manabarType: EManabarType,
     private readonly manabarLoadPercent: number = 98
   ) {
     super(worker);
+
+    this.accounts = new Set(accounts);
   }
 
+  public readonly accounts: Set<string>;
+
   public usedContexts(): Array<TRegisterEvaluationContext> {
-    return [
-      ManabarClassifier.forOptions({
-        account: this.account,
+    const context: TRegisterEvaluationContext[] = [];
+
+    for(const account of this.accounts)
+      context.push(ManabarClassifier.forOptions({
+        account,
         manabarType: this.manabarType
-      } as IManabarCollectorOptions)
-    ];
+      } as IManabarCollectorOptions));
+
+    return context;
   }
 
   public async match(data: DataEvaluationContext): Promise<boolean> {
     const { manabarData } = await data.get(ManabarClassifier);
 
-    const manabar = manabarData[this.account]?.[this.manabarType];
+    for(const account of this.accounts) {
+      const manabar = manabarData[account]?.[this.manabarType];
 
-    if (manabar === undefined)
-      return false;
+      if (manabar === undefined)
+        return false;
 
-    return manabar.percent >= this.manabarLoadPercent;
+      if(manabar.percent >= this.manabarLoadPercent)
+        return true;
+    }
+
+    return false;
   }
 }
