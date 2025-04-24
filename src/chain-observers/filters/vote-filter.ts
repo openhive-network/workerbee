@@ -29,7 +29,7 @@ export class VoteFilter extends FilterBase {
       return false;
 
     for(const { operation } of operationsPerType.vote)
-      if (this.accounts.has(operation.author))
+      if (this.accounts.has(operation.voter))
         return true;
 
     // TODO: Handle witness vote in a separate filter and action in queen
