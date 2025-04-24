@@ -105,12 +105,16 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     this.filterContainers = [];
     this.providers = new Map();
 
+    const usedMediator = this.mediator;
+
     return {
+      get timings() {
+        return usedMediator.timings;
+      },
       unsubscribe: () => {
         this.mediator.unregisterListener(observer);
-        // XXX: Maybe force cancel here
       }
-    };
+    } as Unsubscribable & { timings: Readonly<Record<string, number>> };
   }
 
   private applyOr(): void {

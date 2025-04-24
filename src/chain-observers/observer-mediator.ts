@@ -13,16 +13,26 @@ export class ObserverMediator {
 
   private filters = new Map<Partial<Observer<any>>, { filter: FilterBase; providers: Iterable<ProviderBase>; }>();
 
+  public get timings () {
+    return this.factory.getTimings();
+  }
+
   public notify() {
     this.factory.preNotify(this);
 
     const context = this.factory.collect();
 
+    const startFilter = Date.now();
+
     // Start providing parsed, cached data to filters
     for(const [listener, { filter, providers }] of this.filters.entries())
       filter.match(context).then(async(matched) => {
+        this.factory.addTiming("filters", Date.now() - startFilter);
+
         if(!matched)
           return;
+
+        const startProvider = Date.now();
 
         // Join all providers data for user (1 level nested)
         const providedData = {};
@@ -34,6 +44,8 @@ export class ObserverMediator {
             else
               providedData[key] = { ...(providedData[key] ?? {}), ...providerResult[key] };
         }
+
+        this.factory.addTiming("providers", Date.now() - startProvider);
 
         listener.next?.(providedData);
       }).catch(error => listener.error?.(error));

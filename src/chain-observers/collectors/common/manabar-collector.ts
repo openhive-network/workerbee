@@ -82,12 +82,16 @@ export class ManabarCollector extends CollectorBase {
         if (manabarData[account] === undefined)
           manabarData[account] = {};
 
+        const startManabarData = Date.now();
+
         const calculatedManabarData = this.worker.chain!.calculateCurrentManabarValue(
           time,
           rcAccounts.rcAccounts[account].rcManabar.max,
           rcAccounts.rcAccounts[account].rcManabar.currentMana,
           rcAccounts.rcAccounts[account].rcManabar.lastUpdateTime.getTime() / 1000
         );
+
+        data.addTiming("calculateCurrentManabarValue", Date.now() - startManabarData);
 
         manabarData[account][EManabarType.RC] = {
           currentMana: calculatedManabarData.current,
@@ -107,12 +111,16 @@ export class ManabarCollector extends CollectorBase {
         if (manabarData[account] === undefined)
           manabarData[account] = {};
 
+        const startManabarData = Date.now();
+
         const calculatedManabarData = this.worker.chain!.calculateCurrentManabarValue(
           time,
           accounts.accounts[account].upvoteManabar.max,
           accounts.accounts[account].upvoteManabar.currentMana,
           accounts.accounts[account].upvoteManabar.lastUpdateTime.getTime() / 1000
         );
+
+        data.addTiming("calculateCurrentManabarValue", Date.now() - startManabarData);
 
         manabarData[account][EManabarType.UPVOTE] = {
           currentMana: calculatedManabarData.current,
@@ -129,6 +137,8 @@ export class ManabarCollector extends CollectorBase {
         if (manabarData[account] === undefined)
           manabarData[account] = {};
 
+        const startManabarData = Date.now();
+
         let max = accounts.accounts[account].upvoteManabar.max;
 
         if(max.divide(ONE_HUNDRED_PERCENT).greaterThan(ONE_HUNDRED_PERCENT))
@@ -142,6 +152,8 @@ export class ManabarCollector extends CollectorBase {
           accounts.accounts[account].downvoteManabar.currentMana,
           accounts.accounts[account].downvoteManabar.lastUpdateTime.getTime() / 1000
         );
+
+        data.addTiming("calculateCurrentManabarValue", Date.now() - startManabarData);
 
         manabarData[account][EManabarType.UPVOTE] = {
           currentMana: calculatedManabarData.current,

@@ -3,7 +3,7 @@ import { WorkerBeeError } from "../../errors";
 import { createFactoryCircularDependencyErrorMessage, createFactoryUnsupportedClassifierErrorMessage } from "../../utils/error-helper";
 import { IEvaluationContextClass, TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { CollectorBase } from "../collectors/collector-base";
-import type { ObserverMediator } from "../observer-mediator";
+import { ObserverMediator } from "../observer-mediator";
 import { DataEvaluationContext } from "./data-evaluation-context";
 
 export enum EClassifierOrigin {
@@ -18,6 +18,18 @@ export class FactoryBase {
   public constructor(
     protected readonly worker: WorkerBee
   ) {}
+
+  private readonly timings: Record<string, number> = {};
+  private lastStart = Date.now();
+
+  public getTimings(): Readonly<Record<string, number>> {
+    this.timings.total = Date.now() - this.lastStart;
+    return this.timings;
+  }
+
+  public addTiming(name: string, time: number) {
+    this.timings[name] = (this.timings[name] ?? 0) + time;
+  }
 
   public preNotify(_mediator: ObserverMediator): void {}
   public postNotify(_mediator: ObserverMediator, _context: DataEvaluationContext): void {}
@@ -59,7 +71,7 @@ export class FactoryBase {
   }
 
   private rebuildDataEvaluationContext(): DataEvaluationContext {
-    const context = new DataEvaluationContext();
+    const context = new DataEvaluationContext(this);
 
     for(const [contextClass, collectorInstance] of this.collectors) {
       if (!collectorInstance.hasRegistered) // Ignore collectors that have no registered classifiers

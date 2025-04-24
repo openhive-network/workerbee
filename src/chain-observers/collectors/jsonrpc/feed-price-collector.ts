@@ -27,7 +27,9 @@ export class FeedPriceCollector extends CollectorBase {
     if ( this.cachedFeedHistoryData === undefined
       || isDivisibleByInRange(Number.parseInt(this.worker.chain!.config["HIVE_FEED_INTERVAL_BLOCKS"]), headBlockNumber, this.previouslyCheckedBlockNumber)
     ) {
+      const startGetFeedHistory = Date.now();
       const feedHistoryData = await this.worker.chain!.api.database_api.get_feed_history({});
+      data.addTiming("database_api.get_feed_history", Date.now() - startGetFeedHistory);
 
       this.cachedFeedHistoryData = {
         currentMedianHistory: feedHistoryData.current_median_history,

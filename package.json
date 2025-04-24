@@ -33,7 +33,7 @@
       "path": [
         "./dist/bundle"
       ],
-      "limit": "135 kB",
+      "limit": "140 kB",
       "brotli": false
     }
   ],

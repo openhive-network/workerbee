@@ -15,6 +15,8 @@ export class OperationCollector extends CollectorBase {
     const operations: Array<IOperationTransactionPair> = [];
     const operationsPerType: Record<string, Array<IOperationTransactionPair>> = {};
 
+    const startOperationPerType = Date.now();
+
     for(const transaction of transactions)
       for(const operation of transaction.transaction.operations) {
         operations.push({
@@ -38,6 +40,7 @@ export class OperationCollector extends CollectorBase {
         });
       }
 
+    data.addTiming("operationPerType", Date.now() - startOperationPerType);
 
     return {
       [OperationClassifier.name]: {

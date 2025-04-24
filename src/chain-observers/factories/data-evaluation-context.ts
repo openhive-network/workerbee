@@ -3,6 +3,7 @@ import type * as TClassifiers from "../classifiers";
 import { CollectorClassifierBase, IEvaluationContextClass } from "../classifiers/collector-classifier-base";
 
 import { CollectorBase, TAvailableClassifiers } from "../collectors/collector-base";
+import { FactoryBase } from "./factory-base";
 
 export type TAvailableCollectorFunctions = {
   [key in keyof typeof TClassifiers]: CollectorBase;
@@ -11,6 +12,14 @@ export type TAvailableCollectorFunctions = {
 export class DataEvaluationContext {
   private readonly cachedFunctions = new Map<CollectorBase, Promise<Partial<TAvailableClassifiers>>>();
   private readonly collectors: TAvailableCollectorFunctions = {} as TAvailableCollectorFunctions;
+
+  public constructor(
+    private readonly factory: FactoryBase
+  ) {}
+
+  public addTiming(name: string, time: number): void {
+    this.factory.addTiming(name, time);
+  }
 
   public inject<T extends IEvaluationContextClass>(
     evaluationContext: T,
@@ -33,7 +42,11 @@ export class DataEvaluationContext {
     let cached = this.cachedFunctions.get(collector);
 
     if (cached === undefined) {
-      cached = collector.fetchData(this);
+      const startTime = Date.now();
+
+      cached = (collector.fetchData(this) as Promise<any>).finally(() => {
+        this.addTiming(evaluationContext.name, Date.now() - startTime);
+      });
 
       for(const key in this.collectors)
         if (this.collectors[key] === collector)

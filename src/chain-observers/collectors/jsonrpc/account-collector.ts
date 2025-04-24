@@ -24,12 +24,12 @@ export class AccountCollector extends CollectorBase {
       delete this.accounts[data.account];
   }
 
-  public async fetchData(_: DataEvaluationContext) {
+  public async fetchData(data: DataEvaluationContext) {
     const accounts: Record<string, IAccount> = {};
 
-    const tryParseJson = (data: string) => {
+    const tryParseJson = (jsonData: string) => {
       try {
-        return JSON.parse(data);
+        return JSON.parse(jsonData);
       } catch {
         return {};
       }
@@ -39,7 +39,11 @@ export class AccountCollector extends CollectorBase {
     for (let i = 0; i < accountNames.length; i += MAX_ACCOUNT_GET_LIMIT) {
       const chunk = accountNames.slice(i, i + MAX_ACCOUNT_GET_LIMIT);
 
+      const startFindAccounts = Date.now();
       const { accounts: apiAccounts } = await this.worker.chain!.api.database_api.find_accounts({ accounts: chunk });
+      data.addTiming("database_api.find_accounts", Date.now() - startFindAccounts);
+
+      const startAccountsAnalysis = Date.now();
 
       for(const account of apiAccounts) {
         let governanceVoteExpiration: Date | undefined = new Date(`${account.governance_vote_expiration_ts}Z`);
@@ -108,6 +112,8 @@ export class AccountCollector extends CollectorBase {
           }
         };
       }
+
+      data.addTiming("accountsAnalysis", Date.now() - startAccountsAnalysis);
     }
 
     return {
