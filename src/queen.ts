@@ -268,12 +268,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     percent: number,
     ...accounts: TAccounts
   ): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ManabarProvider<TAccounts>["provide"]>>> {
-    for(let i = 0; i < accounts.length; ++i) {
-      if (i > 0)
-        this.applyOr(); // Add logical OR between each account filter to allow multiple accounts to be used in the same subscribe call
-
-      this.operands.push(new AccountFullManabarFilter(this.worker, accounts[i], manabarType, percent));
-    }
+    this.operands.push(new AccountFullManabarFilter(this.worker, accounts, manabarType, percent));
 
     this.pushProvider(ManabarProvider, { manabarData: accounts.map(account => ({ account, manabarType })) });
 
@@ -349,12 +344,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public onVotes<
     TAccounts extends TAccountName[]
   >(...voters: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<VoteProvider<TAccounts>["provide"]>>> {
-    for(let i = 0; i < voters.length; ++i) {
-      if (i > 0)
-        this.applyOr(); // Add logical OR between each account filter to allow multiple accounts to be used in the same subscribe call
-
-      this.operands.push(new VoteFilter(this.worker, voters[i]));
-    }
+    this.operands.push(new VoteFilter(this.worker, voters));
 
     this.pushProvider(VoteProvider, { voters });
 
@@ -386,12 +376,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public onPosts<
     TAccounts extends TAccountName[]
   >(...authors: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<PostProvider<TAccounts>["provide"]>>> {
-    for(let i = 0; i < authors.length; ++i) {
-      if (i > 0)
-        this.applyOr(); // Add logical OR between each account filter to allow multiple accounts to be used in the same subscribe call
-
-      this.operands.push(new PostFilter(this.worker, authors[i]));
-    }
+    this.operands.push(new PostFilter(this.worker, authors));
 
     this.pushProvider(PostProvider, { authors });
 
@@ -425,12 +410,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   >(...authors: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CommentProvider<TAccounts>["provide"]>>> {
     // TODO: Handle parentPostOrComment?: ICommentData
 
-    for(let i = 0; i < authors.length; ++i) {
-      if (i > 0)
-        this.applyOr(); // Add logical OR between each account filter to allow multiple accounts to be used in the same subscribe call
-
-      this.operands.push(new CommentFilter(this.worker, authors[i]));
-    }
+    this.operands.push(new CommentFilter(this.worker, authors));
 
     this.pushProvider(CommentProvider, { authors: authors.map(account => ({ account })) });
 
@@ -685,12 +665,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public onImpactedAccounts<
     TAccounts extends TAccountName[]
   >(...accounts: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ImpactedAccountProvider<TAccounts>["provide"]>>> {
-    for(let i = 0; i < accounts.length; ++i) {
-      if (i > 0)
-        this.applyOr(); // Add logical OR between each account filter to allow multiple accounts to be used in the same subscribe call
-
-      this.operands.push(new ImpactedAccountFilter(this.worker, accounts[i]));
-    }
+    this.operands.push(new ImpactedAccountFilter(this.worker, accounts));
 
     this.pushProvider(ImpactedAccountProvider, { accounts });
 

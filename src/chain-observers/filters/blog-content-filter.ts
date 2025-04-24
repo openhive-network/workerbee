@@ -14,12 +14,16 @@ export interface ICommentData {
 export abstract class BlogContentFilter extends FilterBase {
   public constructor(
     worker: WorkerBee,
-    protected readonly account: string,
+    accounts: string[],
     protected readonly isPost: boolean,
     protected readonly parentCommentFilter?: ICommentData
   ) {
     super(worker);
+
+    this.accounts = new Set(accounts);
   }
+
+  protected readonly accounts: Set<string>;
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [
@@ -38,7 +42,7 @@ export abstract class BlogContentFilter extends FilterBase {
           continue;
 
         // Check author match
-        if (operation.author !== this.account)
+        if (this.accounts.has(operation.author))
           continue;
 
         // Check parent data if specified
@@ -60,10 +64,10 @@ export abstract class BlogContentFilter extends FilterBase {
 export class CommentFilter extends BlogContentFilter {
   public constructor(
     worker: WorkerBee,
-    account: string,
+    accounts: string[],
     parentCommentFilter?: ICommentData
   ) {
-    super(worker, account, false, parentCommentFilter);
+    super(worker, accounts, false, parentCommentFilter);
   }
 }
 
@@ -71,8 +75,8 @@ export class CommentFilter extends BlogContentFilter {
 export class PostFilter extends BlogContentFilter {
   public constructor(
     worker: WorkerBee,
-    account: string
+    accounts: string[]
   ) {
-    super(worker, account, true);
+    super(worker, accounts, true);
   }
 }
