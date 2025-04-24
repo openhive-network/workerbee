@@ -7,10 +7,14 @@ import { FilterBase } from "./filter-base";
 export class VoteFilter extends FilterBase {
   public constructor(
     worker: WorkerBee,
-    private readonly account: string
+    accounts: string[]
   ) {
     super(worker);
+
+    this.accounts = new Set(accounts);
   }
+
+  public readonly accounts: Set<string>;
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [
@@ -25,7 +29,7 @@ export class VoteFilter extends FilterBase {
       return false;
 
     for(const { operation } of operationsPerType.vote)
-      if (operation.author === this.account)
+      if (this.accounts.has(operation.author))
         return true;
 
     // TODO: Handle witness vote in a separate filter and action in queen
