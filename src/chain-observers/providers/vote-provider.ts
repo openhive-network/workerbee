@@ -1,5 +1,5 @@
 import { TAccountName, vote } from "@hiveio/wax";
-import { WorkerBeeIterable } from "../../types/iterator";
+import { WorkerBeeArrayIterable, WorkerBeeIterable } from "../../types/iterator";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { IOperationTransactionPair, OperationClassifier } from "../classifiers/operation-classifier";
 import { DataEvaluationContext } from "../factories/data-evaluation-context";
@@ -36,22 +36,21 @@ export class VoteProvider<TAccounts extends Array<TAccountName> = Array<TAccount
 
     const operations = await data.get(OperationClassifier);
     if (operations.operationsPerType.vote)
-      for(const operation of operations.operationsPerType.vote)
-        for(const account of this.voters) {
-          if(operation.operation.voter !== account)
-            continue;
+      for(const operation of operations.operationsPerType.vote) {
+        if(this.voters.has(operation.operation.voter) === false)
+          continue;
 
-          if (!result.votes[account])
-            result.votes[account] = [];
+        const account = operation.operation.voter;
 
-          result.votes[account].push({
-            operation: operation.operation,
-            transaction: operation.transaction
-          });
-        }
+        if (!result.votes[account])
+          result.votes[account] = new WorkerBeeArrayIterable();
 
-    for(const account in result.votes)
-      result.votes[account] = new WorkerBeeIterable(result.votes[account]);
+        const storage = result.votes[account] as WorkerBeeArrayIterable<IOperationTransactionPair<vote>>;
+        storage.push({
+          operation: operation.operation,
+          transaction: operation.transaction
+        });
+      }
 
     return result;
   }
