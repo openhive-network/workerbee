@@ -28,3 +28,13 @@ export class WorkerBeeIterable<T> implements Iterable<T> {
       callbackfn(value);
   }
 }
+
+export class WorkerBeeArrayIterable<T> extends WorkerBeeIterable<T> {
+  public constructor (private readonly array: Array<T> = []) {
+    super(array);
+  }
+
+  public push(value: T): void {
+    this.array.push(value);
+  }
+}
