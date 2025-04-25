@@ -61,13 +61,13 @@ export class BlockCollector extends CollectorBase {
 
     const transactions: ITransactionData[] = [];
     const transactionsPerId = new Map<string, transaction>();
-    for(const tx of block.transactions) {
-      const transaction = this.worker.chain!.createTransactionFromJson(tx);
+    for(let i = 0; i < block.transactions.length; ++i) {
+      const transaction = this.worker.chain!.createTransactionFromJson(block.transactions[i]);
       transactions.push({
         transaction: transaction.transaction,
-        id: transaction.id,
+        id: block.transaction_ids[i]
       });
-      transactionsPerId.set(transaction.id, transaction.transaction);
+      transactionsPerId.set(block.transaction_ids[i], transaction.transaction);
     }
 
     ++this.currentContainerIndex;
