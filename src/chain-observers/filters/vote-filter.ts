@@ -25,10 +25,10 @@ export class VoteFilter extends FilterBase {
   public async match(data: DataEvaluationContext): Promise<boolean> {
     const { operationsPerType } = await data.get(OperationClassifier);
 
-    if (operationsPerType.vote === undefined)
+    if (operationsPerType.vote_operation === undefined)
       return false;
 
-    for(const { operation } of operationsPerType.vote)
+    for(const { operation } of operationsPerType.vote_operation)
       if (this.accounts.has(operation.voter))
         return true;
 

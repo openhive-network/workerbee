@@ -57,8 +57,8 @@ export abstract class BlogContentProvider<
     const result = {} as TBlogContentProvided<TAccounts>;
 
     const accounts = await data.get(OperationClassifier);
-    if (accounts.operationsPerType.comment)
-      for (const operation of accounts.operationsPerType.comment) {
+    if (accounts.operationsPerType.comment_operation)
+      for (const operation of accounts.operationsPerType.comment_operation) {
         // Check if post/comment type matches what we're looking for
         const isPostContent = operation.operation.parent_author === "";
         if (this.isPost !== isPostContent)

@@ -41,8 +41,8 @@ export class ReblogProvider<TAccounts extends Array<TAccountName> = Array<string
     } as IReblogProviderData<TAccounts>;
 
     const accounts = await data.get(OperationClassifier);
-    if (accounts.operationsPerType.custom_json)
-      for(const operation of accounts.operationsPerType.custom_json) {
+    if (accounts.operationsPerType.custom_json_operation)
+      for(const operation of accounts.operationsPerType.custom_json_operation) {
         if (operation.operation.id !== "follow")
           continue;
         const json = JSON.parse(operation.operation.json);

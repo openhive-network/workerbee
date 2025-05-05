@@ -20,13 +20,13 @@ export class AccountCreatedFilter extends FilterBase {
   public async match(data: DataEvaluationContext): Promise<boolean> {
     const { operationsPerType } = await data.get(OperationClassifier);
 
-    for(const {} of (operationsPerType.account_create ?? []))
+    for(const {} of (operationsPerType.account_create_operation ?? []))
       return true;
 
-    for(const {} of (operationsPerType.account_create_with_delegation ?? []))
+    for(const {} of (operationsPerType.account_create_with_delegation_operation ?? []))
       return true;
 
-    for(const {} of (operationsPerType.create_claimed_account ?? []))
+    for(const {} of (operationsPerType.create_claimed_account_operation ?? []))
       return true;
 
     return false;

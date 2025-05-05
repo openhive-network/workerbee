@@ -37,10 +37,10 @@ export class WhaleAlertProvider extends ProviderBase<IWhaleAlertProviderOptions>
   public async provide(data: DataEvaluationContext): Promise<IWhaleAlertProviderData> {
     const operations = await data.get(OperationClassifier);
 
-    const transfer = operations.operationsPerType["transfer"];
-    const fromSavings = operations.operationsPerType["transfer_from_savings"];
-    const escrow = operations.operationsPerType["escrow_transfer"];
-    const recurrent = operations.operationsPerType["recurrent_transfer"];
+    const transfer = operations.operationsPerType.transfer_operation;
+    const fromSavings = operations.operationsPerType.transfer_from_savings_operation;
+    const escrow = operations.operationsPerType.escrow_transfer_operation;
+    const recurrent = operations.operationsPerType.recurrent_transfer_operation;
 
     const whaleOperations: IOperationTransactionPair<IWhaleAlertMetadata>[] = [];
 
@@ -50,8 +50,8 @@ export class WhaleAlertProvider extends ProviderBase<IWhaleAlertProviderOptions>
           if(isGreaterThan(asset, op.operation.amount!))
             whaleOperations.push({
               operation: {
-                from: op.operation.from_account,
-                to: op.operation.to_account,
+                from: op.operation.from,
+                to: op.operation.to,
                 amount: op.operation.amount!
               },
               transaction: op.transaction
@@ -62,8 +62,8 @@ export class WhaleAlertProvider extends ProviderBase<IWhaleAlertProviderOptions>
           if(isGreaterThan(asset, op.operation.amount!))
             whaleOperations.push({
               operation: {
-                from: op.operation.from_account,
-                to: op.operation.to_account,
+                from: op.operation.from,
+                to: op.operation.to,
                 amount: op.operation.amount!
               },
               transaction: op.transaction
@@ -74,8 +74,8 @@ export class WhaleAlertProvider extends ProviderBase<IWhaleAlertProviderOptions>
           if(isGreaterThan(asset, op.operation.hbd_amount!))
             whaleOperations.push({
               operation: {
-                from: op.operation.from_account,
-                to: op.operation.to_account,
+                from: op.operation.from,
+                to: op.operation.to,
                 amount: op.operation.hbd_amount!
               },
               transaction: op.transaction
@@ -83,8 +83,8 @@ export class WhaleAlertProvider extends ProviderBase<IWhaleAlertProviderOptions>
           else if(isGreaterThan(asset, op.operation.hive_amount!))
             whaleOperations.push({
               operation: {
-                from: op.operation.from_account,
-                to: op.operation.to_account,
+                from: op.operation.from,
+                to: op.operation.to,
                 amount: op.operation.hive_amount!
               },
               transaction: op.transaction
@@ -95,8 +95,8 @@ export class WhaleAlertProvider extends ProviderBase<IWhaleAlertProviderOptions>
           if(isGreaterThan(asset, op.operation.amount!))
             whaleOperations.push({
               operation: {
-                from: op.operation.from_account,
-                to: op.operation.to_account,
+                from: op.operation.from,
+                to: op.operation.to,
                 amount: op.operation.amount!
               },
               transaction: op.transaction

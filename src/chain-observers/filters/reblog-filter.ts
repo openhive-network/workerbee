@@ -21,7 +21,7 @@ export class ReblogFilter extends FilterBase {
   public async match(data: DataEvaluationContext): Promise<boolean> {
     const { operationsPerType } = await data.get(OperationClassifier);
 
-    for(const { operation } of (operationsPerType.custom_json ?? []))
+    for(const { operation } of (operationsPerType.custom_json_operation ?? []))
       if (operation.id === "follow") {
         const json = JSON.parse(operation.json);
 

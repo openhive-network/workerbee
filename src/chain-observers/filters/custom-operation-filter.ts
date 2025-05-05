@@ -21,11 +21,11 @@ export class CustomOperationFilter extends FilterBase {
   public async match(data: DataEvaluationContext): Promise<boolean> {
     const { operationsPerType } = await data.get(OperationClassifier);
 
-    for(const { operation } of (operationsPerType.custom_json ?? []))
+    for(const { operation } of (operationsPerType.custom_json_operation ?? []))
       if (operation.id === this.id)
         return true;
 
-    for(const { operation } of (operationsPerType.custom ?? []))
+    for(const { operation } of (operationsPerType.custom_operation ?? []))
       if (operation.id === this.id)
         return true;
 

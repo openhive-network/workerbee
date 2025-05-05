@@ -21,7 +21,7 @@ export class PostMentionFilter extends FilterBase {
   public async match(data: DataEvaluationContext): Promise<boolean> {
     const { operationsPerType } = await data.get(OperationClassifier);
 
-    for(const { operation } of (operationsPerType.comment ?? []))
+    for(const { operation } of (operationsPerType.comment_operation ?? []))
       try {
         const jsonMetadata = JSON.parse(operation.json_metadata);
 

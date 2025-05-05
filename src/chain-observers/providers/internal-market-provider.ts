@@ -38,9 +38,9 @@ export class InternalMarketProvider extends ProviderBase {
   public async provide(data: DataEvaluationContext): Promise<IInternalMarketProviderData> {
     const operations = await data.get(OperationClassifier);
 
-    const orderCreate = operations.operationsPerType["limit_order_create"];
-    const orderCreate2 = operations.operationsPerType["limit_order_create2"];
-    const orderCancel = operations.operationsPerType["limit_order_cancel"];
+    const orderCreate = operations.operationsPerType.limit_order_create_operation;
+    const orderCreate2 = operations.operationsPerType.limit_order_create2_operation;
+    const orderCancel = operations.operationsPerType.limit_order_cancel_operation;
 
     const internalMarketOperations: IOperationTransactionPair<TInternalMarketOperation>[] = [];
 

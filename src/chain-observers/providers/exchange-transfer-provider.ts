@@ -32,22 +32,22 @@ export class ExchangeTransferProvider extends ProviderBase {
   public async provide(data: DataEvaluationContext): Promise<IExchangeTransferProviderData> {
     const operations = await data.get(OperationClassifier);
 
-    const transfer = operations.operationsPerType["transfer"];
-    const fromSavings = operations.operationsPerType["transfer_from_savings"];
-    const escrow = operations.operationsPerType["escrow_transfer"];
-    const recurrent = operations.operationsPerType["recurrent_transfer"];
+    const transfer = operations.operationsPerType.transfer_operation;
+    const fromSavings = operations.operationsPerType.transfer_from_savings_operation;
+    const escrow = operations.operationsPerType.escrow_transfer_operation;
+    const recurrent = operations.operationsPerType.recurrent_transfer_operation;
 
     const exchangeTransfers: IOperationTransactionPair<IExchangeTransferMetadata>[] = [];
 
     if(transfer)
       for(const op of transfer) {
-        const exchange = isExchange(op.operation.from_account);
+        const exchange = isExchange(op.operation.from);
 
         if (exchange)
           exchangeTransfers.push({
             operation: {
-              from: op.operation.from_account,
-              to: op.operation.to_account,
+              from: op.operation.from,
+              to: op.operation.to,
               amount: op.operation.amount!,
               exchange
             },
@@ -57,13 +57,13 @@ export class ExchangeTransferProvider extends ProviderBase {
 
     if(fromSavings)
       for(const op of fromSavings) {
-        const exchange = isExchange(op.operation.from_account);
+        const exchange = isExchange(op.operation.from);
 
         if (exchange)
           exchangeTransfers.push({
             operation: {
-              from: op.operation.from_account,
-              to: op.operation.to_account,
+              from: op.operation.from,
+              to: op.operation.to,
               amount: op.operation.amount!,
               exchange
             },
@@ -73,13 +73,13 @@ export class ExchangeTransferProvider extends ProviderBase {
 
     if(escrow)
       for(const op of escrow) {
-        const exchange = isExchange(op.operation.from_account);
+        const exchange = isExchange(op.operation.from);
 
         if (exchange)
           exchangeTransfers.push({
             operation: {
-              from: op.operation.from_account,
-              to: op.operation.to_account,
+              from: op.operation.from,
+              to: op.operation.to,
               amount: op.operation.hbd_amount!,
               exchange
             },
@@ -89,13 +89,13 @@ export class ExchangeTransferProvider extends ProviderBase {
 
     if(recurrent)
       for(const op of recurrent) {
-        const exchange = isExchange(op.operation.from_account);
+        const exchange = isExchange(op.operation.from);
 
         if (exchange)
           exchangeTransfers.push({
             operation: {
-              from: op.operation.from_account,
-              to: op.operation.to_account,
+              from: op.operation.from,
+              to: op.operation.to,
               amount: op.operation.amount!,
               exchange
             },

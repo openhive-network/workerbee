@@ -36,8 +36,8 @@ export class MentionedAccountProvider<TMentions extends Array<TAccountName> = Ar
 
     const { operationsPerType } = await data.get(OperationClassifier);
 
-    if (operationsPerType.comment)
-      for(const { operation } of operationsPerType.comment)
+    if (operationsPerType.comment_operation)
+      for(const { operation } of operationsPerType.comment_operation)
         for(const account of this.accounts)
           try {
             const jsonMetadata = JSON.parse(operation.json_metadata);
