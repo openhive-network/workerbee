@@ -1,3 +1,4 @@
+import { ChangeRecoveryInProgressClassifier } from "../../classifiers";
 import { IAccountChangingRecovery } from "../../classifiers/change-recovery-in-progress-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
@@ -42,9 +43,9 @@ export class ChangeRecoveryInProgressCollector extends CollectorBase {
     }
 
     return {
-      ChangeRecoveryInProgressClassifier: {
+      [ChangeRecoveryInProgressClassifier.name]: {
         recoveringAccounts: retrieveChangeRecoveryAccounts
-      }
+      } as TAvailableClassifiers["ChangeRecoveryInProgressClassifier"]
     } satisfies Partial<TAvailableClassifiers>;
   };
 }

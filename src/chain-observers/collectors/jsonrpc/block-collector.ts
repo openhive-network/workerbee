@@ -1,7 +1,7 @@
 import { transaction } from "@hiveio/wax";
 import { ITransactionData } from "src/chain-observers/classifiers/block-classifier";
 import { WorkerBeeError } from "../../../errors";
-import { DynamicGlobalPropertiesClassifier } from "../../classifiers";
+import { DynamicGlobalPropertiesClassifier, BlockClassifier } from "../../classifiers";
 import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
@@ -20,7 +20,7 @@ export class BlockCollector extends CollectorBase {
 
     if(this.currentHeadBlock === headBlockNumber)
       return {
-        BlockClassifier: this.cachedBlockData
+        [BlockClassifier.name]: this.cachedBlockData as TAvailableClassifiers["BlockClassifier"]
       } satisfies Partial<TAvailableClassifiers>;
 
     this.currentHeadBlock = headBlockNumber;
@@ -47,10 +47,10 @@ export class BlockCollector extends CollectorBase {
     data.addTiming("blockAnalysis", Date.now() - startBlockAnalysis);
 
     return {
-      BlockClassifier: (this.cachedBlockData = {
+      [BlockClassifier.name]: (this.cachedBlockData = {
         transactionsPerId,
         transactions
-      })
+      }) as TAvailableClassifiers["BlockClassifier"]
     } satisfies Partial<TAvailableClassifiers>;
   };
 }

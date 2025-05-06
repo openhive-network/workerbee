@@ -1,3 +1,4 @@
+import { DynamicGlobalPropertiesClassifier } from "../../classifiers";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
@@ -12,13 +13,13 @@ export class DynamicGlobalPropertiesCollector extends CollectorBase {
     } = await this.worker.chain!.api.database_api.get_dynamic_global_properties({});
 
     return {
-      DynamicGlobalPropertiesClassifier: {
+      [DynamicGlobalPropertiesClassifier.name]: {
         currentWitness: current_witness,
         downvotePoolPercent: downvote_pool_percent,
         headBlockNumber: head_block_number,
         headBlockTime: new Date(`${time}Z`),
         headBlockId: head_block_id
-      }
+      } as TAvailableClassifiers["DynamicGlobalPropertiesClassifier"]
     } satisfies Partial<TAvailableClassifiers>;
   };
 }

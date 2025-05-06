@@ -1,3 +1,4 @@
+import { BlockHeaderClassifier } from "../../classifiers";
 import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
 import { DynamicGlobalPropertiesClassifier } from "../../classifiers/dynamic-global-properties-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
@@ -12,12 +13,12 @@ export class BlockHeaderCollector extends CollectorBase {
     const { headBlockNumber, currentWitness, headBlockTime, headBlockId } = await data.get(DynamicGlobalPropertiesClassifier);
 
     return {
-      BlockHeaderClassifier: {
+      [BlockHeaderClassifier.name]: {
         number: headBlockNumber,
         timestamp: headBlockTime,
         witness: currentWitness,
         id: headBlockId
-      }
+      } as TAvailableClassifiers["BlockHeaderClassifier"]
     } satisfies Partial<TAvailableClassifiers>;
   };
 }

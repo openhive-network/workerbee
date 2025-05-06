@@ -1,4 +1,5 @@
 import Long from "long";
+import { RcAccountClassifier } from "../../classifiers";
 import { IRcAccount } from "../../classifiers/rc-account-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
@@ -46,9 +47,9 @@ export class RcAccountCollector extends CollectorBase {
     }
 
     return {
-      RcAccountClassifier: {
+      [RcAccountClassifier.name]: {
         rcAccounts
-      }
+      } as TAvailableClassifiers["RcAccountClassifier"]
     } satisfies Partial<TAvailableClassifiers>;
   };
 }

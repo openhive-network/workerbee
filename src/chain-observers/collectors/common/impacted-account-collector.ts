@@ -1,4 +1,4 @@
-import { OperationClassifier } from "../../classifiers";
+import { OperationClassifier, ImpactedAccountClassifier } from "../../classifiers";
 import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
 import { IImpactedAccount } from "../../classifiers/impacted-account-classifier";
 import { IOperationTransactionPair } from "../../classifiers/operation-classifier";
@@ -34,9 +34,9 @@ export class ImpactedAccountCollector extends CollectorBase {
     data.addTiming("operationGetImpactedAccounts", Date.now() - startImpactedAccounts);
 
     return {
-      ImpactedAccountClassifier: {
+      [ImpactedAccountClassifier.name]: {
         impactedAccounts
-      }
+      } as TAvailableClassifiers["ImpactedAccountClassifier"]
     } satisfies Partial<TAvailableClassifiers>;
   };
 }
