@@ -1,4 +1,4 @@
-import { DynamicGlobalPropertiesClassifier } from "../../classifiers";
+import { DynamicGlobalPropertiesClassifier, FeedPriceClassifier } from "../../classifiers";
 import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
 import { IFeedPriceData } from "../../classifiers/feed-price-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
@@ -42,7 +42,7 @@ export class FeedPriceCollector extends CollectorBase {
     this.previouslyCheckedBlockNumber = headBlockNumber;
 
     return {
-      FeedPriceClassifier: this.cachedFeedHistoryData
+      [FeedPriceClassifier.name]: this.cachedFeedHistoryData as TAvailableClassifiers["FeedPriceClassifier"]
     } satisfies Partial<TAvailableClassifiers>;
   };
 }

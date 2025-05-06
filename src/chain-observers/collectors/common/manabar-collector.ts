@@ -1,6 +1,6 @@
 import { EManabarType, TAccountName } from "@hiveio/wax";
 import { WorkerBeeError } from "../../../errors";
-import { AccountClassifier, RcAccountClassifier } from "../../classifiers";
+import { AccountClassifier, RcAccountClassifier, ManabarClassifier } from "../../classifiers";
 import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
 import { DynamicGlobalPropertiesClassifier } from "../../classifiers/dynamic-global-properties-classifier";
 import { TManabars } from "../../classifiers/manabar-classifier";
@@ -153,9 +153,9 @@ export class ManabarCollector extends CollectorBase {
     }
 
     return {
-      ManabarClassifier: {
+      [ManabarClassifier.name]: {
         manabarData
-      }
+      } as TAvailableClassifiers["ManabarClassifier"]
     } satisfies Partial<TAvailableClassifiers>;
   };
 }

@@ -1,6 +1,7 @@
 import { ApiBlock, transaction } from "@hiveio/wax";
 import { WorkerBee } from "../../../bot";
 import { WorkerBeeError } from "../../../errors";
+import { BlockClassifier, BlockHeaderClassifier } from "../../classifiers";
 import { IBlockHeaderData } from "../../classifiers/block-header-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
@@ -43,11 +44,11 @@ export class BlockCollector extends CollectorBase {
 
       if (this.cachedBlocksData.length === 0)
         return {
-          BlockClassifier: {
+          [BlockClassifier.name]: {
             transactionsPerId: new Map<string, transaction>(),
             transactions: []
-          },
-          BlockHeaderClassifier: this.previousBlockHeaderData
+          } as TAvailableClassifiers["BlockClassifier"],
+          [BlockHeaderClassifier.name]: this.previousBlockHeaderData as TAvailableClassifiers["BlockHeaderClassifier"]
         } satisfies Partial<TAvailableClassifiers>;
     }
 
@@ -62,16 +63,16 @@ export class BlockCollector extends CollectorBase {
     ++this.currentBlockIndex;
 
     return {
-      BlockClassifier: {
+      [BlockClassifier.name]: {
         transactionsPerId: new Map<string, transaction>(block.transaction_ids.map((id, index) => [id, transactions[index].transaction])),
         transactions
-      },
-      BlockHeaderClassifier: this.previousBlockHeaderData = {
+      } as TAvailableClassifiers["BlockClassifier"],
+      [BlockHeaderClassifier.name]: this.previousBlockHeaderData = {
         number: this.currentBlockIndex - 1,
         timestamp: new Date(`${block.timestamp}Z`),
         witness: block.witness,
         id: block.block_id
-      }
+      } as TAvailableClassifiers["BlockHeaderClassifier"]
     } satisfies Partial<TAvailableClassifiers>;
   };
 }

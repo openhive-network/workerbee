@@ -1,4 +1,4 @@
-import { BlockClassifier } from "../../classifiers";
+import { BlockClassifier, OperationClassifier } from "../../classifiers";
 import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
 import { IOperationTransactionPair } from "../../classifiers/operation-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
@@ -40,10 +40,10 @@ export class OperationCollector extends CollectorBase {
 
 
     return {
-      OperationClassifier: {
+      [OperationClassifier.name]: {
         operations,
         operationsPerType
-      }
+      } as TAvailableClassifiers["OperationClassifier"]
     } satisfies Partial<TAvailableClassifiers>;
   };
 }

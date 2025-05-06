@@ -1,3 +1,4 @@
+import { DeclineVotingRightsClassifier } from "../../classifiers";
 import { IDeclinedVotingRightsAccount } from "../../classifiers/decline-voting-rights-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
@@ -39,9 +40,9 @@ export class DeclineVotingRightsCollector extends CollectorBase {
     }
 
     return {
-      DeclineVotingRightsClassifier: {
+      [DeclineVotingRightsClassifier.name]: {
         declineVotingRightsAccounts
-      }
+      } as TAvailableClassifiers["DeclineVotingRightsClassifier"]
     } satisfies Partial<TAvailableClassifiers>;
   };
 }

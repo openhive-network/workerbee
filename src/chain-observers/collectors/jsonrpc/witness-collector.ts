@@ -1,3 +1,4 @@
+import { WitnessClassifier } from "../../classifiers";
 import { IWitness } from "../../classifiers/witness-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
@@ -41,9 +42,9 @@ export class WitnessCollector extends CollectorBase {
     }
 
     return {
-      WitnessClassifier: {
+      [WitnessClassifier.name]: {
         witnesses
-      }
+      } as TAvailableClassifiers["WitnessClassifier"]
     } satisfies Partial<TAvailableClassifiers>;
   };
 }

@@ -1,4 +1,5 @@
 import Long from "long";
+import { AccountClassifier } from "../../classifiers";
 import { IAccount } from "../../classifiers/account-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
@@ -110,9 +111,9 @@ export class AccountCollector extends CollectorBase {
     }
 
     return {
-      AccountClassifier: {
+      [AccountClassifier.name]: {
         accounts
-      }
+      } as TAvailableClassifiers["AccountClassifier"]
     } satisfies Partial<TAvailableClassifiers>;
   };
 }

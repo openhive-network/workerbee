@@ -28,8 +28,6 @@ export abstract class CollectorBase {
     return [];
   }
 
-  // TODO: Overriding logic
-
   protected pushOptions?(data: Record<string, any>): void;
   protected popOptions?(data: Record<string, any>): void;
 
