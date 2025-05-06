@@ -51,6 +51,7 @@
     "@playwright/test": "catalog:playwright-toolset",
     "@rollup/plugin-commonjs": "catalog:rollup-toolset",
     "@rollup/plugin-node-resolve": "catalog:rollup-toolset",
+    "@rollup/plugin-replace": "catalog:rollup-toolset",
     "@size-limit/file": "catalog:size-limit-toolset",
     "@types/node": "^20.11.30",
     "@typescript-eslint/eslint-plugin": "^8.24.1",

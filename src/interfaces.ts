@@ -121,6 +121,11 @@ export interface IWorkerBee {
   get observe(): QueenBee;
 
   /**
+   * @returns {string} The version of the library
+   */
+  getVersion(): string;
+
+  /**
    * Broadcast given transaction to the remote and returns a promise resolved when
    * transaction has been successfully applied on chain.
    * You can also optionally provide {@link IBroadcastOptions verifySignatures} option
