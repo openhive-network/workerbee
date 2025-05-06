@@ -64,6 +64,10 @@ export class WorkerBee implements IWorkerBee {
     return new QueenBee(this);
   }
 
+  public getVersion(): string {
+    return process.env.npm_package_version as string;
+  }
+
   public mediator = new ObserverMediator(new JsonRpcFactory(this));
 
   public constructor(
