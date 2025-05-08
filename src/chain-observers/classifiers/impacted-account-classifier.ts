@@ -9,6 +9,6 @@ export interface IImpactedAccountData {
   impactedAccounts: Record<string, IImpactedAccount>;
 }
 
-export class ImpactedAccountClassifier extends CollectorClassifierBase {
-  public type!: IImpactedAccountData;
+export class ImpactedAccountClassifier extends CollectorClassifierBase<IImpactedAccountData> {
+
 }

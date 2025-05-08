@@ -10,6 +10,6 @@ export interface IRcAccountData {
   rcAccounts: Record<string, IRcAccount>;
 }
 
-export class RcAccountClassifier extends CollectorClassifierBase {
-  public type!: IRcAccountData;
+export class RcAccountClassifier extends CollectorClassifierBase<IRcAccountData> {
+
 }

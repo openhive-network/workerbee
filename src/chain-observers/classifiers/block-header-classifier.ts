@@ -7,6 +7,6 @@ export interface IBlockHeaderData {
   id: string;
 }
 
-export class BlockHeaderClassifier extends CollectorClassifierBase {
-  public type!: IBlockHeaderData;
+export class BlockHeaderClassifier extends CollectorClassifierBase<IBlockHeaderData> {
+
 }

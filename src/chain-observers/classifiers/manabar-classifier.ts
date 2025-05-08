@@ -12,6 +12,6 @@ export interface IManabarAccountData {
   manabarData: Record<string, TManabars>;
 }
 
-export class ManabarClassifier extends CollectorClassifierBase {
-  public type!: IManabarAccountData;
+export class ManabarClassifier extends CollectorClassifierBase<IManabarAccountData> {
+
 }
