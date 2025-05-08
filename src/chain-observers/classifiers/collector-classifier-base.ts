@@ -9,8 +9,8 @@ export type TRegisterEvaluationContext = IEvaluationContextClass | {
   class: IEvaluationContextClass;
 }
 
-export class CollectorClassifierBase {
-  public type!: any;
+export class CollectorClassifierBase<TDataType = any> {
+  public type!: TDataType;
 
   public static forOptions(options?: Record<string, any>): TRegisterEvaluationContext {
     return {

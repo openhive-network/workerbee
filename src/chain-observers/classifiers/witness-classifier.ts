@@ -11,6 +11,6 @@ export interface IWitnessData {
   witnesses: Record<string, IWitness>;
 }
 
-export class WitnessClassifier extends CollectorClassifierBase {
-  public type!: IWitnessData;
+export class WitnessClassifier extends CollectorClassifierBase<IWitnessData> {
+
 }

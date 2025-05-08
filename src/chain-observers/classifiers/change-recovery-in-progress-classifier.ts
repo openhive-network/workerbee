@@ -10,6 +10,6 @@ export interface IChangeRecoveryInProgressData {
   recoveringAccounts: Record<string, IAccountChangingRecovery>;
 }
 
-export class ChangeRecoveryInProgressClassifier extends CollectorClassifierBase {
-  public type!: IChangeRecoveryInProgressData;
+export class ChangeRecoveryInProgressClassifier extends CollectorClassifierBase<IChangeRecoveryInProgressData> {
+
 }

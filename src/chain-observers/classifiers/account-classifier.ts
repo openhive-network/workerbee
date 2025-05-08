@@ -48,6 +48,6 @@ export interface IAccountData {
   accounts: Record<string, IAccount>;
 }
 
-export class AccountClassifier extends CollectorClassifierBase {
-  public type!: IAccountData;
+export class AccountClassifier extends CollectorClassifierBase<IAccountData> {
+
 }

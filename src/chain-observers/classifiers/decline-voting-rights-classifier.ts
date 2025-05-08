@@ -9,6 +9,6 @@ export interface IDeclineVotingRightsAccountsData {
   declineVotingRightsAccounts: Record<string, IDeclinedVotingRightsAccount>;
 }
 
-export class DeclineVotingRightsClassifier extends CollectorClassifierBase {
-  public type!: IDeclineVotingRightsAccountsData;
+export class DeclineVotingRightsClassifier extends CollectorClassifierBase<IDeclineVotingRightsAccountsData> {
+
 }
