@@ -58,7 +58,7 @@ catalogs:
       specifier: 2.8.1
       version: 2.8.1
     tsx:
-      specifier: 4.19.2
+      specifier: 4.19.3
       version: 4.19.2
     typescript:
       specifier: 5.7.3
@@ -69,11 +69,11 @@ importers:
   .:
     dependencies:
       '@hiveio/beekeeper':
-        specifier: 1.27.10-stable.250310202833
-        version: 1.27.10-stable.250310202833
+        specifier: 1.27.11-stable.250513143655
+        version: 1.27.11-stable.250513143655
       '@hiveio/wax':
-        specifier: 1.27.6-rc7-stable.250407204822
-        version: 1.27.6-rc7-stable.250407204822
+        specifier: 1.27.6-rc7-stable.250513162056
+        version: 1.27.6-rc7-stable.250513162056
       long:
         specifier: ^5.3.1
         version: 5.3.1
@@ -380,16 +380,12 @@ packages:
   '@gerrit0/mini-shiki@1.27.2':
     resolution: {integrity: sha512-GeWyHz8ao2gBiUW4OJnQDxXQnFgZQwwQk05t/CVVgNBN7/rK8XZ7xY6YhLVv9tH3VppWWmr9DCl3MwemB/i+Og==}
 
-  '@hiveio/beekeeper@1.27.10-stable.250305202831':
-    resolution: {integrity: sha1-mPx0QrDh3NSPSOYGyR1SUyi3lyA=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.10-stable.250305202831.tgz}
+  '@hiveio/beekeeper@1.27.11-stable.250513143655':
+    resolution: {integrity: sha1-WM73mERJWR06dqP67ZznUjbya6I=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.11-stable.250513143655.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
-  '@hiveio/beekeeper@1.27.10-stable.250310202833':
-    resolution: {integrity: sha1-RIuA9M6LrJkf/2HuNmiavT9bUyI=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.10-stable.250310202833.tgz}
-    engines: {node: ^20.11 || >= 21.2}
-
-  '@hiveio/wax@1.27.6-rc7-stable.250407204822':
-    resolution: {integrity: sha1-/tmWZEuiYG32Tua91de5cfKAf10=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc7-stable.250407204822.tgz}
+  '@hiveio/wax@1.27.6-rc7-stable.250513162056':
+    resolution: {integrity: sha1-DIUD5zPj06aDtT1BiriKW84cifE=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc7-stable.250513162056.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
   '@humanfs/core@0.19.1':
@@ -2893,13 +2889,11 @@ snapshots:
       '@shikijs/types': 1.29.2
       '@shikijs/vscode-textmate': 10.0.1
 
-  '@hiveio/beekeeper@1.27.10-stable.250305202831': {}
+  '@hiveio/beekeeper@1.27.11-stable.250513143655': {}
 
-  '@hiveio/beekeeper@1.27.10-stable.250310202833': {}
-
-  '@hiveio/wax@1.27.6-rc7-stable.250407204822':
+  '@hiveio/wax@1.27.6-rc7-stable.250513162056':
     dependencies:
-      '@hiveio/beekeeper': 1.27.10-stable.250305202831
+      '@hiveio/beekeeper': 1.27.11-stable.250513143655
       events: 3.3.0
       long: 5.3.1
 
