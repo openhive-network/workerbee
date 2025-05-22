@@ -7,7 +7,7 @@ export interface IDeclineVotingRightsCollectorOptions {
   declineVotingRightsAccount: string;
 }
 
-const MAX_DECLINED_VOTING_RIGHTS_GET_LIMIT = 100;
+const MAX_DECLINED_VOTING_RIGHTS_GET_LIMIT = 1000;
 
 export class DeclineVotingRightsCollector extends CollectorBase {
   private readonly declineVotingRightsAccounts: Record<string, number> = {};

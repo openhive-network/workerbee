@@ -7,7 +7,7 @@ export interface IWitnessCollectorOptions {
   witness: string;
 }
 
-const MAX_WITNESS_GET_LIMIT = 100;
+const MAX_WITNESS_GET_LIMIT = 1000;
 
 export class WitnessCollector extends CollectorBase {
   private readonly witnesses: Record<string, number> = {};

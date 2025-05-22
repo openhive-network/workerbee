@@ -7,7 +7,7 @@ export interface IChangeRecoveryCollectorOptions {
   changeRecoveryAccount: string;
 }
 
-const MAX_CHANGE_RECOVERY_GET_LIMIT = 100;
+const MAX_CHANGE_RECOVERY_GET_LIMIT = 1000;
 
 export class ChangeRecoveryInProgressCollector extends CollectorBase {
   private readonly changeRecoveryAccounts: Record<string, number> = {};

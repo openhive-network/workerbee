@@ -8,7 +8,7 @@ export interface IAccountCollectorOptions {
   account: string;
 }
 
-const MAX_ACCOUNT_GET_LIMIT = 100;
+const MAX_ACCOUNT_GET_LIMIT = 1000;
 
 export class AccountCollector extends CollectorBase {
   private readonly accounts: Record<string, number> = {};

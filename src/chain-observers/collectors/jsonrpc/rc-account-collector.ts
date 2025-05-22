@@ -8,7 +8,7 @@ export interface IRcAccountCollectorOptions {
   rcAccount: string;
 }
 
-const MAX_RC_ACCOUNT_GET_LIMIT = 100;
+const MAX_RC_ACCOUNT_GET_LIMIT = 1000;
 
 export class RcAccountCollector extends CollectorBase {
   private readonly rcAccounts: Record<string, number> = {};
