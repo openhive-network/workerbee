@@ -10,6 +10,7 @@ export type { IImpactedAccount, IImpactedAccountData } from "./classifiers/impac
 export type { IOperationBaseData, IOperationData, IOperationTransactionPair } from "./classifiers/operation-classifier";
 export type { IRcAccount, IRcAccountData } from "./classifiers/rc-account-classifier";
 export type { IWitness, IWitnessData } from "./classifiers/witness-classifier";
+export type { IHiveContent } from "./classifiers/content-classifier";
 
 export type { IAccountProviderData, TAccountProvided } from "./providers/account-provider";
 export { EAlarmType, type IAlarmAccountsData, type TAlarmAccounts } from "./providers/alarm-provider";
@@ -34,5 +35,6 @@ export type { IRcAccountProviderData, TRcAccountProvided } from "./providers/rc-
 export type { ITransactionProviderData, TTransactionProvider } from "./providers/transaction-provider";
 export type { IWhaleAlertMetadata, IWhaleAlertProviderData } from "./providers/whale-alert-provider";
 export type { IWitnessProviderData, TWitnessProvider } from "./providers/witness-provider";
+export type { IBlogContentMetadataroviderData, TBlogContentMetadataProvided } from "./providers/content-metadata-provider";
 
 export { Exchange } from "../utils/known-exchanges";

@@ -9,6 +9,7 @@ import { BalanceChangeFilter } from "./chain-observers/filters/balance-change-fi
 import { BlockNumberFilter } from "./chain-observers/filters/block-filter";
 import { CommentFilter, PostFilter } from "./chain-observers/filters/blog-content-filter";
 import { LogicalAndFilter, LogicalOrFilter } from "./chain-observers/filters/composite-filter";
+import { CommentContentMetadataFilter, PostContentMetadataFilter } from "./chain-observers/filters/content-metadata-filter";
 import { CustomOperationFilter } from "./chain-observers/filters/custom-operation-filter";
 import { ExchangeTransferFilter } from "./chain-observers/filters/exchange-transfer-filter";
 import { FeedPriceChangeFilter } from "./chain-observers/filters/feed-price-change-percent-filter";
@@ -30,6 +31,7 @@ import { AlarmProvider } from "./chain-observers/providers/alarm-provider";
 import { BlockHeaderProvider } from "./chain-observers/providers/block-header-provider";
 import { BlockProvider } from "./chain-observers/providers/block-provider";
 import { CommentProvider, PostProvider } from "./chain-observers/providers/blog-content-provider";
+import { BlogContentMetadataProvider } from "./chain-observers/providers/content-metadata-provider";
 import { CustomOperationProvider } from "./chain-observers/providers/custom-operation-provider";
 import { ExchangeTransferProvider } from "./chain-observers/providers/exchange-transfer-provider";
 import { FeedPriceProvider } from "./chain-observers/providers/feed-price-provider";
@@ -413,6 +415,74 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     this.operands.push(new CommentFilter(this.worker, authors));
 
     this.pushProvider(CommentProvider, { authors: authors.map(account => ({ account })) });
+
+    return this;
+  }
+
+  /**
+   * Subscribes to notifications when a post is given relative time close to the incoming payment time
+   *
+   * Automatically provides the post metadata (including e.g. net rshares) in the `next` callback.
+   *
+   * Note: This method implicitly applies the OR operator between the specified accounts.
+   *
+   * @example
+   * ```ts
+   * workerbee.observe.onPostsIncomingPayment("-6s", "username", "username2").subscribe({
+   *   next: (data) => { // Will notify 6 seconds before the post receives the payment
+   *     for(const account in data.contentMetadataPerAccount)
+   *       for(const { author, permlink, netVotes } of data.posts[account])
+   *         console.log(`@${author}/${permlink} received ${netVotes} votes`);
+   *   }
+   * });
+   * ```
+   *
+   * @param authors account names of the authors to monitor for post incoming payout.
+   * @returns itself
+   */
+  public onPostsIncomingPayment<
+    TAccounts extends TAccountName[]
+  >(relativeTime: string, ...authors: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<BlogContentMetadataProvider<TAccounts>["provide"]>>> {
+    this.operands.push(new PostContentMetadataFilter(this.worker, authors));
+
+    this.pushProvider(PostProvider, { collectPostMetadataAfter: relativeTime, authors });
+
+    this.pushProvider(BlogContentMetadataProvider);
+
+    return this;
+  }
+
+  /**
+   * Subscribes to notifications when a comment is given relative time close to the incoming payment time
+   *
+   * Automatically provides the comment metadata (including e.g. net rshares) in the `next` callback.
+   *
+   * Note: This method implicitly applies the OR operator between the specified accounts.
+   *
+   * @example
+   * ```ts
+   * workerbee.observe.onCommentsIncomingPayment("-6s", "username", "username2").subscribe({
+   *   next: (data) => { // Will notify 6 seconds before the comment receives the payment
+   *     for(const account in data.contentMetadataPerAccount)
+   *       for(const { author, permlink, netVotes } of data.comments[account])
+   *         console.log(`@${author}/${permlink} received ${netVotes} votes`);
+   *   }
+   * });
+   * ```
+   *
+   * @param authors account names of the authors to monitor for comment incoming payout.
+   * @returns itself
+   */
+  public onCommentsIncomingPayment<
+    TAccounts extends TAccountName[]
+  >(relativeTime: string, ...authors: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<BlogContentMetadataProvider<TAccounts>["provide"]>>> {
+    // TODO: Handle parentPostOrComment?: ICommentData
+
+    this.operands.push(new CommentContentMetadataFilter(this.worker, authors));
+
+    this.pushProvider(CommentProvider, { collectPostMetadataAfter: relativeTime, authors: authors.map(account => ({ account })) });
+
+    this.pushProvider(BlogContentMetadataProvider);
 
     return this;
   }

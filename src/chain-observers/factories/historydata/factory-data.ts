@@ -1,6 +1,7 @@
 import type { WorkerBee } from "../../../bot";
 import {
   BlockClassifier, BlockHeaderClassifier,
+  ContentClassifier,
   DynamicGlobalPropertiesClassifier, ImpactedAccountClassifier, OperationClassifier
 } from "../../classifiers";
 import { IEvaluationContextClass } from "../../classifiers/collector-classifier-base";
@@ -9,6 +10,7 @@ import { ImpactedAccountCollector } from "../../collectors/common/impacted-accou
 import { OperationCollector } from "../../collectors/common/operation-collector";
 import { BlockCollector } from "../../collectors/historydata/block-collector";
 import { DynamicGlobalPropertiesCollector } from "../../collectors/historydata/dynamic-global-properties-collector";
+import { ContentCollector } from "../../collectors/jsonrpc/content-collector";
 
 export const HistoryDataFactoryData = (worker: WorkerBee, fromBlock: number, toBlock?: number): Array<[IEvaluationContextClass, CollectorBase]> => {
   const blockClassifier = new BlockCollector(worker, fromBlock, toBlock);
@@ -19,5 +21,6 @@ export const HistoryDataFactoryData = (worker: WorkerBee, fromBlock: number, toB
     [BlockClassifier, blockClassifier],
     [ImpactedAccountClassifier, new ImpactedAccountCollector(worker)],
     [OperationClassifier, new OperationCollector(worker)],
+    [ContentClassifier, new ContentCollector(worker)]
   ];
 };
