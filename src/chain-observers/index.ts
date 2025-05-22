@@ -34,5 +34,6 @@ export type { IRcAccountProviderData, TRcAccountProvided } from "./providers/rc-
 export type { ITransactionProviderData, TTransactionProvider } from "./providers/transaction-provider";
 export type { IWhaleAlertMetadata, IWhaleAlertProviderData } from "./providers/whale-alert-provider";
 export type { IWitnessProviderData, TWitnessProvider } from "./providers/witness-provider";
+export type { IBlogContentMetadataroviderData, TBlogContentMetadataProvided } from "./providers/content-metadata-provider";
 
 export { Exchange } from "../utils/known-exchanges";

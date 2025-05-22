@@ -2,6 +2,7 @@ import type { WorkerBee } from "../../../bot";
 import {
   AccountClassifier, BlockClassifier, BlockHeaderClassifier,
   ChangeRecoveryInProgressClassifier,
+  ContentClassifier,
   DeclineVotingRightsClassifier,
   DynamicGlobalPropertiesClassifier, FeedPriceClassifier, ImpactedAccountClassifier, ManabarClassifier, OperationClassifier, RcAccountClassifier,
   WitnessClassifier
@@ -15,6 +16,7 @@ import { OperationCollector } from "../../collectors/common/operation-collector"
 import { AccountCollector } from "../../collectors/jsonrpc/account-collector";
 import { BlockCollector } from "../../collectors/jsonrpc/block-collector";
 import { ChangeRecoveryInProgressCollector } from "../../collectors/jsonrpc/change-recovery-in-progress-collector";
+import { ContentCollector } from "../../collectors/jsonrpc/content-collector";
 import { DeclineVotingRightsCollector } from "../../collectors/jsonrpc/decline-voting-rights-collector";
 import { DynamicGlobalPropertiesCollector } from "../../collectors/jsonrpc/dynamic-global-properties-collector";
 import { FeedPriceCollector } from "../../collectors/jsonrpc/feed-price-collector";
@@ -34,4 +36,5 @@ export const JsonRpcFactoryData: (worker: WorkerBee) => Array<[IEvaluationContex
   [ChangeRecoveryInProgressClassifier, new ChangeRecoveryInProgressCollector(worker)],
   [DeclineVotingRightsClassifier, new DeclineVotingRightsCollector(worker)],
   [ManabarClassifier, new ManabarCollector(worker)],
+  [ContentClassifier, new ContentCollector(worker)]
 ]);

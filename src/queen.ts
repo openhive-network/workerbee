@@ -30,6 +30,7 @@ import { AlarmProvider } from "./chain-observers/providers/alarm-provider";
 import { BlockHeaderProvider } from "./chain-observers/providers/block-header-provider";
 import { BlockProvider } from "./chain-observers/providers/block-provider";
 import { CommentProvider, PostProvider } from "./chain-observers/providers/blog-content-provider";
+import { BlogContentMetadataProvider } from "./chain-observers/providers/content-metadata-provider";
 import { CustomOperationProvider } from "./chain-observers/providers/custom-operation-provider";
 import { ExchangeTransferProvider } from "./chain-observers/providers/exchange-transfer-provider";
 import { FeedPriceProvider } from "./chain-observers/providers/feed-price-provider";
@@ -360,25 +361,40 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * @example
    * ```ts
-   * workerbee.observe.onPosts("username", "username2").subscribe({
+   * workerbee.observe.onPosts(true, "username", "username2").subscribe({
    *   next: (data) => {
    *     for(const account in data.posts)
    *       if(data.posts[account] !== undefined)
    *         for(const { operation } of data.posts[account])
    *           console.log("Post created:", operation);
+   *
+   *     // This will be called on each iteration up to 7 days after post creation
+   *     console.log("Posts metadata:", data.postMetadataPerAccount[account]);
    *   }
    * });
    * ```
    *
+   * @param collectMetadata Whether to collect metadata for the posts created by given authors.
+   *                        This can be used to periodically fetch net rshares, votes etc. per post.
+   *                        Note: After 7 days of post creation, metadata collection for single post will auto-expire
+   *                        Note: When used with past data, you will receive current status of the post, not the one at the time of post creation
+   *                              Also, metadata will be be collected only once per post with past data
    * @param authors account names of the authors to monitor for post creation.
    * @returns itself
    */
   public onPosts<
-    TAccounts extends TAccountName[]
-  >(...authors: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<PostProvider<TAccounts>["provide"]>>> {
+    TAccounts extends TAccountName[],
+    TCollectMetadata extends boolean,
+  >(collectMetadata: TCollectMetadata, ...authors: TAccounts): QueenBee<
+    TPreviousSubscriberData & Awaited<ReturnType<PostProvider<TAccounts>["provide"]>>
+      & (TCollectMetadata extends true ? Awaited<ReturnType<BlogContentMetadataProvider<TAccounts>["provide"]>> : {})
+  > {
     this.operands.push(new PostFilter(this.worker, authors));
 
-    this.pushProvider(PostProvider, { authors });
+    if (collectMetadata)
+      this.pushProvider(BlogContentMetadataProvider);
+
+    this.pushProvider(PostProvider, { collectPostMetadata: collectMetadata, authors });
 
     return this;
   }
@@ -392,27 +408,42 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * @example
    * ```ts
-   * workerbee.observe.onComments("username", "username2").subscribe({
+   * workerbee.observe.onComments(true, "username", "username2").subscribe({
    *   next: (data) => {
    *     for(const account in data.comments)
    *       if(data.comments[account] !== undefined)
    *         for(const { operation } of data.comments[account])
    *           console.log("Comment created:", operation);
+   *
+   *     // This will be called on each iteration up to 7 days after post creation
+   *     console.log("Comments metadata:", data.contentMetadataPerAccount[account]);
    *   }
    * });
    * ```
    *
+   * @param collectMetadata Whether to collect metadata for the comments created by given authors.
+   *                        This can be used to periodically fetch net rshares, votes etc. per comment.
+   *                        Note: After 7 days of comment creation, metadata collection for single comment will auto-expire
+   *                        Note: When used with past data, you will receive current status of the comment, not the one at the time of comment creation
+   *                              Also, metadata will be be collected only once per comment with past data
    * @param authors account names of the authors to monitor for comment creation.
    * @returns itself
    */
   public onComments<
-    TAccounts extends TAccountName[]
-  >(...authors: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CommentProvider<TAccounts>["provide"]>>> {
+    TAccounts extends TAccountName[],
+    TCollectMetadata extends boolean
+  >(collectMetadata: TCollectMetadata, ...authors: TAccounts): QueenBee<
+    TPreviousSubscriberData & Awaited<ReturnType<CommentProvider<TAccounts>["provide"]>>
+      & (TCollectMetadata extends true ? Awaited<ReturnType<BlogContentMetadataProvider<TAccounts>["provide"]>> : {})
+    > {
     // TODO: Handle parentPostOrComment?: ICommentData
 
     this.operands.push(new CommentFilter(this.worker, authors));
 
-    this.pushProvider(CommentProvider, { authors: authors.map(account => ({ account })) });
+    if (collectMetadata)
+      this.pushProvider(BlogContentMetadataProvider);
+
+    this.pushProvider(CommentProvider, { collectPostMetadata: collectMetadata, authors: authors.map(account => ({ account })) });
 
     return this;
   }

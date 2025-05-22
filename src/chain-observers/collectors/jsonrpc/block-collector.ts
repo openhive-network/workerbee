@@ -1,7 +1,7 @@
 import { transaction } from "@hiveio/wax";
-import { ITransactionData } from "src/chain-observers/classifiers/block-classifier";
 import { WorkerBeeError } from "../../../errors";
 import { DynamicGlobalPropertiesClassifier, BlockClassifier } from "../../classifiers";
+import { ITransactionData } from "../../classifiers/block-classifier";
 import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
