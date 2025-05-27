@@ -30,7 +30,7 @@ export class BlockCollector extends CollectorBase {
 
   private cachedBlocksData: ApiBlock[] = [];
 
-  public async fetchData(data: DataEvaluationContext) {
+  public async get(data: DataEvaluationContext) {
     if (this.toBlock !== undefined && this.currentBlockIndex > this.toBlock)
       throw new WorkerBeeError(`Block Buffer overflow in history data BlockCollector: ${this.currentBlockIndex} > ${this.toBlock}`);
 

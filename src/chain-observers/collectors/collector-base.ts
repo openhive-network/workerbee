@@ -19,7 +19,7 @@ export abstract class CollectorBase {
    * We need to return the data in the format of { [classifierName]: { [key]: value } } so
    * overriding can be properly deduced later by the data evaluation context
    */
-  public abstract fetchData(data: DataEvaluationContext): Promise<Partial<TAvailableClassifiers>>;
+  public abstract get(data: DataEvaluationContext): Promise<Partial<TAvailableClassifiers>>;
 
   /**
    * If the collector uses any context, it should report it as dependency by overriding this function

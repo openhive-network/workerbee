@@ -3,7 +3,7 @@ import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
 export class DynamicGlobalPropertiesCollector extends CollectorBase {
-  public async fetchData(_: DataEvaluationContext) {
+  public async get(_: DataEvaluationContext) {
     const {
       current_witness,
       head_block_number,

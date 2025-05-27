@@ -67,7 +67,7 @@ export class ManabarCollector extends CollectorBase {
     return classifiers;
   }
 
-  public async fetchData(data: DataEvaluationContext) {
+  public async get(data: DataEvaluationContext) {
     const dgpo = await data.get(DynamicGlobalPropertiesClassifier);
     const time = Math.round(dgpo.headBlockTime.getTime() / 1000);
 

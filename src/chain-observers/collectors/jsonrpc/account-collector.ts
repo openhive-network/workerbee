@@ -24,7 +24,7 @@ export class AccountCollector extends CollectorBase {
       delete this.accounts[data.account];
   }
 
-  public async fetchData(data: DataEvaluationContext) {
+  public async get(data: DataEvaluationContext) {
     const accounts: Record<string, IAccount> = {};
 
     const tryParseJson = (jsonData: string) => {

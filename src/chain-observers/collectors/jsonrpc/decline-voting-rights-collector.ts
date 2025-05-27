@@ -23,7 +23,7 @@ export class DeclineVotingRightsCollector extends CollectorBase {
       delete this.declineVotingRightsAccounts[data.declineVotingRightsAccount];
   }
 
-  public async fetchData(data: DataEvaluationContext) {
+  public async get(data: DataEvaluationContext) {
     const declineVotingRightsAccounts: Record<string, IDeclinedVotingRightsAccount> = {};
 
     const recoveryAccounts = Object.keys(this.declineVotingRightsAccounts);

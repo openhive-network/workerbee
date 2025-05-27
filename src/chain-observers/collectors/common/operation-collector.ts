@@ -9,7 +9,7 @@ export class OperationCollector extends CollectorBase {
     return [BlockClassifier];
   }
 
-  public async fetchData(data: DataEvaluationContext) {
+  public async get(data: DataEvaluationContext) {
     const { transactions } = await data.get(BlockClassifier);
 
     const operations: Array<IOperationTransactionPair> = [];

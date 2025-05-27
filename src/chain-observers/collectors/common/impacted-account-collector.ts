@@ -10,7 +10,7 @@ export class ImpactedAccountCollector extends CollectorBase {
     return [OperationClassifier];
   }
 
-  public async fetchData(data: DataEvaluationContext) {
+  public async get(data: DataEvaluationContext) {
     const { operations } = await data.get(OperationClassifier);
 
     const startImpactedAccounts = Date.now();

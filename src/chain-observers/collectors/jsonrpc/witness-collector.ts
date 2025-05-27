@@ -23,7 +23,7 @@ export class WitnessCollector extends CollectorBase {
       delete this.witnesses[data.witness];
   }
 
-  public async fetchData(data: DataEvaluationContext) {
+  public async get(data: DataEvaluationContext) {
     const witnesses: Record<string, IWitness> = {};
 
     const witnessNames = Object.keys(this.witnesses);

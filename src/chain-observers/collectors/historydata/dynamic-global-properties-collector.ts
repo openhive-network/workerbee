@@ -8,7 +8,7 @@ export class DynamicGlobalPropertiesCollector extends CollectorBase {
     return [BlockHeaderClassifier];
   }
 
-  public async fetchData(data: DataEvaluationContext) {
+  public async get(data: DataEvaluationContext) {
     const { id, number, timestamp, witness } = await data.get(BlockHeaderClassifier);
 
     return {

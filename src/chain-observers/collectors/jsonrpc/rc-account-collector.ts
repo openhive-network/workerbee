@@ -24,7 +24,7 @@ export class RcAccountCollector extends CollectorBase {
       delete this.rcAccounts[data.rcAccount];
   }
 
-  public async fetchData(data: DataEvaluationContext) {
+  public async get(data: DataEvaluationContext) {
     const rcAccounts: Record<string, IRcAccount> = {};
 
     const accountNames = Object.keys(this.rcAccounts);

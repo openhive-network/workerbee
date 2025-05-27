@@ -15,7 +15,7 @@ export class BlockCollector extends CollectorBase {
     return [DynamicGlobalPropertiesClassifier];
   }
 
-  public async fetchData(data: DataEvaluationContext) {
+  public async get(data: DataEvaluationContext) {
     const { headBlockNumber } = await data.get(DynamicGlobalPropertiesClassifier);
 
     if(this.currentHeadBlock === headBlockNumber)

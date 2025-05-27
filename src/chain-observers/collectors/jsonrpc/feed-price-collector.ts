@@ -20,7 +20,7 @@ export class FeedPriceCollector extends CollectorBase {
     return [DynamicGlobalPropertiesClassifier];
   }
 
-  public async fetchData(data: DataEvaluationContext) {
+  public async get(data: DataEvaluationContext) {
     const { headBlockNumber } = await data.get(DynamicGlobalPropertiesClassifier);
 
     // Update feed price history every hour (HIVE_FEED_INTERVAL_BLOCKS) or when there is no cached data

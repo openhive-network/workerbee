@@ -23,7 +23,7 @@ export class ChangeRecoveryInProgressCollector extends CollectorBase {
       delete this.changeRecoveryAccounts[data.changeRecoveryAccount];
   }
 
-  public async fetchData(data: DataEvaluationContext) {
+  public async get(data: DataEvaluationContext) {
     const retrieveChangeRecoveryAccounts: Record<string, IAccountChangingRecovery> = {};
 
     const recoveryAccounts = Object.keys(this.changeRecoveryAccounts);

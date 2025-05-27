@@ -44,7 +44,7 @@ export class DataEvaluationContext {
     if (cached === undefined) {
       const startTime = Date.now();
 
-      cached = (collector.fetchData(this) as Promise<any>).finally(() => {
+      cached = (collector.get(this) as Promise<any>).finally(() => {
         this.addTiming(evaluationContext.name, Date.now() - startTime);
       });
 
