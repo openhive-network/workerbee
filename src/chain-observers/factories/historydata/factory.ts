@@ -1,9 +1,12 @@
 import { WorkerBee } from "../../../bot";
-import { DynamicGlobalPropertiesClassifier } from "../../classifiers";
+import { BlockClassifier, BlockHeaderClassifier, DynamicGlobalPropertiesClassifier, ImpactedAccountClassifier, OperationClassifier } from "../../classifiers";
+import { ImpactedAccountCollector } from "../../collectors/common/impacted-account-collector";
+import { OperationCollector } from "../../collectors/common/operation-collector";
+import { BlockCollector } from "../../collectors/historydata/block-collector";
+import { DynamicGlobalPropertiesCollector } from "../../collectors/historydata/dynamic-global-properties-collector";
 import { ObserverMediator } from "../../observer-mediator";
 import { DataEvaluationContext } from "../data-evaluation-context";
 import { EClassifierOrigin, FactoryBase } from "../factory-base";
-import { HistoryDataFactoryData } from "./factory-data";
 
 export class HistoryDataFactory extends FactoryBase {
   private hasDGPOClassifier = false;
@@ -16,7 +19,11 @@ export class HistoryDataFactory extends FactoryBase {
   ) {
     super(worker);
 
-    this.collectors = new Map(HistoryDataFactoryData(worker, fromBlock, toBlock));
+    super.registerClassifier(BlockHeaderClassifier, BlockCollector, worker, fromBlock, toBlock);
+    super.registerClassifier(DynamicGlobalPropertiesClassifier, DynamicGlobalPropertiesCollector, worker);
+    super.registerClassifier(BlockClassifier, BlockCollector, worker, fromBlock, toBlock);
+    super.registerClassifier(ImpactedAccountClassifier, ImpactedAccountCollector, worker);
+    super.registerClassifier(OperationClassifier, OperationCollector, worker);
   }
 
   public preNotify(): void {

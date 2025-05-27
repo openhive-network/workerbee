@@ -62,6 +62,10 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * Internal function to be called when the subscription is created.
    */
   protected onSubscribe(): void {}
+  /**
+   * Internal function to be called when the subscription is unsubscribed.
+   */
+  protected onUnsubscribe(): void {}
 
   /**
    * Subscribe to the requested filters and providers.
@@ -113,6 +117,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
       },
       unsubscribe: () => {
         this.mediator.unregisterListener(observer);
+        this.onUnsubscribe();
       }
     } as Unsubscribable & { timings: Readonly<Record<string, number>> };
   }

@@ -17,6 +17,17 @@ export class ObserverMediator {
     return this.factory.getTimings();
   }
 
+  /**
+   * Extend the current mediator with another one, merging filters, providers and factory collectors.
+   * See {@link FactoryBase.extend} for more details.
+   */
+  public extend(other: ObserverMediator) {
+    for(const [listener, { filter, providers }] of other.filters.entries())
+      this.registerListener(listener, filter, providers);
+
+    this.factory.extend(other.factory);
+  }
+
   public notify() {
     this.factory.preNotify(this);
 

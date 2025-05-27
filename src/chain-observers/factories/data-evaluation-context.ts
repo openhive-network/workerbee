@@ -1,4 +1,5 @@
 import { WorkerBeeError } from "../../errors";
+import { createFactoryUnsupportedClassifierErrorMessage } from "../../utils/error-helper";
 import type * as TClassifiers from "../classifiers";
 import { CollectorClassifierBase, IEvaluationContextClass } from "../classifiers/collector-classifier-base";
 
@@ -22,22 +23,22 @@ export class DataEvaluationContext {
   }
 
   public inject<T extends IEvaluationContextClass>(
-    evaluationContext: T,
+    classifier: T,
     collector: CollectorBase<any>
   ): void {
-    if (this.collectors[evaluationContext.name] !== undefined)
+    if (this.collectors[classifier.name] !== undefined)
       return; // Already registered
 
-    this.collectors[evaluationContext.name] = collector;
+    this.collectors[classifier.name] = collector;
   }
 
   public async get<Classifier extends CollectorClassifierBase<any, any, any, any>>(
-    evaluationContext: abstract new (...args: any[]) => Classifier
+    classifier: new (...args: any[]) => Classifier
   ): Promise<Classifier["getType"]> {
-    const collector = this.collectors[evaluationContext.name];
+    const collector = this.collectors[classifier.name];
 
     if (collector === undefined)
-      throw new WorkerBeeError(`Collector for evaluation context: "${evaluationContext.name}" not found`);
+      throw new WorkerBeeError(createFactoryUnsupportedClassifierErrorMessage((this.factory as any).__proto__.constructor.name, classifier));
 
     let cached = this.cachedFunctions.get(collector);
 
@@ -45,10 +46,10 @@ export class DataEvaluationContext {
       const startTime = Date.now();
 
       if (collector.get === undefined)
-        throw new WorkerBeeError(`Collector for evaluation context: "${evaluationContext.name}" does not implement the requested "get" method`);
+        throw new WorkerBeeError(`Collector for classifier: "${classifier.name}" does not implement the requested "get" method`);
 
       cached = (collector.get(this) as Promise<any>).finally(() => {
-        this.addTiming(`${evaluationContext.name}#get`, Date.now() - startTime);
+        this.addTiming(`${classifier.name}#get`, Date.now() - startTime);
       });
 
       for(const key in this.collectors)
@@ -58,25 +59,25 @@ export class DataEvaluationContext {
 
     const result = await cached!;
 
-    return result[evaluationContext.name] as any;
+    return result[classifier.name] as any;
   }
 
   public async query<Classifier extends CollectorClassifierBase<any, any, any, any>>(
-    evaluationContext: abstract new (...args: any[]) => Classifier,
+    classifier: new (...args: any[]) => Classifier,
     collectorOptions: Classifier["queryOptionsType"]
   ): Promise<Classifier["queryType"]> {
-    const collector = this.collectors[evaluationContext.name];
+    const collector = this.collectors[classifier.name];
 
     if (collector === undefined)
-      throw new WorkerBeeError(`Collector for evaluation context: "${evaluationContext.name}" not found`);
+      throw new WorkerBeeError(createFactoryUnsupportedClassifierErrorMessage((this.factory as any).__proto__.constructor.name, classifier));
 
     const startTime = Date.now();
 
     if (collector.query === undefined)
-      throw new WorkerBeeError(`Collector for evaluation context: "${evaluationContext.name}" does not implement the requested "query" method`);
+      throw new WorkerBeeError(`Collector for classifier: "${classifier.name}" does not implement the requested "query" method`);
 
     return await (collector.query(this, collectorOptions) as Promise<any>).finally(() => {
-      this.addTiming(`${evaluationContext.name}#query`, Date.now() - startTime);
+      this.addTiming(`${classifier.name}#query`, Date.now() - startTime);
     });
   }
 }

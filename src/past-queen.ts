@@ -20,6 +20,11 @@ export class PastQueen<TPreviousSubscriberData extends object = {}> extends Quee
     super(worker, new ObserverMediator(new HistoryDataFactory(worker, fromBlock, toBlock)));
   }
 
+  protected onUnsubscribe(): void {
+    // Pass all the data retrieved by the past queen to the top-level mediator
+    this.worker.mediator.extend(this.mediator);
+  }
+
   protected onSubscribe(): void {
     this.mediator.notify();
   }

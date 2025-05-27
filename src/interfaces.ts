@@ -66,6 +66,11 @@ export interface IWorkerBee {
   /**
    * Allows you to iterate over blocks in the past from a given range
    *
+   * Note: This should be called only once per instance.
+   * If you want to iterate over multiple ranges, you should create a new instance of WorkerBee.
+   *
+   * Data collected by this method will be preserved for later usage by the live observer.
+   *
    * @example
    * ```ts
    * await new Promise((resolve, reject) => {
@@ -85,6 +90,11 @@ export interface IWorkerBee {
 
   /**
    * Allows you to iterate over blocks in the past from a given range
+   *
+   * Note: This should be called only once per instance.
+   * If you want to iterate over multiple ranges, you should create a new instance of WorkerBee.
+   *
+   * Data collected by this method will be preserved for later usage by the live observer.
    *
    * @example
    * ```ts
