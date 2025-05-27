@@ -1,6 +1,6 @@
 import type { asset } from "@hiveio/wax";
 import Long from "long";
-import { CollectorClassifierBase } from "./collector-classifier-base";
+import { CollectorClassifierBase, TRegisterEvaluationContext } from "./collector-classifier-base";
 
 export interface IHiveAssetDetailedBalance {
   liquid: asset;
@@ -48,6 +48,15 @@ export interface IAccountData {
   accounts: Record<string, IAccount>;
 }
 
-export class AccountClassifier extends CollectorClassifierBase<IAccountData> {
+export interface IAccountCollectorOptions {
+  account: string;
+}
 
+export class AccountClassifier extends CollectorClassifierBase<IAccountData, void, void, IAccountCollectorOptions> {
+  public static forOptions(options: IAccountCollectorOptions): TRegisterEvaluationContext {
+    return {
+      class: this, // Intentionally using `this` to refer to the class prototype itself later - even though it is not a class **instance**
+      options
+    };
+  }
 }

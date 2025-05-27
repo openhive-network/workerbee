@@ -4,7 +4,7 @@ import { DynamicGlobalPropertiesClassifier } from "../../classifiers/dynamic-glo
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
-export class BlockHeaderCollector extends CollectorBase {
+export class BlockHeaderCollector extends CollectorBase<BlockHeaderClassifier> {
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [DynamicGlobalPropertiesClassifier];
   }
@@ -13,12 +13,16 @@ export class BlockHeaderCollector extends CollectorBase {
     const { headBlockNumber, currentWitness, headBlockTime, headBlockId } = await data.get(DynamicGlobalPropertiesClassifier);
 
     return {
-      [BlockHeaderClassifier.name]: {
+      /*
+       * Instruct TypeScript typings that BlockHeaderClassifier.name is actualy a Classifier name we expect.
+       * This is required for the bundlers to properly deduce the type of the classifier in data evaluation context.
+       */
+      [BlockHeaderClassifier.name as "BlockHeaderClassifier"]: {
         number: headBlockNumber,
         timestamp: headBlockTime,
         witness: currentWitness,
         id: headBlockId
       } as TAvailableClassifiers["BlockHeaderClassifier"]
-    } satisfies Partial<TAvailableClassifiers>;
+    };
   };
 }

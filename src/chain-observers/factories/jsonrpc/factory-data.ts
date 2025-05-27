@@ -6,7 +6,7 @@ import {
   DynamicGlobalPropertiesClassifier, FeedPriceClassifier, ImpactedAccountClassifier, ManabarClassifier, OperationClassifier, RcAccountClassifier,
   WitnessClassifier
 } from "../../classifiers";
-import { IEvaluationContextClass } from "../../classifiers/collector-classifier-base";
+import { CollectorClassifierBase, IEvaluationContextClass } from "../../classifiers/collector-classifier-base";
 import { CollectorBase } from "../../collectors/collector-base";
 import { BlockHeaderCollector } from "../../collectors/common/block-header-collector";
 import { ImpactedAccountCollector } from "../../collectors/common/impacted-account-collector";
@@ -21,7 +21,8 @@ import { FeedPriceCollector } from "../../collectors/jsonrpc/feed-price-collecto
 import { RcAccountCollector } from "../../collectors/jsonrpc/rc-account-collector";
 import { WitnessCollector } from "../../collectors/jsonrpc/witness-collector";
 
-export const JsonRpcFactoryData: (worker: WorkerBee) => Array<[IEvaluationContextClass, CollectorBase]> = (worker: WorkerBee) => ([
+export const JsonRpcFactoryData = (worker: WorkerBee):
+  Array<[IEvaluationContextClass, CollectorBase<CollectorClassifierBase<any, any, any, any>>]> => ([
   [BlockHeaderClassifier, new BlockHeaderCollector(worker)],
   [DynamicGlobalPropertiesClassifier, new DynamicGlobalPropertiesCollector(worker)],
   [BlockClassifier, new BlockCollector(worker)],

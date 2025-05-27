@@ -3,20 +3,17 @@ import { IAccountChangingRecovery } from "../../classifiers/change-recovery-in-p
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
-export interface IChangeRecoveryCollectorOptions {
-  changeRecoveryAccount: string;
-}
 
 const MAX_CHANGE_RECOVERY_GET_LIMIT = 1000;
 
-export class ChangeRecoveryInProgressCollector extends CollectorBase {
+export class ChangeRecoveryInProgressCollector extends CollectorBase<ChangeRecoveryInProgressClassifier> {
   private readonly changeRecoveryAccounts: Record<string, number> = {};
 
-  protected pushOptions(data: IChangeRecoveryCollectorOptions): void {
+  protected pushOptions(data: ChangeRecoveryInProgressClassifier["optionsType"]): void {
     this.changeRecoveryAccounts[data.changeRecoveryAccount] = (this.changeRecoveryAccounts[data.changeRecoveryAccount] || 0) + 1;
   }
 
-  protected popOptions(data: IChangeRecoveryCollectorOptions): void {
+  protected popOptions(data: ChangeRecoveryInProgressClassifier["optionsType"]): void {
     this.changeRecoveryAccounts[data.changeRecoveryAccount] = (this.changeRecoveryAccounts[data.changeRecoveryAccount] || 1) - 1;
 
     if (this.changeRecoveryAccounts[data.changeRecoveryAccount] === 0)
@@ -43,7 +40,11 @@ export class ChangeRecoveryInProgressCollector extends CollectorBase {
     }
 
     return {
-      [ChangeRecoveryInProgressClassifier.name]: {
+      /*
+       * Instruct TypeScript typings that ChangeRecoveryInProgressClassifier.name is actualy a Classifier name we expect.
+       * This is required for the bundlers to properly deduce the type of the classifier in data evaluation context.
+       */
+      [ChangeRecoveryInProgressClassifier.name as "ChangeRecoveryInProgressClassifier"]: {
         recoveringAccounts: retrieveChangeRecoveryAccounts
       } as TAvailableClassifiers["ChangeRecoveryInProgressClassifier"]
     } satisfies Partial<TAvailableClassifiers>;

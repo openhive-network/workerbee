@@ -1,7 +1,7 @@
 import type { WorkerBee } from "../../bot";
 import { WorkerBeeError } from "../../errors";
 import { createFactoryCircularDependencyErrorMessage, createFactoryUnsupportedClassifierErrorMessage } from "../../utils/error-helper";
-import { IEvaluationContextClass, TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
+import { CollectorClassifierBase, IEvaluationContextClass, TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { CollectorBase } from "../collectors/collector-base";
 import { ObserverMediator } from "../observer-mediator";
 import { DataEvaluationContext } from "./data-evaluation-context";
@@ -13,7 +13,7 @@ export enum EClassifierOrigin {
 }
 
 export class FactoryBase {
-  protected collectors!: Map<IEvaluationContextClass, CollectorBase>;
+  protected collectors!: Map<IEvaluationContextClass, CollectorBase<CollectorClassifierBase<any, any, any, any>>>;
 
   public constructor(
     protected readonly worker: WorkerBee

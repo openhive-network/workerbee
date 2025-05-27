@@ -6,11 +6,11 @@ import { CollectorBase, TAvailableClassifiers } from "../collectors/collector-ba
 import { FactoryBase } from "./factory-base";
 
 export type TAvailableCollectorFunctions = {
-  [key in keyof typeof TClassifiers]: CollectorBase;
+  [key in keyof typeof TClassifiers]: CollectorBase<InstanceType<(typeof TClassifiers)[key]>>;
 };
 
 export class DataEvaluationContext {
-  private readonly cachedFunctions = new Map<CollectorBase, Promise<Partial<TAvailableClassifiers>>>();
+  private readonly cachedFunctions = new Map<CollectorBase<any>, Promise<Partial<TAvailableClassifiers>>>();
   private readonly collectors: TAvailableCollectorFunctions = {} as TAvailableCollectorFunctions;
 
   public constructor(
@@ -23,7 +23,7 @@ export class DataEvaluationContext {
 
   public inject<T extends IEvaluationContextClass>(
     evaluationContext: T,
-    collector: CollectorBase
+    collector: CollectorBase<any>
   ): void {
     if (this.collectors[evaluationContext.name] !== undefined)
       return; // Already registered
@@ -31,9 +31,9 @@ export class DataEvaluationContext {
     this.collectors[evaluationContext.name] = collector;
   }
 
-  public async get<T extends IEvaluationContextClass, R = T extends new () => infer R ? R : never>(
-    evaluationContext: T
-  ): Promise<R extends CollectorClassifierBase ? R["type"] : never> {
+  public async get<Classifier extends CollectorClassifierBase<any, any, any, any>>(
+    evaluationContext: abstract new (...args: any[]) => Classifier
+  ): Promise<Classifier["getType"]> {
     const collector = this.collectors[evaluationContext.name];
 
     if (collector === undefined)
@@ -61,10 +61,10 @@ export class DataEvaluationContext {
     return result[evaluationContext.name] as any;
   }
 
-  public async query<T extends IEvaluationContextClass, R = T extends new () => infer R ? R : never>(
-    evaluationContext: T,
-    collectorOptions: object
-  ): Promise<R extends CollectorClassifierBase ? R["type"] : never> {
+  public async query<Classifier extends CollectorClassifierBase<any, any, any, any>>(
+    evaluationContext: abstract new (...args: any[]) => Classifier,
+    collectorOptions: Classifier["queryOptionsType"]
+  ): Promise<Classifier["queryType"]> {
     const collector = this.collectors[evaluationContext.name];
 
     if (collector === undefined)

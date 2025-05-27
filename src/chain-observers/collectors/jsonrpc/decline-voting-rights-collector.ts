@@ -3,20 +3,17 @@ import { IDeclinedVotingRightsAccount } from "../../classifiers/decline-voting-r
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
-export interface IDeclineVotingRightsCollectorOptions {
-  declineVotingRightsAccount: string;
-}
 
 const MAX_DECLINED_VOTING_RIGHTS_GET_LIMIT = 1000;
 
-export class DeclineVotingRightsCollector extends CollectorBase {
+export class DeclineVotingRightsCollector extends CollectorBase<DeclineVotingRightsClassifier> {
   private readonly declineVotingRightsAccounts: Record<string, number> = {};
 
-  protected pushOptions(data: IDeclineVotingRightsCollectorOptions): void {
+  protected pushOptions(data: DeclineVotingRightsClassifier["optionsType"]): void {
     this.declineVotingRightsAccounts[data.declineVotingRightsAccount] = (this.declineVotingRightsAccounts[data.declineVotingRightsAccount] || 0) + 1;
   }
 
-  protected popOptions(data: IDeclineVotingRightsCollectorOptions): void {
+  protected popOptions(data: DeclineVotingRightsClassifier["optionsType"]): void {
     this.declineVotingRightsAccounts[data.declineVotingRightsAccount] = (this.declineVotingRightsAccounts[data.declineVotingRightsAccount] || 1) - 1;
 
     if (this.declineVotingRightsAccounts[data.declineVotingRightsAccount] === 0)
@@ -42,9 +39,13 @@ export class DeclineVotingRightsCollector extends CollectorBase {
     }
 
     return {
-      [DeclineVotingRightsClassifier.name]: {
+      /*
+       * Instruct TypeScript typings that DeclineVotingRightsClassifier.name is actualy a Classifier name we expect.
+       * This is required for the bundlers to properly deduce the type of the classifier in data evaluation context.
+       */
+      [DeclineVotingRightsClassifier.name as "DeclineVotingRightsClassifier"]: {
         declineVotingRightsAccounts
       } as TAvailableClassifiers["DeclineVotingRightsClassifier"]
-    } satisfies Partial<TAvailableClassifiers>;
+    };
   };
 }

@@ -11,6 +11,4 @@ export interface IBlockData {
   transactionsPerId: Map<string, transaction>;
 }
 
-export class BlockClassifier extends CollectorClassifierBase<IBlockData> {
-
-}
+export class BlockClassifier extends CollectorClassifierBase<IBlockData> {}

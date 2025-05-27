@@ -2,7 +2,6 @@ import { EManabarType } from "@hiveio/wax";
 import type { WorkerBee } from "../../bot";
 import { ManabarClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { IManabarCollectorOptions } from "../collectors/common/manabar-collector";
 import type { DataEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";
 
@@ -27,7 +26,7 @@ export class AccountFullManabarFilter extends FilterBase {
       context.push(ManabarClassifier.forOptions({
         account,
         manabarType: this.manabarType
-      } as IManabarCollectorOptions));
+      }));
 
     return context;
   }

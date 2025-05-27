@@ -8,6 +8,4 @@ export interface IDynamicGlobalPropertiesData {
   downvotePoolPercent: number;
 }
 
-export class DynamicGlobalPropertiesClassifier extends CollectorClassifierBase<IDynamicGlobalPropertiesData> {
-
-}
+export class DynamicGlobalPropertiesClassifier extends CollectorClassifierBase<IDynamicGlobalPropertiesData> {}

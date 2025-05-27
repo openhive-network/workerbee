@@ -6,10 +6,10 @@ import { TRegisterEvaluationContext } from "../../classifiers/collector-classifi
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
-export class BlockCollector extends CollectorBase {
+export class BlockCollector extends CollectorBase<BlockClassifier> {
   private currentHeadBlock = -1;
 
-  private cachedBlockData!: TAvailableClassifiers["BlockClassifier"];
+  private cachedBlockData!: BlockClassifier["getType"];
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [DynamicGlobalPropertiesClassifier];
@@ -20,8 +20,12 @@ export class BlockCollector extends CollectorBase {
 
     if(this.currentHeadBlock === headBlockNumber)
       return {
-        [BlockClassifier.name]: this.cachedBlockData as TAvailableClassifiers["BlockClassifier"]
-      } satisfies Partial<TAvailableClassifiers>;
+        /*
+         * Instruct TypeScript typings that BlockClassifier.name is actualy a Classifier name we expect.
+         * This is required for the bundlers to properly deduce the type of the classifier in data evaluation context.
+         */
+        [BlockClassifier.name as "BlockClassifier"]: this.cachedBlockData as TAvailableClassifiers["BlockClassifier"]
+      };
 
     this.currentHeadBlock = headBlockNumber;
 
@@ -47,10 +51,14 @@ export class BlockCollector extends CollectorBase {
     data.addTiming("blockAnalysis", Date.now() - startBlockAnalysis);
 
     return {
-      [BlockClassifier.name]: (this.cachedBlockData = {
+      /*
+       * Instruct TypeScript typings that BlockClassifier.name is actualy a Classifier name we expect.
+       * This is required for the bundlers to properly deduce the type of the classifier in data evaluation context.
+       */
+      [BlockClassifier.name as "BlockClassifier"]: (this.cachedBlockData = {
         transactionsPerId,
         transactions
       }) as TAvailableClassifiers["BlockClassifier"]
-    } satisfies Partial<TAvailableClassifiers>;
+    };
   };
 }

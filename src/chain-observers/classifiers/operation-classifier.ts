@@ -17,6 +17,4 @@ export interface IOperationData extends IOperationBaseData {
   };
 }
 
-export class OperationClassifier extends CollectorClassifierBase<IOperationData> {
-
-}
+export class OperationClassifier extends CollectorClassifierBase<IOperationData> {}

@@ -10,7 +10,7 @@ import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 const MAX_TAKE_BLOCKS = 1000;
 
 
-export class BlockCollector extends CollectorBase {
+export class BlockCollector extends CollectorBase<BlockClassifier> {
   private currentBlockIndex = -1;
   private currentContainerIndex = -1;
   private previousBlockHeaderData?: IBlockHeaderData;
@@ -47,12 +47,17 @@ export class BlockCollector extends CollectorBase {
 
       if (this.cachedBlocksData.length === 0)
         return {
-          [BlockClassifier.name]: {
+          /*
+           * Instruct TypeScript typings that BlockClassifier.name is actualy a Classifier name we expect.
+           * This is required for the bundlers to properly deduce the type of the classifier in data evaluation context.
+           */
+          [BlockClassifier.name as "BlockClassifier"]: {
             transactionsPerId: new Map<string, transaction>(),
             transactions: []
           } as TAvailableClassifiers["BlockClassifier"],
-          [BlockHeaderClassifier.name]: this.previousBlockHeaderData as TAvailableClassifiers["BlockHeaderClassifier"]
-        } satisfies Partial<TAvailableClassifiers>;
+          [BlockHeaderClassifier.name as "BlockHeaderClassifier"]:
+            this.previousBlockHeaderData as TAvailableClassifiers["BlockHeaderClassifier"]
+        };
     }
 
     const startBlockAnalysis = Date.now();
@@ -76,16 +81,20 @@ export class BlockCollector extends CollectorBase {
     data.addTiming("blockAnalysis", Date.now() - startBlockAnalysis);
 
     return {
-      [BlockClassifier.name]: {
+      /*
+       * Instruct TypeScript typings that BlockClassifier.name is actualy a Classifier name we expect.
+       * This is required for the bundlers to properly deduce the type of the classifier in data evaluation context.
+       */
+      [BlockClassifier.name as "BlockClassifier"]: {
         transactionsPerId,
         transactions
       } as TAvailableClassifiers["BlockClassifier"],
-      [BlockHeaderClassifier.name]: this.previousBlockHeaderData = {
+      [BlockHeaderClassifier.name as "BlockHeaderClassifier"]: this.previousBlockHeaderData = {
         number: this.currentBlockIndex - 1,
         timestamp: new Date(`${block.timestamp}Z`),
         witness: block.witness,
         id: block.block_id
       } as TAvailableClassifiers["BlockHeaderClassifier"]
-    } satisfies Partial<TAvailableClassifiers>;
+    };
   };
 }

@@ -11,7 +11,7 @@ const isDivisibleByInRange = (by: number, start: number, end: number) => {
   return firstMultiple <= end;
 };
 
-export class FeedPriceCollector extends CollectorBase {
+export class FeedPriceCollector extends CollectorBase<FeedPriceClassifier> {
   private cachedFeedHistoryData: IFeedPriceData | undefined;
 
   private previouslyCheckedBlockNumber = 0;
@@ -44,7 +44,11 @@ export class FeedPriceCollector extends CollectorBase {
     this.previouslyCheckedBlockNumber = headBlockNumber;
 
     return {
-      [FeedPriceClassifier.name]: this.cachedFeedHistoryData as TAvailableClassifiers["FeedPriceClassifier"]
-    } satisfies Partial<TAvailableClassifiers>;
+      /*
+       * Instruct TypeScript typings that FeedPriceClassifier.name is actualy a Classifier name we expect.
+       * This is required for the bundlers to properly deduce the type of the classifier in data evaluation context.
+       */
+      [FeedPriceClassifier.name as "FeedPriceClassifier"]: this.cachedFeedHistoryData as TAvailableClassifiers["FeedPriceClassifier"]
+    };
   };
 }

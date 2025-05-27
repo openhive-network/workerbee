@@ -4,20 +4,16 @@ import { IRcAccount } from "../../classifiers/rc-account-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
-export interface IRcAccountCollectorOptions {
-  rcAccount: string;
-}
-
 const MAX_RC_ACCOUNT_GET_LIMIT = 1000;
 
-export class RcAccountCollector extends CollectorBase {
+export class RcAccountCollector extends CollectorBase<RcAccountClassifier> {
   private readonly rcAccounts: Record<string, number> = {};
 
-  protected pushOptions(data: IRcAccountCollectorOptions): void {
+  protected pushOptions(data: RcAccountClassifier["optionsType"]): void {
     this.rcAccounts[data.rcAccount] = (this.rcAccounts[data.rcAccount] || 0) + 1;
   }
 
-  protected popOptions(data: IRcAccountCollectorOptions): void {
+  protected popOptions(data: RcAccountClassifier["optionsType"]): void {
     this.rcAccounts[data.rcAccount] = (this.rcAccounts[data.rcAccount] || 1) - 1;
 
     if (this.rcAccounts[data.rcAccount] === 0)
@@ -47,9 +43,13 @@ export class RcAccountCollector extends CollectorBase {
     }
 
     return {
-      [RcAccountClassifier.name]: {
+      /*
+       * Instruct TypeScript typings that RcAccountClassifier.name is actualy a Classifier name we expect.
+       * This is required for the bundlers to properly deduce the type of the classifier in data evaluation context.
+       */
+      [RcAccountClassifier.name as "RcAccountClassifier"]: {
         rcAccounts
-      } as TAvailableClassifiers["RcAccountClassifier"]
-    } satisfies Partial<TAvailableClassifiers>;
+      } satisfies TAvailableClassifiers["RcAccountClassifier"]
+    };
   };
 }

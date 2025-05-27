@@ -3,20 +3,16 @@ import { IWitness } from "../../classifiers/witness-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
-export interface IWitnessCollectorOptions {
-  witness: string;
-}
-
 const MAX_WITNESS_GET_LIMIT = 1000;
 
-export class WitnessCollector extends CollectorBase {
+export class WitnessCollector extends CollectorBase<WitnessClassifier> {
   private readonly witnesses: Record<string, number> = {};
 
-  protected pushOptions(data: IWitnessCollectorOptions): void {
+  protected pushOptions(data: WitnessClassifier["optionsType"]): void {
     this.witnesses[data.witness] = (this.witnesses[data.witness] || 0) + 1;
   }
 
-  protected popOptions(data: IWitnessCollectorOptions): void {
+  protected popOptions(data: WitnessClassifier["optionsType"]): void {
     this.witnesses[data.witness] = (this.witnesses[data.witness] || 1) - 1;
 
     if (this.witnesses[data.witness] === 0)
@@ -44,9 +40,13 @@ export class WitnessCollector extends CollectorBase {
     }
 
     return {
-      [WitnessClassifier.name]: {
+      /*
+       * Instruct TypeScript typings that WitnessClassifier.name is actualy a Classifier name we expect.
+       * This is required for the bundlers to properly deduce the type of the classifier in data evaluation context.
+       */
+      [WitnessClassifier.name as "WitnessClassifier"]: {
         witnesses
-      } as TAvailableClassifiers["WitnessClassifier"]
-    } satisfies Partial<TAvailableClassifiers>;
+      } satisfies TAvailableClassifiers["WitnessClassifier"]
+    };
   };
 }

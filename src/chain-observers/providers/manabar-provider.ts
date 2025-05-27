@@ -1,7 +1,6 @@
 import { TAccountName, EManabarType } from "@hiveio/wax";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { ManabarClassifier, TManabars } from "../classifiers/manabar-classifier";
-import { IManabarCollectorOptions } from "../collectors/common/manabar-collector";
+import { IManabarCollectorOptions, ManabarClassifier, TManabars } from "../classifiers/manabar-classifier";
 import { DataEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
@@ -34,7 +33,7 @@ export class ManabarProvider<TAccounts extends Array<TAccountName> = Array<TAcco
     const contexts: TRegisterEvaluationContext[] = [];
     for(const [account, manabarTypes] of this.manabarData)
       for(const manabarType of manabarTypes)
-        contexts.push(ManabarClassifier.forOptions({ account, manabarType } satisfies IManabarCollectorOptions));
+        contexts.push(ManabarClassifier.forOptions({ account, manabarType }));
 
     return contexts;
   }

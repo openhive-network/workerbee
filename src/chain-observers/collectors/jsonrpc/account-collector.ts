@@ -4,20 +4,17 @@ import { IAccount } from "../../classifiers/account-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
-export interface IAccountCollectorOptions {
-  account: string;
-}
 
 const MAX_ACCOUNT_GET_LIMIT = 1000;
 
-export class AccountCollector extends CollectorBase {
+export class AccountCollector extends CollectorBase<AccountClassifier> {
   private readonly accounts: Record<string, number> = {};
 
-  protected pushOptions(data: IAccountCollectorOptions): void {
+  protected pushOptions(data: AccountClassifier["optionsType"]): void {
     this.accounts[data.account] = (this.accounts[data.account] || 0) + 1;
   }
 
-  protected popOptions(data: IAccountCollectorOptions): void {
+  protected popOptions(data: AccountClassifier["optionsType"]): void {
     this.accounts[data.account] = (this.accounts[data.account] || 1) - 1;
 
     if (this.accounts[data.account] === 0)
@@ -117,9 +114,13 @@ export class AccountCollector extends CollectorBase {
     }
 
     return {
-      [AccountClassifier.name]: {
+      /*
+       * Instruct TypeScript typings that AccountClassifier.name is actualy a Classifier name we expect.
+       * This is required for the bundlers to properly deduce the type of the classifier in data evaluation context.
+       */
+      [AccountClassifier.name as "AccountClassifier"]: {
         accounts
       } as TAvailableClassifiers["AccountClassifier"]
-    } satisfies Partial<TAvailableClassifiers>;
+    };
   };
 }

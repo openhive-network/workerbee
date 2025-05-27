@@ -4,7 +4,7 @@ import { IOperationTransactionPair } from "../../classifiers/operation-classifie
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
-export class OperationCollector extends CollectorBase {
+export class OperationCollector extends CollectorBase<OperationClassifier> {
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [BlockClassifier];
   }
@@ -43,10 +43,14 @@ export class OperationCollector extends CollectorBase {
     data.addTiming("operationPerType", Date.now() - startOperationPerType);
 
     return {
-      [OperationClassifier.name]: {
+      /*
+       * Instruct TypeScript typings that OperationClassifier.name is actualy a Classifier name we expect.
+       * This is required for the bundlers to properly deduce the type of the classifier in data evaluation context.
+       */
+      [OperationClassifier.name as "OperationClassifier"]: {
         operations,
         operationsPerType
       } as TAvailableClassifiers["OperationClassifier"]
-    } satisfies Partial<TAvailableClassifiers>;
+    };
   };
 }

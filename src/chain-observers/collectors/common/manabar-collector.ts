@@ -6,18 +6,11 @@ import { DynamicGlobalPropertiesClassifier } from "../../classifiers/dynamic-glo
 import { TManabars } from "../../classifiers/manabar-classifier";
 import { DataEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
-import { IAccountCollectorOptions } from "../jsonrpc/account-collector";
-import { IRcAccountCollectorOptions } from "../jsonrpc/rc-account-collector";
-
-export interface IManabarCollectorOptions {
-  account: TAccountName;
-  manabarType: EManabarType;
-}
 
 const PERCENT_VALUE_DOUBLE_PRECISION = 100;
 export const ONE_HUNDRED_PERCENT = 100 * PERCENT_VALUE_DOUBLE_PRECISION;
 
-export class ManabarCollector extends CollectorBase {
+export class ManabarCollector extends CollectorBase<ManabarClassifier> {
   private readonly upvoteManabarAccounts = new Map<TAccountName, number>();
   private readonly downvoteManabarAccounts = new Map<TAccountName, number>();
   private readonly rcManabarAccounts = new Map<TAccountName, number>();
@@ -35,7 +28,7 @@ export class ManabarCollector extends CollectorBase {
     }
   };
 
-  protected pushOptions(data: IManabarCollectorOptions): void {
+  protected pushOptions(data: ManabarClassifier["optionsType"]): void {
     const manabarObject: Map<TAccountName, number> = this.selectOptionsContainer(data.manabarType);
 
     const accountData = manabarObject.get(data.account);
@@ -45,7 +38,7 @@ export class ManabarCollector extends CollectorBase {
       manabarObject.set(data.account, 1);
   }
 
-  protected popOptions(data: IManabarCollectorOptions): void {
+  protected popOptions(data: ManabarClassifier["optionsType"]): void {
     const manabarObject: Map<TAccountName, number> = this.selectOptionsContainer(data.manabarType);
 
     const accountData = manabarObject.get(data.account);
@@ -58,11 +51,11 @@ export class ManabarCollector extends CollectorBase {
   public usedContexts(): Array<TRegisterEvaluationContext> {
     const classifiers: TRegisterEvaluationContext[] = [DynamicGlobalPropertiesClassifier];
     for(const [account] of this.upvoteManabarAccounts)
-      classifiers.push(AccountClassifier.forOptions({ account } satisfies IAccountCollectorOptions));
+      classifiers.push(AccountClassifier.forOptions({ account }));
     for(const [account] of this.downvoteManabarAccounts)
-      classifiers.push(AccountClassifier.forOptions({ account } satisfies IAccountCollectorOptions));
+      classifiers.push(AccountClassifier.forOptions({ account }));
     for(const [rcAccount] of this.rcManabarAccounts)
-      classifiers.push(RcAccountClassifier.forOptions({ rcAccount } satisfies IRcAccountCollectorOptions));
+      classifiers.push(RcAccountClassifier.forOptions({ rcAccount }));
 
     return classifiers;
   }
@@ -165,9 +158,13 @@ export class ManabarCollector extends CollectorBase {
     }
 
     return {
-      [ManabarClassifier.name]: {
+      /*
+       * Instruct TypeScript typings that ManabarClassifier.name is actualy a Classifier name we expect.
+       * This is required for the bundlers to properly deduce the type of the classifier in data evaluation context.
+       */
+      [ManabarClassifier.name as "ManabarClassifier"]: {
         manabarData
       } as TAvailableClassifiers["ManabarClassifier"]
-    } satisfies Partial<TAvailableClassifiers>;
+    };
   };
 }
