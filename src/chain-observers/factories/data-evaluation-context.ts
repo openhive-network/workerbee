@@ -44,8 +44,11 @@ export class DataEvaluationContext {
     if (cached === undefined) {
       const startTime = Date.now();
 
+      if (collector.get === undefined)
+        throw new WorkerBeeError(`Collector for evaluation context: "${evaluationContext.name}" does not implement the requested "get" method`);
+
       cached = (collector.get(this) as Promise<any>).finally(() => {
-        this.addTiming(evaluationContext.name, Date.now() - startTime);
+        this.addTiming(`${evaluationContext.name}#get`, Date.now() - startTime);
       });
 
       for(const key in this.collectors)
@@ -56,5 +59,24 @@ export class DataEvaluationContext {
     const result = await cached!;
 
     return result[evaluationContext.name] as any;
+  }
+
+  public async query<T extends IEvaluationContextClass, R = T extends new () => infer R ? R : never>(
+    evaluationContext: T,
+    collectorOptions: object
+  ): Promise<R extends CollectorClassifierBase ? R["type"] : never> {
+    const collector = this.collectors[evaluationContext.name];
+
+    if (collector === undefined)
+      throw new WorkerBeeError(`Collector for evaluation context: "${evaluationContext.name}" not found`);
+
+    const startTime = Date.now();
+
+    if (collector.query === undefined)
+      throw new WorkerBeeError(`Collector for evaluation context: "${evaluationContext.name}" does not implement the requested "query" method`);
+
+    return await (collector.query(this, collectorOptions) as Promise<any>).finally(() => {
+      this.addTiming(`${evaluationContext.name}#query`, Date.now() - startTime);
+    });
   }
 }
