@@ -148,7 +148,7 @@ export class ManabarCollector extends CollectorBase<ManabarClassifier> {
 
         data.addTiming("calculateCurrentManabarValue", Date.now() - startManabarData);
 
-        manabarData[account][EManabarType.UPVOTE] = {
+        manabarData[account][EManabarType.DOWNVOTE] = {
           currentMana: calculatedManabarData.current,
           lastUpdateTime: accounts.accounts[account].downvoteManabar.lastUpdateTime,
           max: calculatedManabarData.max,
