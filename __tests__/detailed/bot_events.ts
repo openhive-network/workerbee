@@ -81,7 +81,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
 
-  test("Allow to pass explicit chain", async({ workerbeeTest }) => {
+  test("Allow to pass explicit extended chain", async({ workerbeeTest }) => {
     const explicitChainTest = await workerbeeTest(async({ WorkerBee }) => {
 
       /*
@@ -97,9 +97,22 @@ test.describe("WorkerBee Bot events test", () => {
       // Stop does not affect chain property, so we can avoid making ineffective api calls.
       chainOwner.stop();
 
-      const localChain = chainOwner.chain;
+      const localChain = chainOwner.chain!.extend<{
+        my_custom_api: {
+          nested_call: {
+            params: undefined;
+            result: undefined;
+          }
+        }
+      }>();
+
+      // Test if TypeScript passes on extended chain:
+      localChain.api.my_custom_api.nested_call.endpointUrl = "no-call.local";
 
       const bot = new WorkerBee({ explicitChain: localChain });
+
+      // Should be able to directly call the extended API from the provided chain:
+      const extendedEndpointUrl = bot.chain.api.my_custom_api.nested_call.endpointUrl;
 
       await bot.start();
 
@@ -110,10 +123,14 @@ test.describe("WorkerBee Bot events test", () => {
 
       chainOwner.delete();
 
-      return validChainInstance;
+      return {
+        validChainInstance,
+        extendedEndpointUrl
+      };
     });
 
-    expect(explicitChainTest).toEqual(true);
+    expect(explicitChainTest.validChainInstance).toEqual(true);
+    expect(explicitChainTest.extendedEndpointUrl).toEqual("no-call.local");
   });
 
   test("Should be able to parse at least 2 blocks from the remote using block observer", async({ workerbeeTest }) => {

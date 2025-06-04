@@ -1,4 +1,4 @@
-import { createHiveChain, IHiveChainInterface, IWaxOptionsChain, price, TWaxExtended } from "@hiveio/wax";
+import { createHiveChain, IWaxOptionsChain, price, TWaxExtended } from "@hiveio/wax";
 
 export type WaxExtendTypes = {
   database_api: {
@@ -40,10 +40,6 @@ export type WaxExtendTypes = {
   }
 };
 
-export const getWax = async(explicitHiveChain?: IHiveChainInterface, options?: Partial<IWaxOptionsChain>): Promise<TWaxExtended<WaxExtendTypes>> => {
-
-  if(explicitHiveChain === undefined)
-    explicitHiveChain = await createHiveChain(options);
-
-  return explicitHiveChain.extend<WaxExtendTypes>();
+export const getWax = async(options?: Partial<IWaxOptionsChain>): Promise<TWaxExtended<WaxExtendTypes>> => {
+  return (await createHiveChain(options)).extend<WaxExtendTypes>();
 };

@@ -22,7 +22,7 @@ export interface IBroadcastData {
   block: IBlockHeaderData;
 }
 
-export interface IWorkerBee {
+export interface IWorkerBee<ExplicitChainT = IHiveChainInterface> {
   /**
    * Indicates if the bot is running
    * @type {boolean}
@@ -42,8 +42,8 @@ export interface IWorkerBee {
    * May be undefined if you have not already started our bot.
    *
    * Remember that chain property will be initialized during {@link start} call and uninitialized during {@link delete}
-   */
-  readonly chain?: Readonly<IHiveChainInterface>;
+   */ // If an explicit chain was provided, make it always defined, otherwise mark it as possibly undefined, as #start may not have been called yet
+  readonly chain: ExplicitChainT extends IHiveChainInterface ? ExplicitChainT : (undefined | Readonly<IHiveChainInterface>);
 
   /**
    * Starts the automation with given configuration
@@ -220,5 +220,5 @@ export interface IWorkerBeeConstructor {
    *
    * @note If you do not register an "error" event listener, the error will be dropped silently
    */
-  new(configuration?: Partial<IStartConfiguration>): IWorkerBee;
+  new<T extends IStartConfiguration>(configuration?: Partial<T>): IWorkerBee<T["explicitChain"]>;
 }

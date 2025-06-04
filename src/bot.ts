@@ -47,10 +47,10 @@ export const DEFAULT_BLOCK_INTERVAL_TIMEOUT_MS = 2000;
 type TAsyncBlockIteratorResolveCallback = (value: IteratorResult<IBlockData & IBlockHeaderData, void>) => void;
 type TAsyncBlockIteratorPromise = Promise<IteratorResult<IBlockData & IBlockHeaderData, void>>;
 
-export class WorkerBee implements IWorkerBee {
+export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | undefined> {
   public readonly configuration: IStartConfiguration;
 
-  public chain?: TWaxExtended<WaxExtendTypes>;
+  public chain: TWaxExtended<WaxExtendTypes> | undefined;
 
   private wallet?: IBeekeeperUnlockedWallet;
 
@@ -78,6 +78,9 @@ export class WorkerBee implements IWorkerBee {
     if(typeof configuration.explicitChain !== "undefined"
        && typeof configuration.chainOptions !== "undefined")
       throw new WorkerBeeError("explicitChain and chainOptions parameters are exclusive");
+
+    if (typeof configuration.explicitChain !== "undefined")
+      this.chain = configuration.explicitChain.extend<WaxExtendTypes>();
   }
 
   public providePastOperations(fromBlock: number, toBlock: number): PastQueen;
@@ -163,7 +166,7 @@ export class WorkerBee implements IWorkerBee {
   public async start(wallet?: IBeekeeperUnlockedWallet): Promise<void> {
     // Initialize chain and beekepeer if required
     if(typeof this.chain === "undefined")
-      this.chain = await getWax(this.configuration.explicitChain, this.configuration.chainOptions);
+      this.chain = await getWax(this.configuration.chainOptions);
 
     if(typeof this.wallet === "undefined")
       this.wallet = wallet;
