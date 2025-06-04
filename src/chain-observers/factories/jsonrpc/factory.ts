@@ -1,7 +1,7 @@
 import { WorkerBee } from "../../../bot";
 import {
   AccountClassifier, BlockClassifier, BlockHeaderClassifier,
-  ChangeRecoveryInProgressClassifier, DeclineVotingRightsClassifier,
+  ChangeRecoveryInProgressClassifier, ContentMetadataClassifier, DeclineVotingRightsClassifier,
   DynamicGlobalPropertiesClassifier, FeedPriceClassifier,
   ImpactedAccountClassifier, ManabarClassifier, OperationClassifier,
   RcAccountClassifier, WitnessClassifier
@@ -13,6 +13,7 @@ import { OperationCollector } from "../../collectors/common/operation-collector"
 import { AccountCollector } from "../../collectors/jsonrpc/account-collector";
 import { BlockCollector } from "../../collectors/jsonrpc/block-collector";
 import { ChangeRecoveryInProgressCollector } from "../../collectors/jsonrpc/change-recovery-in-progress-collector";
+import { ContentMetadataCollector } from "../../collectors/jsonrpc/content-metadata-collector";
 import { DeclineVotingRightsCollector } from "../../collectors/jsonrpc/decline-voting-rights-collector";
 import { DynamicGlobalPropertiesCollector } from "../../collectors/jsonrpc/dynamic-global-properties-collector";
 import { FeedPriceCollector } from "../../collectors/jsonrpc/feed-price-collector";
@@ -38,5 +39,6 @@ export class JsonRpcFactory extends FactoryBase {
     super.registerClassifier(ChangeRecoveryInProgressClassifier, ChangeRecoveryInProgressCollector, worker);
     super.registerClassifier(DeclineVotingRightsClassifier, DeclineVotingRightsCollector, worker);
     super.registerClassifier(ManabarClassifier, ManabarCollector, worker);
+    super.registerClassifier(ContentMetadataClassifier, ContentMetadataCollector, worker);
   }
 }

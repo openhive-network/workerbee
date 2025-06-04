@@ -1,6 +1,6 @@
 // We only want to import types here!
 import type beekeeperFactoryType from "@hiveio/beekeeper/web";
-import type Wax from "@hiveio/wax";
+import type * as Wax from "@hiveio/wax";
 
 import type WorkerBee from "../../dist/bundle/index";
 

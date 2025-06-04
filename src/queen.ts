@@ -9,6 +9,7 @@ import { BalanceChangeFilter } from "./chain-observers/filters/balance-change-fi
 import { BlockNumberFilter } from "./chain-observers/filters/block-filter";
 import { CommentFilter, PostFilter } from "./chain-observers/filters/blog-content-filter";
 import { LogicalAndFilter, LogicalOrFilter } from "./chain-observers/filters/composite-filter";
+import { CommentMetadataFilter, PostMetadataFilter } from "./chain-observers/filters/content-metadata-filter";
 import { CustomOperationFilter } from "./chain-observers/filters/custom-operation-filter";
 import { ExchangeTransferFilter } from "./chain-observers/filters/exchange-transfer-filter";
 import { FeedPriceChangeFilter } from "./chain-observers/filters/feed-price-change-percent-filter";
@@ -30,6 +31,7 @@ import { AlarmProvider } from "./chain-observers/providers/alarm-provider";
 import { BlockHeaderProvider } from "./chain-observers/providers/block-header-provider";
 import { BlockProvider } from "./chain-observers/providers/block-provider";
 import { CommentProvider, PostProvider } from "./chain-observers/providers/blog-content-provider";
+import { CommentMetadataProvider, PostMetadataProvider } from "./chain-observers/providers/content-metadata-provider";
 import { CustomOperationProvider } from "./chain-observers/providers/custom-operation-provider";
 import { ExchangeTransferProvider } from "./chain-observers/providers/exchange-transfer-provider";
 import { FeedPriceProvider } from "./chain-observers/providers/feed-price-provider";
@@ -47,6 +49,7 @@ import { VoteProvider } from "./chain-observers/providers/vote-provider";
 import { WhaleAlertProvider } from "./chain-observers/providers/whale-alert-provider";
 import { WitnessProvider } from "./chain-observers/providers/witness-provider";
 import type { Observer, Unsubscribable } from "./types/subscribable";
+import { calculateRelativeTime } from "./utils/time";
 
 export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public constructor(
@@ -420,6 +423,74 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     this.operands.push(new CommentFilter(this.worker, authors));
 
     this.pushProvider(CommentProvider, { authors: authors.map(account => ({ account })) });
+
+    return this;
+  }
+
+  /**
+   * Subscribes to notifications when a comment is near its payout time by a specific author(s).
+   *
+   * Automatically provides the comment in the `next` callback.
+   *
+   * Note: This method implicitly applies the OR operator between the specified accounts.
+   *
+   * @example
+   * ```ts
+   * workerbee.observe.onCommentsIncomingPayout("username", "username2").subscribe({
+   *   next: (data) => {
+   *     for(const account in data.commentsMetadata)
+   *       if(data.commentsMetadata[account] !== undefined)
+   *         for(const permlink of data.commentsMetadata[account])
+   *           console.log("Comment about to payout:", data.commentsMetadata[account][permlink]);
+   *   }
+   * });
+   * ```
+   *
+   * @param relativeTimeMs The relative time in milliseconds or a string representing the time duration (e.g., "-1h", "-30m") to monitor for comment payouts.
+   * @param authors account names of the authors to monitor for comment payout.
+   * @returns itself
+   */
+  public onCommentsIncomingPayout<
+    TAccounts extends TAccountName[]
+  >(
+    relativeTimeMs: number | string, ...authors: TAccounts
+  ): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CommentMetadataProvider<TAccounts>["provide"]>>> {
+    const time = typeof relativeTimeMs === "number" ? relativeTimeMs : (Date.now() - calculateRelativeTime(relativeTimeMs).getTime());
+
+    this.operands.push(new CommentMetadataFilter(this.worker, time, authors));
+
+    this.pushProvider(CommentMetadataProvider, { authors });
+
+    return this;
+  }
+
+  /**
+   * Subscribes to notifications when a post is near its payout time by a specific author(s).
+   *
+   * Automatically provides the post in the `next` callback.
+   *
+   * Note: This method implicitly applies the OR operator between the specified accounts.
+   *
+   * @example
+   * ```ts
+   * workerbee.observe.onPostsIncomingPayout("username", "username2").subscribe({
+   *   next: (data) => {
+   *     for(const account in data.postsMetadata)
+   *       if(data.postsMetad
+   *const time = typeof relativeTimeMs === "number" ? relativeTimeMs : (Date.now() - calculateRelativeTime(relativeTimeMs).getTime());
+   * @param relativeTimeMs The relative time in milliseconds or a string representing the time duration (e.g., "-1h", "-30m") to monitor for post payouts.
+   * @param authors account names of the authors to monitor for post payout.
+   * @returns itself
+   */
+  public onPostsIncomingPayout<
+    TAccounts extends TAccountName[]
+  >(relativeTimeMs: number | string, ...authors: TAccounts):
+    QueenBee<TPreviousSubscriberData & Awaited<ReturnType<PostMetadataProvider<TAccounts>["provide"]>>> {
+    const time = typeof relativeTimeMs === "number" ? relativeTimeMs : (Date.now() - calculateRelativeTime(relativeTimeMs).getTime());
+
+    this.operands.push(new PostMetadataFilter(this.worker, time, authors));
+
+    this.pushProvider(PostMetadataProvider, { authors });
 
     return this;
   }

@@ -60,7 +60,7 @@ test.describe("WorkerBee Bot events test", () => {
         parentPermlink: "re-upvote-this-post-to-fund-hbdstabilizer-20250312t045515z", title: "test", body: "Awesome test!",
         maxAcceptedPayout: localChain.hbdCoins(1000000), percentHbd: 9000, allowVotes: true, allowCurationRewards: true}));
 
-      const bkInstance = await beekeeperFactory({inMemory: true});
+      const bkInstance = await beekeeperFactory({ inMemory: true, enableLogs: false });
       const bkSession = bkInstance.createSession("salt and pepper");
 
       const {wallet} = await bkSession.createWallet("temp", "pass", true);
@@ -228,6 +228,80 @@ test.describe("WorkerBee Bot events test", () => {
     }, HIVE_BLOCK_INTERVAL);
 
     expect(result.length).toBeGreaterThan(0);
+  });
+
+  test("Should be able to use incoming payout observer", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee, wax, beekeeperFactory }) => {
+      const bot = new WorkerBee({
+        chainOptions: {
+          apiTimeout: 0,
+          apiEndpoint: "https://api.fake.openhive.network",
+          chainId: "42"
+        }
+      });
+
+      const bkInstance = await beekeeperFactory({ inMemory: true, enableLogs: false });
+      const bkSession = bkInstance.createSession("salt and pepper");
+
+      const { wallet } = await bkSession.createWallet("temp", "pass", true);
+      const publicKey = await wallet.importKey("5JNHfZYKGaomSFvd4NUdQ9qMcEAC43kujbfjueTHpVapX1Kzq2n");
+
+      await bot.start();
+
+      const tx = await bot.chain!.createTransaction();
+      const targetTx = tx.transaction;
+
+      const getSignedTx = () => {
+        const tx = bot.chain!.createTransactionFromProto(structuredClone(targetTx));
+        tx.pushOperation(new wax.ReplyOperation({
+          parentAuthor: "thebeedevs",
+          parentPermlink: "further-integration-of-metamask-and-hive-wallet",
+          author: "gtg",
+          body: "WB tests",
+          permlink: `wb-tests-${Date.now()}`
+        }));
+        tx.sign(wallet, publicKey);
+        return tx;
+      };
+
+      setTimeout(() => { // Broadcaster
+        const tx = getSignedTx();
+        console.log(`Broadcasting reply transaction #${tx.id}`);
+        void bot.chain!.broadcast(tx).catch(console.error);
+      }, 2000);
+
+      const result = await new Promise<number>((res, rej) => { // Listener
+        const observer = bot.observe.onCommentsIncomingPayout("-7d", "gtg");
+        observer.subscribe({
+          next(data) {
+            let rshares: number | undefined;
+
+            for(const account in data.commentsMetadata)
+              for(const permlink in data.commentsMetadata[account]) {
+                rshares = data.commentsMetadata[account][permlink].netRshares.toNumber();
+                console.info(`Retrieved comment payout of @${account}: ${rshares} rshares for ${permlink}`);
+              }
+
+            if (rshares === undefined)
+              return rej(new Error("Could not retrieve rshares for publisher1"));
+
+            res(rshares);
+          },
+          error(err) {
+            console.error(err);
+          }
+        });
+      });
+
+      bot.stop();
+      bot.delete();
+
+      console.log(`Result: ${result}`);
+
+      return result;
+    });
+
+    expect(result).toBeDefined();
   });
 
   test("Should be able to evaluate or condition in first statement", async({ workerbeeTest }) => {

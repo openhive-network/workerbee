@@ -10,6 +10,7 @@ export type { IImpactedAccount, IImpactedAccountData } from "./classifiers/impac
 export type { IOperationBaseData, IOperationData, IOperationTransactionPair } from "./classifiers/operation-classifier";
 export type { IRcAccount, IRcAccountData } from "./classifiers/rc-account-classifier";
 export type { IWitness, IWitnessData } from "./classifiers/witness-classifier";
+export type { IContentData, IHiveContentMetadata, TContentMetadataAuthorData } from "./classifiers/content-metadata-classifier";
 
 export type { IAccountProviderData, TAccountProvided } from "./providers/account-provider";
 export { EAlarmType, type IAlarmAccountsData, type TAlarmAccounts } from "./providers/alarm-provider";
@@ -29,6 +30,8 @@ export type {
   IInternalMarketCancelOperation, IInternalMarketCreateOperation,
   IInternalMarketProviderData, TInternalMarketOperation
 } from "./providers/internal-market-provider";
+export type { ContentMetadataProvider, ICommentMetadataProviderData,
+  IPostMetadataProviderData, TContentMetadataProvided } from "./providers/content-metadata-provider";
 export type { IMentionedAccountProviderData, TMentionedAccountProvided } from "./providers/mention-provider";
 export type { IRcAccountProviderData, TRcAccountProvided } from "./providers/rc-account-provider";
 export type { ITransactionProviderData, TTransactionProvider } from "./providers/transaction-provider";
