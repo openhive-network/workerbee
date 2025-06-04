@@ -1,3 +1,4 @@
+import type { TAccountName } from "@hiveio/wax";
 import type { WorkerBee } from "../../bot";
 import { AccountClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
@@ -7,17 +8,23 @@ import { FilterBase } from "./filter-base";
 export class AccountMetadataChangeFilter extends FilterBase {
   public constructor(
     worker: WorkerBee,
-    private readonly account: string
+    accounts: TAccountName[]
   ) {
     super(worker);
+
+    this.accounts = new Set(accounts);
   }
 
+  private readonly accounts: Set<TAccountName>;
+
   public usedContexts(): Array<TRegisterEvaluationContext> {
-    return [
-      AccountClassifier.forOptions({
-        account: this.account
-      })
-    ];
+    const classifiers: Array<TRegisterEvaluationContext> = [];
+    for(const account of this.accounts)
+      classifiers.push(AccountClassifier.forOptions({
+        account
+      }));
+
+    return classifiers;
   }
 
   private previousJsonMetadata?: string;
@@ -26,24 +33,32 @@ export class AccountMetadataChangeFilter extends FilterBase {
   public async match(data: DataEvaluationContext): Promise<boolean> {
     const { accounts } = await data.get(AccountClassifier);
 
-    const account = accounts[this.account];
+    for(const accountName of this.accounts) {
+      const account = accounts[accountName];
 
-    if (this.previousJsonMetadata === undefined) {
-      this.previousJsonMetadata = JSON.stringify(account.jsonMetadata);
-      this.previousPostingJsonMetadata = JSON.stringify(account.postingJsonMetadata);
+      if (account === undefined)
+        return false;
 
-      return false;
+      if (this.previousJsonMetadata === undefined) {
+        this.previousJsonMetadata = JSON.stringify(account.jsonMetadata);
+        this.previousPostingJsonMetadata = JSON.stringify(account.postingJsonMetadata);
+
+        return false;
+      }
+
+      const postingMeta = JSON.stringify(account.postingJsonMetadata);
+      const accMeta = JSON.stringify(account.jsonMetadata);
+
+      const changedAccMeta = accMeta !== this.previousJsonMetadata;
+      const changedPosting = postingMeta !== this.previousPostingJsonMetadata;
+
+      this.previousJsonMetadata = accMeta;
+      this.previousPostingJsonMetadata = postingMeta;
+
+      if(changedAccMeta || changedPosting)
+        return true;
     }
 
-    const postingMeta = JSON.stringify(account.postingJsonMetadata);
-    const accMeta = JSON.stringify(account.jsonMetadata);
-
-    const changedAccMeta = accMeta !== this.previousJsonMetadata;
-    const changedPosting = postingMeta !== this.previousPostingJsonMetadata;
-
-    this.previousJsonMetadata = accMeta;
-    this.previousPostingJsonMetadata = postingMeta;
-
-    return changedAccMeta || changedPosting;
+    return false;
   }
 }

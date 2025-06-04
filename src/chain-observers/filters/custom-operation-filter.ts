@@ -7,10 +7,14 @@ import { FilterBase } from "./filter-base";
 export class CustomOperationFilter extends FilterBase {
   public constructor(
     worker: WorkerBee,
-    private readonly id: string | number
+    ids: Array<string | number>
   ) {
     super(worker);
+
+    this.ids = new Set(ids);
   }
+
+  private readonly ids = new Set<string | number>();
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [
@@ -22,11 +26,11 @@ export class CustomOperationFilter extends FilterBase {
     const { operationsPerType } = await data.get(OperationClassifier);
 
     for(const { operation } of (operationsPerType.custom_json ?? []))
-      if (operation.id === this.id)
+      if (this.ids.has(operation.id))
         return true;
 
     for(const { operation } of (operationsPerType.custom ?? []))
-      if (operation.id === this.id)
+      if (this.ids.has(operation.id))
         return true;
 
     return false;

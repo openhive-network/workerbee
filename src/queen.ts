@@ -190,9 +190,11 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * Automatically provides the transaction in the `next` callback.
    *
+   * Note: This method implicitly applies the OR operator between the specified transaction IDs.
+   *
    * @example
    * ```ts
-   * workerbee.observe.onTransactionId("555605d1e344cf3acb36c3e0631969b1b73f89b6").subscribe({
+   * workerbee.observe.onTransactionIds("555605d1e344cf3acb36c3e0631969b1b73f89b6").subscribe({
    *   next: (data) => {
    *     console.log('Got transaction:', data.transactions['555605d1e344cf3acb36c3e0631969b1b73f89b6']);
    *   }
@@ -201,11 +203,11 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @param transactionId Transaction ID to subscribe to
    * @returns itself
    */
-  public onTransactionId<
-    TIdTx extends string
-  >(transactionId: TIdTx): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<TransactionByIdProvider<[TIdTx]>["provide"]>>> {
-    this.operands.push(new TransactionIdFilter(this.worker, transactionId));
-    this.pushProvider(TransactionByIdProvider, { transactionIds: [transactionId] });
+  public onTransactionIds<
+    TIdTxs extends Array<string>
+  >(...transactionIds: TIdTxs): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<TransactionByIdProvider<TIdTxs>["provide"]>>> {
+    this.operands.push(new TransactionIdFilter(this.worker, transactionIds));
+    this.pushProvider(TransactionByIdProvider, { transactionIds });
 
     return this;
   }
@@ -251,7 +253,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * @example
    * ```ts
-   * workerbee.observe.onAccountsFullManabar(EManabarType.RC, 50, "username", "username2").subscribe({
+   * workerbee.observe.onAccountsManabarPercent(EManabarType.RC, 50, "username", "username2").subscribe({
    *   next: (data) => {
    *     // Note: When providing multiple accounts with implicit OR, you should check for the actual mana load in the `next` callback
    *     for(const account in data.manabarData)
@@ -263,7 +265,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * @param manabarType The type of manabar to monitor (default: {@link EManabarType.RC})
    * @param manabarLoadPercent The percentage of manabar load to trigger the notification
-   * @param account account names to monitor for full manabar
+   * @param accounts account names to monitor for full manabar
    * @returns itself
    */
   public onAccountsManabarPercent<
@@ -286,19 +288,19 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * @example
    * ```ts
-   * workerbee.observe.onAccountBalanceChange("username", true).subscribe({
+   * workerbee.observe.onAccountsBalanceChange(false, "username").subscribe({
    *   next: () => {
    *     console.log("@username account balance changed");
    *   }
    * });
    * ```
    *
-   * @param account The account name to monitor for balance changes.
-   * @param includeInternalTransfers Whether to include internal transfers in the balance change monitoring (default: `false`).
+   * @param includeInternalTransfers Whether to include internal transfers in the balance change monitoring.
+   * @param accounts The account name to monitor for balance changes.
    * @returns itself
    */
-  public onAccountBalanceChange(account: TAccountName, includeInternalTransfers: boolean = false): QueenBee<TPreviousSubscriberData> {
-    this.operands.push(new BalanceChangeFilter(this.worker, account, includeInternalTransfers));
+  public onAccountsBalanceChange(includeInternalTransfers: boolean, ...accounts: TAccountName[]): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new BalanceChangeFilter(this.worker, accounts, includeInternalTransfers));
 
     return this;
   }
@@ -308,18 +310,18 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * @example
    * ```ts
-   * workerbee.observe.onAccountMetadataChange("username").subscribe({
+   * workerbee.observe.onAccountsMetadataChange("username").subscribe({
    *   next: () => {
    *     console.log("Account @username metadata changed");
    *   }
    * });
    * ```
    *
-   * @param account The account name to monitor for metadata changes.
+   * @param accounts The account name to monitor for metadata changes.
    * @returns itself
    */
-  public onAccountMetadataChange(account: TAccountName): QueenBee<TPreviousSubscriberData> {
-    this.operands.push(new AccountMetadataChangeFilter(this.worker, account));
+  public onAccountsMetadataChange(...accounts: TAccountName[]): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new AccountMetadataChangeFilter(this.worker, accounts));
 
     return this;
   }
@@ -451,6 +453,8 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * Automatically provides the custom JSON operation in the `next` callback.
    *
+   * Note: This method implicitly applies the OR operator between the specified ids.
+   *
    * @example
    * ```ts
    * workerbee.observe.onCustomOperation("sm_claim_reward").subscribe({
@@ -461,14 +465,14 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * });
    * ```
    *
-   * @param id The ID of the custom operation to monitor.
+   * @param ids The ID of the custom operation to monitor.
    * @returns itself
    */
   public onCustomOperation<
-    TOperationId extends string | number
-  >(id: TOperationId): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CustomOperationProvider<[TOperationId]>["provide"]>>> {
-    this.operands.push(new CustomOperationFilter(this.worker, id));
-    this.pushProvider(CustomOperationProvider, { ids: [id] });
+    TOperationId extends Array<string | number>
+  >(...ids: TOperationId): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CustomOperationProvider<TOperationId>["provide"]>>> {
+    this.operands.push(new CustomOperationFilter(this.worker, ids));
+    this.pushProvider(CustomOperationProvider, { ids });
 
     return this;
   }
@@ -540,6 +544,8 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * Automatically provides the reblog operation metadata in the `next` callback.
    *
+   * Note: This method implicitly applies the OR operator between the specified accounts.
+   *
    * @example
    * ```ts
    * workerbee.observe.onReblog("username").subscribe({
@@ -550,14 +556,14 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * });
    * ```
    *
-   * @param reblogger The account name of the reblogger to monitor.
+   * @param rebloggers The account names of the rebloggers to monitor.
    * @returns itself
    */
   public onReblog<
-    TReblog extends TAccountName
-  >(reblogger: TReblog): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<MentionedAccountProvider<[TReblog]>["provide"]>>> {
-    this.operands.push(new ReblogFilter(this.worker, reblogger));
-    this.pushProvider(ReblogProvider, { accounts: [reblogger] });
+    TReblogs extends TAccountName[]
+  >(...rebloggers: TReblogs): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<MentionedAccountProvider<TReblogs>["provide"]>>> {
+    this.operands.push(new ReblogFilter(this.worker, rebloggers));
+    this.pushProvider(ReblogProvider, { accounts: rebloggers });
 
     return this;
   }
@@ -566,6 +572,8 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * Subscribes to notifications when a specific account performs follow operation, such as, e.g.: mute, follow blacklisted, blacklist, follow, unfollow.
    *
    * Automatically provides the follow operation metadata in the `next` callback.
+   *
+   * Note: This method implicitly applies the OR operator between the specified accounts.
    *
    * @example
    * ```ts
@@ -577,14 +585,14 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * });
    * ```
    *
-   * @param follower The account name of the follower to monitor.
+   * @param followers The account names of the followers to monitor.
    * @returns itself
    */
   public onFollow<
-    TFollow extends TAccountName
-  >(follower: TFollow): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<FollowProvider<[TFollow]>["provide"]>>> {
-    this.operands.push(new FollowFilter(this.worker, follower));
-    this.pushProvider(FollowProvider, { accounts: [follower] });
+    TFollows extends TAccountName[]
+  >(...followers: TFollows): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<FollowProvider<TFollows>["provide"]>>> {
+    this.operands.push(new FollowFilter(this.worker, followers));
+    this.pushProvider(FollowProvider, { accounts: followers });
 
     return this;
   }
@@ -593,6 +601,8 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * Subscribes to notifications when a specific account is mentioned in a post.
    *
    * Automatically provides the comment operation metadata in the `next` callback.
+   *
+   * Note: This method implicitly applies the OR operator between the specified accounts.
    *
    * @example
    * ```ts
@@ -604,14 +614,14 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * });
    * ```
    *
-   * @param mentionedAccount The account name to monitor for mentions.
+   * @param mentionedAccounts The account names to monitor for mentions.
    * @returns itself
    */
   public onMention<
-    TMention extends TAccountName
-  >(mentionedAccount: TMention): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<MentionedAccountProvider<[TMention]>["provide"]>>> {
-    this.operands.push(new PostMentionFilter(this.worker, mentionedAccount));
-    this.pushProvider(MentionedAccountProvider, { accounts: [mentionedAccount] });
+    TMentions extends TAccountName[]
+  >(...mentionedAccounts: TMentions): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<MentionedAccountProvider<TMentions>["provide"]>>> {
+    this.operands.push(new PostMentionFilter(this.worker, mentionedAccounts));
+    this.pushProvider(MentionedAccountProvider, { accounts: mentionedAccounts });
 
     return this;
   }
@@ -621,6 +631,8 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * governance vote expirations, or declining voting rights.
    *
    * Automatically provides alarm-related data in the `next` callback.
+   *
+   * Note: This method implicitly applies the OR operator between the specified accounts.
    *
    * @example
    * ```ts
@@ -632,14 +644,14 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * });
    * ```
    *
-   * @param watchAccount The account name to monitor for alarms.
+   * @param watchAccounts The account names to monitor for alarms.
    * @returns itself
    */
   public onAlarm<
-    TAccount extends TAccountName
-  >(watchAccount: TAccount): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<AlarmProvider<[TAccount]>["provide"]>>> {
-    this.operands.push(new AlarmFilter(this.worker, watchAccount));
-    this.pushProvider(AlarmProvider, { accounts: [watchAccount] });
+    TAccounts extends TAccountName[]
+  >(...watchAccounts: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<AlarmProvider<TAccounts>["provide"]>>> {
+    this.operands.push(new AlarmFilter(this.worker, watchAccounts));
+    this.pushProvider(AlarmProvider, { accounts: watchAccounts });
 
     return this;
   }
@@ -684,21 +696,23 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * If witness catches up with no miessed blocks, it will be automatically re-enabled and will trigger
    * when the witness misses the specified number of blocks again.
    *
+   * Note: This method implicitly applies the OR operator between the specified accounts.
+   *
    * @example
    * ```ts
-   * workerbee.observe.onWitnessMissedBlocks("username", 5).subscribe({
+   * workerbee.observe.onWitnessesMissedBlocks(5, "username").subscribe({
    *   next: () => {
    *     console.log("Witness @username has missed 5 or more blocks!");
    *   }
    * });
    * ```
    *
-   * @param witness The account name of the witness to monitor for missed blocks.
    * @param missedBlocksMinCount The minimum number of missed blocks that triggers the notification.
+   * @param witnesses The account names of the witnesses to monitor for missed blocks.
    * @returns itself
    */
-  public onWitnessMissedBlocks(witness: TAccountName, missedBlocksMinCount: number): QueenBee<TPreviousSubscriberData> {
-    this.operands.push(new WitnessMissedBlocksFilter(this.worker, witness, missedBlocksMinCount));
+  public onWitnessesMissedBlocks(missedBlocksMinCount: number, ...witnesses: TAccountName[]): QueenBee<TPreviousSubscriberData> {
+    this.operands.push(new WitnessMissedBlocksFilter(this.worker, witnesses, missedBlocksMinCount));
 
     return this;
   }
@@ -902,28 +916,28 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   }
 
   /**
-   * {rovides the manabar data in the `next` callback.
+   * Provides the manabar data in the `next` callback.
    *
    * @example
    * ```ts
-   * workerbee.observe.onBlock().provideManabarData("username", EManabarType.RC).subscribe({
+   * workerbee.observe.onBlock().provideManabarData(EManabarType.RC, "username1", "username2").subscribe({
    *   next: (data) => {
-   *     console.log("Account manabar is now loaded %:", data.manabarData["username"][EManabarType.RC].percent);
+   *     console.log("Account manabar is now loaded %:", data.manabarData["username1"][EManabarType.RC].percent);
    *   }
    * });
    * ```
    *
-   * @param account The account name to monitor for full manabar
-   * @param manabarType The type of manabar to monitor (default: {@link EManabarType.RC})
+   * @param manabarType The type of manabar to monitor
+   * @param accounts The account names to monitor for full manabar
    * @returns itself
    */
   public provideManabarData<
-    TAccount extends TAccountName
+    TAccounts extends Array<TAccountName>
   >(
-    account: TAccount,
-    manabarType: EManabarType = EManabarType.RC
-  ): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ManabarProvider<[TAccount]>["provide"]>>> {
-    this.pushProvider(ManabarProvider, { manabarData: [{ account, manabarType }] });
+    manabarType: EManabarType,
+    ...accounts: TAccounts
+  ): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ManabarProvider<TAccounts>["provide"]>>> {
+    this.pushProvider(ManabarProvider, { manabarData: accounts.map(account => ({ account, manabarType })) });
 
     return this;
   }

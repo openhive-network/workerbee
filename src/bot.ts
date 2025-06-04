@@ -117,7 +117,7 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
     let timeoutId: NodeJS.Timeout | undefined = undefined;
 
     return new Promise<void>((resolve, reject) => {
-      const listener = this.observe.onTransactionId(apiTx.id).or.onTransactionId(apiTx.legacy_id).provideBlockHeaderData().subscribe({
+      const listener = this.observe.onTransactionIds(apiTx.id, apiTx.legacy_id).provideBlockHeaderData().subscribe({
         next(val) {
           clearTimeout(timeoutId);
           listener.unsubscribe();

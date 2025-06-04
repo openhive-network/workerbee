@@ -42,7 +42,7 @@ export abstract class BlogContentFilter extends FilterBase {
           continue;
 
         // Check author match
-        if (this.accounts.has(operation.author))
+        if (!this.accounts.has(operation.author))
           continue;
 
         // Check parent data if specified

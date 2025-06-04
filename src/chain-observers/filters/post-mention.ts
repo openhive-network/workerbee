@@ -1,3 +1,4 @@
+import { TAccountName } from "@hiveio/wax";
 import type { WorkerBee } from "../../bot";
 import { OperationClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
@@ -7,10 +8,14 @@ import { FilterBase } from "./filter-base";
 export class PostMentionFilter extends FilterBase {
   public constructor(
     worker: WorkerBee,
-    private readonly account: string
+    accounts: TAccountName[]
   ) {
     super(worker);
+
+    this.accounts = new Set(accounts);
   }
+
+  private readonly accounts: Set<TAccountName>;;
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [
@@ -26,8 +31,9 @@ export class PostMentionFilter extends FilterBase {
         const jsonMetadata = JSON.parse(operation.json_metadata);
 
         if ("users" in jsonMetadata && Array.isArray(jsonMetadata.users))
-          if (jsonMetadata.users.indexOf(this.account) !== -1)
-            return true;
+          for(const user of jsonMetadata.users)
+            if (this.accounts.has(user))
+              return true;
         // eslint-disable-next-line no-empty
       } catch {}
 

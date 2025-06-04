@@ -359,7 +359,7 @@ test.describe("WorkerBee Bot events test", () => {
 
       let gotTx = false;
       await new Promise<void>(resolve => {
-        bot.providePastOperations(headBlock - 3, headBlock).onTransactionId(block!.transaction_ids[0]).provideBlockHeaderData().subscribe({
+        bot.providePastOperations(headBlock - 3, headBlock).onTransactionIds(block!.transaction_ids[0]).provideBlockHeaderData().subscribe({
           next(data) {
             gotTx = true;
 

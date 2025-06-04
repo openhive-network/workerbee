@@ -1,3 +1,4 @@
+import type { TAccountName } from "@hiveio/wax";
 import type { WorkerBee } from "../../bot";
 import { WitnessClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
@@ -7,16 +8,22 @@ import { FilterBase } from "./filter-base";
 export class WitnessMissedBlocksFilter extends FilterBase {
   public constructor(
     worker: WorkerBee,
-    private readonly witness: string,
+    witnesses: TAccountName[],
     private readonly missedBlocksCountMin: number
   ) {
     super(worker);
+
+    this.witnesses = new Set(witnesses);
   }
 
+  private readonly witnesses = new Set<TAccountName>();
+
   public usedContexts(): Array<TRegisterEvaluationContext> {
-    return [
-      WitnessClassifier.forOptions({ witness: this.witness })
-    ];
+    const classifiers: TRegisterEvaluationContext[] = [];
+    for (const witness of this.witnesses)
+      classifiers.push(WitnessClassifier.forOptions({ witness }));
+
+    return classifiers;
   }
 
   private initialMissedBlocksCount: number | undefined;
@@ -25,34 +32,40 @@ export class WitnessMissedBlocksFilter extends FilterBase {
   public async match(data: DataEvaluationContext): Promise<boolean> {
     const { witnesses } = await data.get(WitnessClassifier);
 
-    const witness = witnesses[this.witness];
+    for(const witnessName of this.witnesses) {
+      const witness = witnesses[witnessName];
 
-    if (this.previousLastBlockNumber === undefined) {
-      this.initialMissedBlocksCount = witness.totalMissedBlocks;
+      // If witness is not producing blocks, we do not care about missed blocks
+      if (witness === undefined)
+        continue;
+
+      if (this.previousLastBlockNumber === undefined) {
+        this.initialMissedBlocksCount = witness.totalMissedBlocks;
+        this.previousLastBlockNumber = witness.lastConfirmedBlockNum;
+
+        return false;
+      }
+
+      /*
+       * If witness missed more blocks than the minimum required and his last signed block number has not changed
+       * (he is not producing blocks)
+       */
+      if (this.previousLastBlockNumber === witness.lastConfirmedBlockNum
+        && this.initialMissedBlocksCount !== undefined
+        && witness.totalMissedBlocks > (this.initialMissedBlocksCount + this.missedBlocksCountMin)
+      ) {
+        // Reset missed blocks count to avoid multiple notifications for the same missed blocks streak
+        this.initialMissedBlocksCount = undefined;
+
+        return true;
+      }
+
+      // Update the initial missed blocks count if the last signed block number has changed - block missed streak reset
+      if (this.previousLastBlockNumber !== witness.lastConfirmedBlockNum)
+        this.initialMissedBlocksCount = witness.totalMissedBlocks;
+
       this.previousLastBlockNumber = witness.lastConfirmedBlockNum;
-
-      return false;
     }
-
-    /*
-     * If witness missed more blocks than the minimum required and his last signed block number has not changed
-     * (he is not producing blocks)
-     */
-    if (this.previousLastBlockNumber === witness.lastConfirmedBlockNum
-      && this.initialMissedBlocksCount !== undefined
-      && witness.totalMissedBlocks > (this.initialMissedBlocksCount + this.missedBlocksCountMin)
-    ) {
-      // Reset missed blocks count to avoid multiple notifications for the same missed blocks streak
-      this.initialMissedBlocksCount = undefined;
-
-      return true;
-    }
-
-    // Update the initial missed blocks count if the last signed block number has changed - block missed streak reset
-    if (this.previousLastBlockNumber !== witness.lastConfirmedBlockNum)
-      this.initialMissedBlocksCount = witness.totalMissedBlocks;
-
-    this.previousLastBlockNumber = witness.lastConfirmedBlockNum;
 
     return false;
   }

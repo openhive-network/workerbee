@@ -1,3 +1,4 @@
+import type { TAccountName } from "@hiveio/wax";
 import type { WorkerBee } from "../../bot";
 import { AccountClassifier } from "../classifiers";
 import { IAccountBalance } from "../classifiers/account-classifier";
@@ -8,18 +9,24 @@ import { FilterBase } from "./filter-base";
 export class BalanceChangeFilter extends FilterBase {
   public constructor(
     worker: WorkerBee,
-    private readonly account: string,
+    accounts: TAccountName[],
     private readonly includeInternalTransfers: boolean = false
   ) {
     super(worker);
+
+    this.accounts = new Set(accounts);
   }
 
+  private readonly accounts: Set<TAccountName>;
+
   public usedContexts(): Array<TRegisterEvaluationContext> {
-    return [
-      AccountClassifier.forOptions({
-        account: this.account
-      })
-    ];
+    const classifiers: Array<TRegisterEvaluationContext> = [];
+    for(const account of this.accounts)
+      classifiers.push(AccountClassifier.forOptions({
+        account
+      }));
+
+    return classifiers;
   }
 
   private previousBalance?: IAccountBalance;
@@ -42,23 +49,31 @@ export class BalanceChangeFilter extends FilterBase {
   public async match(data: DataEvaluationContext): Promise<boolean> {
     const { accounts } = await data.get(AccountClassifier);
 
-    const account = accounts[this.account];
+    for(const accountName of this.accounts) {
+      const account = accounts[accountName];
 
-    if (this.previousBalance === undefined) {
+      if (account === undefined)
+        return false;
+
+      if (this.previousBalance === undefined) {
+        this.previousBalance = account.balance;
+
+        return false;
+      }
+
+      if (this.includeInternalTransfers)
+        return this.parseInternalTransfers(account.balance);
+
+      const changedHP = this.previousBalance.HP.total.amount !== account.balance.HP.total.amount;
+      const changedHIVE = this.previousBalance.HIVE.total.amount !== account.balance.HIVE.total.amount;
+      const changedHBD = this.previousBalance.HBD.total.amount !== account.balance.HBD.total.amount;
+
       this.previousBalance = account.balance;
 
-      return false;
+      if (changedHP || changedHIVE || changedHBD)
+        return true;
     }
 
-    if (this.includeInternalTransfers)
-      return this.parseInternalTransfers(account.balance);
-
-    const changedHP = this.previousBalance.HP.total.amount !== account.balance.HP.total.amount;
-    const changedHIVE = this.previousBalance.HIVE.total.amount !== account.balance.HIVE.total.amount;
-    const changedHBD = this.previousBalance.HBD.total.amount !== account.balance.HBD.total.amount;
-
-    this.previousBalance = account.balance;
-
-    return changedHP || changedHIVE || changedHBD;
+    return false;
   }
 }

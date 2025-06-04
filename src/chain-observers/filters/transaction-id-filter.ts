@@ -7,10 +7,14 @@ import { FilterBase } from "./filter-base";
 export class TransactionIdFilter extends FilterBase {
   public constructor(
     worker: WorkerBee,
-    private readonly transactionId: string
+    transactionIds: string[]
   ) {
     super(worker);
+
+    this.transactionIds = new Set(transactionIds);
   }
+
+  private readonly transactionIds: Set<string>;
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [
@@ -21,6 +25,10 @@ export class TransactionIdFilter extends FilterBase {
   public async match(data: DataEvaluationContext): Promise<boolean> {
     const block = await data.get(BlockClassifier);
 
-    return block.transactionsPerId.has(this.transactionId);
+    for(const transactionId of this.transactionIds)
+      if(block.transactionsPerId.has(transactionId))
+        return true;
+
+    return false;
   }
 }

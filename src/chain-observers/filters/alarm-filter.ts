@@ -1,3 +1,4 @@
+import type { TAccountName } from "@hiveio/wax";
 import type { WorkerBee } from "../../bot";
 import { AccountClassifier, ChangeRecoveryInProgressClassifier, DeclineVotingRightsClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
@@ -10,40 +11,55 @@ export const ONE_MONTH_MS = 1000 * 60 * 60 * 24 * 31;
 export class AlarmFilter extends FilterBase {
   public constructor(
     worker: WorkerBee,
-    private readonly account: string
+    accounts: TAccountName[]
   ) {
     super(worker);
+
+    this.accounts = new Set(accounts);
   }
 
+  private readonly accounts: Set<TAccountName>;
+
   public usedContexts(): Array<TRegisterEvaluationContext> {
-    return [
-      AccountClassifier.forOptions({ account: this.account }),
-      ChangeRecoveryInProgressClassifier.forOptions({ changeRecoveryAccount: this.account }),
-      DeclineVotingRightsClassifier.forOptions({ declineVotingRightsAccount: this.account })
-    ];
+    const classifiers: TRegisterEvaluationContext[] = [];
+    for (const account of this.accounts)
+      classifiers.push(
+        AccountClassifier.forOptions({ account }),
+        ChangeRecoveryInProgressClassifier.forOptions({ changeRecoveryAccount: account }),
+        DeclineVotingRightsClassifier.forOptions({ declineVotingRightsAccount: account })
+      );
+
+    return classifiers;
   }
 
   public async match(data: DataEvaluationContext): Promise<boolean> {
     const { accounts } = await data.get(AccountClassifier);
 
-    if (accounts[this.account].recoveryAccount === STEEM_ACCOUNT_NAME)
-      return true;
+    for(const accountName of this.accounts) {
+      const account = accounts[accountName];
 
-    if (accounts[this.account].governanceVoteExpiration === undefined)
-      return true;
+      if (account === undefined)
+        return false;
 
-    if (accounts[this.account].governanceVoteExpiration!.getTime() < (Date.now() + ONE_MONTH_MS))
-      return true;
+      if (account.recoveryAccount === STEEM_ACCOUNT_NAME)
+        return true;
 
-    const { recoveringAccounts } = await data.get(ChangeRecoveryInProgressClassifier);
+      if (account.governanceVoteExpiration === undefined)
+        return true;
 
-    if (recoveringAccounts[this.account])
-      return true;
+      if (account.governanceVoteExpiration!.getTime() < (Date.now() + ONE_MONTH_MS))
+        return true;
 
-    const { declineVotingRightsAccounts } = await data.get(DeclineVotingRightsClassifier);
+      const { recoveringAccounts } = await data.get(ChangeRecoveryInProgressClassifier);
 
-    if (declineVotingRightsAccounts[this.account])
-      return true;
+      if (recoveringAccounts[accountName])
+        return true;
+
+      const { declineVotingRightsAccounts } = await data.get(DeclineVotingRightsClassifier);
+
+      if (declineVotingRightsAccounts[accountName])
+        return true;
+    }
 
     return false;
   }
