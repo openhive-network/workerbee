@@ -27,6 +27,9 @@ export class ContentMetadataCollector extends CollectorBase<ContentMetadataClass
 
       for(const comment of comments) {
         contentData[comment.author] = contentData[comment.author] || {};
+
+        const payoutTime = new Date(`${comment.cashout_time}Z`);
+
         contentData[comment.author][comment.permlink] = {
           author: comment.author,
           permlink: comment.permlink,
@@ -44,7 +47,8 @@ export class ContentMetadataCollector extends CollectorBase<ContentMetadataClass
           lastUpdated: new Date(`${comment.last_update}Z`),
           netRshares: Long.fromValue(comment.net_rshares),
           netVotes: comment.net_votes,
-          payoutTime: new Date(`${comment.cashout_time}Z`),
+          payoutTime: payoutTime,
+          isPaid: payoutTime.getTime() <= 0,
           replyCount: comment.children,
           totalPayoutValue: comment.total_payout_value,
           title: comment.title
@@ -66,6 +70,9 @@ export class ContentMetadataCollector extends CollectorBase<ContentMetadataClass
       for(const author in contentData)
         for(const permlink in contentData[author]) {
           const postMetadata = contentData[author][permlink];
+          if (postMetadata.isPaid)
+            continue; // Skip already paid posts
+
           const cacheKey = `${author}/${permlink}`;
 
           const rollbackAfter = postMetadata.payoutTime.getTime() - options.reportAfterMsBeforePayout;

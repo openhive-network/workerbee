@@ -91,6 +91,14 @@ export interface IHiveContentMetadata {
   payoutTime: Date;
 
   /**
+   * Indicates if the content has already paid out rewards.
+   * This will be `true` if the `payoutTime` is in the past, meaning rewards have been distributed.
+   * If the `payoutTime` is in the future, this will be `false`.
+   * @example true
+   */
+  isPaid: boolean;
+
+  /**
    * The total value (usually in Hive Backed Dollars - HBD) that was actually paid out for this content.
    * This will show "0" or be empty if the `payoutTime` is still in the future.
    * The `amount` is the numerical value, `nai` is the asset identifier, and `precision` is the number of decimal places.
