@@ -28,10 +28,13 @@ export abstract class BlogContentMetadataFilter extends FilterBase {
     ];
   }
 
+  private queriedPosts: TContentMetadataQueryData[] = [];
+
   public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { operationsPerType } = await data.get(OperationClassifier);
 
-    const queryComments: TContentMetadataQueryData[] = [];
+    const queryComments: TContentMetadataQueryData[] = [...this.queriedPosts];
+    this.queriedPosts = []; // Reset for next match
 
     if (operationsPerType.comment)
       for(const { operation } of operationsPerType.comment) {
@@ -47,11 +50,17 @@ export abstract class BlogContentMetadataFilter extends FilterBase {
         queryComments.push([operation.author, operation.permlink]);
       }
 
-    if (queryComments.length > 0)
-      await data.query(ContentMetadataClassifier, {
+    if (queryComments.length > 0) {
+      const comments = await data.query(ContentMetadataClassifier, {
         requestedData: queryComments,
         reportAfterMsBeforePayout: this.reportAfterMsBeforePayout
       });
+
+      for(const [author, permlink] of queryComments)
+        if (!comments[author] || !comments[author][permlink])
+          this.queriedPosts.push([author, permlink]); // Add back to queried posts if not found
+
+    }
 
     const { contentData } = await data.get(ContentMetadataClassifier);
     for(const _ in contentData)
