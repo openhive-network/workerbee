@@ -2,7 +2,7 @@ import { EManabarType } from "@hiveio/wax";
 import type { WorkerBee } from "../../bot";
 import { ManabarClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import type { DataEvaluationContext } from "../factories/data-evaluation-context";
+import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";
 
 export class AccountFullManabarFilter extends FilterBase {
@@ -31,7 +31,7 @@ export class AccountFullManabarFilter extends FilterBase {
     return context;
   }
 
-  public async match(data: DataEvaluationContext): Promise<boolean> {
+  public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { manabarData } = await data.get(ManabarClassifier);
 
     for(const account of this.accounts) {

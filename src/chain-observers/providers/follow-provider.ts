@@ -1,7 +1,7 @@
 import { EFollowActions, TAccountName } from "@hiveio/wax";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { IOperationTransactionPair, OperationClassifier } from "../classifiers/operation-classifier";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export interface IFollowOperation {
@@ -34,7 +34,7 @@ export class FollowProvider<TAccounts extends Array<TAccountName> = Array<string
     return [OperationClassifier]
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IFollowProviderData<TAccounts>> {
+  public async provide(data: TProviderEvaluationContext): Promise<IFollowProviderData<TAccounts>> {
     const result = {
       follows: {}
     } as IFollowProviderData<TAccounts>;

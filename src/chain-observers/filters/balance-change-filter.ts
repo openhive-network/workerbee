@@ -3,7 +3,7 @@ import type { WorkerBee } from "../../bot";
 import { AccountClassifier } from "../classifiers";
 import { IAccountBalance } from "../classifiers/account-classifier";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import type { DataEvaluationContext } from "../factories/data-evaluation-context";
+import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";
 
 export class BalanceChangeFilter extends FilterBase {
@@ -46,7 +46,7 @@ export class BalanceChangeFilter extends FilterBase {
     return false;
   }
 
-  public async match(data: DataEvaluationContext): Promise<boolean> {
+  public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { accounts } = await data.get(AccountClassifier);
 
     for(const accountName of this.accounts) {

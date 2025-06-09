@@ -2,7 +2,7 @@ import type { TAccountName } from "@hiveio/wax";
 import type { WorkerBee } from "../../bot";
 import { AccountClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import type { DataEvaluationContext } from "../factories/data-evaluation-context";
+import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";
 
 export class AccountMetadataChangeFilter extends FilterBase {
@@ -30,7 +30,7 @@ export class AccountMetadataChangeFilter extends FilterBase {
   private previousJsonMetadata?: string;
   private previousPostingJsonMetadata?: string;
 
-  public async match(data: DataEvaluationContext): Promise<boolean> {
+  public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { accounts } = await data.get(AccountClassifier);
 
     for(const accountName of this.accounts) {

@@ -2,7 +2,7 @@ import { TAccountName } from "@hiveio/wax";
 import { AccountClassifier } from "../classifiers";
 import { IAccount } from "../classifiers/account-classifier";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export type TAccountProvided<TAccounts extends Array<TAccountName>> = {
@@ -33,7 +33,7 @@ export class AccountProvider<TAccounts extends Array<TAccountName> = Array<TAcco
     return contexts;
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IAccountProviderData<TAccounts>> {
+  public async provide(data: TProviderEvaluationContext): Promise<IAccountProviderData<TAccounts>> {
     const result = {
       accounts: {}
     };

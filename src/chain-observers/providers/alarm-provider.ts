@@ -2,7 +2,7 @@ import { TAccountName } from "@hiveio/wax";
 import { WorkerBeeIterable } from "../../types/iterator";
 import { AccountClassifier, ChangeRecoveryInProgressClassifier, DeclineVotingRightsClassifier } from "../classifiers";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ONE_MONTH_MS, STEEM_ACCOUNT_NAME } from "../filters/alarm-filter";
 import { ProviderBase } from "./provider-base";
 
@@ -47,7 +47,7 @@ export class AlarmProvider<TAccounts extends Array<TAccountName> = Array<TAccoun
     return contexts;
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IAlarmAccountsData<TAccounts>> {
+  public async provide(data: TProviderEvaluationContext): Promise<IAlarmAccountsData<TAccounts>> {
     const result: IAlarmAccountsData<TAccounts> = {
       alarmsPerAccount: {} as TAlarmAccounts<TAccounts>
     };

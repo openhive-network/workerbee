@@ -1,7 +1,7 @@
 import type { WorkerBee } from "../../bot";
 import { WorkerBeeUnsatisfiedFilterError } from "../../errors";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "../filters/filter-base";
 
 abstract class CompositeFilter extends FilterBase {
@@ -21,7 +21,7 @@ abstract class CompositeFilter extends FilterBase {
     return [...collectorSet];
   }
 
-  protected async evaluateOperands(context: DataEvaluationContext, forceCancelValue?: boolean, forceResolveValue?: boolean): Promise<void> {
+  protected async evaluateOperands(context: TFilterEvaluationContext, forceCancelValue?: boolean, forceResolveValue?: boolean): Promise<void> {
     let forceResolve = () => {};
     let forceReject = (_: WorkerBeeUnsatisfiedFilterError) => {};
 
@@ -43,7 +43,7 @@ abstract class CompositeFilter extends FilterBase {
 };
 
 export class LogicalAndFilter extends CompositeFilter {
-  public async match(context: DataEvaluationContext): Promise<boolean> {
+  public async match(context: TFilterEvaluationContext): Promise<boolean> {
     try {
       await this.evaluateOperands(context, false);
 
@@ -58,7 +58,7 @@ export class LogicalAndFilter extends CompositeFilter {
 };
 
 export class LogicalOrFilter extends CompositeFilter {
-  public async match(context: DataEvaluationContext): Promise<boolean> {
+  public async match(context: TFilterEvaluationContext): Promise<boolean> {
     try {
       await this.evaluateOperands(context, undefined, true);
 

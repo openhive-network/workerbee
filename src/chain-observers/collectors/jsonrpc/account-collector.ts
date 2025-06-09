@@ -1,7 +1,7 @@
 import Long from "long";
 import { AccountClassifier } from "../../classifiers";
 import { IAccount } from "../../classifiers/account-classifier";
-import { DataEvaluationContext } from "../../factories/data-evaluation-context";
+import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
 
@@ -21,7 +21,7 @@ export class AccountCollector extends CollectorBase<AccountClassifier> {
       delete this.accounts[data.account];
   }
 
-  public async get(data: DataEvaluationContext) {
+  public async get(data: TCollectorEvaluationContext) {
     const accounts: Record<string, IAccount> = {};
 
     const tryParseJson = (jsonData: string) => {

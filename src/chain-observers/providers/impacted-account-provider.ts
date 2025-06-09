@@ -3,7 +3,7 @@ import { WorkerBeeIterable } from "../../types/iterator";
 import { ImpactedAccountClassifier } from "../classifiers";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { IOperationTransactionPair } from "../classifiers/operation-classifier";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export type TImpactedAccountProvided<TAccounts extends Array<TAccountName>> = {
@@ -32,7 +32,7 @@ export class ImpactedAccountProvider<TAccounts extends Array<TAccountName> = Arr
     ];
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IImpactedAccountProviderData<TAccounts>> {
+  public async provide(data: TProviderEvaluationContext): Promise<IImpactedAccountProviderData<TAccounts>> {
     const result = {
       impactedAccounts: {}
     };

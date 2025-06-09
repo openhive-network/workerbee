@@ -1,7 +1,7 @@
 import { BlockClassifier, OperationClassifier } from "../../classifiers";
 import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
 import { IOperationTransactionPair } from "../../classifiers/operation-classifier";
-import { DataEvaluationContext } from "../../factories/data-evaluation-context";
+import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
 export class OperationCollector extends CollectorBase<OperationClassifier> {
@@ -9,7 +9,7 @@ export class OperationCollector extends CollectorBase<OperationClassifier> {
     return [BlockClassifier];
   }
 
-  public async get(data: DataEvaluationContext) {
+  public async get(data: TCollectorEvaluationContext) {
     const { transactions } = await data.get(BlockClassifier);
 
     const operations: Array<IOperationTransactionPair> = [];

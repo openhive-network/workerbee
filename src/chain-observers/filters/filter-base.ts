@@ -1,6 +1,6 @@
 import type { WorkerBee } from "../../bot";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import type { DataEvaluationContext } from "../factories/data-evaluation-context";
+import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 
 export abstract class FilterBase {
   public constructor(
@@ -9,5 +9,5 @@ export abstract class FilterBase {
 
   public abstract usedContexts(): Array<TRegisterEvaluationContext>;
 
-  public abstract match(data: DataEvaluationContext): Promise<boolean>;
+  public abstract match(data: TFilterEvaluationContext): Promise<boolean>;
 }

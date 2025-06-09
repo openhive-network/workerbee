@@ -2,7 +2,7 @@ import { OperationClassifier, ImpactedAccountClassifier } from "../../classifier
 import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
 import { IImpactedAccount } from "../../classifiers/impacted-account-classifier";
 import { IOperationTransactionPair } from "../../classifiers/operation-classifier";
-import { DataEvaluationContext } from "../../factories/data-evaluation-context";
+import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
 export class ImpactedAccountCollector extends CollectorBase<ImpactedAccountClassifier> {
@@ -10,7 +10,7 @@ export class ImpactedAccountCollector extends CollectorBase<ImpactedAccountClass
     return [OperationClassifier];
   }
 
-  public async get(data: DataEvaluationContext) {
+  public async get(data: TCollectorEvaluationContext) {
     const { operations } = await data.get(OperationClassifier);
 
     const startImpactedAccounts = Date.now();

@@ -1,6 +1,6 @@
 import { WitnessClassifier } from "../../classifiers";
 import { IWitness } from "../../classifiers/witness-classifier";
-import { DataEvaluationContext } from "../../factories/data-evaluation-context";
+import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
 const MAX_WITNESS_GET_LIMIT = 1000;
@@ -19,7 +19,7 @@ export class WitnessCollector extends CollectorBase<WitnessClassifier> {
       delete this.witnesses[data.witness];
   }
 
-  public async get(data: DataEvaluationContext) {
+  public async get(data: TCollectorEvaluationContext) {
     const witnesses: Record<string, IWitness> = {};
 
     const witnessNames = Object.keys(this.witnesses);

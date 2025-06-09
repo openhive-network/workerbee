@@ -1,7 +1,7 @@
 import type { WorkerBee } from "../../bot";
 import { OperationClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import type { DataEvaluationContext } from "../factories/data-evaluation-context";
+import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";
 
 export class VoteFilter extends FilterBase {
@@ -22,7 +22,7 @@ export class VoteFilter extends FilterBase {
     ];
   }
 
-  public async match(data: DataEvaluationContext): Promise<boolean> {
+  public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { operationsPerType } = await data.get(OperationClassifier);
 
     if (operationsPerType.vote === undefined)

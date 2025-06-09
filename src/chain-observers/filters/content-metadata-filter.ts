@@ -3,7 +3,7 @@ import type { WorkerBee } from "../../bot";
 import { ContentMetadataClassifier, OperationClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { TContentMetadataQueryData } from "../classifiers/content-metadata-classifier";
-import type { DataEvaluationContext } from "../factories/data-evaluation-context";
+import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";
 
 // Base class for content filters (posts and comments)
@@ -28,7 +28,7 @@ export abstract class BlogContentMetadataFilter extends FilterBase {
     ];
   }
 
-  public async match(data: DataEvaluationContext): Promise<boolean> {
+  public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { operationsPerType } = await data.get(OperationClassifier);
 
     const queryComments: TContentMetadataQueryData[] = [];

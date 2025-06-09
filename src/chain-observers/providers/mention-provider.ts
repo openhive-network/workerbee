@@ -2,7 +2,7 @@ import { comment, TAccountName } from "@hiveio/wax";
 import { WorkerBeeIterable } from "../../types/iterator";
 import { OperationClassifier } from "../classifiers";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export type TMentionedAccountProvided<TMentions extends Array<TAccountName>> = {
@@ -31,7 +31,7 @@ export class MentionedAccountProvider<TMentions extends Array<TAccountName> = Ar
     ];
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IMentionedAccountProviderData<TMentions>> {
+  public async provide(data: TProviderEvaluationContext): Promise<IMentionedAccountProviderData<TMentions>> {
     const mentioned = {} as IMentionedAccountProviderData<TMentions>["mentioned"];
 
     const { operationsPerType } = await data.get(OperationClassifier);

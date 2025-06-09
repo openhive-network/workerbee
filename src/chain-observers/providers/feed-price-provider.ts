@@ -2,7 +2,7 @@ import { price } from "@hiveio/wax";
 import { WorkerBeeIterable } from "../../types/iterator";
 import { FeedPriceClassifier } from "../classifiers";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export interface IFeedPriceData {
@@ -23,7 +23,7 @@ export class FeedPriceProvider extends ProviderBase {
     ]
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IFeedPriceProviderData> {
+  public async provide(data: TProviderEvaluationContext): Promise<IFeedPriceProviderData> {
     const { currentMedianHistory, currentMinHistory, currentMaxHistory, priceHistory } = await data.get(FeedPriceClassifier);
 
     return {

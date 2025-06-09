@@ -3,7 +3,7 @@ import { WorkerBeeError } from "../../../errors";
 import { DynamicGlobalPropertiesClassifier, BlockClassifier } from "../../classifiers";
 import { ITransactionData } from "../../classifiers/block-classifier";
 import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
-import { DataEvaluationContext } from "../../factories/data-evaluation-context";
+import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
 export class BlockCollector extends CollectorBase<BlockClassifier> {
@@ -15,7 +15,7 @@ export class BlockCollector extends CollectorBase<BlockClassifier> {
     return [DynamicGlobalPropertiesClassifier];
   }
 
-  public async get(data: DataEvaluationContext) {
+  public async get(data: TCollectorEvaluationContext) {
     const { headBlockNumber } = await data.get(DynamicGlobalPropertiesClassifier);
 
     if(this.currentHeadBlock === headBlockNumber)

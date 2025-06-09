@@ -1,7 +1,7 @@
 import type { WorkerBee } from "../../bot";
 import { ImpactedAccountClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import type { DataEvaluationContext } from "../factories/data-evaluation-context";
+import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";
 
 export class ImpactedAccountFilter extends FilterBase {
@@ -22,7 +22,7 @@ export class ImpactedAccountFilter extends FilterBase {
     ];
   }
 
-  public async match(data: DataEvaluationContext): Promise<boolean> {
+  public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const impactedAccount = await data.get(ImpactedAccountClassifier);
 
     for(const account of this.accounts)

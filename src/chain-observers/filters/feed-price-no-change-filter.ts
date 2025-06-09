@@ -1,7 +1,7 @@
 import type { WorkerBee } from "../../bot";
 import { FeedPriceClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import type { DataEvaluationContext } from "../factories/data-evaluation-context";
+import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";
 
 export class FeedPriceNoChangeFilter extends FilterBase {
@@ -24,7 +24,7 @@ export class FeedPriceNoChangeFilter extends FilterBase {
 
   private previousUpdateTimestamp: Date | undefined;
 
-  public async match(data: DataEvaluationContext): Promise<boolean> {
+  public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { priceHistory, lastFeedPriceRetrievalTimestamp } = await data.get(FeedPriceClassifier);
 
     if (this.previousUpdateTimestamp && this.previousUpdateTimestamp > lastFeedPriceRetrievalTimestamp)

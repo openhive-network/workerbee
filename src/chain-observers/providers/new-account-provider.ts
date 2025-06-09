@@ -3,7 +3,7 @@ import { authority, TAccountName } from "@hiveio/wax";
 import { WorkerBeeIterable } from "../../types/iterator";
 import { OperationClassifier } from "../classifiers";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export type TNewAccountProvided = {
@@ -25,7 +25,7 @@ export class NewAccountProvider extends ProviderBase {
     return [OperationClassifier];
   }
 
-  public async provide(data: DataEvaluationContext): Promise<INewAccountProviderData> {
+  public async provide(data: TProviderEvaluationContext): Promise<INewAccountProviderData> {
     const result: TNewAccountProvided[] = [];
 
     const { operationsPerType } = await data.get(OperationClassifier);

@@ -1,7 +1,7 @@
 import { custom, custom_json } from "@hiveio/wax";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { IOperationTransactionPair, OperationClassifier } from "../classifiers/operation-classifier";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export type TCustomOperationProvided<TOperationId extends Array<string | number>> = {
@@ -30,7 +30,7 @@ export class CustomOperationProvider<
     return [OperationClassifier]
   }
 
-  public async provide(data: DataEvaluationContext): Promise<ICustomOperationProviderData<TOperationId>> {
+  public async provide(data: TProviderEvaluationContext): Promise<ICustomOperationProviderData<TOperationId>> {
     const result = {
       customOperations: {}
     } as ICustomOperationProviderData<TOperationId>;

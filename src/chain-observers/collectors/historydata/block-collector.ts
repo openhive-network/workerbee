@@ -4,7 +4,7 @@ import { WorkerBeeError } from "../../../errors";
 import { BlockClassifier, BlockHeaderClassifier } from "../../classifiers";
 import { ITransactionData } from "../../classifiers/block-classifier";
 import { IBlockHeaderData } from "../../classifiers/block-header-classifier";
-import { DataEvaluationContext } from "../../factories/data-evaluation-context";
+import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
 const MAX_TAKE_BLOCKS = 1000;
@@ -30,7 +30,7 @@ export class BlockCollector extends CollectorBase<BlockClassifier> {
 
   private cachedBlocksData: ApiBlock[] = [];
 
-  public async get(data: DataEvaluationContext) {
+  public async get(data: TCollectorEvaluationContext) {
     if (this.toBlock !== undefined && this.currentBlockIndex > this.toBlock)
       throw new WorkerBeeError(`Block Buffer overflow in history data BlockCollector: ${this.currentBlockIndex} > ${this.toBlock}`);
 

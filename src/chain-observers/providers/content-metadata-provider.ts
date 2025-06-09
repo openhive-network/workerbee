@@ -1,7 +1,7 @@
 import { TAccountName } from "@hiveio/wax";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { ContentMetadataClassifier, TContentMetadataAuthorData } from "../classifiers/content-metadata-classifier";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 // Common interface for blog content data (posts and comments)
@@ -46,7 +46,7 @@ export abstract class ContentMetadataProvider<
 
   public abstract pushOptions(options: TOptions): void;
 
-  public async createProviderData(data: DataEvaluationContext): Promise<Partial<TContentMetadataProvided<TAccounts>>> {
+  public async createProviderData(data: TProviderEvaluationContext): Promise<Partial<TContentMetadataProvided<TAccounts>>> {
     const { contentData } = await data.get(ContentMetadataClassifier);
 
     const result: Partial<TContentMetadataProvided<TAccounts>> = {};
@@ -78,7 +78,7 @@ export class CommentMetadataProvider<TAccounts extends Array<TAccountName> = Arr
       this.authors.add(account);
   }
 
-  public async provide(data: DataEvaluationContext): Promise<ICommentMetadataProviderData<TAccounts>> {
+  public async provide(data: TProviderEvaluationContext): Promise<ICommentMetadataProviderData<TAccounts>> {
     return {
       commentsMetadata: await this.createProviderData(data)
     };
@@ -96,7 +96,7 @@ export class PostMetadataProvider<TAccounts extends Array<TAccountName> = Array<
       this.authors.add(account);
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IPostMetadataProviderData<TAccounts>> {
+  public async provide(data: TProviderEvaluationContext): Promise<IPostMetadataProviderData<TAccounts>> {
     return {
       postsMetadata: await this.createProviderData(data)
     };

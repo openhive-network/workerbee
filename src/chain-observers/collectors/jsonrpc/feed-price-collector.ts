@@ -1,7 +1,7 @@
 import { DynamicGlobalPropertiesClassifier, FeedPriceClassifier } from "../../classifiers";
 import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
 import { IFeedPriceData } from "../../classifiers/feed-price-classifier";
-import { DataEvaluationContext } from "../../factories/data-evaluation-context";
+import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
 const isDivisibleByInRange = (by: number, start: number, end: number) => {
@@ -20,7 +20,7 @@ export class FeedPriceCollector extends CollectorBase<FeedPriceClassifier> {
     return [DynamicGlobalPropertiesClassifier];
   }
 
-  public async get(data: DataEvaluationContext) {
+  public async get(data: TCollectorEvaluationContext) {
     const { headBlockNumber } = await data.get(DynamicGlobalPropertiesClassifier);
 
     // Update feed price history every hour (HIVE_FEED_INTERVAL_BLOCKS) or when there is no cached data

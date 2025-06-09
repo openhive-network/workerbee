@@ -2,7 +2,7 @@ import type { WorkerBee } from "../../bot";
 
 import type * as TClassifiers from "../classifiers";
 import { CollectorClassifierBase, TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TCollectorEvaluationContext } from "../factories/data-evaluation-context";
 
 export type TAvailableClassifiers = {
   [key in keyof typeof TClassifiers]: InstanceType<(typeof TClassifiers)[key]>["getType"];
@@ -26,15 +26,17 @@ export class CollectorBase<Classifier extends CollectorClassifierBase<any, any, 
    * We need to return the data in the format of { [classifierName]: { [key]: value } } so
    * overriding can be properly deduced later by the data evaluation context
    *
-   * This method allows to get collector state and cache the request, which can be used in the evaluation context {@link DataEvaluationContext.get} method
+   * This method allows to get collector state and cache the request, which can be used in the evaluation context
+   * {@link TCollectorEvaluationContext.get} method
    * Think of this method as HTTP GET request, while {@link CollectorBase.query} is like HTTP POST request
    *
    * When user calls this method via Data evaluation context, and it is not overridden by the subclass, it will fail with an error
    */
-  public get?(data: DataEvaluationContext): Promise<TSpecificClassifier<Classifier> & Partial<TAvailableClassifiers>>;
+  public get?(data: TCollectorEvaluationContext): Promise<TSpecificClassifier<Classifier> & Partial<TAvailableClassifiers>>;
 
   /**
-   * This method allows to query the collector for data (without cache), which can be used in the evaluation context {@link DataEvaluationContext.query} method
+   * This method allows to query the collector for data (without cache), which can be used in the evaluation context
+   * {@link TCollectorEvaluationContext.query} method
    * Think of this method as HTTP POST request, while {@link CollectorBase.get} is like HTTP GET request
    *
    * Note: As results from this method are not cached, it is expected to be used for real-time data retrieval,
@@ -43,7 +45,7 @@ export class CollectorBase<Classifier extends CollectorClassifierBase<any, any, 
    *
    * When user calls this method via Data evaluation context, and it is not overridden by the subclass, it will fail with an error
    */
-  public query?(data: DataEvaluationContext, options: Classifier["queryOptionsType"]): Promise<Classifier["queryType"]>;
+  public query?(data: TCollectorEvaluationContext, options: Classifier["queryOptionsType"]): Promise<Classifier["queryType"]>;
 
   /**
    * If the collector uses any context, it should report it as dependency by overriding this function

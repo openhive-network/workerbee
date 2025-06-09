@@ -3,7 +3,7 @@ import { WorkerBeeIterable } from "../../types/iterator";
 import { isGreaterThan } from "../../utils/assets";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { OperationClassifier, IOperationTransactionPair } from "../classifiers/operation-classifier";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export interface IWhaleAlertMetadata {
@@ -34,7 +34,7 @@ export class WhaleAlertProvider extends ProviderBase<IWhaleAlertProviderOptions>
     ]
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IWhaleAlertProviderData> {
+  public async provide(data: TProviderEvaluationContext): Promise<IWhaleAlertProviderData> {
     const operations = await data.get(OperationClassifier);
 
     const transfer = operations.operationsPerType["transfer"];

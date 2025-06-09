@@ -2,7 +2,7 @@ import { price, type asset } from "@hiveio/wax";
 import { WorkerBeeIterable } from "../../types/iterator";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { OperationClassifier, IOperationTransactionPair } from "../classifiers/operation-classifier";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export interface IInternalMarketOperationBase {
@@ -35,7 +35,7 @@ export class InternalMarketProvider extends ProviderBase {
     ]
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IInternalMarketProviderData> {
+  public async provide(data: TProviderEvaluationContext): Promise<IInternalMarketProviderData> {
     const operations = await data.get(OperationClassifier);
 
     const orderCreate = operations.operationsPerType["limit_order_create"];

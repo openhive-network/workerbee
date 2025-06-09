@@ -3,7 +3,7 @@ import Long from "long";
 import { OrderedAggregateQueue } from "../../../types/queue";
 import { ContentMetadataClassifier } from "../../classifiers";
 import { IHiveContentMetadata, TContentMetadataQueryData } from "../../classifiers/content-metadata-classifier";
-import { DataEvaluationContext } from "../../factories/data-evaluation-context";
+import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
 export const BUCKET_INTERVAL = 3 * 1000; // 3 seconds (Hive block interval)
@@ -14,7 +14,7 @@ export class ContentMetadataCollector extends CollectorBase<ContentMetadataClass
   private readonly contractTimestamps = new OrderedAggregateQueue<number, TContentMetadataQueryData>();
   private readonly contentCached = new Set<string>();
 
-  private async retrieveData(data: DataEvaluationContext, requestData: Array<[TAccountName, string]>) {
+  private async retrieveData(data: TCollectorEvaluationContext, requestData: Array<[TAccountName, string]>) {
     const contentData: Record<TAccountName, Record<string, IHiveContentMetadata>> = {};
     for (let i = 0; i < requestData.length; i += MAX_CONTENT_GET_LIMIT) {
       const chunk = requestData.slice(i, i + MAX_CONTENT_GET_LIMIT);
@@ -61,7 +61,7 @@ export class ContentMetadataCollector extends CollectorBase<ContentMetadataClass
     return contentData;
   }
 
-  public async query(data: DataEvaluationContext, options: ContentMetadataClassifier["queryOptionsType"]) {
+  public async query(data: TCollectorEvaluationContext, options: ContentMetadataClassifier["queryOptionsType"]) {
     // First retrieve data:
     const contentData = await this.retrieveData(data, options.requestedData);
 
@@ -91,7 +91,7 @@ export class ContentMetadataCollector extends CollectorBase<ContentMetadataClass
     };
   }
 
-  public async get(data: DataEvaluationContext) {
+  public async get(data: TCollectorEvaluationContext) {
     const allData: Array<[TAccountName, string]> = [];
 
     // Now we can operate on the enqueued data:

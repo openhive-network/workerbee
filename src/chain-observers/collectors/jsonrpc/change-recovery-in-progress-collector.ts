@@ -1,6 +1,6 @@
 import { ChangeRecoveryInProgressClassifier } from "../../classifiers";
 import { IAccountChangingRecovery } from "../../classifiers/change-recovery-in-progress-classifier";
-import { DataEvaluationContext } from "../../factories/data-evaluation-context";
+import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
 
@@ -20,7 +20,7 @@ export class ChangeRecoveryInProgressCollector extends CollectorBase<ChangeRecov
       delete this.changeRecoveryAccounts[data.changeRecoveryAccount];
   }
 
-  public async get(data: DataEvaluationContext) {
+  public async get(data: TCollectorEvaluationContext) {
     const retrieveChangeRecoveryAccounts: Record<string, IAccountChangingRecovery> = {};
 
     const recoveryAccounts = Object.keys(this.changeRecoveryAccounts);

@@ -1,6 +1,6 @@
 import { BlockHeaderClassifier, DynamicGlobalPropertiesClassifier } from "../../classifiers";
 import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
-import { DataEvaluationContext } from "../../factories/data-evaluation-context";
+import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
 export class DynamicGlobalPropertiesCollector extends CollectorBase<DynamicGlobalPropertiesClassifier> {
@@ -8,7 +8,7 @@ export class DynamicGlobalPropertiesCollector extends CollectorBase<DynamicGloba
     return [BlockHeaderClassifier];
   }
 
-  public async get(data: DataEvaluationContext) {
+  public async get(data: TCollectorEvaluationContext) {
     const { id, number, timestamp, witness } = await data.get(BlockHeaderClassifier);
 
     return {

@@ -3,7 +3,7 @@ import { WorkerBeeIterable } from "../../types/iterator";
 import { Exchange, isExchange } from "../../utils/known-exchanges";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { OperationClassifier, IOperationTransactionPair } from "../classifiers/operation-classifier";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export interface IExchangeTransferMetadata {
@@ -29,7 +29,7 @@ export class ExchangeTransferProvider extends ProviderBase {
     ]
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IExchangeTransferProviderData> {
+  public async provide(data: TProviderEvaluationContext): Promise<IExchangeTransferProviderData> {
     const operations = await data.get(OperationClassifier);
 
     const transfer = operations.operationsPerType["transfer"];

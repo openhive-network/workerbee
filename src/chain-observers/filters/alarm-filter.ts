@@ -2,7 +2,7 @@ import type { TAccountName } from "@hiveio/wax";
 import type { WorkerBee } from "../../bot";
 import { AccountClassifier, ChangeRecoveryInProgressClassifier, DeclineVotingRightsClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import type { DataEvaluationContext } from "../factories/data-evaluation-context";
+import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";
 
 export const STEEM_ACCOUNT_NAME = "steem";
@@ -32,7 +32,7 @@ export class AlarmFilter extends FilterBase {
     return classifiers;
   }
 
-  public async match(data: DataEvaluationContext): Promise<boolean> {
+  public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { accounts } = await data.get(AccountClassifier);
 
     for(const accountName of this.accounts) {

@@ -1,7 +1,7 @@
 import { transaction } from "@hiveio/wax";
 import { BlockClassifier } from "../classifiers";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export type TTransactionProvider<TIdOfTx extends Array<string>> = {
@@ -30,7 +30,7 @@ export class TransactionByIdProvider<TIdOfTx extends Array<string> = Array<strin
     ];
   }
 
-  public async provide(data: DataEvaluationContext): Promise<ITransactionProviderData<TIdOfTx>> {
+  public async provide(data: TProviderEvaluationContext): Promise<ITransactionProviderData<TIdOfTx>> {
     const result = {
       transactions: {}
     };

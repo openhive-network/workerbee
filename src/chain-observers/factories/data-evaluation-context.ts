@@ -81,3 +81,8 @@ export class DataEvaluationContext {
     });
   }
 }
+
+export type TCollectorEvaluationContext = Pick<DataEvaluationContext, "addTiming" | "get" | "query">;
+
+export type TFilterEvaluationContext = Pick<DataEvaluationContext, "get" | "query">;
+export type TProviderEvaluationContext = Pick<DataEvaluationContext, "get" | "query">;

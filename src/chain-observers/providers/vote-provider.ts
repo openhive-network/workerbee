@@ -2,7 +2,7 @@ import { TAccountName, vote } from "@hiveio/wax";
 import { WorkerBeeArrayIterable, WorkerBeeIterable } from "../../types/iterator";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { IOperationTransactionPair, OperationClassifier } from "../classifiers/operation-classifier";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export type TVoteProvided<TAccounts extends Array<TAccountName>> = {
@@ -29,7 +29,7 @@ export class VoteProvider<TAccounts extends Array<TAccountName> = Array<TAccount
     return [OperationClassifier]
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IVoteProviderData<TAccounts>> {
+  public async provide(data: TProviderEvaluationContext): Promise<IVoteProviderData<TAccounts>> {
     const result = {
       votes: {}
     } as IVoteProviderData<TAccounts>;

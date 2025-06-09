@@ -2,7 +2,7 @@ import type { TAccountName } from "@hiveio/wax";
 import type { WorkerBee } from "../../bot";
 import { WitnessClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import type { DataEvaluationContext } from "../factories/data-evaluation-context";
+import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";
 
 export class WitnessMissedBlocksFilter extends FilterBase {
@@ -29,7 +29,7 @@ export class WitnessMissedBlocksFilter extends FilterBase {
   private initialMissedBlocksCount: number | undefined;
   private previousLastBlockNumber: number | undefined;
 
-  public async match(data: DataEvaluationContext): Promise<boolean> {
+  public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { witnesses } = await data.get(WitnessClassifier);
 
     for(const witnessName of this.witnesses) {

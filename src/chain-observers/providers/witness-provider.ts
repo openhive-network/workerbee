@@ -1,7 +1,7 @@
 import { TAccountName } from "@hiveio/wax";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { IWitness, WitnessClassifier } from "../classifiers/witness-classifier";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export type TWitnessProvider<TAccounts extends Array<TAccountName>> = {
@@ -32,7 +32,7 @@ export class WitnessProvider<TAccounts extends Array<TAccountName> = Array<TAcco
     return classifiers;
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IWitnessProviderData<TAccounts>> {
+  public async provide(data: TProviderEvaluationContext): Promise<IWitnessProviderData<TAccounts>> {
     const result = {
       witnesses: {}
     };

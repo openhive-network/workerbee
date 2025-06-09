@@ -4,7 +4,7 @@ import { AccountClassifier, RcAccountClassifier, ManabarClassifier } from "../..
 import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
 import { DynamicGlobalPropertiesClassifier } from "../../classifiers/dynamic-global-properties-classifier";
 import { TManabars } from "../../classifiers/manabar-classifier";
-import { DataEvaluationContext } from "../../factories/data-evaluation-context";
+import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
 const PERCENT_VALUE_DOUBLE_PRECISION = 100;
@@ -60,7 +60,7 @@ export class ManabarCollector extends CollectorBase<ManabarClassifier> {
     return classifiers;
   }
 
-  public async get(data: DataEvaluationContext) {
+  public async get(data: TCollectorEvaluationContext) {
     const dgpo = await data.get(DynamicGlobalPropertiesClassifier);
     const time = Math.round(dgpo.headBlockTime.getTime() / 1000);
 

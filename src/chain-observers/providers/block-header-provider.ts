@@ -1,6 +1,6 @@
 import { BlockHeaderClassifier, IBlockHeaderData } from "../classifiers/block-header-classifier";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export interface IBlockHeaderProviderData {
@@ -14,7 +14,7 @@ export class BlockHeaderProvider extends ProviderBase {
     ]
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IBlockHeaderProviderData> {
+  public async provide(data: TProviderEvaluationContext): Promise<IBlockHeaderProviderData> {
     const blockHeader = await data.get(BlockHeaderClassifier);
 
     return {

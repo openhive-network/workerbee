@@ -1,7 +1,7 @@
 import { TAccountName, EManabarType } from "@hiveio/wax";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { IManabarCollectorOptions, ManabarClassifier, TManabars } from "../classifiers/manabar-classifier";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export type TManabarProvided<TAccounts extends Array<TAccountName>> = {
@@ -38,7 +38,7 @@ export class ManabarProvider<TAccounts extends Array<TAccountName> = Array<TAcco
     return contexts;
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IManabarProviderData<TAccounts>> {
+  public async provide(data: TProviderEvaluationContext): Promise<IManabarProviderData<TAccounts>> {
     const result = {
       manabarData: {}
     };

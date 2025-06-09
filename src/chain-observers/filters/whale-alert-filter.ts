@@ -3,7 +3,7 @@ import type { WorkerBee } from "../../bot";
 import { isGreaterThan } from "../../utils/assets";
 import { OperationClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import type { DataEvaluationContext } from "../factories/data-evaluation-context";
+import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";
 
 export class WhaleAlertFilter extends FilterBase {
@@ -24,7 +24,7 @@ export class WhaleAlertFilter extends FilterBase {
     ];
   }
 
-  public async match(data: DataEvaluationContext): Promise<boolean> {
+  public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const operations = await data.get(OperationClassifier);
 
     const transfer = operations.operationsPerType["transfer"];

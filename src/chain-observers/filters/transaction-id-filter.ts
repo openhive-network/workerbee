@@ -1,7 +1,7 @@
 import type { WorkerBee } from "../../bot";
 import { BlockClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import type { DataEvaluationContext } from "../factories/data-evaluation-context";
+import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";
 
 export class TransactionIdFilter extends FilterBase {
@@ -22,7 +22,7 @@ export class TransactionIdFilter extends FilterBase {
     ];
   }
 
-  public async match(data: DataEvaluationContext): Promise<boolean> {
+  public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const block = await data.get(BlockClassifier);
 
     for(const transactionId of this.transactionIds)

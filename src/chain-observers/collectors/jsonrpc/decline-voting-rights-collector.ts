@@ -1,6 +1,6 @@
 import { DeclineVotingRightsClassifier } from "../../classifiers";
 import { IDeclinedVotingRightsAccount } from "../../classifiers/decline-voting-rights-classifier";
-import { DataEvaluationContext } from "../../factories/data-evaluation-context";
+import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
 
@@ -20,7 +20,7 @@ export class DeclineVotingRightsCollector extends CollectorBase<DeclineVotingRig
       delete this.declineVotingRightsAccounts[data.declineVotingRightsAccount];
   }
 
-  public async get(data: DataEvaluationContext) {
+  public async get(data: TCollectorEvaluationContext) {
     const declineVotingRightsAccounts: Record<string, IDeclinedVotingRightsAccount> = {};
 
     const recoveryAccounts = Object.keys(this.declineVotingRightsAccounts);

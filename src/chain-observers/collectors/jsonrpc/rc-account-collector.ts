@@ -1,7 +1,7 @@
 import Long from "long";
 import { RcAccountClassifier } from "../../classifiers";
 import { IRcAccount } from "../../classifiers/rc-account-classifier";
-import { DataEvaluationContext } from "../../factories/data-evaluation-context";
+import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
 const MAX_RC_ACCOUNT_GET_LIMIT = 1000;
@@ -20,7 +20,7 @@ export class RcAccountCollector extends CollectorBase<RcAccountClassifier> {
       delete this.rcAccounts[data.rcAccount];
   }
 
-  public async get(data: DataEvaluationContext) {
+  public async get(data: TCollectorEvaluationContext) {
     const rcAccounts: Record<string, IRcAccount> = {};
 
     const accountNames = Object.keys(this.rcAccounts);

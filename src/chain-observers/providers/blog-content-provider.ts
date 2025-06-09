@@ -2,7 +2,7 @@ import { comment, TAccountName } from "@hiveio/wax";
 import { WorkerBeeArrayIterable, WorkerBeeIterable } from "../../types/iterator";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { IOperationTransactionPair, OperationClassifier } from "../classifiers/operation-classifier";
-import { DataEvaluationContext } from "../factories/data-evaluation-context";
+import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ICommentData } from "../filters/blog-content-filter";
 import { ProviderBase } from "./provider-base";
 
@@ -53,7 +53,7 @@ export abstract class BlogContentProvider<
 
   public abstract pushOptions(options: TOptions): void;
 
-  public async createProviderData(data: DataEvaluationContext): Promise<TBlogContentProvided<TAccounts>> {
+  public async createProviderData(data: TProviderEvaluationContext): Promise<TBlogContentProvided<TAccounts>> {
     const result = {} as TBlogContentProvided<TAccounts>;
 
     const accounts = await data.get(OperationClassifier);
@@ -103,7 +103,7 @@ export class CommentProvider<TAccounts extends Array<TAccountName> = Array<TAcco
       this.authors.set(account, parentCommentFilter);
   }
 
-  public async provide(data: DataEvaluationContext): Promise<ICommentProviderData<TAccounts>> {
+  public async provide(data: TProviderEvaluationContext): Promise<ICommentProviderData<TAccounts>> {
     return {
       comments: await this.createProviderData(data)
     };
@@ -120,7 +120,7 @@ export class PostProvider<TAccounts extends Array<TAccountName> = Array<TAccount
       this.authors.set(account, undefined);
   }
 
-  public async provide(data: DataEvaluationContext): Promise<IPostProviderData<TAccounts>> {
+  public async provide(data: TProviderEvaluationContext): Promise<IPostProviderData<TAccounts>> {
     return {
       posts: await this.createProviderData(data)
     };
