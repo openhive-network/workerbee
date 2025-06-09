@@ -1,4 +1,40 @@
-import { asset, beneficiary_route_type, createHiveChain, IWaxOptionsChain, price, TAccountName, TWaxExtended } from "@hiveio/wax";
+import { asset, createHiveChain, IWaxOptionsChain, price, TAccountName, TWaxExtended } from "@hiveio/wax";
+
+export type share_type = number | string;
+export type time_point_sec = string; // ISO 8601 date string
+
+export type comment_cachout_info = {
+
+  total_payout_value: asset;
+  total_vote_weight: number | string;
+  curator_payout_value: asset;
+  max_accepted_payout: asset;
+
+  author_rewards: share_type;
+  children_abs_rshares: share_type;
+  net_rshares: share_type;
+  abs_rshares: share_type;
+  vote_rshares: share_type;
+
+  net_votes: number;
+
+  last_payout: time_point_sec ;
+  cashout_time: time_point_sec;
+  max_cashout_time: time_point_sec;
+
+  percent_hbd: number;
+  reward_weight: number;
+  allow_replies: boolean;
+  allow_votes: boolean;
+  allow_curation_rewards: boolean;
+  was_voted_on: boolean;
+};
+
+export type comment_pending_payout_info = {
+  author: TAccountName;
+  permlink: string;
+  cashout_info?: comment_cachout_info;
+};
 
 export type WaxExtendTypes = {
   database_api: {
@@ -21,44 +57,10 @@ export type WaxExtendTypes = {
         last_confirmed_block_num: number;
         // ...
       }>; };
-    };    find_comments: {
-      params: { comments: Array<[TAccountName, string]> };
-      result: { comments: Array<{
-        abs_rshares: 150255792948762,
-        allow_curation_rewards: boolean;
-        allow_replies: boolean;
-        allow_votes: boolean;
-        author: TAccountName;
-        author_rewards: number;
-        beneficiaries: Array<beneficiary_route_type>;
-        body: string;
-        cashout_time: string;
-        category: string
-        children: number;
-        children_abs_rshares: number;
-        created: string;
-        curator_payout_value: asset;
-        depth: number;
-        id: number;
-        json_metadata: string;
-        last_payout: string;
-        last_update: string;
-        max_accepted_payout: asset;
-        max_cashout_time: string;
-        net_rshares: number | string;
-        net_votes: number;
-        parent_author: string
-        parent_permlink: string;
-        percent_hbd: number;
-        permlink: string;
-        reward_weight: string;
-        root_author: TAccountName;
-        root_permlink: string;
-        title: string;
-        total_payout_value: asset;
-        total_vote_weight: number | string;
-        vote_rshares: number | string;
-      }>; };
+    };
+    get_comment_pending_payouts: {
+      params: { comments: Array<[TAccountName, string]>; };
+      result: { cashout_infos: Array<comment_pending_payout_info>; };
     };
     find_decline_voting_rights_requests: {
       params: { accounts: string[]; };
