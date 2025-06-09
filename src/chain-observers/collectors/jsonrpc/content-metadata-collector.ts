@@ -1,6 +1,6 @@
 import { TAccountName } from "@hiveio/wax";
 import Long from "long";
-import { OrderedAggregateQueue } from "../../../types/queue";
+import { BucketAggregateQueue } from "../../../types/queue";
 import { ContentMetadataClassifier } from "../../classifiers";
 import { IHiveContentMetadata, TContentMetadataQueryData } from "../../classifiers/content-metadata-classifier";
 import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
@@ -11,7 +11,7 @@ export const BUCKET_INTERVAL = 3 * 1000; // 3 seconds (Hive block interval)
 const MAX_CONTENT_GET_LIMIT = 1000;
 
 export class ContentMetadataCollector extends CollectorBase<ContentMetadataClassifier> {
-  private readonly contractTimestamps = new OrderedAggregateQueue<number, TContentMetadataQueryData>();
+  private readonly contractTimestamps = new BucketAggregateQueue<TContentMetadataQueryData>(BUCKET_INTERVAL);
   private readonly contentCached = new Set<string>();
 
   private async retrieveData(data: TCollectorEvaluationContext, requestData: Array<[TAccountName, string]>) {
@@ -76,13 +76,12 @@ export class ContentMetadataCollector extends CollectorBase<ContentMetadataClass
           const cacheKey = `${author}/${permlink}`;
 
           const rollbackAfter = postMetadata.payoutTime.getTime() - options.reportAfterMsBeforePayout;
-          const bucketInterval = rollbackAfter + (BUCKET_INTERVAL - (rollbackAfter % BUCKET_INTERVAL));
 
           if (this.contentCached.has(cacheKey))
             // If we already have this content, we don't need to enqueue it again
             continue;
 
-          this.contractTimestamps.enqueue(bucketInterval, [author, permlink]);
+          this.contractTimestamps.enqueue(rollbackAfter, [author, permlink]);
           this.contentCached.add(cacheKey);
         }
 
@@ -92,13 +91,12 @@ export class ContentMetadataCollector extends CollectorBase<ContentMetadataClass
   }
 
   public async get(data: TCollectorEvaluationContext) {
-    const allData: Array<[TAccountName, string]> = [];
+    const allData: TContentMetadataQueryData[] = [];
 
     // Now we can operate on the enqueued data:
     const currentTime = Date.now();
-    for(const { value } of this.contractTimestamps.dequeueUntil(currentTime)) {
-      for(const apiData of value)
-        allData.push(apiData);
+    for(const value of this.contractTimestamps.dequeueUntil(currentTime)) {
+      allData.push(value);
 
       // Cleanup
       this.contentCached.delete(`${value[0]}/${value[1]}`);

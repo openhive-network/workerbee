@@ -42,14 +42,14 @@ export interface IHiveContentMetadata {
    * Will be empty if it's a top-level post.
    * @example ""
    */
-  parentAuthor?: string;
+  parentAuthor: string;
 
   /**
    * If this content is a reply, this is the unique identifier (permlink) of the content it replies to.
    * Will be the category if it's a reply to the main category feed.
    * @example "hive-106130"
    */
-  parentPermlink?: string;
+  parentPermlink: string;
 
   /**
    * The number of direct replies this content has received.
