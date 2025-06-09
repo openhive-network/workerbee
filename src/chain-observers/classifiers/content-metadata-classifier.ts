@@ -28,16 +28,6 @@ export interface IHiveContentMetadata {
   title?: string;
 
   /**
-   * The date and time when the content was originally created.
-   */
-  created: Date;
-
-  /**
-   * The date and time when the content was last edited.
-   */
-  lastUpdated: Date;
-
-  /**
    * If this content is a reply, this is the author of the content it replies to.
    * Will be empty if it's a top-level post.
    * @example ""
@@ -51,18 +41,7 @@ export interface IHiveContentMetadata {
    */
   parentPermlink: string;
 
-  /**
-   * The number of direct replies this content has received.
-   * @example 3
-   */
-  replyCount: number;
 
-  /**
-   * Indicates how "deep" this content is in a conversation thread.
-   * 0 means it's a top-level post. 1 means it's a direct reply to a post, 2 is a reply to a reply, and so on.
-   * @example 0
-   */
-  depth: number;
 
   /**
    * This is a crucial number representing the total "Reward Shares" accumulated by this content from upvotes.
@@ -112,6 +91,7 @@ export interface IHiveContentMetadata {
    * @example { "amount": "0", "nai": "@@000000013", "precision": 3 }
    */
   curatorPayoutValue: asset;
+
 
   /**
    * A list of other Hive accounts that will receive a percentage of this content's rewards.
