@@ -1,4 +1,4 @@
-import type { asset, beneficiary_route_type, TAccountName } from "@hiveio/wax";
+import type { asset, comment, TAccountName } from "@hiveio/wax";
 import Long from "long";
 import { CollectorClassifierBase } from "./collector-classifier-base";
 
@@ -25,7 +25,7 @@ export interface IHiveContentMetadata {
    * The title of the content. This is usually present for posts, but might be empty for comments.
    * @example "Mentorship, onboarding and how to create an Ezabay account for easily conversion."
    */
-  title?: string;
+  title: string;
 
   /**
    * If this content is a reply, this is the author of the content it replies to.
@@ -40,7 +40,6 @@ export interface IHiveContentMetadata {
    * @example "hive-106130"
    */
   parentPermlink: string;
-
 
 
   /**
@@ -92,15 +91,6 @@ export interface IHiveContentMetadata {
    */
   curatorPayoutValue: asset;
 
-
-  /**
-   * A list of other Hive accounts that will receive a percentage of this content's rewards.
-   * `account` is the username of the beneficiary.
-   * `weight` represents their share (e.g., 100 means 1%, 1000 means 10%).
-   * @example [{ account: "sagarkothari88", weight: 100 }, { account: "spk.beneficiary", weight: 1000 }]
-   */
-  beneficiaries: Array<beneficiary_route_type>;
-
   /**
    * Indicates if other users are allowed to reply to this content.
    * @example true
@@ -133,7 +123,7 @@ export interface IContentData {
   contentData: Record<TAccountName, TContentMetadataAuthorData>;
 }
 
-export type TContentMetadataQueryData = [TAccountName, string];
+export type TContentMetadataQueryData = Pick<comment, "author" | "permlink" | "parent_author" | "parent_permlink" | "title">;
 
 export type TContentMetadataQueryOptions = {
   requestedData: TContentMetadataQueryData[];

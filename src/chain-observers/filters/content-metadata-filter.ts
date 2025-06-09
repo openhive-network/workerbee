@@ -1,8 +1,7 @@
-import type { TAccountName } from "@hiveio/wax";
+import type { comment, TAccountName } from "@hiveio/wax";
 import type { WorkerBee } from "../../bot";
-import { ContentMetadataClassifier, OperationClassifier } from "../classifiers";
+import { ContentMetadataClassifier, ImpactedAccountClassifier, OperationClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { TContentMetadataQueryData } from "../classifiers/content-metadata-classifier";
 import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";
 
@@ -24,16 +23,17 @@ export abstract class BlogContentMetadataFilter extends FilterBase {
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [
       ContentMetadataClassifier,
-      OperationClassifier
+      OperationClassifier,
+      ImpactedAccountClassifier
     ];
   }
 
-  private queriedPosts: TContentMetadataQueryData[] = [];
+  private queriedPosts: comment[] = [];
 
   public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { operationsPerType } = await data.get(OperationClassifier);
 
-    const queryComments: TContentMetadataQueryData[] = [...this.queriedPosts];
+    const queryComments: comment[] = [...this.queriedPosts];
     this.queriedPosts = []; // Reset for next match
 
     if (operationsPerType.comment)
@@ -47,7 +47,7 @@ export abstract class BlogContentMetadataFilter extends FilterBase {
         if (!this.accounts.has(operation.author))
           continue;
 
-        queryComments.push([operation.author, operation.permlink]);
+        queryComments.push(operation);
       }
 
     if (queryComments.length > 0) {
@@ -56,9 +56,9 @@ export abstract class BlogContentMetadataFilter extends FilterBase {
         reportAfterMsBeforePayout: this.reportAfterMsBeforePayout
       });
 
-      for(const [author, permlink] of queryComments)
-        if (!comments[author] || !comments[author][permlink])
-          this.queriedPosts.push([author, permlink]); // Add back to queried posts if not found
+      for(const operation of queryComments)
+        if (!comments[operation.author] || !comments[operation.author][operation.permlink])
+          this.queriedPosts.push(operation); // Add back to queried posts if not found
 
     }
 

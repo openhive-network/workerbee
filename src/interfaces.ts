@@ -15,6 +15,14 @@ export interface IBroadcastOptions {
    * @default false
    */
   verifySignatures?: boolean;
+
+  /**
+   * Time in milliseconds after which the transaction will be considered expired
+   *
+   * @type {number}
+   * @default 6000
+   */
+  expireInMs?: number;
 }
 
 export interface IBroadcastData {

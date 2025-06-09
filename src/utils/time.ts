@@ -37,3 +37,13 @@ export const calculateRelativeTime = (expirationTime: number | string | Date, re
 
   return expiration;
 };
+
+export const nullDate = new Date(0);
+
+export const isMaxDate = (date: Date | number): boolean => {
+  return date as any < 0;
+};
+
+export const isNullDate = (date: Date | number): boolean => {
+  return typeof date === "number" ? date === 0 : date.getTime() == 0;
+};
