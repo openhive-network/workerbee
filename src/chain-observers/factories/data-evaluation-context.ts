@@ -10,8 +10,13 @@ export type TAvailableCollectorFunctions = {
   [key in keyof typeof TClassifiers]: CollectorBase<InstanceType<(typeof TClassifiers)[key]>>;
 };
 
+export type TAvailableStores = {
+  [key in keyof typeof TClassifiers]: InstanceType<(typeof TClassifiers)[key]>["storeType"];
+};
+
 export class DataEvaluationContext {
   private readonly cachedFunctions = new Map<CollectorBase<any>, Promise<Partial<TAvailableClassifiers>>>();
+  private readonly storeData: TAvailableStores = {} as TAvailableStores;
   private readonly collectors: TAvailableCollectorFunctions = {} as TAvailableCollectorFunctions;
 
   public constructor(
@@ -30,11 +35,12 @@ export class DataEvaluationContext {
       return; // Already registered
 
     this.collectors[classifier.name] = collector;
+    this.storeData[classifier.name] = {};
   }
 
-  public async get<Classifier extends CollectorClassifierBase<any, any, any, any>>(
+  public async get<Classifier extends CollectorClassifierBase<any, any, any, any, any>>(
     classifier: new (...args: any[]) => Classifier
-  ): Promise<Classifier["getType"]> {
+  ): Promise<Classifier["getType"] extends void ? never : Classifier["getType"]> {
     const collector = this.collectors[classifier.name];
 
     if (collector === undefined)
@@ -62,10 +68,10 @@ export class DataEvaluationContext {
     return result[classifier.name] as any;
   }
 
-  public async query<Classifier extends CollectorClassifierBase<any, any, any, any>>(
+  public async query<Classifier extends CollectorClassifierBase<any, any, any, any, any>>(
     classifier: new (...args: any[]) => Classifier,
     collectorOptions: Classifier["queryOptionsType"]
-  ): Promise<Classifier["queryType"]> {
+  ): Promise<Classifier["queryType"] extends void ? never : Classifier["queryType"]> {
     const collector = this.collectors[classifier.name];
 
     if (collector === undefined)
@@ -80,9 +86,27 @@ export class DataEvaluationContext {
       this.addTiming(`${classifier.name}#query`, Date.now() - startTime);
     });
   }
+
+  public accessStore<Classifier extends CollectorClassifierBase<any, any, any, any, any>>(
+    classifier: new (...args: any[]) => Classifier
+  ): Classifier["storeType"] extends void ? never : Classifier["storeType"] {
+    const store = this.storeData[classifier.name];
+
+    if (store === undefined)
+      throw new WorkerBeeError(createFactoryUnsupportedClassifierErrorMessage(
+        (this.factory as any).__proto__.constructor.name, classifier)
+      );
+
+    return store;
+  }
 }
 
+// Collectors can get, query and access other collectors via `get` and `query`, and add timings for evaluation time analysis.
 export type TCollectorEvaluationContext = Pick<DataEvaluationContext, "addTiming" | "get" | "query">;
 
-export type TFilterEvaluationContext = Pick<DataEvaluationContext, "get" | "query">;
-export type TProviderEvaluationContext = Pick<DataEvaluationContext, "get" | "query">;
+/*
+ * Filters and providers can get, query and access collectors. They should perform fast operations, so timings are not tracked for them.
+ * Also they can get access to stores and share data with other filters and providers.
+ */
+export type TFilterEvaluationContext = Pick<DataEvaluationContext, "get" | "query" | "accessStore">;
+export type TProviderEvaluationContext = Pick<DataEvaluationContext, "get" | "query" | "accessStore">;

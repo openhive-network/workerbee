@@ -8,14 +8,14 @@ export type TAvailableClassifiers = {
   [key in keyof typeof TClassifiers]: InstanceType<(typeof TClassifiers)[key]>["getType"];
 };
 
-export type TSpecificClassifier<T extends CollectorClassifierBase<any, any, any, any>> =
+export type TSpecificClassifier<T extends CollectorClassifierBase<any, any, any, any, any>> =
   // First check if the classifier has a getType method, if not, return an empty object to note that there is no specific classifier selected
   T["getType"] extends void ? {} :
   {
     [K in keyof typeof TClassifiers as InstanceType<(typeof TClassifiers)[K]> extends T ? K : never]: InstanceType<(typeof TClassifiers)[K]>["getType"];
   };
 
-export class CollectorBase<Classifier extends CollectorClassifierBase<any, any, any, any>> {
+export class CollectorBase<Classifier extends CollectorClassifierBase<any, any, any, any, any>> {
   public constructor(
     protected readonly worker: WorkerBee
   ) {}

@@ -12,10 +12,10 @@ export enum EClassifierOrigin {
   FACTORY = "factory"
 }
 
-export type AnyCollectorClass = new (...args: any[]) => CollectorBase<CollectorClassifierBase<any, any, any, any>>;
+export type AnyCollectorClass = new (...args: any[]) => CollectorBase<CollectorClassifierBase<any, any, any, any, any>>;
 
 export class FactoryBase {
-  protected collectors = new Map<AnyCollectorClass, CollectorBase<CollectorClassifierBase<any, any, any, any>>>();
+  protected collectors = new Map<AnyCollectorClass, CollectorBase<CollectorClassifierBase<any, any, any, any, any>>>();
   protected collectorsPerClassifier = new Map<IEvaluationContextClass, AnyCollectorClass>();
 
   public constructor(

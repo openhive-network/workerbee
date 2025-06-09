@@ -1,5 +1,5 @@
 export interface IEvaluationContextClass<
-  T extends CollectorClassifierBase<any, any, any, any> = CollectorClassifierBase<any, any, any, any>
+  T extends CollectorClassifierBase<any, any, any, any, any> = CollectorClassifierBase<any, any, any, any, any>
 > {
   name: string;
 
@@ -15,7 +15,8 @@ export class CollectorClassifierBase<
   TGetResult extends void | Record<string, any> = void,
   TQueryResult extends void | Record<string, any> = void,
   TQueryOptions extends void | Record<string, any> = void,
-  TOptions extends undefined | Record<string, any> = undefined
+  TOptions extends undefined | Record<string, any> = undefined,
+  TStore extends Record<string, any> = {}
 > {
   /*
    * Virtual members - visible only on TypeScript level, not at runtime
@@ -26,4 +27,5 @@ export class CollectorClassifierBase<
   public queryType!: TQueryResult;
   public queryOptionsType!: TQueryOptions;
   public optionsType!: TOptions;
+  public storeType!: TStore;
 }
