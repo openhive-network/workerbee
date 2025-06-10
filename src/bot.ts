@@ -151,11 +151,25 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
         }
       });
 
+      const expireIn = options.expireInMs ?? (HIVE_BLOCK_INTERVAL * 2);
+
       this.chain!.broadcast(apiTx).then(() => {
-        timeoutId = setTimeout(() => {
+        timeoutId = setTimeout(async() => {
           listener.unsubscribe();
-          reject(new WorkerBeeError(`Transaction broadcast error: Transaction #${apiTx.id} has expired`));
-        }, (HIVE_BLOCK_INTERVAL * 2));
+          const txTime = dateFromString(apiTx.transaction.expiration);
+          let errorMessage = `Transaction broadcast error: Transaction #${apiTx.id} has expired.\nTransaction broadcast metadata:\n`;
+          errorMessage += `  - Current timestamp:           ${new Date().toISOString()}\n`;
+          errorMessage += `  - Transaction expiration time: ${txTime.toISOString()}\n`;
+          try {
+            const { time } = await this.chain!.api.database_api.get_dynamic_global_properties({});
+            const headBlockTime = dateFromString(time);
+            errorMessage += `  - Head block blockchain time:  ${headBlockTime.toISOString()}`;
+          } catch {
+            errorMessage += "  - (!) Unable to retrieve the blockchain time";
+          }
+          errorMessage += `\nTry adjusting the 'expireInMs' option (currently set to ${expireIn} ms) in the broadcast method to a higher value.`;
+          reject(new WorkerBeeError(errorMessage));
+        }, expireIn);
       }).catch(err => {
         listener.unsubscribe();
         reject(err);
