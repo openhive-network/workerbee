@@ -47,8 +47,15 @@ export class ObserverMediator {
 
         // Join all providers data for user (1 level nested)
         const providedData = {};
-        for(const provider of providers) {
-          const providerResult = await provider.provide(context);
+
+        // Launch all providers in parallel
+        const allDataToProvide: Promise<any>[] = [];
+        for(const provider of providers)
+          allDataToProvide.push(provider.provide(context).catch(error => listener.error?.(error)));
+
+        // Wait for all providers to finish and merge their results
+        for(const promiseData of allDataToProvide) {
+          const providerResult = await promiseData;
           for(const key in providerResult)
             if (Array.isArray(providerResult[key]))
               providedData[key] = (providedData[key] ?? []).concat(providerResult[key]);
