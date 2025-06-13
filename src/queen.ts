@@ -476,8 +476,13 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * workerbee.observe.onPostsIncomingPayout("username", "username2").subscribe({
    *   next: (data) => {
    *     for(const account in data.postsMetadata)
-   *       if(data.postsMetad
-   *const time = typeof relativeTimeMs === "number" ? relativeTimeMs : (Date.now() - calculateRelativeTime(relativeTimeMs).getTime());
+   *       if(data.postsMetadata[account] !== undefined)
+   *         for(const permlink of data.postsMetadata[account])
+   *           console.log("Post about to payout:", data.postsMetadata[account][permlink]);
+   *   }
+   * });
+   * ```
+   *
    * @param relativeTimeMs The relative time in milliseconds or a string representing the time duration (e.g., "-1h", "-30m") to monitor for post payouts.
    * @param authors account names of the authors to monitor for post payout.
    * @returns itself
