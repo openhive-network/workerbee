@@ -1,6 +1,7 @@
 import { Page, test as base, expect } from "@playwright/test";
 
 import "./globals";
+import { IWorkerBee } from "../../dist/bundle";
 import type { IWorkerBeeGlobals, TEnvType } from "./globals";
 
 type TWorkerBeeTestCallable<R, Args extends any[]> = (globals: IWorkerBeeGlobals, ...args: Args) => (R | Promise<R>);
@@ -21,6 +22,11 @@ export interface IWorkerBeeTest {
      */
     dynamic<R, Args extends any[]>(fn: TWorkerBeeTestCallable<R, Args>, ...args: Args): Promise<R>;
   };
+
+  createWorkerBeeTest: <T = Record<string, any>>(
+    callback: (bot: IWorkerBee<unknown>, resolve: (retVal?: T) => void, reject: (reason?: any) => void) => void,
+    dynamic?: boolean
+  ) => Promise<T>;
 }
 
 const envTestFor = <GlobalType extends IWorkerBeeGlobals>(
@@ -55,8 +61,36 @@ const envTestFor = <GlobalType extends IWorkerBeeGlobals>(
   return using as IWorkerBeeTest["workerbeeTest"];
 };
 
+const createWorkerBeeTest = async <T = Record<string, any>>(
+  envTestFor: IWorkerBeeTest["workerbeeTest"],
+  callback: (bot: IWorkerBee<unknown>, resolve: (retVal?: T) => void, reject: (reason?: any) => void) => void,
+  dynamic: boolean = false
+): Promise<T> => {
+  const testRunner = dynamic ? envTestFor.dynamic : envTestFor;
+
+  return await testRunner(async ({ WorkerBee }, callbackStr) => {
+    const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    await bot.start();
+
+    const returnValue = await new Promise<T>((resolve, reject) => {
+      // Reconstruct callback from string in web environment
+      const reconstructedCallback = eval(`(${callbackStr})`);
+      reconstructedCallback(bot, resolve, reject);
+    });
+
+    bot.stop();
+    bot.delete();
+
+    return returnValue;
+  }, callback.toString());
+}
+
 export const test = base.extend<IWorkerBeeTest>({
   workerbeeTest: ({ page }, use) => {
     use(envTestFor(page, createTestFor));
+  },
+
+  createWorkerBeeTest: ({ workerbeeTest }, use) => {
+    use((callback, dynamic) => createWorkerBeeTest(workerbeeTest, callback, dynamic));
   }
 });
