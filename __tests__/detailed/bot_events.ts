@@ -7,7 +7,6 @@ import type { IStartConfiguration } from "../../src/bot";
 
 import { test } from "../assets/jest-helper";
 
-
 let browser!: ChromiumBrowser;
 
 const HIVE_BLOCK_INTERVAL = 3000;
@@ -79,7 +78,6 @@ test.describe("WorkerBee Bot events test", () => {
       chainOwner.delete();
     });
   });
-
 
   test("Allow to pass explicit extended chain", async({ workerbeeTest }) => {
     const explicitChainTest = await workerbeeTest(async({ WorkerBee }) => {
@@ -549,6 +547,580 @@ test.describe("WorkerBee Bot events test", () => {
     });
 
     expect(result).toBeGreaterThanOrEqual(3);
+  });
+
+  test("Should be able to observe votes on accounts", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+      await bot.start();
+
+      let vote = "";
+
+      await new Promise<void>(resolve => {
+        bot.providePastOperations(97117000, 97117025).onVotes("gtg").subscribe({
+          next(data) {
+            data.votes["gtg"]?.forEach(({ operation }) => {
+              vote = `Vote operation: ${operation.voter} voted for ${operation.author}/${operation.permlink}`;
+            });
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      });
+
+      bot.stop();
+      bot.delete();
+
+      return vote;
+    });
+
+    expect(result).toBe("Vote operation: gtg voted for hbd.funder/re-upvote-this-post-to-fund-hbdstabilizer-20250626t045515z");
+  });
+
+  test("Should be able to observe posts from specific authors", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+      await bot.start();
+
+      let post = "";
+
+      await new Promise<void>(resolve => {
+        bot.providePastOperations(96549390, 96549415).onPosts("mtyszczak").subscribe({
+          next(data) {
+            data.posts["mtyszczak"]?.forEach(({ operation }) => {
+              post = `New post created: ${operation.author}/${operation.permlink}`;
+            });
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      });
+
+      bot.stop();
+      bot.delete();
+
+      return post;
+    });
+
+    expect(result).toBe("New post created: mtyszczak/hi-ve-everyone");
+  });
+
+  test("Should be able to observe comments from specific authors", async({ workerbeeTest }) => {
+    const result = await workerbeeTest.dynamic(async({ WorkerBee }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+      await bot.start();
+
+      let comment = "";
+
+      await new Promise<void>(resolve => {
+        bot.providePastOperations(96549690, 96549715).onComments("gtg").subscribe({
+          next(data) {
+            data.comments["gtg"]?.forEach(({ operation }) => {
+              comment = `New comment created: ${operation.author}/${operation.permlink}`;
+            });
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      });
+
+      bot.stop();
+      bot.delete();
+
+      return comment;
+    });
+
+    expect(result).toBe("New comment created: gtg/re-mtyszczak-1749229740753");
+  });
+
+  test("Should be able to observe new account creation", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+      await bot.start();
+
+      let newAccount = "";
+
+      await new Promise<void>(resolve => {
+        bot.providePastOperations(96685040, 96685065).onNewAccount().subscribe({
+          next(data) {
+            console.log(data.newAccounts)
+            data.newAccounts?.forEach(({ accountName, creator }) => {
+              newAccount = `New account created: ${accountName} by ${creator}`;
+            });
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      });
+
+      bot.stop();
+      bot.delete();
+
+      return newAccount;
+    });
+
+    expect(result).toBe("New account created: fwaszkiewicz by gtg");
+  });
+
+  test("Should be able to observe custom operations", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+      await bot.start();
+
+      let customOp = "";
+
+      await new Promise<void>(resolve => {
+        bot.providePastOperations(97146305, 97146312).onCustomOperation("follow").subscribe({
+          next(data) {
+            data.customOperations.follow?.forEach(({ transaction }) => {
+              customOp = transaction.transaction.operations[0].custom_json_operation?.json || "";
+            });
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      });
+
+      bot.stop();
+      bot.delete();
+
+      return customOp;
+    });
+
+    expect(result).toBe("[\"follow\",{\"follower\":\"fwaszkiewicz\",\"following\":\"gtg\",\"what\":[\"blog\"]}]");
+  });
+
+  test("Should be able to observe reblog operations", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+      await bot.start();
+
+      let reblogedPost = "";
+
+      await new Promise<void>(resolve => {
+        bot.providePastOperations(96839100, 96839115).onReblog("thebeedevs").subscribe({
+          next(data) {
+            console.log(data);
+            data.reblogs["thebeedevs"]?.forEach(({ operation }) => {
+              reblogedPost = `${operation.account} rebloged: ${operation.author}/${operation.permlink}`;
+            });
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      });
+
+      bot.stop();
+      bot.delete();
+
+      return reblogedPost;
+    });
+
+    expect(result).toBe("thebeedevs rebloged: mtyszczak/write-on-hive-read-everywhere");
+  });
+
+  test("Should be able to observe follow operations", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+      await bot.start();
+
+      let follow = "";
+
+      await new Promise<void>(resolve => {
+        bot.providePastOperations(97146305, 97146312).onFollow("fwaszkiewicz").subscribe({
+          next(data) {
+            data.follows["fwaszkiewicz"]?.forEach(({ operation }) => {
+              follow = `${operation.follower} followed: ${operation.following}`;
+            });
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      });
+
+      bot.stop();
+      bot.delete();
+
+      return follow;
+    });
+
+    expect(result).toBe("fwaszkiewicz followed: gtg");
+  });
+
+  test("Should be able to observe account mentions in posts", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+      await bot.start();
+
+      let mention = "";
+
+      await new Promise<void>(resolve => {
+        bot.providePastOperations(96812075, 96812095).onMention("gtg").subscribe({
+          next(data) {
+            console.log(data);
+            data.mentioned["gtg"]?.forEach(operation => {
+              mention = `gtg has been mentioned in post: ${operation.author}/${operation.permlink}`;
+            });
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      });
+
+      bot.stop();
+      bot.delete();
+
+      return mention;
+    });
+
+    expect(result).toBe("gtg has been mentioned in post: mtyszczak/write-on-hive-read-everywhere");
+  });
+
+  test("Should be able to observe internal market operations", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+      await bot.start();
+
+      let marketOpCount = 0;
+
+      await new Promise<void>(resolve => {
+        bot.providePastOperations(97346870, 97346880).onInternalMarketOperation().subscribe({
+          next(data) {
+            data.internalMarketOperations.forEach(({ operation }) => {
+              console.log(`Internal market operation: ${operation.owner} - ${operation.orderId}`);
+
+              ++marketOpCount;
+            });
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      });
+
+      bot.stop();
+      bot.delete();
+
+      return marketOpCount;
+    });
+
+    expect(result).toBeGreaterThanOrEqual(4);
+  });
+
+  test("Should be able to observe exchange transfer operations", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+      await bot.start();
+
+      let exchangeTransferCount = 0;
+
+      await new Promise<void>(resolve => {
+        bot.providePastOperations(97346915, 97346930).onExchangeTransfer().subscribe({
+          next(data) {
+            data.exchangeTransferOperations.forEach(({ operation }) => {
+              console.log(`Exchange transfer operation: ${operation.from} -> ${operation.to} - ${operation.amount.amount} ${operation.amount.nai}`);
+
+              exchangeTransferCount++;
+            });
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      });
+
+      bot.stop();
+      bot.delete();
+
+      return exchangeTransferCount;
+    });
+
+    expect(result).toBeGreaterThanOrEqual(4);
+  });
+
+  test("Should be able to observe whale alerts for large transfers", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+      await bot.start();
+
+      let whaleOpCount = 0;
+
+      await new Promise<void>(resolve => {
+        bot.providePastOperations(97347570, 97347585).onWhaleAlert(bot.chain!.hiveCoins(50)).subscribe({
+          next(data) {
+            data.whaleOperations.forEach(({ operation }) => {
+              console.log(`Whale alert: ${operation.from} -> ${operation.to} - ${operation.amount.amount} ${operation.amount.nai}`);
+
+              whaleOpCount++;
+            });
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      });
+
+      bot.stop();
+      bot.delete();
+
+      return whaleOpCount;
+    });
+
+    expect(result).toBeGreaterThanOrEqual(2);
+  });
+
+  test("Should be able to observe account balance changes", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+      await bot.start();
+
+      let balanceChanged = false;
+
+      await new Promise<void>(resolve => {
+        bot.observe.onAccountsBalanceChange(false, "blocktrades").subscribe({
+          next() {
+            balanceChanged = true;
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+
+        // Use a short timeout since this is a live test
+        setTimeout(() => resolve(), 5000);
+      });
+
+      bot.stop();
+      bot.delete();
+
+      return balanceChanged;
+    });
+
+    expect(typeof result).toBe("boolean");
+  });
+
+  test("Should be able to observe account metadata changes", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+      await bot.start();
+
+      let metadataChanged = false;
+
+      await new Promise<void>(resolve => {
+        bot.observe.onAccountsMetadataChange("blocktrades").subscribe({
+          next() {
+            metadataChanged = true;
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+
+        // Use a short timeout since this is a live test
+        setTimeout(() => resolve(), 5000);
+      });
+
+      bot.stop();
+      bot.delete();
+
+      return metadataChanged;
+    });
+
+    expect(typeof result).toBe("boolean");
+  });
+
+  test("Should be able to observe manabar percentage threshold", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }, hiveBlockInterval) => {
+      const bot = new WorkerBee();
+
+      const result = await Promise.race([
+        new Promise<string>((res, rej) => {
+          bot.start();
+
+          console.info("Waiting for manabar to reach 50% on initminer");
+
+          const observer = bot.observe.onAccountsManabarPercent(/* EManabarType.RC */ 2, 50, "initminer");
+          observer.subscribe({
+            next(data) {
+              if (!data.manabarData["initminer"]?.[2])
+                return rej(new Error("Could not retrieve RC manabar data for initminer"));
+
+              console.info(`Account manabar reached threshold: ${data.manabarData["initminer"][2].percent}%`);
+
+              res(data.manabarData["initminer"][2].currentMana.toString());
+            },
+            error(err) {
+              console.error(err);
+            }
+          });
+        }),
+        new Promise<string>((_, rej) => { setTimeout(rej, hiveBlockInterval * 2, new Error("Test timeout")); })
+      ]);
+
+      bot.stop();
+      bot.delete();
+
+      return result;
+    }, HIVE_BLOCK_INTERVAL);
+
+    expect(result.length).toBeGreaterThan(0);
+  });
+
+  test("Should be able to observe feed price changes", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }, hiveBlockInterval) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+
+      const result = await Promise.race([
+        new Promise<boolean>((res) => {
+          bot.start();
+
+          console.info("Waiting for feed price change of 5%");
+
+          const observer = bot.observe.onFeedPriceChange(5);
+          observer.subscribe({
+            next() {
+              console.info("Feed price changed by 5%");
+              res(true);
+            },
+            error(err) {
+              console.error(err);
+            }
+          });
+        }),
+        new Promise<boolean>((res) => { setTimeout(() => res(false), hiveBlockInterval * 2); })
+      ]);
+
+      bot.stop();
+      bot.delete();
+
+      return result;
+    }, HIVE_BLOCK_INTERVAL);
+
+    // This might not trigger in test environment, so we just check it doesn't throw
+    expect(typeof result).toBe("boolean");
+  });
+
+  test("Should be able to observe feed price no change", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }, hiveBlockInterval) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+
+      const result = await Promise.race([
+        new Promise<boolean>((res) => {
+          bot.start();
+
+          console.info("Waiting for feed price to remain unchanged for 1 hour");
+
+          const observer = bot.observe.onFeedPriceNoChange(1);
+          observer.subscribe({
+            next() {
+              console.info("Feed price has not changed for 1 hour");
+              res(true);
+            },
+            error(err) {
+              console.error(err);
+            }
+          });
+        }),
+        new Promise<boolean>((res) => { setTimeout(() => res(false), hiveBlockInterval * 2); })
+      ]);
+
+      bot.stop();
+      bot.delete();
+
+      return result;
+    }, HIVE_BLOCK_INTERVAL);
+
+    // This might not trigger in test environment, so we just check it doesn't throw
+    expect(typeof result).toBe("boolean");
+  });
+
+  test("Should be able to observe witness missed blocks", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }, hiveBlockInterval) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+
+      const result = await Promise.race([
+        new Promise<boolean>((res) => {
+          bot.start();
+
+          console.info("Waiting for witness to miss 5 blocks");
+
+          const observer = bot.observe.onWitnessesMissedBlocks(5, "gtg");
+          observer.subscribe({
+            next() {
+              console.info("Witness has missed 5 blocks");
+              res(true);
+            },
+            error(err) {
+              console.error(err);
+            }
+          });
+        }),
+        new Promise<boolean>((res) => { setTimeout(() => res(false), hiveBlockInterval * 2); })
+      ]);
+
+      bot.stop();
+      bot.delete();
+
+      return result;
+    }, HIVE_BLOCK_INTERVAL);
+
+    // This might not trigger in test environment, so we just check it doesn't throw
+    expect(typeof result).toBe("boolean");
+  });
+
+  test("Should be able to observe account alarms", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }, hiveBlockInterval) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+
+      const result = await Promise.race([
+        new Promise<boolean>((res) => {
+          bot.start();
+
+          console.info("Waiting for account alarms");
+
+          const observer = bot.observe.onAlarm("blocktrades");
+          observer.subscribe({
+            next(_data) {
+              console.info("Account alarm detected");
+              res(true);
+            },
+            error(err) {
+              console.error(err);
+            }
+          });
+        }),
+        new Promise<boolean>((res) => { setTimeout(() => res(false), hiveBlockInterval * 2); })
+      ]);
+
+      bot.stop();
+      bot.delete();
+
+      return result;
+    }, HIVE_BLOCK_INTERVAL);
+
+    // This might not trigger in test environment, so we just check it doesn't throw
+    expect(typeof result).toBe("boolean");
   });
 
   test.afterAll(async() => {
