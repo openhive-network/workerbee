@@ -68,15 +68,13 @@ export abstract class BlogContentProvider<
         if(this.authors.has(operation.operation.author) === false)
           continue;
 
-        let account = operation.operation.author;
+        const account = operation.operation.author;
 
         /// If requested account is a comment parent-author
         const parentCommentFilter = this.authors.get(operation.operation.author);
 
         if(!this.isPost && parentCommentFilter && operation.operation.parent_permlink !== parentCommentFilter.parentPermlink)
           continue;
-        else
-          account = operation.operation.parent_author;
 
         if (!result[account])
           result[account] = new WorkerBeeArrayIterable<IOperationTransactionPair<comment>>();
