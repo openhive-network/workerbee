@@ -36,16 +36,24 @@ export class NewAccountProvider extends ProviderBase {
       ...(operationsPerType.account_create_with_delegation ?? [])
     ];
 
-    for(const { operation } of operations)
+    for(const { operation } of operations) {
+      let jsonMetadata: Record<string, unknown> = {};
+      if (operation.json_metadata)
+        try {
+          jsonMetadata = JSON.parse(operation.json_metadata);
+        // eslint-disable-next-line no-empty
+        } catch {}
+
       result.push({
         accountName: operation.new_account_name,
         active: operation.active!,
         creator: operation.creator,
-        jsonMetadata: JSON.parse(operation.json_metadata),
+        jsonMetadata,
         memo: operation.memo_key,
         owner: operation.owner!,
         posting: operation.posting!,
       });
+    }
 
     return {
       newAccounts: new WorkerBeeIterable(result)

@@ -27,12 +27,15 @@ export class ReblogFilter extends FilterBase {
     const { operationsPerType } = await data.get(OperationClassifier);
 
     for(const { operation } of (operationsPerType.custom_json ?? []))
-      if (operation.id === "follow") {
-        const json = JSON.parse(operation.json);
+      if (operation.id === "follow")
+        try {
+          const json = JSON.parse(operation.json);
 
-        if (json[0] === "reblog" && this.accounts.has(json[1].account))
-          return true;
-      }
+          if (json[0] === "reblog" && this.accounts.has(json[1].account))
+            return true;
+        // eslint-disable-next-line no-empty
+        } catch {}
+
 
     return false;
   }

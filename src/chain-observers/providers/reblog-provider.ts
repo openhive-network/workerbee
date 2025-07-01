@@ -45,7 +45,12 @@ export class ReblogProvider<TAccounts extends Array<TAccountName> = Array<string
       for(const operation of accounts.operationsPerType.custom_json) {
         if (operation.operation.id !== "follow")
           continue;
-        const json = JSON.parse(operation.operation.json);
+        let json: [string, IReblogOperation];
+        try {
+          json = JSON.parse(operation.operation.json);
+        } catch {
+          continue;
+        }
 
         const reblogger = json[1].account;
 

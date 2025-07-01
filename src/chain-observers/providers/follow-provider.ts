@@ -44,7 +44,13 @@ export class FollowProvider<TAccounts extends Array<TAccountName> = Array<string
       for(const operation of accounts.operationsPerType.custom_json) {
         if (operation.operation.id !== "follow")
           continue;
-        const json = JSON.parse(operation.operation.json);
+
+        let json: [string, IFollowOperation];
+        try {
+          json = JSON.parse(operation.operation.json);
+        } catch {
+          continue;
+        }
 
         const follower = json[1].follower;
 
