@@ -57,10 +57,8 @@ export class ObserverMediator {
         for(const promiseData of allDataToProvide) {
           const providerResult = await promiseData;
           for(const key in providerResult)
-            if (Array.isArray(providerResult[key]))
-              providedData[key] = (providedData[key] ?? []).concat(providerResult[key]);
-            else
-              providedData[key] = { ...(providedData[key] ?? {}), ...providerResult[key] };
+            if (providerResult[key] !== undefined)
+              providedData[key] = providerResult[key];
         }
 
         this.factory.addTiming("providers", Date.now() - startProvider);
