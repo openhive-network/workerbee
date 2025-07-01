@@ -7,6 +7,12 @@ export class WorkerBeeError extends Error {
   }
 }
 
+export class BlockNotAvailableError extends WorkerBeeError {
+  public constructor(public readonly blockNumber: number) {
+    super(`Block ${blockNumber} is not available`);
+  }
+}
+
 export class WorkerBeeUnsatisfiedFilterError extends WorkerBeeError {
   public constructor() {
     super("Unsatisfied filter");

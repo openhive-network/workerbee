@@ -5,7 +5,7 @@ import { IBlockData } from "./chain-observers/classifiers/block-classifier";
 import { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
 import { JsonRpcFactory } from "./chain-observers/factories/jsonrpc/factory";
 import { ObserverMediator } from "./chain-observers/observer-mediator";
-import { WorkerBeeError } from "./errors";
+import { BlockNotAvailableError, WorkerBeeError } from "./errors";
 import type { IWorkerBee, IBroadcastOptions } from "./interfaces";
 import { PastQueen } from "./past-queen";
 import { QueenBee } from "./queen";
@@ -145,6 +145,9 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
           resolve();
         },
         error(val) {
+          if (val instanceof BlockNotAvailableError)
+            return; // Ignore not available block error if iteration executed before next block is available in live chain
+
           clearTimeout(timeoutId);
           listener.unsubscribe();
           reject(val);

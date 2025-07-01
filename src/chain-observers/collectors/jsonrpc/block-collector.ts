@@ -1,5 +1,5 @@
 import { transaction } from "@hiveio/wax";
-import { WorkerBeeError } from "../../../errors";
+import { BlockNotAvailableError } from "../../../errors";
 import { DynamicGlobalPropertiesClassifier, BlockClassifier } from "../../classifiers";
 import { ITransactionData } from "../../classifiers/block-classifier";
 import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
@@ -34,7 +34,7 @@ export class BlockCollector extends CollectorBase<BlockClassifier> {
     data.addTiming("block_api.get_block", Date.now() - startBlock);
 
     if (block === undefined)
-      throw new WorkerBeeError(`Block ${headBlockNumber} is not available`);
+      throw new BlockNotAvailableError(headBlockNumber);
 
     const startBlockAnalysis = Date.now();
     const transactions: ITransactionData[] = [];
