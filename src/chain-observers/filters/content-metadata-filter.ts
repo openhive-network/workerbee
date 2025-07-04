@@ -36,8 +36,8 @@ export abstract class BlogContentMetadataFilter extends FilterBase {
     const queryComments: comment[] = [...this.queriedPosts];
     this.queriedPosts = []; // Reset for next match
 
-    if (operationsPerType.comment)
-      for(const { operation } of operationsPerType.comment) {
+    if (operationsPerType.comment_operation)
+      for(const { operation } of operationsPerType.comment_operation) {
         // Check if post/comment type matches what we're looking for
         const postIndicator = operation.parent_author === "";
         if (this.isPost !== postIndicator)

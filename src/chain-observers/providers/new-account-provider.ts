@@ -31,9 +31,9 @@ export class NewAccountProvider extends ProviderBase {
     const { operationsPerType } = await data.get(OperationClassifier);
 
     const operations = [
-      ...(operationsPerType.create_claimed_account ?? []),
-      ...(operationsPerType.account_create ?? []),
-      ...(operationsPerType.account_create_with_delegation ?? [])
+      ...(operationsPerType.create_claimed_account_operation ?? []),
+      ...(operationsPerType.account_create_operation ?? []),
+      ...(operationsPerType.account_create_with_delegation_operation ?? [])
     ];
 
     for(const { operation } of operations) {

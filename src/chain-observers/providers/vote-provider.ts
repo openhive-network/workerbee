@@ -35,8 +35,8 @@ export class VoteProvider<TAccounts extends Array<TAccountName> = Array<TAccount
     } as IVoteProviderData<TAccounts>;
 
     const operations = await data.get(OperationClassifier);
-    if (operations.operationsPerType.vote)
-      for(const operation of operations.operationsPerType.vote) {
+    if (operations.operationsPerType.vote_operation)
+      for(const operation of operations.operationsPerType.vote_operation) {
         if(this.voters.has(operation.operation.voter) === false)
           continue;
 

@@ -27,10 +27,10 @@ export class WhaleAlertFilter extends FilterBase {
   public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const operations = await data.get(OperationClassifier);
 
-    const transfer = operations.operationsPerType["transfer"];
-    const fromSavings = operations.operationsPerType["transfer_from_savings"];
-    const escrow = operations.operationsPerType["escrow_transfer"];
-    const recurrent = operations.operationsPerType["recurrent_transfer"];
+    const transfer = operations.operationsPerType["transfer_operation"];
+    const fromSavings = operations.operationsPerType["transfer_from_savings_operation"];
+    const escrow = operations.operationsPerType["escrow_transfer_operation"];
+    const recurrent = operations.operationsPerType["recurrent_transfer_operation"];
 
     if(transfer)
       for(const op of transfer)

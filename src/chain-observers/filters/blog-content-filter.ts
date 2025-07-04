@@ -34,8 +34,8 @@ export abstract class BlogContentFilter extends FilterBase {
   public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { operationsPerType } = await data.get(OperationClassifier);
 
-    if (operationsPerType.comment)
-      for(const { operation } of operationsPerType.comment) {
+    if (operationsPerType.comment_operation)
+      for(const { operation } of operationsPerType.comment_operation) {
         // Check if post/comment type matches what we're looking for
         const postIndicator = operation.parent_author === "";
         if (this.isPost !== postIndicator)

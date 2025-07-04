@@ -36,8 +36,8 @@ export class CustomOperationProvider<
     } as ICustomOperationProviderData<TOperationId>;
 
     const accounts = await data.get(OperationClassifier);
-    if (accounts.operationsPerType.custom_json)
-      for(const operation of accounts.operationsPerType.custom_json) {
+    if (accounts.operationsPerType.custom_json_operation)
+      for(const operation of accounts.operationsPerType.custom_json_operation) {
         if (!this.ids.has(operation.operation.id))
           continue;
 
@@ -50,8 +50,8 @@ export class CustomOperationProvider<
         });
       }
 
-    if (accounts.operationsPerType.custom)
-      for(const operation of accounts.operationsPerType.custom) {
+    if (accounts.operationsPerType.custom_operation)
+      for(const operation of accounts.operationsPerType.custom_operation) {
         if (!this.ids.has(operation.operation.id))
           continue;
 

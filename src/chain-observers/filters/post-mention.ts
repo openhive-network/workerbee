@@ -26,7 +26,7 @@ export class PostMentionFilter extends FilterBase {
   public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { operationsPerType } = await data.get(OperationClassifier);
 
-    for(const { operation: { body } } of (operationsPerType.comment ?? [])) {
+    for(const { operation: { body } } of (operationsPerType.comment_operation ?? [])) {
       // Use regex to find all account mentions in the form of @username
       const mentionRegex = /@([a-z0-9.-]+)/gi;
       let match: RegExpExecArray | null;

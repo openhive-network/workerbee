@@ -20,13 +20,13 @@ export class InternalMarketFilter extends FilterBase {
   public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { operationsPerType } = await data.get(OperationClassifier);
 
-    for(const {} of (operationsPerType.limit_order_create2 ?? []))
+    for(const {} of (operationsPerType.limit_order_create2_operation ?? []))
       return true;
 
-    for(const {} of (operationsPerType.limit_order_cancel ?? []))
+    for(const {} of (operationsPerType.limit_order_cancel_operation ?? []))
       return true;
 
-    for(const {} of (operationsPerType.limit_order_create ?? []))
+    for(const {} of (operationsPerType.limit_order_create_operation ?? []))
       return true;
 
     return false;
