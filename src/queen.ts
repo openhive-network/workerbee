@@ -637,7 +637,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    */
   public onReblog<
     TReblogs extends TAccountName[]
-  >(...rebloggers: TReblogs): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<MentionedAccountProvider<TReblogs>["provide"]>>> {
+  >(...rebloggers: TReblogs): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ReblogProvider<TReblogs>["provide"]>>> {
     this.operands.push(new ReblogFilter(this.worker, rebloggers));
     this.pushProvider(ReblogProvider, { accounts: rebloggers });
 
