@@ -684,7 +684,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * ```ts
    * workerbee.observe.onMention("username").subscribe({
    *   next: (data) => {
-   *     for(const { operation } of data.mentioned["username"])
+   *     for(const operation of data.mentioned["username"])
    *      console.log("@username mentioned in post:", operation);
    *   }
    * });

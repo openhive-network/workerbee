@@ -37,16 +37,19 @@ export class MentionedAccountProvider<TMentions extends Array<TAccountName> = Ar
     const { operationsPerType } = await data.get(OperationClassifier);
 
     if (operationsPerType.comment)
-      for(const { operation } of operationsPerType.comment)
-        for(const account of this.accounts)
-          try {
-            const jsonMetadata = JSON.parse(operation.json_metadata);
+      for(const { operation } of operationsPerType.comment) {
+        const mentionRegex = /@([a-z0-9.-]+)/gi;
+        let match: RegExpExecArray | null;
+        while ((match = mentionRegex.exec(operation.body)) !== null) {
+          const mentionedAccount = match[1] as TAccountName;
+          if (this.accounts.has(mentionedAccount)) {
+            if (!mentioned[mentionedAccount])
+              mentioned[mentionedAccount] = [];
 
-            if ("users" in jsonMetadata && Array.isArray(jsonMetadata.users))
-              if (jsonMetadata.users.indexOf(account) !== -1)
-                mentioned[account].push(operation);
-            // eslint-disable-next-line no-empty
-          } catch {}
+            mentioned[mentionedAccount].push(operation);
+          }
+        }
+      }
 
     for(const account in mentioned)
       mentioned[account] = new WorkerBeeIterable(mentioned[account]);

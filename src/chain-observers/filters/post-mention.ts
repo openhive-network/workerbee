@@ -26,16 +26,16 @@ export class PostMentionFilter extends FilterBase {
   public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { operationsPerType } = await data.get(OperationClassifier);
 
-    for(const { operation } of (operationsPerType.comment ?? []))
-      try {
-        const jsonMetadata = JSON.parse(operation.json_metadata);
-
-        if ("users" in jsonMetadata && Array.isArray(jsonMetadata.users))
-          for(const user of jsonMetadata.users)
-            if (this.accounts.has(user))
-              return true;
-        // eslint-disable-next-line no-empty
-      } catch {}
+    for(const { operation: { body } } of (operationsPerType.comment ?? [])) {
+      // Use regex to find all account mentions in the form of @username
+      const mentionRegex = /@([a-z0-9.-]+)/gi;
+      let match: RegExpExecArray | null;
+      while ((match = mentionRegex.exec(body)) !== null) {
+        const mentionedAccount = match[1] as TAccountName;
+        if (this.accounts.has(mentionedAccount))
+          return true;
+      }
+    }
 
     return false;
   }
