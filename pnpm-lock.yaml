@@ -75,8 +75,8 @@ importers:
         specifier: 1.27.11-stable.250513143655
         version: 1.27.11-stable.250513143655
       '@hiveio/wax':
-        specifier: 1.27.6-rc7-stable.250701234723
-        version: 1.27.6-rc7-stable.250701234723
+        specifier: 1.27.6-rc7-stable.250708094236
+        version: 1.27.6-rc7-stable.250708094236
       long:
         specifier: ^5.3.1
         version: 5.3.1
@@ -390,8 +390,8 @@ packages:
     resolution: {integrity: sha1-WM73mERJWR06dqP67ZznUjbya6I=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.11-stable.250513143655.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
-  '@hiveio/wax@1.27.6-rc7-stable.250701234723':
-    resolution: {integrity: sha1-XwAc3n7HREsTxo44wBo/0nlZO04=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc7-stable.250701234723.tgz}
+  '@hiveio/wax@1.27.6-rc7-stable.250708094236':
+    resolution: {integrity: sha1-wl2jSSYUwmpnYzmDJbSow2JHhjY=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc7-stable.250708094236.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
   '@humanfs/core@0.19.1':
@@ -2906,7 +2906,7 @@ snapshots:
 
   '@hiveio/beekeeper@1.27.11-stable.250513143655': {}
 
-  '@hiveio/wax@1.27.6-rc7-stable.250701234723':
+  '@hiveio/wax@1.27.6-rc7-stable.250708094236':
     dependencies:
       '@hiveio/beekeeper': 1.27.11-stable.250513143655
       events: 3.3.0
