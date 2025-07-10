@@ -190,7 +190,7 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
 
     this.stop();
 
-    setInterval(() => {
+    this.intervalId = setInterval(() => {
       this.mediator.notify();
     }, DEFAULT_BLOCK_INTERVAL_TIMEOUT_MS);
   }
