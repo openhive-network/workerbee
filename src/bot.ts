@@ -106,7 +106,10 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
     });
   }
 
-  public broadcast(tx: ApiTransaction | ITransaction, options: IBroadcastOptions = {}): Promise<void> {
+  public async broadcast(tx: ApiTransaction | ITransaction, options: IBroadcastOptions = {}): Promise<void> {
+    if (!this.running)
+      await this.start();
+
     const toBroadcast: ApiTransaction = "toApiJson" in tx ? tx.toApiJson() as ApiTransaction : tx as ApiTransaction;
 
     if(toBroadcast.signatures.length === 0)
@@ -116,18 +119,20 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
 
     let timeoutId: NodeJS.Timeout | undefined = undefined;
 
-    return new Promise<void>((resolve, reject) => {
-      const listener = this.observe.onTransactionIds(apiTx.id, apiTx.legacy_id).provideBlockHeaderData().subscribe({
-        next(val) {
-          clearTimeout(timeoutId);
-          listener.unsubscribe();
+    const blocksAnalyzed: number[] = [];
 
+    return new Promise<void>((resolve, reject) => {
+      const listener = this.observe.onTransactionIds(apiTx.id, apiTx.legacy_id).or.onBlock().subscribe({
+        next(val) {
           const transaction = val.transactions[apiTx.id] || val.transactions[apiTx.legacy_id];
           if (transaction === undefined) {
-            reject(new WorkerBeeError(`Transaction broadcast error: Observer filter matched on block ${val.block.number
-            }, but transaction #${apiTx.id} not found in the provided data. Please report this issue`));
+            blocksAnalyzed.push(val.block.number);
+
             return;
           }
+
+          clearTimeout(timeoutId);
+          listener.unsubscribe();
 
           if (options.verifySignatures) {
             if(transaction.signatures.length !== apiTx.transaction.signatures.length) {
@@ -160,7 +165,8 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
         timeoutId = setTimeout(async() => {
           listener.unsubscribe();
           const txTime = dateFromString(apiTx.transaction.expiration);
-          let errorMessage = `Transaction broadcast error: Transaction #${apiTx.id} has expired.\nTransaction broadcast metadata:\n`;
+          let errorMessage = `Transaction #${apiTx.id} broadcasted successfully, but listener has expired.\n`;
+          errorMessage += `Blocks analyzed: ${blocksAnalyzed.join(", ") || "(none)"}\nTransaction broadcast metadata:\n`;
           errorMessage += `  - Current timestamp:           ${new Date().toISOString()}\n`;
           errorMessage += `  - Transaction expiration time: ${txTime.toISOString()}\n`;
           try {

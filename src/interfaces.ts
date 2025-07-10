@@ -151,6 +151,8 @@ export interface IWorkerBee<ExplicitChainT = IHiveChainInterface> {
    *
    * Requires signed transaction
    *
+   * Note: Implicitly calls {@link start} if the bot is not running yet.
+   *
    * @param tx Protobuf transactoin to broadcast
    * @param options Options for broadcasting
    */
