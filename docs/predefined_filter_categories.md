@@ -1,5 +1,6 @@
 # WorkerBee Filter Categories Tree
 
+```text
 QueenBee 🐝
 ├── 👤 Account Management
 │   ├── AccountCreatedFilter (onNewAccount)
@@ -34,3 +35,4 @@ QueenBee 🐝
     ├── BlockNumberFilter (onBlockNumber)
     ├── BlockChangedFilter (onBlock)
     └── TransactionIdFilter (onTransactionIds)
+```

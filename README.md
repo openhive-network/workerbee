@@ -1,14 +1,34 @@
-# WorkerBee
+# 🐝 WorkerBee
 
-Hive automation library based on the wax and beekeeper
+**A powerful and flexible Hive automation library.**
 
-## Install
+WorkerBee, based on `wax`, provides a simple yet powerful interface to interact with the Hive blockchain, allowing you to build sophisticated bots and automation scripts with ease.
+
+[![npm version](https://badge.fury.io/js/%40hiveio%2Fworkerbee.svg)](https://badge.fury.io/js/%40hiveio%2Fworkerbee)
+[![CI](https://gitlab.syncad.com/hive/workerbee/badges/main/pipeline.svg)](https://gitlab.syncad.com/hive/workerbee/-/pipelines)
+
+---
+
+## ✨ Features
+
+- **No More Endless Loops!** 🔄 Just say what you want to listen to - WorkerBee does all the waiting and event handling behind the scenes.
+- **No Blockchain Headaches!** 🧩 Forget complicated APIs and coding tricks. Write logic much like you would on regular web apps (think: “When a new post appears by Alice, send me a ping!”).
+- **Keep Your Sandbox Clean** 🧼 WorkerBee shields your code from the messy details of blockchain data, so your app stays flexible and easy-to-maintain.
+- **One Interface, Many Sources** 🗃️ Switch from live blockchain data to a historical database or new data source (e.g. SQL) - all without changing your app’s logic!
+- **Easy to Expand** 📈 Start simple but add new events, rules, or channels as your needs grow.
+- **Fully typed** ℹ️ Library APIs have well defined types and functional interfaces with special support for IDE IntelliSense
+
+---
+
+## 🚀 Getting Started
+
+### Installation
 
 This is a [Node.js](https://nodejs.org/en/) module available through the
 [npm registry](https://www.npmjs.com/).
 
 Before installing, [download and install Node.js](https://nodejs.org/en/download/).
-Node.js 18 or higher is required.
+Node.js 20 or higher is required.
 
 Installation is done using the
 [`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
@@ -24,156 +44,230 @@ echo @hiveio:registry=https://gitlab.syncad.com/api/v4/groups/136/-/packages/npm
 npm install @hiveio/workerbee
 ```
 
-## Usage
+### Basic Usage
 
-### Iterating indefinitely over new blocks
+Here's a simple example of how to start listening for new blocks on the Hive blockchain:
 
-```js
+```typescript
 import WorkerBee from "@hiveio/workerbee";
 
 const bot = new WorkerBee();
-bot.on("error", console.error);
 
 await bot.start();
 
-for await(const { block, number } of bot)
-  console.info(`Got block #${block.block_id} (${number})`);
+console.log("🚀 Bot started! Waiting for new blocks...");
+
+for await (const { id, number } of bot) {
+  console.log(`🎉 Got block #${number} with ID: ${id}`);
+}
 ```
 
-### Wait for the next block using observer
+---
 
-```js
+## 📚 Examples
+
+WorkerBee offers a rich set of observers to monitor various activities on the Hive blockchain. Here are some common use cases:
+
+### Observing New Blocks
+
+You can use an observer to wait for the next block:
+
+```typescript
 import WorkerBee from "@hiveio/workerbee";
 
 const bot = new WorkerBee();
-bot.on("error", console.error);
 
 await bot.start();
 
-const block = await new Promise(blockResolve => {
-  bot.once("block", blockResolve);
-}); // Get one latest block
+console.log(`⏳ Waiting for new blocks...`);
 
-console.info(`Waiting for block: #${block.number + 1}`);
-const observer = bot.observe.block(block.number + 1);
-
-observer.subscribe({
-  next() {
-    console.info('Block detected');
+bot.observe.onBlock().subscribe({
+  next(data) {
+    console.log(`📦 Block #${data.block.number} detected!`);
   }
 });
 ```
 
-### Observe given account for operations in blockchain
+### 👀 Observing Account Activity
 
-```js
+Monitor a specific account for new operations:
+
+```typescript
 import WorkerBee from "@hiveio/workerbee";
 
 const bot = new WorkerBee();
-bot.on("error", console.error);
 
 await bot.start();
 
-const observer = bot.observe.accountOperations("gtg");
+console.log("👂 Listening for operations from 'gtg'...");
 
-observer.subscribe({
-  next(op) {
-    console.info(op);
+bot.observe.onImpactedAccounts("gtg").subscribe({
+  next(data) {
+    console.log("💥 'gtg' was involved in a new transaction!");
+    console.log(data.impactedAccounts["gtg"]);
   }
 });
 ```
 
-### Observe given account for full manabar regeneration
+### 💰 Monitoring for Large Transfers (Whale Watching)
 
-```js
+Get notified when large transfers occur:
+
+```typescript
 import WorkerBee from "@hiveio/workerbee";
 
 const bot = new WorkerBee();
-bot.on("error", console.error);
 
 await bot.start();
 
-const observer = bot.observe.accountFullManabar("gtg");
+// Set a threshold for what you consider a "whale" transfer (e.g., 1000 HIVE)
+console.log(`🐋 Watching for transfers larger than 1000 HIVE...`);
 
-observer.subscribe({
-  next(acc) {
-    console.info(acc.voting_manabar); // { "current_mana": "0", "last_update_time": 0 }
+const amount = bot.chain!.hiveCoins(1000);
+
+bot.observe.onWhaleAlert(amount).subscribe({
+  next(data) {
+    data.whaleOperations.forEach(({ operation }) => {
+      console.log(
+        bot.chain!.waxify`🚨 Whale Alert! ${operation.from} sent ${operation.amount} to ${operation.to}`
+      );
+    });
   }
 });
 ```
 
-### Broadcast and observe transaction in blockchain
+### 📜 Processing Historical Data
 
-```js
+You can also process data from a specific range of past blocks. Here's how to find all posts by a specific author in a given block range:
+
+```typescript
 import WorkerBee from "@hiveio/workerbee";
-import beekeeperFactory from "@hiveio/beekeeper";
-
-const beekeeper = await beekeeperFactory();
-const session = await beekeeper.createSession("my.salt");
-const { wallet } = await session.createWallet("w0", "mypassword");
-const publicKey = await wallet.importKey("5JkFnXrLM2ap9t3AmAxBJvQHF7xSKtnTrCTginQCkhzU5S7ecPT");
 
 const bot = new WorkerBee();
-bot.on("error", console.error);
-
 await bot.start();
 
-// Build transaction
-const transaction = await bot.chain.createTransaction();
-transaction.pushOperation({
-  vote: {
-    voter: "otom",
-    author: "c0ff33a",
-    permlink: "ewxhnjbj",
-    weight: 2200
-  }
-});
+const author = "gtg";
+const startBlock = 96549390;
+const endBlock = 96549415;
 
-transaction.sign(wallet, publicKey);
+console.log(`🔍 Searching for posts by @${author} from block ${startBlock} to ${endBlock}...`);
 
-// Broadcast our transaction with custom internal expiration time
-const observer = await bot.broadcast(transaction);
-
-// Observe if our transaction has been applied
-observer.subscribe({
-  next(tx) {
-    console.info(tx, "applied in blockchain");
-  },
-  error() {
-    console.error("Transaction observation time expired");
-  }
-});
+bot.providePastOperations(startBlock, endBlock)
+  .onPosts(author)
+  .subscribe({
+    next(data) {
+      data.posts[author]?.forEach(({ operation }) => {
+        console.log(`✍️ Found post: @${operation.author}/${operation.permlink}`);
+      });
+    },
+    error: console.error,
+    complete() {
+      console.log("✅ Search complete.");
+    }
+  });
 ```
 
-## API
+> [!IMPORTANT]
+> `providePastOperations` provides past data to the bot, allowing you to start processing historical operations and directly switch to the live data without losing any context.
 
-See API definition in our [Wiki](${GEN_DOC_URL})
+### Combining Observers with `.or`
 
-## Support and tests
+WorkerBee allows you to combine multiple observers using the `.or` operator. This enables you to create complex conditions where you can react to any one of several events occurring. The resulting observer will fire if any of the chained conditions are met.
 
-Tested on the latest Chromium (v117) and Node.js v18.19.0
+Here's an example of how to get notified when either a specific account's manabar is full or a certain block number is reached:
 
-[Automated CI test](https://gitlab.syncad.com/hive/workerbee/-/pipelines) runs are available.
+```typescript
+import { EManabarType } from "@hiveio/wax";
+import WorkerBee from "@hiveio/workerbee";
 
-To run the tests on your own, clone the Wax repo and install the dependencies and then compile the project:
+const bot = new WorkerBee();
+await bot.start();
+
+console.log("👀 Watching for 'initminer' to have a full RC manabar or for new account...");
+
+bot.observe
+  .onAccountsFullManabar(EManabarType.RC, "initminer")
+  .or.onNewAccount()
+  .subscribe({
+    next(data) {
+      if (data.newAccounts) {
+        data.newAccounts.forEach(({ accountName }) => {
+          console.log(`👤 New account created: @${accountName}`);
+        });
+      }
+      if (data.manabarData?.["initminer"]) {
+        console.log("🔋 'initminer' now has a full RC manabar!");
+      }
+    },
+    error: console.error
+  });
+```
+
+Even if multiple conditions are met at the same time, WorkerBee is smart enough to only trigger the event once, preventing duplicate notifications. Moreover if multiple events occur in the same notification cycle, they will be processed together, ensuring that your logic can account for all relevant changes at once.
+
+### 📢 Broadcasting a Transaction
+
+Here's how you can create, sign, and broadcast a transaction:
+
+```typescript
+import WorkerBee from "@hiveio/workerbee";
+
+const bot = new WorkerBee();
+await bot.start();
+
+console.log("📡 Broadcasting transaction...");
+
+await bot.broadcast(transaction);
+
+console.log("✅ Transaction confirmed by the node!");
+```
+
+This will send the transaction to the Hive network and wait for confirmation from the node (transaction applied in the next block).
+
+---
+
+## 📚 Predefined filter categories
+
+WorkerBee provides a set of predefined filter categories to help you easily subscribe to specific types of operations.
+
+You can check the full list of available categories in the [docs/predefined_filter_categories.md](https://gitlab.syncad.com/hive/workerbee/-/blob/main/docs/predefined_filter_categories.md).
+
+## 📖 API Reference
+
+For a detailed API definition, please see our [Wiki](${GEN_DOC_URL}).
+
+## 🛠️ Development and Testing
+
+### Environment Setup
+
+Clone the repository and install the dependencies:
 
 ```bash
-sudo npm install -g pnpm
+git clone https://gitlab.syncad.com/hive/workerbee.git
+cd workerbee
+
+corepack enable
 pnpm install
 ```
 
-Compile source:
+### Build
+
+Compile the TypeScript source code:
 
 ```bash
-npm run build
+pnpm build
 ```
 
-Then run tests:
+### Run Tests
+
+Execute the test suite:
 
 ```bash
-npm run test
+pnpm test
 ```
 
-## License
+---
 
-See license in the [LICENSE.md](https://gitlab.syncad.com/hive/workerbee/-/blob/main/LICENSE.md) file
+## 📄 License
+
+This project is licensed under the MIT License. See the [LICENSE.md](https://gitlab.syncad.com/hive/workerbee/-/blob/main/LICENSE.md) file for details.
