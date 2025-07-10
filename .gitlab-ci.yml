@@ -11,7 +11,7 @@ variables:
 
 include:
   - project: 'hive/common-ci-configuration'
-    ref: b87d23ff08491d5006db9eddbec1520190266c0d
+    ref: ab4d4c78df8ebc5b5d7744fe2cfa64c51143fe01
     file:
       - '/templates/npm_projects.gitlab-ci.yml'
 
