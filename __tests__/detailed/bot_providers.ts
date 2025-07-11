@@ -1,25 +1,8 @@
 /* eslint-disable no-console */
-import { ChromiumBrowser, ConsoleMessage, chromium } from "playwright";
 import { expect } from "playwright/test";
 import { test } from "../assets/jest-helper";
 
-let browser!: ChromiumBrowser;
-
 test.describe("Bot Providers", () => {
-  test.beforeAll(async() => {
-    browser = await chromium.launch({
-      headless: true
-    });
-  });
-
-  test.beforeEach(async({ page }) => {
-    page.on("console", (msg: ConsoleMessage) => {
-      console.log(">>", msg.type(), msg.text());
-    });
-
-    await page.goto("http://localhost:8080/__tests__/assets/test.html", { waitUntil: "load" });
-  });
-
   test("Should be able to provide witnesses", async({ createWorkerBeeTest }) => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const observer = bot.observe.onBlock().provideWitnesses("gtg");
@@ -380,9 +363,5 @@ test.describe("Bot Providers", () => {
     expect(result.rcAccounts["blocktrades"]).toBeDefined();
     expect(result.rcAccounts["gtg"].name).toBe("gtg");
     expect(result.rcAccounts["blocktrades"].name).toBe("blocktrades");
-  });
-
-  test.afterAll(async() => {
-    await browser.close();
   });
 });

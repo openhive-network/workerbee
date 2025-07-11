@@ -1,4 +1,5 @@
-import { Page, test as base, expect } from "@playwright/test";
+/* eslint-disable no-console */
+import { ConsoleMessage, Page, test as base, expect } from "@playwright/test";
 
 import "./globals";
 import { IWorkerBee } from "../../dist/bundle";
@@ -6,7 +7,11 @@ import type { IWorkerBeeGlobals, TEnvType } from "./globals";
 
 type TWorkerBeeTestCallable<R, Args extends any[]> = (globals: IWorkerBeeGlobals, ...args: Args) => (R | Promise<R>);
 
-export interface IWorkerBeeTest {
+interface IWorkerBeeTestPlaywright {
+  forEachTest: void;
+}
+
+export interface IWorkerBeeFixtureMethods {
   /**
    * Runs given function in both environments: web and Node.js
    * Created specifically for testing the wax code - base and chain
@@ -27,6 +32,12 @@ export interface IWorkerBeeTest {
     callback: (bot: IWorkerBee<unknown>, resolve: (retVal?: T) => void, reject: (reason?: any) => void) => void,
     dynamic?: boolean
   ) => Promise<T>;
+}
+
+export interface IWorkerBeeTest extends IWorkerBeeFixtureMethods, IWorkerBeeTestPlaywright {}
+
+interface IWorkerBeeWorker {
+  forEachWorker: void;
 }
 
 const envTestFor = <GlobalType extends IWorkerBeeGlobals>(
@@ -87,7 +98,23 @@ const createWorkerBeeTest = async <T = Record<string, any>>(
   }, callback.toString());
 }
 
-export const test = base.extend<IWorkerBeeTest>({
+export const test = base.extend<IWorkerBeeTest, IWorkerBeeWorker>({
+  forEachTest: [async ({ page }, use, ) => {
+    page.on("console", (msg: ConsoleMessage) => {
+      console.log(">>", msg.type(), msg.text());
+    });
+
+    await page.goto("http://localhost:8080/__tests__/assets/test.html", { waitUntil: "load" });
+
+    await use();
+  }, { auto: true }],
+
+  forEachWorker: [async ({ browser }, use) => {
+    await use();
+
+    await browser.close();
+  }, { scope: "worker", auto: true }],
+
   workerbeeTest: ({ page }, use) => {
     use(envTestFor(page, createTestFor));
   },

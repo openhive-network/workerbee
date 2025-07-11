@@ -1,31 +1,14 @@
 /* eslint-disable no-console */
 
 import { expect } from "@playwright/test";
-import { ChromiumBrowser, ConsoleMessage, chromium } from "playwright";
 
 import type { IStartConfiguration } from "../../src/bot";
 
 import { test } from "../assets/jest-helper";
 
-let browser!: ChromiumBrowser;
-
 const HIVE_BLOCK_INTERVAL = 3000;
 
 test.describe("WorkerBee Bot events test", () => {
-  test.beforeAll(async() => {
-    browser = await chromium.launch({
-      headless: true
-    });
-  });
-
-  test.beforeEach(async({ page }) => {
-    page.on("console", (msg: ConsoleMessage) => {
-      console.log(">>", msg.type(), msg.text());
-    });
-
-    await page.goto("http://localhost:8080/__tests__/assets/test.html", { waitUntil: "load" });
-  });
-
   test("Should have a destroyable global module", async({ workerbeeTest }) => {
     await workerbeeTest(({ WorkerBee }) => {
       const bot = new WorkerBee();
@@ -1121,9 +1104,5 @@ test.describe("WorkerBee Bot events test", () => {
 
     // This might not trigger in test environment, so we just check it doesn't throw
     expect(typeof result).toBe("boolean");
-  });
-
-  test.afterAll(async() => {
-    await browser.close();
   });
 });
