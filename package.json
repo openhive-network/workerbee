@@ -85,7 +85,7 @@
     "typescript": "catalog:typescript-toolset"
   },
   "dependencies": {
-    "@hiveio/wax": "1.27.6-rc8",
+    "@hiveio/wax": "1.27.6-rc9",
     "long": "^5.3.1"
   },
   "repository": {
