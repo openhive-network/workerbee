@@ -26,7 +26,7 @@
     "build": "tsc",
     "postbuild": "rollup -c && tsx ./npm-common-config/ts-common/terser.ts && size-limit",
     "pretest": "playwright install chromium",
-    "test": "unset CI && playwright test --workers 1 --max-failures 1 --project=workerbee_testsuite"
+    "test": "unset CI && playwright test --workers 4 --max-failures 1 --project=workerbee_testsuite"
   },
   "size-limit": [
     {
