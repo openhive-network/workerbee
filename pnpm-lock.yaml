@@ -71,9 +71,6 @@ importers:
 
   .:
     dependencies:
-      '@hiveio/beekeeper':
-        specifier: 1.27.11-stable.250513143655
-        version: 1.27.11-stable.250513143655
       '@hiveio/wax':
         specifier: 1.27.6-rc7-stable.250708094236
         version: 1.27.6-rc7-stable.250708094236
@@ -90,6 +87,9 @@ importers:
       '@eslint/js':
         specifier: ^9.20.0
         version: 9.20.0
+      '@hiveio/beekeeper':
+        specifier: 1.27.11-stable.250513143655
+        version: 1.27.11-stable.250513143655
       '@playwright/test':
         specifier: catalog:playwright-toolset
         version: 1.50.1

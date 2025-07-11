@@ -1,4 +1,3 @@
-import type { IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
 import type { ApiTransaction, IHiveChainInterface, ITransaction, transaction } from "@hiveio/wax";
 import type { IStartConfiguration } from "./bot";
 import { IBlockData } from "./chain-observers/classifiers/block-classifier";
@@ -55,10 +54,8 @@ export interface IWorkerBee<ExplicitChainT = IHiveChainInterface> {
 
   /**
    * Starts the automation with given configuration
-   *
-   * @param {?IBeekeeperUnlockedWallet} wallet optional unlocked beekeper wallet for bot operations
    */
-  start(wallet?: IBeekeeperUnlockedWallet): Promise<void>;
+  start(): Promise<void>;
 
   /**
    * Request automation stop

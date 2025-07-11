@@ -1,5 +1,4 @@
-import { TPublicKey } from "@hiveio/beekeeper";
-import { authority, TAccountName } from "@hiveio/wax";
+import { authority, TAccountName, TPublicKey } from "@hiveio/wax";
 import { WorkerBeeIterable } from "../../types/iterator";
 import { OperationClassifier } from "../classifiers";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";

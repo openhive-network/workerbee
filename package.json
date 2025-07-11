@@ -48,6 +48,7 @@
     "@eslint/compat": "^1.2.7",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.20.0",
+    "@hiveio/beekeeper": "1.27.11-stable.250513143655",
     "@playwright/test": "catalog:playwright-toolset",
     "@rollup/plugin-commonjs": "catalog:rollup-toolset",
     "@rollup/plugin-node-resolve": "catalog:rollup-toolset",
@@ -84,7 +85,6 @@
     "typescript": "catalog:typescript-toolset"
   },
   "dependencies": {
-    "@hiveio/beekeeper": "1.27.11-stable.250513143655",
     "@hiveio/wax": "1.27.6-rc7-stable.250708094236",
     "long": "^5.3.1"
   },

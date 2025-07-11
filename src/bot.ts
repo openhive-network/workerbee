@@ -1,4 +1,3 @@
-import type { IBeekeeperOptions, IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
 import { IWaxOptionsChain, IHiveChainInterface, TWaxExtended, ITransaction, ApiTransaction, dateFromString } from "@hiveio/wax";
 
 import { IBlockData } from "./chain-observers/classifiers/block-classifier";
@@ -28,14 +27,6 @@ export interface IStartConfiguration {
    * This option is exclusive to {@link chainOptions}
    */
   explicitChain?: IHiveChainInterface;
-
-  /**
-   * Beekeeper wallet options
-   *
-   * @type {?Partial<IBeekeeperOptions>}
-   * @default {}
-   */
-  beekeeperOptions?: Partial<IBeekeeperOptions>;
 }
 
 export const DEFAULT_WORKERBEE_OPTIONS = {
@@ -51,8 +42,6 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
   public readonly configuration: IStartConfiguration;
 
   public chain: TWaxExtended<WaxExtendTypes> | undefined;
-
-  private wallet?: IBeekeeperUnlockedWallet;
 
   private intervalId: NodeJS.Timeout | undefined = undefined;
 
@@ -186,13 +175,10 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
     });
   }
 
-  public async start(wallet?: IBeekeeperUnlockedWallet): Promise<void> {
+  public async start(): Promise<void> {
     // Initialize chain and beekepeer if required
     if(typeof this.chain === "undefined")
       this.chain = await getWax(this.configuration.chainOptions);
-
-    if(typeof this.wallet === "undefined")
-      this.wallet = wallet;
 
     this.stop();
 
@@ -275,9 +261,6 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
     if(typeof this.configuration.explicitChain === "undefined")
       this.chain?.delete();
 
-    this.wallet?.close();
-
     this.chain = undefined;
-    this.wallet = undefined;
   }
 }
