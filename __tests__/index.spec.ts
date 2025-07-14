@@ -2,3 +2,4 @@
 
 import "./detailed/bot_providers";
 import "./detailed/bot_events";
+import "./detailed/individual_filter_tests";
