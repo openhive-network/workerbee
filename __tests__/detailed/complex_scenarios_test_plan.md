@@ -1,5 +1,91 @@
 # Test Plan - Complex WorkerBee Usage Scenarios
 
+## Individual Filter Verification Scenarios
+
+### 1. onPosts Filter Tests
+
+#### 1.1 onPosts Positive Cases
+```typescript
+// Multiple accounts - should trigger when any specified account creates post
+bot.observe.onPosts("author1", "author2", "author3")
+
+// Simultaneous posts - should trigger for all accounts posting in same block
+bot.observe.onPosts("author1", "author2") // Both post in block N
+```
+
+#### 1.2 onPosts Negative Cases
+```typescript
+// Should NOT trigger when account creates comment
+bot.observe.onPosts("test-author") // test-author creates comment, not post
+
+// Multiple accounts - should NOT trigger when any specified account creates comment, not post
+bot.observe.onPosts("author1", "author2", "author3")
+
+// Monitor for posts from a specific account - should NOT trigger as the account created no posts
+bot.observe.onPosts("nonexistent-account")
+
+// Should handle empty account list
+bot.observe.onPosts()
+```
+
+### 2. onComments Filter Tests
+
+#### 2.1 onComments Positive Cases
+```typescript
+// Multiple accounts - should trigger when any specified account creates comment
+bot.observe.onComments("commenter1", "commenter2", "commenter3")
+
+// Simultaneous comments - should trigger for all accounts commenting in same block
+bot.observe.onComments("commenter1", "commenter2") // Both comment in block N
+```
+
+#### 2.2 onComments Negative Cases
+```typescript
+// Should NOT trigger when account creates post
+bot.observe.onComments("test-commenter") // test-commenter creates post, not comment
+
+// Multiple accounts - should NOT trigger when any specified account creates post, not comment
+bot.observe.onComments("author1", "author2", "author3")
+
+// Monitor for comments from a specific account - should NOT trigger as the account created no comments
+bot.observe.onComments("nonexistent-account")
+
+// Should handle empty account list
+bot.observe.onComments()
+```
+
+#### 2.3 onPosts and onComments cases
+```typescript
+// Multiple accounts - should trigger when any specified account creates post or comment
+bot.observe.onComments("test-commenter").or.onPosts("test-poster")
+```
+
+### 3. onVotes Filter Tests
+
+#### 3.1 onVotes Positive Cases
+```typescript
+// Multiple voters - should trigger when any specified account votes
+bot.observe.onVotes("voter1", "voter2", "voter3")
+
+// Simultaneous votes - should trigger for all accounts voting in same block
+bot.observe.onVotes("voter1", "voter2") // Both vote in block N
+```
+
+#### 3.2 onVotes Negative Cases
+```typescript
+// Should NOT trigger when account creates post/comment
+bot.observe.onVotes("test-voter") // test-voter posts or comments, doesn't vote
+
+// Should NOT trigger when different account votes
+bot.observe.onVotes("voter1") // voter2 votes, not voter1
+
+// Monitor for votes from a specific account - should NOT trigger as the account did not vote
+bot.observe.onVotes("nonexistent-account")
+
+// Should handle empty account list
+bot.observe.onVotes()
+```
+
 ## Realistic Test Scenarios
 
 ### 1. Scenarios with OR operator
@@ -25,7 +111,7 @@ bot.observe.onWhaleAlert(hiveCoins(1000)).or.onInternalMarketOperation().or.onEx
 #### 1.4 Content Engagement Tracker
 ```typescript
 // Tracks content engagement
-bot.observe.onMention("brand").or.onComments("brand").or.onReblog("brand")
+bot.observe.onMention("brand").or.onPosts("brand").or.onReblog("brand")
 ```
 
 #### 1.5 Cross-Platform Activity Monitor
@@ -155,7 +241,7 @@ bot.observe.onFeedPriceChange(5)
   .provideFeedPriceData()
 ```
 
-#### 3.4 Community Moderation Bot
+#### 3.4 Community Moderation Bot (TODO after `onCommunityPost` implementation)
 ```typescript
 // Community moderation monitoring
 bot.observe.onPosts("community-tag")
@@ -179,7 +265,6 @@ bot.observe.onAccountsBalanceChange(true, "investor1", "investor2")
 bot.observe.onPosts("news-account1")
   .or.onPosts("news-account2")
   .or.onReblog("aggregator-account")
-  .or.onCustomOperation("cross-post")
 ```
 
 #### 3.7 Engagement Optimization Bot
