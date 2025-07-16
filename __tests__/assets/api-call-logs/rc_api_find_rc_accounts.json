@@ -1,0 +1,37 @@
+[
+  {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "rc_api.find_rc_accounts",
+      "params": {
+        "accounts": [
+          "gtg"
+        ]
+      },
+      "id": 1
+    },
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "rc_accounts": [
+          {
+            "account": "gtg",
+            "delegated_rc": 130000000000,
+            "max_rc": 2935684458790312,
+            "max_rc_creation_adjustment": {
+              "amount": "2020748973",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "rc_manabar": {
+              "current_mana": 2152098568737624,
+              "last_update_time": 1752663375
+            },
+            "received_delegated_rc": 10174616133
+          }
+        ]
+      }
+    }
+  }
+]

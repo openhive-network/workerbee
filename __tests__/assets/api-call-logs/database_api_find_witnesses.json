@@ -1,0 +1,66 @@
+[
+  {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "database_api.find_witnesses",
+      "params": {
+        "owners": [
+          "gtg"
+        ]
+      },
+      "id": 1
+    },
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "witnesses": [
+          {
+            "available_witness_account_subsidies": 1377021,
+            "created": "2016-06-30T17:22:18",
+            "hardfork_time_vote": "2025-02-08T13:00:00",
+            "hardfork_version_vote": "1.28.0",
+            "hbd_exchange_rate": {
+              "base": {
+                "amount": "241",
+                "nai": "@@000000013",
+                "precision": 3
+              },
+              "quote": {
+                "amount": "1000",
+                "nai": "@@000000021",
+                "precision": 3
+              }
+            },
+            "id": 9493,
+            "last_aslot": 97972476,
+            "last_confirmed_block_num": 97506932,
+            "last_hbd_exchange_update": "2025-07-17T11:41:39",
+            "last_work": "0000000048bf77f525731f28db7c1aa9ad853a475ccc78e71ea952a7782e5459",
+            "owner": "gtg",
+            "pow_worker": 0,
+            "props": {
+              "account_creation_fee": {
+                "amount": "3000",
+                "nai": "@@000000021",
+                "precision": 3
+              },
+              "account_subsidy_budget": 797,
+              "account_subsidy_decay": 347321,
+              "hbd_interest_rate": 1000,
+              "maximum_block_size": 65536
+            },
+            "running_version": "1.28.0",
+            "signing_key": "STM6LLegbAgLAy28EHrffBVuANFWcFgmqRMW13wBmTExqFE9SCkg4",
+            "total_missed": 8608,
+            "url": "https://gtg.openhive.network",
+            "virtual_last_update": "976912495575489581911509823",
+            "virtual_position": "6247395889179736241420680092396656593",
+            "virtual_scheduled_time": "976914764013601056742029734",
+            "votes": "147253288217144739"
+          }
+        ]
+      }
+    }
+  }
+]
