@@ -11,6 +11,12 @@ export default defineConfig({
     {
       name: "workerbee_testsuite",
       testDir: "./__tests__/"
+    },
+    {
+      name: "workerbee_testsuite_mock",
+      testDir: "./__tests__/",
+      testMatch: "mock*",
+      fullyParallel: false
     }
   ],
   // Run your local dev server before starting the tests
