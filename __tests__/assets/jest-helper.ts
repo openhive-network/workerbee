@@ -4,6 +4,8 @@ import { ConsoleMessage, Page, test as base, expect } from "@playwright/test";
 import "./globals";
 import { IWorkerBee } from "../../dist/bundle";
 import type { IWorkerBeeGlobals, TEnvType } from "./globals";
+import { resetMockCallIndexes } from "./mock/api-mock";
+import { resetCallIndexes } from "./mock/jsonRpcMock";
 
 type TWorkerBeeTestCallable<R, Args extends any[]> = (globals: IWorkerBeeGlobals, ...args: Args) => (R | Promise<R>);
 
@@ -30,6 +32,12 @@ export interface IWorkerBeeFixtureMethods {
 
   createWorkerBeeTest: <T = Record<string, any>>(
     callback: (bot: IWorkerBee<unknown>, resolve: (retVal?: T) => void, reject: (reason?: any) => void) => void,
+    dynamic?: boolean,
+    isMockEnvironment?: boolean
+  ) => Promise<T>;
+
+  createMockWorkerBeeTest: <T = Record<string, any>>(
+    callback: (bot: IWorkerBee<unknown>, resolve: (retVal?: T) => void, reject: (reason?: any) => void) => void,
     dynamic?: boolean
   ) => Promise<T>;
 }
@@ -42,18 +50,27 @@ interface IWorkerBeeWorker {
 
 const envTestFor = <GlobalType extends IWorkerBeeGlobals>(
   page: Page,
-  globalFunction: (env: TEnvType) => Promise<GlobalType>
+  globalFunction: (env: TEnvType) => Promise<GlobalType>,
+  isMockEnvironment: boolean = false
 ): IWorkerBeeTest["workerbeeTest"] => {
 
   const runner = async<R, Args extends any[]>(checkEqual: boolean, fn: TWorkerBeeTestCallable<R, Args>, ...args: Args): Promise<R> => {
 
     let nodeData = await fn(await (globalFunction as (...args: any[]) => any)("node"), ...args);
-    const webData = await page.evaluate(async({ args: pageArgs, globalFunction: globalFn, webFn }) => {
+
+    if (isMockEnvironment) {
+      // Reset mock call indexes between node and web environments
+      resetMockCallIndexes();
+      resetCallIndexes();
+    }
+
+    const webData = await page.evaluate(async({ args: pageArgs, globalFunction: globalFn, webFn, isMockEnv }) => {
       /* eslint-disable no-eval */
       eval(`window.webEvalFn = ${webFn};`);
+      eval(`window.isMockEnvironment = ${isMockEnv};`);
 
       return (window as Window & typeof globalThis & { webEvalFn: (...args: any[]) => any }).webEvalFn(await globalThis[globalFn]("web"), ...pageArgs);
-    }, { args, globalFunction: globalFunction.name, webFn: fn.toString() });
+    }, { args, globalFunction: globalFunction.name, webFn: fn.toString(), isMockEnv: isMockEnvironment });
 
     if(typeof nodeData === "object") // Remove prototype data from the node result to match webData
       nodeData = JSON.parse(JSON.stringify(nodeData));
@@ -75,12 +92,21 @@ const envTestFor = <GlobalType extends IWorkerBeeGlobals>(
 const createWorkerBeeTest = async <T = Record<string, any>>(
   envTestFor: IWorkerBeeTest["workerbeeTest"],
   callback: (bot: IWorkerBee<unknown>, resolve: (retVal?: T) => void, reject: (reason?: any) => void) => void,
-  dynamic: boolean = false
+  dynamic: boolean = false,
+  isMockEnvironment: boolean = false
 ): Promise<T> => {
   const testRunner = dynamic ? envTestFor.dynamic : envTestFor;
 
   return await testRunner(async ({ WorkerBee }, callbackStr) => {
-    const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const bot = isMockEnvironment
+      ? new WorkerBee({
+        chainOptions: {
+          apiEndpoint: "http://localhost:8000",
+          apiTimeout: 0
+        }
+      })
+      : new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+
     await bot.start();
 
     const returnValue = await new Promise<T>((resolve, reject) => {
@@ -119,5 +145,10 @@ export const test = base.extend<IWorkerBeeTest, IWorkerBeeWorker>({
 
   createWorkerBeeTest: ({ workerbeeTest }, use) => {
     use((callback, dynamic) => createWorkerBeeTest(workerbeeTest, callback, dynamic));
+  },
+
+  createMockWorkerBeeTest: ({ page }, use) => {
+    const mockEnvTestFor = envTestFor(page, createTestFor, true);
+    use((callback, dynamic) => createWorkerBeeTest(mockEnvTestFor, callback, dynamic, true));
   }
 });
