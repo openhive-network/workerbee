@@ -1,0 +1,104 @@
+[
+    {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "rc_api.find_rc_accounts",
+      "params": {
+        "accounts": [
+          "gtg",
+          "blocktrades",
+          "thebeedevs"
+        ]
+      },
+      "id": 1
+    },
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "rc_accounts": [
+          {
+            "account": "gtg",
+            "delegated_rc": 130000000000,
+            "max_rc": 2942324145307497,
+            "max_rc_creation_adjustment": {
+              "amount": "2020748973",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "rc_manabar": {
+              "current_mana": 161024584599674,
+              "last_update_time": 1753097298
+            },
+            "received_delegated_rc": 10174616133
+          },
+          {
+            "account": "blocktrades",
+            "delegated_rc": 16760000000,
+            "max_rc": "15564167323386971",
+            "max_rc_creation_adjustment": {
+              "amount": "2020748973",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "rc_manabar": {
+              "current_mana": "15564167323386971",
+              "last_update_time": 1753097352
+            },
+            "received_delegated_rc": 0
+          },
+          {
+            "account": "thebeedevs",
+            "delegated_rc": 0,
+            "max_rc": 3851240315396,
+            "max_rc_creation_adjustment": {
+              "amount": "5279676360",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "rc_manabar": {
+              "current_mana": 3851154925254,
+              "last_update_time": 1753095357
+            },
+            "received_delegated_rc": 0
+          }
+        ]
+      }
+    }
+  },
+  {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "rc_api.find_rc_accounts",
+      "params": {
+        "accounts": [
+          "gtg"
+        ]
+      },
+      "id": 1
+    },
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "rc_accounts": [
+          {
+            "account": "gtg",
+            "delegated_rc": 130000000000,
+            "max_rc": 2935684458790312,
+            "max_rc_creation_adjustment": {
+              "amount": "2020748973",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "rc_manabar": {
+              "current_mana": 2152098568737624,
+              "last_update_time": 1752663375
+            },
+            "received_delegated_rc": 10174616133
+          }
+        ]
+      }
+    }
+  }
+]
