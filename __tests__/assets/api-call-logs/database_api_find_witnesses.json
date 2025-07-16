@@ -1,0 +1,175 @@
+[
+    {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "database_api.find_witnesses",
+      "params": {
+        "owners": [
+          "gtg",
+          "blocktrades"
+        ]
+      },
+      "id": 1
+    },
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "witnesses": [
+          {
+            "available_witness_account_subsidies": 2074405,
+            "created": "2016-06-30T17:22:18",
+            "hardfork_time_vote": "2022-10-24T12:00:00",
+            "hardfork_version_vote": "1.27.0",
+            "hbd_exchange_rate": {
+              "base": {
+                "amount": "257",
+                "nai": "@@000000013",
+                "precision": 3
+              },
+              "quote": {
+                "amount": "1000",
+                "nai": "@@000000021",
+                "precision": 3
+              }
+            },
+            "id": 9493,
+            "last_aslot": 98087356,
+            "last_confirmed_block_num": 97837194,
+            "last_hbd_exchange_update": "2025-07-21T10:41:42",
+            "last_work": "0000000048bf77f525731f28db7c1aa9ad853a475ccc78e71ea952a7782e5459",
+            "owner": "gtg",
+            "pow_worker": 0,
+            "props": {
+              "account_creation_fee": {
+                "amount": "3000",
+                "nai": "@@000000021",
+                "precision": 3
+              },
+              "account_subsidy_budget": 797,
+              "account_subsidy_decay": 347321,
+              "hbd_interest_rate": 1000,
+              "maximum_block_size": 65536
+            },
+            "running_version": "1.27.11",
+            "signing_key": "STM8PFEEhF9g3PMZu9mu9vso56bzP6i4aMYM73aWL8CkcKi4LEGLR",
+            "total_missed": 988,
+            "url": "https://gtg.openhive.network",
+            "virtual_last_update": "979505544365428371674234720",
+            "virtual_position": "51472121875816974750553820863478338819",
+            "virtual_scheduled_time": "979507497029019599401149403",
+            "votes": "147905786917209621"
+          },
+          {
+            "available_witness_account_subsidies": 2924797,
+            "created": "2016-03-30T00:04:33",
+            "hardfork_time_vote": "2022-10-24T12:00:00",
+            "hardfork_version_vote": "1.27.0",
+            "hbd_exchange_rate": {
+              "base": {
+                "amount": "258",
+                "nai": "@@000000013",
+                "precision": 3
+              },
+              "quote": {
+                "amount": "1000",
+                "nai": "@@000000021",
+                "precision": 3
+              }
+            },
+            "id": 437,
+            "last_aslot": 98087348,
+            "last_confirmed_block_num": 97837186,
+            "last_hbd_exchange_update": "2025-07-21T11:12:00",
+            "last_work": "0000000df71896f1756d6a3456905da575407b4917d922042f72e076f586a2b4",
+            "owner": "blocktrades",
+            "pow_worker": 0,
+            "props": {
+              "account_creation_fee": {
+                "amount": "3000",
+                "nai": "@@000000021",
+                "precision": 3
+              },
+              "account_subsidy_budget": 797,
+              "account_subsidy_decay": 347321,
+              "hbd_interest_rate": 1200,
+              "maximum_block_size": 65536
+            },
+            "running_version": "1.27.11",
+            "signing_key": "STM74tqTQG9K52rUN1YwaD4uiGE1qyvz3NqdcrqX9af6jydtNkT9Y",
+            "total_missed": 3728,
+            "url": "https://blocktrades.us",
+            "virtual_last_update": "979505544365428371674234720",
+            "virtual_position": "49901447424579651697224724781791347991",
+            "virtual_scheduled_time": "979507569443824706952652143",
+            "votes": "143392433607435720"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "database_api.find_witnesses",
+      "params": {
+        "owners": [
+          "gtg"
+        ]
+      },
+      "id": 1
+    },
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "witnesses": [
+          {
+            "available_witness_account_subsidies": 1377021,
+            "created": "2016-06-30T17:22:18",
+            "hardfork_time_vote": "2025-02-08T13:00:00",
+            "hardfork_version_vote": "1.28.0",
+            "hbd_exchange_rate": {
+              "base": {
+                "amount": "241",
+                "nai": "@@000000013",
+                "precision": 3
+              },
+              "quote": {
+                "amount": "1000",
+                "nai": "@@000000021",
+                "precision": 3
+              }
+            },
+            "id": 9493,
+            "last_aslot": 97972476,
+            "last_confirmed_block_num": 97506932,
+            "last_hbd_exchange_update": "2025-07-17T11:41:39",
+            "last_work": "0000000048bf77f525731f28db7c1aa9ad853a475ccc78e71ea952a7782e5459",
+            "owner": "gtg",
+            "pow_worker": 0,
+            "props": {
+              "account_creation_fee": {
+                "amount": "3000",
+                "nai": "@@000000021",
+                "precision": 3
+              },
+              "account_subsidy_budget": 797,
+              "account_subsidy_decay": 347321,
+              "hbd_interest_rate": 1000,
+              "maximum_block_size": 65536
+            },
+            "running_version": "1.28.0",
+            "signing_key": "STM6LLegbAgLAy28EHrffBVuANFWcFgmqRMW13wBmTExqFE9SCkg4",
+            "total_missed": 8608,
+            "url": "https://gtg.openhive.network",
+            "virtual_last_update": "976912495575489581911509823",
+            "virtual_position": "6247395889179736241420680092396656593",
+            "virtual_scheduled_time": "976914764013601056742029734",
+            "votes": "147253288217144739"
+          }
+        ]
+      }
+    }
+  }
+]

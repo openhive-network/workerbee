@@ -1,0 +1,636 @@
+[
+  {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "block_api.get_block",
+      "params": {
+        "block_num": 97477291
+      },
+      "id": 1
+    },
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "block": {
+          "block_id": "05cf62ab3f2151a60e601ed86bdb43137949873d",
+          "extensions": [],
+          "previous": "05cf62aa64e54158fd61938b410c80366004b7fd",
+          "signing_key": "STM6LLegbAgLAy28EHrffBVuANFWcFgmqRMW13wBmTExqFE9SCkg4",
+          "timestamp": "2025-07-16T10:29:18",
+          "transaction_ids": [],
+          "transaction_merkle_root": "0000000000000000000000000000000000000000",
+          "transactions": [],
+          "witness": "ocd-witness",
+          "witness_signature": "204bc1f7343463a111570f51748aab9ca36da3fd7dfecaf2bacd2114738231275f51b4b04fecc810b2da7dcab518af03618c2bf7484be14722cc1011deb31b2843"
+        }
+      }
+    }
+  },
+  {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "block_api.get_block",
+      "params": {
+        "block_num": 97477292
+      },
+      "id": 1
+    },
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "block": {
+          "block_id": "05cf62ab3f2151a60e601ed86bdb43137949873d",
+          "extensions": [],
+          "previous": "05cf62aa64e54158fd61938b410c80366004b7fd",
+          "signing_key": "STM6LLegbAgLAy28EHrffBVuANFWcFgmqRMW13wBmTExqFE9SCkg4",
+          "timestamp": "2025-07-16T10:29:18",
+          "transaction_ids": [
+            "6bcf068618d8b66882cca5b94cd8de74215553df"
+          ],
+          "transaction_merkle_root": "0000000000000000000000000000000000000000",
+          "transactions": [
+            {
+              "expiration": "2025-07-16T10:02:20",
+              "extensions": [],
+              "operations": [
+                {
+                  "type": "vote_operation",
+                  "value": {
+                    "voter": "gtg",
+                    "author": "hbd.funder",
+                    "weight": 10000,
+                    "permlink": "re-upvote-this-post-to-fund-hbdstabilizer-20250716t045515z"
+                  }
+                }
+              ],
+              "signatures": [
+                "1f3395709c602d2a0643bbe1ed29ca0378412d6da504845fa3f174aec0437abcbc0831bd8817251f0eb8d113a5837fa433f25e886a7c6c30cd0c92f9bcae35d261"
+              ],
+              "ref_block_num": 43042,
+              "ref_block_prefix": 1380442540
+            }
+          ],
+          "witness": "ocd-witness",
+          "witness_signature": "204bc1f7343463a111570f51748aab9ca36da3fd7dfecaf2bacd2114738231275f51b4b04fecc810b2da7dcab518af03618c2bf7484be14722cc1011deb31b2843"
+        }
+      }
+    }
+  },
+  {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "block_api.get_block",
+      "params": {
+        "block_num": 97477293
+      },
+      "id": 1
+    },
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "block": {
+          "block_id": "05cf62ab3f2151a60e601ed86bdb43137949873d",
+          "extensions": [],
+          "previous": "05cf62aa64e54158fd61938b410c80366004b7fd",
+          "signing_key": "STM6LLegbAgLAy28EHrffBVuANFWcFgmqRMW13wBmTExqFE9SCkg4",
+          "timestamp": "2025-07-16T10:29:18",
+          "transaction_ids": [],
+          "transaction_merkle_root": "0000000000000000000000000000000000000000",
+          "transactions": [],
+          "witness": "ocd-witness",
+          "witness_signature": "204bc1f7343463a111570f51748aab9ca36da3fd7dfecaf2bacd2114738231275f51b4b04fecc810b2da7dcab518af03618c2bf7484be14722cc1011deb31b2843"
+        }
+      }
+    }
+  },
+  {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "block_api.get_block",
+      "params": {
+        "block_num": 97477294
+      },
+      "id": 1
+    },
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "block": {
+          "block_id": "05cf62ab3f2151a60e601ed86bdb43137949873d",
+          "extensions": [],
+          "previous": "05cf62aa64e54158fd61938b410c80366004b7fd",
+          "signing_key": "STM6LLegbAgLAy28EHrffBVuANFWcFgmqRMW13wBmTExqFE9SCkg4",
+          "timestamp": "2025-07-16T10:29:18",
+          "transaction_ids": [
+            "1c4b64f563f143284ca38dc66b3c2c71d314780f"
+          ],
+          "transaction_merkle_root": "0000000000000000000000000000000000000000",
+          "transactions": [
+            {
+              "expiration": "2025-06-27T11:04:39",
+              "extensions": [],
+              "operations": [
+                {
+                  "type": "custom_json_operation",
+                  "value": {
+                    "id": "follow",
+                    "json": "[\"follow\",{\"follower\":\"gtg\",\"following\":\"thebeedevs\",\"what\":[\"blog\"]}]",
+                    "required_auths": [],
+                    "required_posting_auths": [
+                      "gtg"
+                    ]
+                  }
+                }
+              ],
+              "signatures": [
+                "1f00ac9a744bec96aed8ec9041bb45ec45a73d739b9b23d84120ab2d3b927bc8b71df03de7585d05352519ba4c52c24ada670100f527e1a68d206d140fe0e436f5"
+              ],
+              "ref_block_num": 22025,
+              "ref_block_prefix": 3008336972
+            },
+                        {
+              "expiration": "2025-06-27T11:04:39",
+              "extensions": [],
+              "operations": [
+                {
+                  "type": "custom_json_operation",
+                  "value": {
+                    "id": "follow",
+                    "json": "[\"follow\",{\"follower\":\"blocktrades\",\"following\":\"thebeedevs\",\"what\":[\"blog\"]}]",
+                    "required_auths": [],
+                    "required_posting_auths": [
+                      "blocktrades"
+                    ]
+                  }
+                }
+              ],
+              "signatures": [
+                "1f00ac9a744bec96aed8ec9041bb45ec45a73d739b9b23d84120ab2d3b927bc8b71df03de7585d05352519ba4c52c24ada670100f527e1a68d206d140fe0e436f5"
+              ],
+              "ref_block_num": 22025,
+              "ref_block_prefix": 3008336972
+            },
+            {
+              "expiration": "2025-07-04T11:06:03",
+              "extensions": [],
+              "operations": [
+                {
+                  "type": "transfer_operation",
+                  "value": {
+                    "to": "inhivepool",
+                    "from": "mxchive",
+                    "memo": "114406",
+                    "amount": {
+                      "nai": "@@000000021",
+                      "amount": "23890",
+                      "precision": 3
+                    }
+                  }
+                }
+              ],
+              "signatures": [
+                "1f7319ba8eb2dea0eb79f96b7f365575b1249f7ee57d67d03e9f11a5dfec4356e8703c3849edb127277c1e11f392c960cf5ae050c8b7e51c9228ae155d8e4edb3d"
+              ],
+              "ref_block_num": 26618,
+              "ref_block_prefix": 1666306812
+            },
+            {
+              "expiration": "2025-07-04T11:05:36",
+              "extensions": [],
+              "operations": [
+                {
+                  "type": "limit_order_cancel_operation",
+                  "value": {
+                    "owner": "honeybot",
+                    "orderid": 1485200410
+                  }
+                }
+              ],
+              "signatures": [
+                "2042efb7142db143e406e8c8452839a3a9622d559e4c458cbcdaa0cba3c709fecf1d3a6064dfc56a187374b886078704b9fde44732a52156b4244765429ae3354b"
+              ],
+              "ref_block_num": 26609,
+              "ref_block_prefix": 3575588823
+            },
+            {
+              "expiration": "2025-07-16T21:18:51",
+              "extensions": [],
+              "operations": [
+                {
+                  "type": "custom_json_operation",
+                  "value": {
+                    "id": "follow",
+                    "json": "[\"reblog\",{\"account\":\"thebeedevs\",\"author\":\"fwaszkiewicz\",\"permlink\":\"hi-to-hive\"}]",
+                    "required_auths": [],
+                    "required_posting_auths": [
+                      "thebeedevs"
+                    ]
+                  }
+                }
+              ],
+              "signatures": [
+                "20d0b0d37581a0ad263bd49a60f96f09f2b2d12620c2f6824fccb4d1d470e5a39313f4e31b5d73dd4ebcee5e0e5f5335d9ebd9fc6650ae2600f6d6de5443fb657a"
+              ],
+              "ref_block_num": 56564,
+              "ref_block_prefix": 4096474193
+            },
+            {
+              "expiration": "2025-07-15T09:52:12",
+              "extensions": [],
+              "operations": [
+                {
+                  "type": "custom_json_operation",
+                  "value": {
+                    "id": "follow",
+                    "json": "[\"reblog\",{\"account\":\"gtg\",\"author\":\"fwaszkiewicz\",\"permlink\":\"hi-to-hive\"}]",
+                    "required_auths": [],
+                    "required_posting_auths": [
+                      "gtg"
+                    ]
+                  }
+                }
+              ],
+              "signatures": [
+                "1f9f5e132e12ea613314ea54901607baade72da7b58a5b79f7bed922ae3fd367e6458c531f26592b48a5856d6f6c9e91b7d5420ce08a207918f49d618013fa380b"
+              ],
+              "ref_block_num": 14069,
+              "ref_block_prefix": 844257793
+            },
+            {
+              "expiration": "2025-06-15T20:05:27",
+              "extensions": [],
+              "operations": [
+                {
+                  "type": "comment_operation",
+                  "value": {
+                    "body": "# Write on Hive, Read Everywhere!\n\nHello, dear Hive community! ꙮ\n\nEven though it's only been about a week since [my last post](https://blog.dev.openhive.network/hive-139531/@mtyszczak/hi-ve-everyone), I've missed you all so much! 🤗\n\nRecently, our dev team had a productive chat with @crimsonclad and @gtg about Hive components that users can embed on their websites. So, I got busy trying to bring these ideas to life as quickly as I could! 🏃\n\n ![img1.png](https://images.hive.blog/DQmYMwGJVN58EbpT5RPddsSh8tZcRK9KHPjcLuu6jNYXSmW/img1.png) \n\n## 📖 User Stories\n\nWe began by asking simple questions 🤔 about which components are essential and how they should be used, and we got immediate answers!\n\n- I want to **embed Hive posts** 🧩 on my website\n- I want my visitors to **view comments** 🗪\n- I want my visitors to be able to **❤️ like & 💬 comment** on the content I create\n- I want to display a paginated list of the **latest posts by tag** 📚\n- I want to show details of my **Hive account** 👦\n- I want to display my **witness details** 👀\n\n ![img2.png](https://images.hive.blog/DQmUkRJCBrBmQ1zYJAwDF6e7eoBvW6s84JmV3WgDuBsh24w/img2.png) \n\n## 📊 Check Out the Components!\n\n### Witness\n\n```html\n<hive-witness account=\"gtg\"></hive-witness>\n```\n\n ![img3.png](https://images.hive.blog/DQmSrkbu7pCVpgiVfCPMBGvyBaNgk6cW2UAdD6EWA51w42X/img3.png) \n\n### Post\n\n```html\n<hive-post permlink=\"@gtg/hello-world\"></hive-post>\n```\n\n ![img4.png](https://images.hive.blog/DQmfN7ufSamd9GvFP3b7Y6Py9ix1TtgTAqsrXqTY2bVzrRg/img4.png) \n\n### Comments\n\n```html\n<hive-comments permlink=\"@gtg/67juuw-skyteam-airline-alliance-official-partner-of-hivefest\"></hive-comments>\n```\n\n ![img5.png](https://images.hive.blog/DQmNMze5vfPhXy2gykvtQU2RrSG76u6hycFCXHfEPD8kojR/img5.png) \n\n### Posts by Tag\n\n```html\n<hive-tag tag=\"photography\" url-template=\"/photography/{permlink}\"></hive-tag>\n```\n\n ![img6.png](https://images.hive.blog/DQmXLz7KdmwYcVGrxLrUqcdZESZBMrGCYkgjyvDv4tzjtGE/img6.png) \n\n## 💻 Sample Website\n\nThanks to @gtg, you can see these components [in action](https://gtg.openhive.network/5bb236) 💥\n\nFeel free to explore the source code of the website (visit: `view-source:https://gtg.openhive.network/5bb236`). It's impressively simple! ♻️\n\n## 📱 Mobile Users Welcome!\n\nNo worries! The components are fully responsive! ⚡\n\n ![img7.png](https://images.hive.blog/DQmcGoPbnekagshgHdLxLU98LH1pMY1WLTiCGCnXXmrayFY/img7.png) \n\nNo need to adjust settings. They automatically adapt to the viewport! 😊\n\n## 🔍 How to Use Them?\n\nI created a [quick start guide](https://github.com/mtyszczak/hive-components?tab=readme-ov-file#-quick-start) 🧠 in my repository.\n\nTL;DR:\n\n```html\n<!-- Prepare imports for our components -->\n<script type=\"importmap\">\n  {\n    \"imports\": {\n      \"lit\": \"https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js\",\n      \"@hiveio/internal\": \"https://gtg.openhive.network/5bb236/hive-internal.js\"\n    }\n  }\n</script>\n\n<!-- Import components we want -->\n<script type=\"module\" src=\"https://gtg.openhive.network/5bb236/hive-post.js\"></script>\n<script type=\"module\" src=\"https://gtg.openhive.network/5bb236/hive-witness.js\"></script>\n<script type=\"module\" src=\"https://gtg.openhive.network/5bb236/hive-comments.js\"></script>\n<script type=\"module\" src=\"https://gtg.openhive.network/5bb236/hive-tag.js\"></script>\n\n<!-- Use the components -->\n<hive-witness account=\"gtg\"></hive-witness>\n<hive-post permlink=\"@gtg/hello-world\"></hive-post>\n<hive-comments permlink=\"@gtg/hello-world\"></hive-comments>\n<hive-tag tag=\"photography\" posts-per-page=\"4\" url-template=\"/photography/{permlink}\"></hive-tag>\n```\n\n## 🧛🏻‍♀️ For Night Owls\n\nIntroducing the ✨ **dark theme** ✨:\n\n ![img8.png](https://images.hive.blog/DQmdAAobQMwVS4qFNLvSrVFnqr7iHda2t6ErwZefWTf3yxn/img8.png) \n\nJust set the `theme=\"dark\"` attribute on any component and you're good to go! 💪\n\n## 🎨 Want More Colors?\n\nCustomize your communities and websites with just a few lines of CSS! 🤩\n\n```css\nhive-comments {\n  --hive-on-surface: blue;\n}\n```\n\nAnd here are the results: 👇\n\n ![img9.png](https://images.hive.blog/DQmVeRbsM31kshvF8LXXRauRMVfjdSYKHWRJTCvhMhTZKvJ/img9.png) \n\n## 📈 Need More Components?\n\nGreat! I love your spirit! 👻\n\nYou can request a new component by [creating an issue](https://github.com/mtyszczak/hive-components/issues/new) 💡 or suggest edits by [opening a pull request](https://github.com/mtyszczak/hive-components/pulls) 🛠️\n\n## 💾 Component Sizes\n\nI understand not everyone has super-fast internet 📟\n\nSo, I worked to make the components as compact as possible! ⬇️\n\n| Name | Size |\n|------|------|\n| Lit core | 7 kB |\n| Hive Witness | 19 kB |\n| Hive Post | 29.3 kB |\n| Hive Comments | 46.9 kB |\n| Hive Tag | 50.2 kB |\n| Hive internals | 640 kB |\n\nAnd remember, these script sizes are not gzipped yet! They are cached by browsers and executed only once per page load, on demand! 🤯\n\n## 💲 Pricing\n\nJust kidding 🤣 It's completely 🆓 🗽\n\nFeel free to visit [the repository](https://github.com/mtyszczak/hive-components) to contribute or use the components via CDN, thanks to @gtg 🧙‍♂️\n\n## 🌟 Future Plans\n\nI have a [few ideas](https://github.com/mtyszczak/hive-components/issues) in mind, and there are areas I can improve, but we did it! 📣\n\nMVP is on board! 💎\n\nI strongly encourage you to use the Hive components! 🖼️\n\n---\n\nImages from private archive & chatgpt.com\n",
+                    "title": "Write on Hive, Read Everywhere!",
+                    "author": "mtyszczak",
+                    "permlink": "write-on-hive-read-everywhere",
+                    "json_metadata": "{\"format\":\"markdown+html\",\"summary\":\"Bring Hive to your site! Embed posts, comments, tags & account data easily. Try new Hive web components - fast, free & mobile-ready!\",\"app\":\"hive.blog/0.9\",\"tags\":[\"hive\",\"dev\",\"web\",\"components\",\"html\",\"embed\"],\"image\":[\"\"],\"author\":\"\"}",
+                    "parent_author": "",
+                    "parent_permlink": "hive-139531"
+                  }
+                },
+                {
+                  "type": "comment_options_operation",
+                  "value": {
+                    "author": "mtyszczak",
+                    "permlink": "write-on-hive-read-everywhere",
+                    "extensions": [],
+                    "allow_votes": true,
+                    "percent_hbd": 10000,
+                    "max_accepted_payout": {
+                      "nai": "@@000000013",
+                      "amount": "1000000000",
+                      "precision": 3
+                    },
+                    "allow_curation_rewards": true
+                  }
+                }
+              ],
+              "signatures": [
+                "20acb866dfb0e66afb6a5dcd507111da268107a5f8fbf34983b169f5ceb1ac5e0864e57fd02391a240037d46dfc3d89e7fda6ad96673c932e8636cd7924bdf8dc3"
+              ],
+              "ref_block_num": 15412,
+              "ref_block_prefix": 2290083372
+            },
+            {
+              "expiration": "2025-07-15T09:51:46",
+              "extensions": [],
+              "operations": [
+                {
+                  "type": "comment_operation",
+                  "value": {
+                    "body": "# Hi To Hive! 🐝\n\nI am a software developer who loves frontend technologies especially creating UI applications. Great **Look 'n' Feel** like also ergonomy are my best principles in the app development.\n \nIt's been over a year since I started my journey developing on Hive, and now — after some strong encouragement from [@gtg](/@gtg) and [@small.minion](/@small.minion) — I finally decided to share my work with you! 😄\n\n\n![image](https://hackmd.io/_uploads/Hypprp8Exg.png)\n\n\n## Short Summary\n\n### Welcome to Wax! 🕯️\n\nI hope by now you've all heard about **Wax** (thanks to [@thebeedevs' article](/@thebeedevs/for-those-developing-a-hive)). This library is a powerful toolset for interacting with Hive, and it didn’t take long before I became deeply involved in improving and testing it.\n\nAt first, I treated **Wax** as a black box 📦 — something powerful, but a bit mysterious. It was also a little gluey like true beewax. 🙂 My missing knowledge specific to Hive platform also made our relationship difficult. 🤔\n\nBut honestly, without great support for IDE intellisense, involving into Hive developer platform would be dramatically hard. I started by exploring how transactions work and slowly learned what **Wax** offers. \n\nSince then, **Wax** has taken a few steps forward — and of course, to ensure it's as great as we intended, someone had to test it thoroughly. 🧪\n\n### Wax well tested! 🕵️‍♂️\n\nAs I write this, there are **thousands of lines of code** dedicated to testing **Wax's** features — and a lot of that is my work. 🧑‍💻\n\nWhat’s more, the way we test the TypeScript part of **Wax** is a bit unconventional. We wanted the tests to run in **both web and Node environments**, but without duplicating code. That’s where [Microsoft Playwright](https://playwright.dev) came in with its awesome fixture system. 🛠️\n\nThis library allows developers to define custom fixtures — reusable rules and behaviors — which extend the base Playwright `test` object. To make this setup work, we created a helper file called `jest-helper`. Although honestly, a more fitting name would be `jest-confuser`... or maybe even `jest-UNhelper`. 😅\n\nBut the twisted backstory of our `jest-helper` deserves a dedicated post of its own - it is almost imposible to shorten the story... 📚\n\nFor now, you can [take a look at current jest-helper state](https://gitlab.syncad.com/hive/wax/-/blob/7e6218a060b6bc73b4fd8323fc7be62106f6566c/ts/wasm/__tests__/assets/jest-helper.ts) - and trust me - now it looks clean! 🚿\n\n\n### Inspect all your transactions! 🔍\n\nTight integration of 🇹🇸 **Wax** layer and Hive Protocol 🇨 code ☢️, allowed us to make our dreams of visualizing the Hive authorization process come true 👂\nSince my knowledge related to **Wax** library improved significantly, the next step was to use it in practice. \n\nThat’s why I built **Transaction Inspector** - a tool created for those who've always wondered what really happens behind the scenes when blockchain rejects their transaction (which creation was occupied by a lot of sweat 💦).\n\nI'm pretty sure you've had moments in your Hive journey when you submitted a transaction and wished you could easily see all its details. That's where **Transaction Inspector** comes in — it gathers all the information in one place, making it simple to read, verify, and understand! ✅ We announced it already in the [Transaction Inspector chapter.](/hive-139531/@thebeedevs/hive-is-five)\n\n![image](https://hackmd.io/_uploads/HJWCScL4gg.png)\n\nBut wait, there's more! Let's try breaking the signature in the same transaction... 🤫\n\n![image](https://hackmd.io/_uploads/BkrpU5UEgg.png)\n\nOf course, this will end in an error — but now, thanks to Transaction Inspector, you can **analyze exactly what went wrong** and why the broadcast failed. 💥\n\nI know this is a simple case, but the tool offers many more features and is still actively being developed. So it definitely deserves a dedicated post in the future! 🚧\n\nFor now, feel free to [test it yourself!](https://tx.openhive.network/?transaction=KQdgQsAMCCwEyXoucCmAPADgSwE4EMAXbAewDt45gBmWBShOAVgFpIA2FuagFQ5ujUAHALghK8AMJQ6yZGnSFUZAM6lVE2kmBMITACJSZ2%2BihKZUBYuRWbZOiDBNzt4Y6ZceTcQgE8Ldt4AbiRKAPrmlkTqEnDSTl6JnnBB%2BAA2AK6ogfRuCZ4FzsGhljnyAOaE5bHx9klFiXD4GYQAFiS4ZZStAEYAJgB0AGYZZH2lKEb5DYWNAO6o2OWthGUAjJCbyLUzu40WuAC2adhkANZdKLioLBmYIUosbdgqLJgkKoRPJCwjYyy9PqffA9bAnABeli4kGYHG4hEgABYmExIGtwRJpvUvCBDFjCrj3C4DFM6vI1OUyEQMtdbJMtPRdES9nA1kNID0hj12EN8Gt8OxET0AMZ9HnsACc%2BGoHBAwrgwrWEuFqGFiKETCGIFQfTW7CYIGoQz6KOocERPMgqCGiJAiL6QnwcAd1HYcCGQzWqEgwuoevYPQ5qDWQj6%2BExZJ0hjizNMcGuQzCPTSJGFZzCZAyhzKZrta1JDXj1qTKbTYUwCew6BzazW1ERrsRSOMuKAA)\n(The link takes you straight to the example shown in the above screenshot 😉 — yep, that's another **cool feature!**)\n\nBeside nice design, usage simplicity and good ergonomics, I am also proud of internal architecture of the application. Strong separation of UI and data processing layers improved a lot of automated testing process like also provided good performance level.\n\nWas it a big challenge? Definitely. 😅\nWorth the effort? Absolutely. 💪\n\nWhat I can promise is another detailed post describing challenges ⚔️ I had while working on it‼️\n\n\n### Another brick in my (programming) wall 🧱: design data structures and algorithm\n\nSomewhere between commits on **Transaction Inspector**, I caught myself thinking — What if I made a bot, which could vote automatically to avoid wasting manabar? No manual transactions ⚙️, no screen-staring while waiting on full manabar 👀.\n\nEnter **VoterBee** — a bot that votes for you. The first prototype was whipped up quickly — a rough concept, built without **WorkerBee**. But let’s be honest: coding everything from scratch is a fast track to API burnout.\n\nAnd than the question appeared:\n> **Okay... but how am I supposed to use this?** 🤔\n\nThe best sign that a library’s interface is well-designed is when a developer can jump in and figure out how to achieve their goals **without needing a massive wall of documentation**.\n\nIt wasn't easy at the beggining, but now, after many iterations, tons of feedback, boards full of concepts and thoughts, and lots of code improvements, we (that is: me, the *annoying user* who keeps complaining 😅, and [@mtyszczak](/@mtyszczak), the *patient developer* who built it) finally reached the point when **WorkerBee meets that standard** ❤️‍🔥\n\nIf you're curious and want to dive deeper into the technical side of **WorkerBee**, which I strongly recommend, check out [this post](/hive-139531/@thebeedevs/meet-workerbee-the-easy-way-to-build-smart-blockchain-bots) 📚 and if you want to start using the library immediately, check out the [public repo](https://gitlab.syncad.com/hive/workerbee).\n\n## Final thoughts 🧠💬\n\nThat’s it for now! Roughly a year of hard work led to this point. 🥳\n\nThis post turned out longer than I expected — and yet I feel like I’ve only scratched the surface. There’s still a lot more I’d love to share. 😅 \n\nI hope this gave you a little insight into the tools we're building around Hive — and how we try to make them not only powerful, but actually *nice to use*. Whether you’re a developer already building on Hive or just curious about what’s under the hood, I truly believe these tools can make your life easier.\n\nAnd hey, if you try them out and something breaks — that’s a feature, not a bug. Just kidding (kind of). 😜\n\nThanks for reading and stay tuned — more is coming soon! 🚀🐝\n",
+                    "title": "Hi To Hive! 🐝",
+                    "author": "fwaszkiewicz",
+                    "permlink": "hi-to-hive",
+                    "json_metadata": "{\"format\":\"markdown+html\",\"summary\":\"From Wax testing to the Transaction Inspector tool — a frontend dev's journey building smart tools on the Hive blockchain 🐝💻\",\"app\":\"hive.blog/0.9\",\"tags\":[\"introduceyourself\",\"hive\",\"dev\",\"hivedevs\",\"thebeedevs\"],\"image\":[\"https://images.hive.blog/1536x0/https://hackmd.io/_uploads/Hypprp8Exg.png\"],\"author\":\"\"}",
+                    "parent_author": "",
+                    "parent_permlink": "hive-139531"
+                  }
+                }
+              ],
+              "signatures": [
+                "1f0f4552e47cf22ec8c2c21044dacaca06fd7f170a0a1888f236d9c93e68264c117678ac4e430925ef08a55ded88fd6c26ab2f0bfc119208b8c96b9a7d94c721c5"
+              ],
+              "ref_block_num": 14060,
+              "ref_block_prefix": 2524420619
+            },
+            {
+              "expiration": "2025-07-15T09:51:46",
+              "extensions": [],
+              "operations": [
+                {
+                  "type": "comment_operation",
+                  "value": {
+                    "body": "# Hi To Hive! 🐝\n\nI am a software developer who loves frontend technologies especially creating UI applications. Great **Look 'n' Feel** like also ergonomy are my best principles in the app development.\n \nIt's been over a year since I started my journey developing on Hive, and now — after some strong encouragement from [@gtg](/@gtg) and [@small.minion](/@small.minion) — I finally decided to share my work with you! 😄\n\n\n![image](https://hackmd.io/_uploads/Hypprp8Exg.png)\n\n\n## Short Summary\n\n### Welcome to Wax! 🕯️\n\nI hope by now you've all heard about **Wax** (thanks to [@thebeedevs' article](/@thebeedevs/for-those-developing-a-hive)). This library is a powerful toolset for interacting with Hive, and it didn’t take long before I became deeply involved in improving and testing it.\n\nAt first, I treated **Wax** as a black box 📦 — something powerful, but a bit mysterious. It was also a little gluey like true beewax. 🙂 My missing knowledge specific to Hive platform also made our relationship difficult. 🤔\n\nBut honestly, without great support for IDE intellisense, involving into Hive developer platform would be dramatically hard. I started by exploring how transactions work and slowly learned what **Wax** offers. \n\nSince then, **Wax** has taken a few steps forward — and of course, to ensure it's as great as we intended, someone had to test it thoroughly. 🧪\n\n### Wax well tested! 🕵️‍♂️\n\nAs I write this, there are **thousands of lines of code** dedicated to testing **Wax's** features — and a lot of that is my work. 🧑‍💻\n\nWhat’s more, the way we test the TypeScript part of **Wax** is a bit unconventional. We wanted the tests to run in **both web and Node environments**, but without duplicating code. That’s where [Microsoft Playwright](https://playwright.dev) came in with its awesome fixture system. 🛠️\n\nThis library allows developers to define custom fixtures — reusable rules and behaviors — which extend the base Playwright `test` object. To make this setup work, we created a helper file called `jest-helper`. Although honestly, a more fitting name would be `jest-confuser`... or maybe even `jest-UNhelper`. 😅\n\nBut the twisted backstory of our `jest-helper` deserves a dedicated post of its own - it is almost imposible to shorten the story... 📚\n\nFor now, you can [take a look at current jest-helper state](https://gitlab.syncad.com/hive/wax/-/blob/7e6218a060b6bc73b4fd8323fc7be62106f6566c/ts/wasm/__tests__/assets/jest-helper.ts) - and trust me - now it looks clean! 🚿\n\n\n### Inspect all your transactions! 🔍\n\nTight integration of 🇹🇸 **Wax** layer and Hive Protocol 🇨 code ☢️, allowed us to make our dreams of visualizing the Hive authorization process come true 👂\nSince my knowledge related to **Wax** library improved significantly, the next step was to use it in practice. \n\nThat’s why I built **Transaction Inspector** - a tool created for those who've always wondered what really happens behind the scenes when blockchain rejects their transaction (which creation was occupied by a lot of sweat 💦).\n\nI'm pretty sure you've had moments in your Hive journey when you submitted a transaction and wished you could easily see all its details. That's where **Transaction Inspector** comes in — it gathers all the information in one place, making it simple to read, verify, and understand! ✅ We announced it already in the [Transaction Inspector chapter.](/hive-139531/@thebeedevs/hive-is-five)\n\n![image](https://hackmd.io/_uploads/HJWCScL4gg.png)\n\nBut wait, there's more! Let's try breaking the signature in the same transaction... 🤫\n\n![image](https://hackmd.io/_uploads/BkrpU5UEgg.png)\n\nOf course, this will end in an error — but now, thanks to Transaction Inspector, you can **analyze exactly what went wrong** and why the broadcast failed. 💥\n\nI know this is a simple case, but the tool offers many more features and is still actively being developed. So it definitely deserves a dedicated post in the future! 🚧\n\nFor now, feel free to [test it yourself!](https://tx.openhive.network/?transaction=KQdgQsAMCCwEyXoucCmAPADgSwE4EMAXbAewDt45gBmWBShOAVgFpIA2FuagFQ5ujUAHALghK8AMJQ6yZGnSFUZAM6lVE2kmBMITACJSZ2%2BihKZUBYuRWbZOiDBNzt4Y6ZceTcQgE8Ldt4AbiRKAPrmlkTqEnDSTl6JnnBB%2BAA2AK6ogfRuCZ4FzsGhljnyAOaE5bHx9klFiXD4GYQAFiS4ZZStAEYAJgB0AGYZZH2lKEb5DYWNAO6o2OWthGUAjJCbyLUzu40WuAC2adhkANZdKLioLBmYIUosbdgqLJgkKoRPJCwjYyy9PqffA9bAnABeli4kGYHG4hEgABYmExIGtwRJpvUvCBDFjCrj3C4DFM6vI1OUyEQMtdbJMtPRdES9nA1kNID0hj12EN8Gt8OxET0AMZ9HnsACc%2BGoHBAwrgwrWEuFqGFiKETCGIFQfTW7CYIGoQz6KOocERPMgqCGiJAiL6QnwcAd1HYcCGQzWqEgwuoevYPQ5qDWQj6%2BExZJ0hjizNMcGuQzCPTSJGFZzCZAyhzKZrta1JDXj1qTKbTYUwCew6BzazW1ERrsRSOMuKAA)\n(The link takes you straight to the example shown in the above screenshot 😉 — yep, that's another **cool feature!**)\n\nBeside nice design, usage simplicity and good ergonomics, I am also proud of internal architecture of the application. Strong separation of UI and data processing layers improved a lot of automated testing process like also provided good performance level.\n\nWas it a big challenge? Definitely. 😅\nWorth the effort? Absolutely. 💪\n\nWhat I can promise is another detailed post describing challenges ⚔️ I had while working on it‼️\n\n\n### Another brick in my (programming) wall 🧱: design data structures and algorithm\n\nSomewhere between commits on **Transaction Inspector**, I caught myself thinking — What if I made a bot, which could vote automatically to avoid wasting manabar? No manual transactions ⚙️, no screen-staring while waiting on full manabar 👀.\n\nEnter **VoterBee** — a bot that votes for you. The first prototype was whipped up quickly — a rough concept, built without **WorkerBee**. But let’s be honest: coding everything from scratch is a fast track to API burnout.\n\nAnd than the question appeared:\n> **Okay... but how am I supposed to use this?** 🤔\n\nThe best sign that a library’s interface is well-designed is when a developer can jump in and figure out how to achieve their goals **without needing a massive wall of documentation**.\n\nIt wasn't easy at the beggining, but now, after many iterations, tons of feedback, boards full of concepts and thoughts, and lots of code improvements, we (that is: me, the *annoying user* who keeps complaining 😅, and [@mtyszczak](/@mtyszczak), the *patient developer* who built it) finally reached the point when **WorkerBee meets that standard** ❤️‍🔥\n\nIf you're curious and want to dive deeper into the technical side of **WorkerBee**, which I strongly recommend, check out [this post](/hive-139531/@thebeedevs/meet-workerbee-the-easy-way-to-build-smart-blockchain-bots) 📚 and if you want to start using the library immediately, check out the [public repo](https://gitlab.syncad.com/hive/workerbee).\n\n## Final thoughts 🧠💬\n\nThat’s it for now! Roughly a year of hard work led to this point. 🥳\n\nThis post turned out longer than I expected — and yet I feel like I’ve only scratched the surface. There’s still a lot more I’d love to share. 😅 \n\nI hope this gave you a little insight into the tools we're building around Hive — and how we try to make them not only powerful, but actually *nice to use*. Whether you’re a developer already building on Hive or just curious about what’s under the hood, I truly believe these tools can make your life easier.\n\nAnd hey, if you try them out and something breaks — that’s a feature, not a bug. Just kidding (kind of). 😜\n\nThanks for reading and stay tuned — more is coming soon! 🚀🐝\n",
+                    "title": "Hi To Hive! 🐝",
+                    "author": "fwaszkiewicz",
+                    "permlink": "hi-to-hive",
+                    "json_metadata": "{\"format\":\"markdown+html\",\"summary\":\"From Wax testing to the Transaction Inspector tool — a frontend dev's journey building smart tools on the Hive blockchain 🐝💻\",\"app\":\"hive.blog/0.9\",\"tags\":[\"introduceyourself\",\"hive\",\"dev\",\"hivedevs\",\"thebeedevs\"],\"image\":[\"https://images.hive.blog/1536x0/https://hackmd.io/_uploads/Hypprp8Exg.png\"],\"author\":\"\"}",
+                    "parent_author": "mtyszczak",
+                    "parent_permlink": "hive-139531"
+                  }
+                }
+              ],
+              "signatures": [
+                "1f0f4552e47cf22ec8c2c21044dacaca06fd7f170a0a1888f236d9c93e68264c117678ac4e430925ef08a55ded88fd6c26ab2f0bfc119208b8c96b9a7d94c721c5"
+              ],
+              "ref_block_num": 14060,
+              "ref_block_prefix": 2524420619
+            },
+            {
+              "expiration": "2025-07-18T02:31:03",
+              "extensions": [],
+              "operations": [
+                {
+                  "type": "transfer_operation",
+                  "value": {
+                    "to": "gtg",
+                    "from": "blocktrades",
+                    "memo": "Daily reward | Day 721 | Lucoin in the wallet 1.000 Lu | Rank 96",
+                    "amount": {
+                      "nai": "@@000000021",
+                      "amount": "10000000",
+                      "precision": 3
+                    }
+                  }
+                }
+              ],
+              "signatures": [
+                "200126af7ac6781fa5563170b13078802a73224f794abab7b666a3009b0eeb77912e746167d9079ac2cfc7a9457cea27a7df5b6c81427a36f941daf6a4f3a12ca6"
+              ],
+              "ref_block_num": 26038,
+              "ref_block_prefix": 432684587
+            },
+                        {
+              "expiration": "2025-07-18T02:31:03",
+              "extensions": [],
+              "operations": [
+                {
+                  "type": "transfer_operation",
+                  "value": {
+                    "to": "gtg",
+                    "from": "bdhivesteem",
+                    "memo": "Daily reward | Day 721 | Lucoin in the wallet 1.000 Lu | Rank 96",
+                    "amount": {
+                      "nai": "@@000000021",
+                      "amount": "1000",
+                      "precision": 3
+                    }
+                  }
+                }
+              ],
+              "signatures": [
+                "200126af7ac6781fa5563170b13078802a73224f794abab7b666a3009b0eeb77912e746167d9079ac2cfc7a9457cea27a7df5b6c81427a36f941daf6a4f3a12ca6"
+              ],
+              "ref_block_num": 26038,
+              "ref_block_prefix": 432684587
+            },
+            {
+              "expiration": "2025-07-15T20:31:28",
+              "extensions": [],
+              "operations": [
+                {
+                  "type": "comment_operation",
+                  "value": {
+                    "body": "Oh, I'm sorry, I haven't understood properly what you are asking for, I assumed something else.\nI think the problem is that you have \"auto power up\" setting there, it should be unchecked when you are starting power down, otherwise HP powered down will again be automatically powered up.",
+                    "title": "",
+                    "author": "gtg",
+                    "permlink": "re-purepinay-1752611428637",
+                    "json_metadata": "{\"format\":\"markdown+html\",\"app\":\"@hiveio/wax/1.27.6-rc7-stable.250708094236\"}",
+                    "parent_author": "purepinay",
+                    "parent_permlink": "re-gtg-2025715t104337480z"
+                  }
+                }
+              ],
+              "signatures": [
+                "1fd570ff32b69df3146c670c1ccc0e9b9c66f23d8a966f208af9e3637309ec13382c6681cbae24fd8c9aca238e38ec8dfc808f0d61d2c817bb381a6f03f4b432df"
+              ],
+              "ref_block_num": 26841,
+              "ref_block_prefix": 55555419
+            }
+          ],
+          "witness": "ocd-witness",
+          "witness_signature": "204bc1f7343463a111570f51748aab9ca36da3fd7dfecaf2bacd2114738231275f51b4b04fecc810b2da7dcab518af03618c2bf7484be14722cc1011deb31b2843"
+        }
+      }
+    }
+  },
+    {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "block_api.get_block",
+      "params": {
+        "block_num": 97477295
+      },
+      "id": 1
+    },
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "block": {
+          "block_id": "05cf62ab3f2151a60e601ed86bdb43137949873d",
+          "extensions": [],
+          "previous": "05cf62aa64e54158fd61938b410c80366004b7fd",
+          "signing_key": "STM6LLegbAgLAy28EHrffBVuANFWcFgmqRMW13wBmTExqFE9SCkg4",
+          "timestamp": "2025-07-16T10:29:18",
+          "transaction_ids": [],
+          "transaction_merkle_root": "0000000000000000000000000000000000000000",
+          "transactions": [],
+          "witness": "ocd-witness",
+          "witness_signature": "204bc1f7343463a111570f51748aab9ca36da3fd7dfecaf2bacd2114738231275f51b4b04fecc810b2da7dcab518af03618c2bf7484be14722cc1011deb31b2843"
+        }
+      }
+    }
+  },
+    {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "block_api.get_block",
+      "params": {
+        "block_num": 97477296
+      },
+      "id": 1
+    },
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "block": {
+          "block_id": "05cf62ab3f2151a60e601ed86bdb43137949873d",
+          "extensions": [],
+          "previous": "05cf62aa64e54158fd61938b410c80366004b7fd",
+          "signing_key": "STM6LLegbAgLAy28EHrffBVuANFWcFgmqRMW13wBmTExqFE9SCkg4",
+          "timestamp": "2025-07-16T10:29:18",
+          "transaction_ids": [
+            "3f6a99bf0106bcb9d77a2119ebc559a1f4a0343d"
+          ],
+          "transaction_merkle_root": "0000000000000000000000000000000000000000",
+          "transactions": [
+            {
+              "expiration": "2025-05-14T20:06:28",
+              "extensions": [],
+              "operations": [
+                {
+                  "type": "comment_operation",
+                  "value": {
+                    "body": "HiveFest is back for another round, usually unusual and boringly awesome as always. For the fourth time, we're partnering not with a single airline, but with the entire SkyTeam airline alliance as our official travel partner!\n\n![Sky is the limit... or is it?](https://images.hive.blog/DQmRDoi3dAqoCPF6ji1riLGMNcj2ESHbQar9DkWSnu4q78a/hive_clouds2.png)\n\n> _The airlines of SkyTeam, your Preferred Alliance for travel, offer exclusive discounts of up to 15% on all SkyTeam airlines serving 1,088 destinations\nin 184 countries with over 10,084 daily flights._\n\n# SkyTeam Airlines:\n- Aerolíneas Argentinas\n- Aeroméxico\n- Air Europa\n- Air France\n- China Airlines\n- China Eastern Airlines\n- Delta Air Lines\n- Garuda Indonesia\n- Kenya Airways\n- KLM Royal Dutch Airlines\n- Korean Air\n- Middle East Airlines\n- Saudia\n- TAROM\n- Vietnam Airlines\n- Virgin Atlantic\n- Xiamen Airlines\n\n# How to book\nUse this link:\n[https://res.skyteam.com/Search/promoDefault.aspx?vendor=sky&promocode=5121S](https://res.skyteam.com/Search/promoDefault.aspx?vendor=sky&promocode=5121S)\nor provide the unique Event ID while booking.\n\n#### Event ID: `5121S`\n#### Valid Departure Dates: **08/10/2025 – 26/10/2025**\n\n> \"Only Participants and one companion traveling with the Participant within the designated travel period (7 days prior/post the Event date) to and from the Event and able to provide the qualifying \"Event ID\", are eligible to benefit from the discount offer. Please note that a proof of participation to an Event may be requested at any time during a Participant's journey (i.e. a HiveFest ticket).\"\n\n![Your job is the event, ours is the travel](https://a.storyblok.com/f/271050/585x150/445bdd642b/skyteam-anniversary-logo.png)\n\n## _“SkyTeam is pleased to be your preferred alliance for travel, official partner of HiveFest”_\n\nHiveFest lands in vibrant Kuala Lumpur, Malaysia from 15 to 19 October 2025, bringing together Hive users, builders, creators and decentralization dreamers for its 10th edition. Join us for five days of tropical vibes, real conversations and practical Web3 energy. Explore blockchain apps that people actually use, meet the humans behind the handles and discover what makes Hive and its ecosystem uniquely resilient. Whether you're Hive-native or Web3-curious, HiveFest is your gateway to a creative, decentralized future in real life.\n\n![HiveFest10](https://trisept.widen.net/content/kokt7jl5d6/png/SKT_IMG_PROMO_Event_5121_HiveFest10-KUL.png)\n\nFor more details about the event, visit [https://hivefe.st](https://hivefe.st) – the site is continuously updated as the event details crystallize.\n",
+                    "title": "SkyTeam Airline Alliance - Official partner of HiveFest",
+                    "author": "gtg",
+                    "permlink": "67juuw-skyteam-airline-alliance-official-partner-of-hivefest",
+                    "json_metadata": "{\"format\":\"markdown+html\",\"summary\":\"\",\"app\":\"hive.blog/0.9\",\"tags\":[\"hivefest\",\"hivefest10\",\"roadtohivefest\",\"hive\",\"travel\",\"kul\",\"malaysia\",\"skyteam\"],\"image\":[\"https://images.hive.blog/1536x0/https://trisept.widen.net/content/kokt7jl5d6/png/SKT_IMG_PROMO_Event_5121_HiveFest10-KUL.png\"],\"author\":\"\"}",
+                    "parent_author": "",
+                    "parent_permlink": "hive-106258"
+                  }
+                },
+                {
+                  "type": "comment_options_operation",
+                  "value": {
+                    "author": "gtg",
+                    "permlink": "67juuw-skyteam-airline-alliance-official-partner-of-hivefest",
+                    "extensions": [],
+                    "allow_votes": true,
+                    "percent_hbd": 10000,
+                    "max_accepted_payout": {
+                      "nai": "@@000000013",
+                      "amount": "1000000000",
+                      "precision": 3
+                    },
+                    "allow_curation_rewards": true
+                  }
+                }
+              ],
+              "signatures": [
+                "202b0bb03c7594a3b761311b23e8e48a966970073443b1f566a60b88eb52167fee579f31af223692258e66626d49fbf4bdd27a056c8fde9244f46a136c97c98e82"
+              ],
+              "ref_block_num": 12359,
+              "ref_block_prefix": 2019715493
+            }
+          ],
+          "witness": "ocd-witness",
+          "witness_signature": "204bc1f7343463a111570f51748aab9ca36da3fd7dfecaf2bacd2114738231275f51b4b04fecc810b2da7dcab518af03618c2bf7484be14722cc1011deb31b2843"
+        }
+      }
+    }
+  },
+    {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "block_api.get_block",
+      "params": {
+        "block_num": 97477297
+      },
+      "id": 1
+    },
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "block": {
+          "block_id": "05cf62ab3f2151a60e601ed86bdb43137949873d",
+          "extensions": [],
+          "previous": "05cf62aa64e54158fd61938b410c80366004b7fd",
+          "signing_key": "STM6LLegbAgLAy28EHrffBVuANFWcFgmqRMW13wBmTExqFE9SCkg4",
+          "timestamp": "2025-07-16T10:29:18",
+          "transaction_ids": [],
+          "transaction_merkle_root": "0000000000000000000000000000000000000000",
+          "transactions": [],
+          "witness": "ocd-witness",
+          "witness_signature": "204bc1f7343463a111570f51748aab9ca36da3fd7dfecaf2bacd2114738231275f51b4b04fecc810b2da7dcab518af03618c2bf7484be14722cc1011deb31b2843"
+        }
+      }
+    }
+  },
+    {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "block_api.get_block",
+      "params": {
+        "block_num": 97477298
+      },
+      "id": 1
+    },
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "block": {
+          "block_id": "05cf62ab3f2151a60e601ed86bdb43137949873d",
+          "extensions": [],
+          "previous": "05cf62aa64e54158fd61938b410c80366004b7fd",
+          "signing_key": "STM6LLegbAgLAy28EHrffBVuANFWcFgmqRMW13wBmTExqFE9SCkg4",
+          "timestamp": "2025-07-16T10:29:18",
+          "transaction_ids": [],
+          "transaction_merkle_root": "0000000000000000000000000000000000000000",
+          "transactions": [],
+          "witness": "ocd-witness",
+          "witness_signature": "204bc1f7343463a111570f51748aab9ca36da3fd7dfecaf2bacd2114738231275f51b4b04fecc810b2da7dcab518af03618c2bf7484be14722cc1011deb31b2843"
+        }
+      }
+    }
+  },
+    {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "block_api.get_block",
+      "params": {
+        "block_num": 97477299
+      },
+      "id": 1
+    },
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "block": {
+          "block_id": "05cf62ab3f2151a60e601ed86bdb43137949873d",
+          "extensions": [],
+          "previous": "05cf62aa64e54158fd61938b410c80366004b7fd",
+          "signing_key": "STM6LLegbAgLAy28EHrffBVuANFWcFgmqRMW13wBmTExqFE9SCkg4",
+          "timestamp": "2025-07-16T10:29:18",
+          "transaction_ids": [],
+          "transaction_merkle_root": "0000000000000000000000000000000000000000",
+          "transactions": [],
+          "witness": "ocd-witness",
+          "witness_signature": "204bc1f7343463a111570f51748aab9ca36da3fd7dfecaf2bacd2114738231275f51b4b04fecc810b2da7dcab518af03618c2bf7484be14722cc1011deb31b2843"
+        }
+      }
+    }
+  },
+    {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "block_api.get_block",
+      "params": {
+        "block_num": 97477300
+      },
+      "id": 1
+    },
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "block": {
+          "block_id": "05cf62ab3f2151a60e601ed86bdb43137949873d",
+          "extensions": [],
+          "previous": "05cf62aa64e54158fd61938b410c80366004b7fd",
+          "signing_key": "STM6LLegbAgLAy28EHrffBVuANFWcFgmqRMW13wBmTExqFE9SCkg4",
+          "timestamp": "2025-07-16T10:29:18",
+          "transaction_ids": [],
+          "transaction_merkle_root": "0000000000000000000000000000000000000000",
+          "transactions": [],
+          "witness": "ocd-witness",
+          "witness_signature": "204bc1f7343463a111570f51748aab9ca36da3fd7dfecaf2bacd2114738231275f51b4b04fecc810b2da7dcab518af03618c2bf7484be14722cc1011deb31b2843"
+        }
+      }
+    }
+  }
+]
