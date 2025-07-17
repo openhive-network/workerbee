@@ -31,16 +31,17 @@ export class FeedPriceChangeFilter extends FilterBase {
     if (history.length < 2)
       return false;
 
-    const price1 = BigInt(history[0].base!.amount) / BigInt(history[0].quote!.amount);
-    const price2 = BigInt(history[1].base!.amount) / BigInt(history[1].quote!.amount);
+    const price1 = Number.parseInt(history[0].base!.amount) / Number.parseInt(history[0].quote!.amount);
+    const price2 = Number.parseInt(history[1].base!.amount) / Number.parseInt(history[1].quote!.amount);
 
-    let percentChange = (price1 - price2) * BigInt(100) / price2;
+    // Avoid division by zero
+    if (price2 === 0)
+      return false;
 
-    if (percentChange < 0)
-      percentChange = -percentChange;
+    const percentChange = Math.abs(price1 - price2) / price2 * 100;
 
     this.previousUpdateTimestamp = lastFeedPriceRetrievalTimestamp;
 
-    return Number(percentChange.toString()) >= this.feedPriceChangePercentMin;
+    return percentChange >= this.feedPriceChangePercentMin;
   }
 }
