@@ -36,17 +36,28 @@ export class MentionedAccountProvider<TMentions extends Array<TAccountName> = Ar
 
     const { operationsPerType } = await data.get(OperationClassifier);
 
+    const postMetadataSet = new Set<string>();
+
     if (operationsPerType.comment_operation)
       for(const { operation } of operationsPerType.comment_operation) {
+        const postHash = `${operation.author}-${operation.permlink}`;
+
+        if (postMetadataSet.has(postHash))
+          continue;
+
+        postMetadataSet.add(postHash);
+
         const mentionRegex = /@([a-z0-9.-]+)/gi;
         let match: RegExpExecArray | null;
-        while ((match = mentionRegex.exec(operation.body)) !== null) {
+        let foundMention = false;
+        while ((match = mentionRegex.exec(operation.body)) !== null && !foundMention) {
           const mentionedAccount = match[1] as TAccountName;
           if (this.accounts.has(mentionedAccount)) {
             if (!mentioned[mentionedAccount])
               mentioned[mentionedAccount] = [];
 
             mentioned[mentionedAccount].push(operation);
+            foundMention = true;
           }
         }
       }
