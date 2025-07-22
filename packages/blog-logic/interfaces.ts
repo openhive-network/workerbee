@@ -65,5 +65,15 @@ interface IPostProperties {
 
 interface IPost extends IPostProperties {
   content: string;
+  enumComments: (filter: unknown, page: number) => Iterable<IComment>;
+  enumMentionedAccounts: () => Iterable<IAuthorShort>;
+  getTitleImage: () => string;
+  enumVotes: (filter: unknown, page: number) => Iterable<IVote> ;
+}
+
+interface BloggingPlatform {
+  enumPosts: (filter: unknown, page: number) => Iterable<IPost>;
+  configureAccountContext: (accont_name: string) => void;
+  authorize(provider: unknown);
 }
 
