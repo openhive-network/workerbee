@@ -71,9 +71,15 @@ interface IPost extends IPostProperties {
   enumVotes: (filter: unknown, page: number) => Iterable<IVote> ;
 }
 
+interface IActiveBloggingPlatform {
+  post: (post_data: IPost) => void;
+  comment: (post: string, comment_data: IComment) => void;
+  vote: (post: string, vote_data: IVote ) => void;
+  reblog: (post: string) => void;
+}
+
 interface BloggingPlatform {
   enumPosts: (filter: unknown, page: number) => Iterable<IPost>;
   configureAccountContext: (accont_name: string) => void;
   authorize(provider: unknown);
 }
-
