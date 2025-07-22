@@ -21,14 +21,20 @@ interface ICommunity extends ICommunityShort {
   pending_count: number;
 }
 
-interface IBlogUser {
+interface IAuthorShort {
   id: number;
-  creation_date: Date;
   name: string;
+  avatar: string;
+    url: string;
+}
+
+interface IBlogUser extends IAuthorShort {
+  creation_date: Date;
   comment_count: number;
   post_count: number;
+  registered_date: Date;
   last_activity: Date;
-  profile_description: string;
+  description: string;
 }
 
 interface IComment {
@@ -38,17 +44,13 @@ interface IComment {
   published_at: Date;
   updated_at: Date;
   url: string;
+  enumVotes: (filter: unknown, page: number) => Iterable<IVote>;
 }
 
 interface ISession {
 
 }
 
-interface IAuthorShort {
-  name: string;
-  profile_url: string;
-  avatar: string;
-}
 
 interface IPostProperties {
   id: string;
@@ -68,7 +70,7 @@ interface IPost extends IPostProperties {
   enumComments: (filter: unknown, page: number) => Iterable<IComment>;
   enumMentionedAccounts: () => Iterable<IAuthorShort>;
   getTitleImage: () => string;
-  enumVotes: (filter: unknown, page: number) => Iterable<IVote> ;
+  enumVotes: (filter: unknown, page: number) => Iterable<IVote>;
 }
 
 interface IActiveBloggingPlatform {
