@@ -1,44 +1,46 @@
 // WORK IN PROGRESS
 
 interface ICommentPostIdentity {
-  author: IAuthorIdentity;
-  id: string;
+  readonly author: IAuthorIdentity;
+  readonly id: string;
 }
 
 interface IVote {
-  weight: number;
-  upvote: boolean;
-  voter: string;
+  readonly weight: number;
+  readonly upvote: boolean;
+  readonly voter: string;
 }
 
 interface ICommunityIdentity {
-  name: string;
-  title: string;
+  readonly name: string;
+  readonly title: string;
 }
 interface ICommunity extends ICommunityIdentity {
-  about: string;
-  admins: string[];
-  avatar_url: string;
-  creation_date: Date;
-  subscribers_count: number;
-  authors_count: number;
-  pending_count: number;
+  readonly about: string;
+  readonly admins: string[];
+  readonly avatar_url: string;
+  readonly creation_date: Date;
+  readonly subscribers_count: number;
+  readonly authors_count: number;
+  readonly pending_count: number;
+  getSlug: () => string;
 }
 
 interface IAuthorIdentity {
-  id: string;
-  name: string;
-  avatar: string;
-  url: string;
+  readonly id: string;
+  readonly name: string;
+  readonly avatar: string;
+  readonly url: string;
 }
 
 interface IBlogUser extends IAuthorIdentity {
-  creation_date: Date;
-  comment_count: number;
-  post_count: number;
-  registered_date: Date;
-  last_activity: Date;
-  description: string;
+  readonly creation_date: Date;
+  readonly comment_count: number;
+  readonly post_count: number;
+  readonly registered_date: Date;
+  readonly last_activity: Date;
+  readonly description: string;
+  getSlug: () => string;
 }
 
 interface ICommonPostCommentFunctions {
@@ -50,10 +52,10 @@ interface ICommonPostCommentFunctions {
 
 
 interface IComment extends ICommentPostIdentity, ICommonPostCommentFunctions {
-  published_at: Date;
-  updated_at: Date;
-  url: string;
-  slug: string;
+  readonly published_at: Date;
+  readonly updated_at: Date;
+  readonly url: string;
+  getSlug: () => string;
 }
 
 interface ISession {
@@ -62,14 +64,14 @@ interface ISession {
 
 
 interface IPostProperties extends ICommentPostIdentity {
-  title: string;
-  slug: string;
-  summary: string;
-  tags: string[];
-  community: ICommunityIdentity;
-  published_at: Date;
-  updated_at: Date;
-  url: string;
+  readonly title: string;
+  getSlug: () => string;
+  readonly summary: string;
+  readonly tags: string[];
+  readonly community: ICommunityIdentity;
+  readonly published_at: Date;
+  readonly updated_at: Date;
+  readonly url: string;
 }
 
 interface IPost extends IPostProperties, ICommonPostCommentFunctions {
