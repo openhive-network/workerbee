@@ -1,8 +1,11 @@
 /* eslint-disable no-console */
+import { IHiveChainInterface } from "@hiveio/wax";
 import { ConsoleMessage, Page, test as base, expect } from "@playwright/test";
 
 import "./globals";
 import { IWorkerBee } from "../../dist/bundle";
+import { TPastQueen } from "../../src/past-queen";
+import { QueenBee } from "../../src/queen";
 import type { IWorkerBeeGlobals, TEnvType } from "./globals";
 import { resetMockCallIndexes } from "./mock/api-mock";
 import { resetCallIndexes } from "./mock/jsonRpcMock";
@@ -31,13 +34,15 @@ export interface IWorkerBeeFixtureMethods {
   };
 
   createWorkerBeeTest: <T = Record<string, any>>(
-    callback: (bot: IWorkerBee<unknown>, resolve: (retVal?: T) => void, reject: (reason?: any) => void) => void,
+    callback: (bot: QueenBee<{}> | TPastQueen<{}>, resolve: (retVal?: T) => void, reject: (reason?: any) => void, chain?: IHiveChainInterface) => void,
+    pastDataFrom?: number,
+    pastDataTo?: number,
     dynamic?: boolean,
     isMockEnvironment?: boolean
   ) => Promise<T>;
 
   createMockWorkerBeeTest: <T = Record<string, any>>(
-    callback: (bot: IWorkerBee<unknown>, resolve: (retVal?: T) => void, reject: (reason?: any) => void) => void,
+    callback: (bot: QueenBee<{}>, resolve: (retVal?: T) => void, reject: (reason?: any) => void, chain?: IHiveChainInterface) => void,
     dynamic?: boolean
   ) => Promise<T>;
 }
@@ -93,14 +98,16 @@ const envTestFor = <GlobalType extends IWorkerBeeGlobals>(
 
 const createWorkerBeeTest = async <T = Record<string, any>>(
   envTestFor: IWorkerBeeTest["workerbeeTest"],
-  callback: (bot: IWorkerBee<unknown>, resolve: (retVal?: T) => void, reject: (reason?: any) => void) => void,
+  callback: (bot: QueenBee<{}> | TPastQueen<{}>, resolve: (retVal?: T) => void, reject: (reason?: any) => void, chain?: IHiveChainInterface) => void,
+  pastDataFrom?: number,
+  pastDataTo?: number,
   dynamic: boolean = false,
   isMockEnvironment: boolean = false
 ): Promise<T> => {
   const testRunner = dynamic ? envTestFor.dynamic : envTestFor;
 
-  return await testRunner(async ({ WorkerBee }, callbackStr) => {
-    const bot = isMockEnvironment
+  return await testRunner(async ({ WorkerBee }, callbackStr, pastFrom, pastTo, isMock) => {
+    const bot = isMock
       ? new WorkerBee({
         chainOptions: {
           apiEndpoint: "http://localhost:8000",
@@ -111,17 +118,24 @@ const createWorkerBeeTest = async <T = Record<string, any>>(
 
     await bot.start();
 
+    let finalBot: IWorkerBee<unknown> | TPastQueen<{}>;
+
+    if (!isMock && pastFrom && pastTo)
+      finalBot = bot.providePastOperations(pastFrom, pastTo) as unknown as TPastQueen<{}>;
+    else
+      finalBot = bot.observe as unknown as QueenBee<{}>;
+
     const returnValue = await new Promise<T>((resolve, reject) => {
       // Reconstruct callback from string in web environment
       const reconstructedCallback = eval(`(${callbackStr})`);
-      reconstructedCallback(bot, resolve, reject);
+      reconstructedCallback(finalBot, resolve, reject, bot.chain);
     });
 
     bot.stop();
     bot.delete();
 
     return returnValue;
-  }, callback.toString());
+  }, callback.toString(), pastDataFrom, pastDataTo, isMockEnvironment);
 }
 
 export const test = base.extend<IWorkerBeeTest, IWorkerBeeWorker>({
@@ -146,11 +160,12 @@ export const test = base.extend<IWorkerBeeTest, IWorkerBeeWorker>({
   },
 
   createWorkerBeeTest: ({ workerbeeTest }, use) => {
-    use((callback, dynamic) => createWorkerBeeTest(workerbeeTest, callback, dynamic));
+    use((callback, pastDataFrom, pastDataTo, dynamic) => createWorkerBeeTest(workerbeeTest, callback, pastDataFrom, pastDataTo, dynamic));
   },
 
   createMockWorkerBeeTest: ({ page }, use) => {
     const mockEnvTestFor = envTestFor(page, createTestFor, true);
-    use((callback, dynamic) => createWorkerBeeTest(mockEnvTestFor, callback, dynamic, true));
+    // TODO: Improve types to not cast to `any`
+    use((callback, dynamic) => createWorkerBeeTest(mockEnvTestFor, callback as any, undefined, undefined, dynamic, true));
   }
 });
