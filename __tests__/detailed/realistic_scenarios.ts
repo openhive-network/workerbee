@@ -8,7 +8,7 @@ test.describe("Bot Realistic Scenarios", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const content: string[] = [];
 
-      bot.providePastOperations(96549390, 96549415).onPosts("mtyszczak").or.onPosts("nickdongsik").or.onComments("brando28").subscribe({
+      bot.onPosts("mtyszczak").or.onPosts("nickdongsik").or.onComments("brando28").subscribe({
         next(data) {
           for (const author in data.posts)
             data.posts[author].forEach(({ operation }) => content.push(`${operation.author} - ${operation.permlink}`));
@@ -22,7 +22,7 @@ test.describe("Bot Realistic Scenarios", () => {
         },
         complete: () => resolve(content)
       });
-    }, true);
+    }, 96549390, 96549415, true);
 
     expect(result).toEqual([
       "brando28 - re-bitcoinman-ovjhawi6",
@@ -35,7 +35,7 @@ test.describe("Bot Realistic Scenarios", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const content: string[] = [];
 
-      bot.providePastOperations(97146285, 97146300).onVotes("e-sport-gamer").or.onFollow("fwaszkiewicz").or.onReblog("maxinpower").subscribe({
+      bot.onVotes("e-sport-gamer").or.onFollow("fwaszkiewicz").or.onReblog("maxinpower").subscribe({
         next(data) {
           for (const author in data.votes)
             data.votes[author].forEach(({ operation }) => content.push(`Vote: ${operation.voter} - ${operation.permlink}`));
@@ -52,7 +52,7 @@ test.describe("Bot Realistic Scenarios", () => {
         },
         complete: () => resolve(content)
       });
-    }, true);
+    }, 97146285, 97146300, true);
 
     expect(result).toEqual([
       "Vote: e-sport-gamer - city-pingeons",
@@ -63,12 +63,11 @@ test.describe("Bot Realistic Scenarios", () => {
   });
 
   test("1.3 - Should be able to create financial activity monitor", async({ createWorkerBeeTest }) => {
-    const result = await createWorkerBeeTest((bot, resolve, reject) => {
+    const result = await createWorkerBeeTest((bot, resolve, reject, chain) => {
       const content: string[] = [];
 
       bot
-        .providePastOperations(97347575, 97347585)
-        .onWhaleAlert(bot.chain!.hiveCoins(50))
+        .onWhaleAlert(chain!.hiveCoins(50))
         .or.onInternalMarketOperation()
         .or.onExchangeTransfer()
         .subscribe({
@@ -91,7 +90,7 @@ test.describe("Bot Realistic Scenarios", () => {
           },
           complete: () => resolve(content)
         });
-    }, true);
+    }, 97347575, 97347585, true);
 
     expect(result).toEqual([
       "Internal Market Operation: honeybot - 243293707",
@@ -105,7 +104,7 @@ test.describe("Bot Realistic Scenarios", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const content: string[] = [];
 
-      bot.providePastOperations(97639665, 97639695).onMention("thebeedevs").or.onPosts("thebeedevs").or.onReblog("thebeedevs").subscribe({
+      bot.onMention("thebeedevs").or.onPosts("thebeedevs").or.onReblog("thebeedevs").subscribe({
         next(data) {
           data.posts.thebeedevs?.forEach(({ operation }) => {
             content.push(`Post: ${operation.author} - ${operation.permlink}`);
@@ -125,7 +124,7 @@ test.describe("Bot Realistic Scenarios", () => {
         },
         complete: () => resolve(content)
       });
-    }, true);
+    }, 97639665, 97639695, true);
 
     expect(result).toEqual([
       "Post: thebeedevs - hivesense-why-nothing-worked-at-first-and-what-we-did-about-it",
@@ -139,7 +138,6 @@ test.describe("Bot Realistic Scenarios", () => {
       const content: string[] = [];
 
       bot
-        .providePastOperations(97664614, 97664618)
         .onCustomOperation("follow")
         .or.onCustomOperation("reblog")
         .or.onNewAccount().subscribe({
@@ -162,7 +160,7 @@ test.describe("Bot Realistic Scenarios", () => {
           },
           complete: () => resolve(content)
         });
-    }, true);
+    }, 97664614, 97664618, true);
 
     expect(result).toEqual([
       "Follow: [\"reblog\",{\"account\":\"cribbio\",\"author\":\"donasycafe\",\"permlink\":\"feliz-4o-aniversario-mi-historia\"}]",
@@ -177,7 +175,6 @@ test.describe("Bot Realistic Scenarios", () => {
       const content: string[] = [];
 
       bot
-        .providePastOperations(97547200, 97547250)
         .onPosts("thebeedevs")
         .or.onComments("thebeedevs")
         .or.onMention("thebeedevs")
@@ -211,7 +208,7 @@ test.describe("Bot Realistic Scenarios", () => {
           },
           complete: () => resolve(content)
         });
-    }, true);
+    }, 97547200, 97547250, true);
 
     expect(result).toEqual([
       "Post: thebeedevs - meet-workerbee-the-easy-way-to-build-smart-blockchain-bots",
@@ -222,12 +219,11 @@ test.describe("Bot Realistic Scenarios", () => {
   });
 
   test("1.7 - Should be able to create market movement detector", async({ createWorkerBeeTest }) => {
-    const result = await createWorkerBeeTest((bot, resolve, reject) => {
+    const result = await createWorkerBeeTest((bot, resolve, reject, chain) => {
       const content: string[] = [];
 
       bot
-        .providePastOperations(97347545, 97347555)
-        .or.onWhaleAlert(bot.chain!.hiveCoins(10000))
+        .or.onWhaleAlert(chain!.hiveCoins(10000))
         .or.onInternalMarketOperation()
         .or.onExchangeTransfer()
         .subscribe({
@@ -250,7 +246,7 @@ test.describe("Bot Realistic Scenarios", () => {
           },
           complete: () => resolve(content)
         });
-    }, true);
+    }, 97347545, 97347555, true);
 
     expect(result).toEqual([
       "Whale Alert: huobi-pro -> huobi-withdrawal - 1598290",
@@ -265,7 +261,6 @@ test.describe("Bot Realistic Scenarios", () => {
       const content: string[] = [];
 
       bot
-        .providePastOperations(97547200, 97547250)
         .onVotes("thebeedevs")
         .or.onPosts("thebeedevs")
         .subscribe({
@@ -284,7 +279,7 @@ test.describe("Bot Realistic Scenarios", () => {
           },
           complete: () => resolve(content)
         });
-    }, true);
+    }, 97547200, 97547250, true);
 
     expect(result).toEqual([
       "Post: thebeedevs - meet-workerbee-the-easy-way-to-build-smart-blockchain-bots",
@@ -293,12 +288,11 @@ test.describe("Bot Realistic Scenarios", () => {
   });
 
   test("2.2 - Should be able to create market trend analyzer", async({ createWorkerBeeTest }) => {
-    const result = await createWorkerBeeTest((bot, resolve, reject) => {
+    const result = await createWorkerBeeTest((bot, resolve, reject, chain) => {
       const content: string[] = [];
 
       bot
-        .providePastOperations(97347545, 97347555)
-        .onWhaleAlert(bot.chain!.hiveCoins(10000))
+        .onWhaleAlert(chain!.hiveCoins(10000))
         .or.onInternalMarketOperation()
         .subscribe({
           next(data) {
@@ -316,7 +310,7 @@ test.describe("Bot Realistic Scenarios", () => {
           },
           complete: () => resolve(content)
         });
-    }, true);
+    }, 97347545, 97347555, true);
 
     expect(result).toEqual([
       "Whale Alert: huobi-pro -> huobi-withdrawal - 1598290",
@@ -330,7 +324,6 @@ test.describe("Bot Realistic Scenarios", () => {
       const content: string[] = [];
 
       bot
-        .providePastOperations(97664610, 97664620)
         .onNewAccount()
         .or.onFollow("thebeedevs")
         .or.onCustomOperation("follow")
@@ -354,7 +347,7 @@ test.describe("Bot Realistic Scenarios", () => {
           },
           complete: () => resolve(content)
         });
-    }, true);
+    }, 97664610, 97664620, true);
 
     expect(result).toEqual([
       "Custom Follow: [\"follow\",{\"follower\":\"dehai\",\"following\":\"rubenjr\",\"what\":[\"blog\"]}]",
@@ -371,7 +364,6 @@ test.describe("Bot Realistic Scenarios", () => {
       const content: string[] = [];
 
       bot
-        .providePastOperations(97547200, 97547250)
         .onPosts("thebeedevs")
         .or.onComments("thebeedevs")
         .or.onVotes("thebeedevs")
@@ -395,7 +387,7 @@ test.describe("Bot Realistic Scenarios", () => {
           },
           complete: () => resolve(content)
         });
-    }, true);
+    }, 97547200, 97547250, true);
 
     expect(result).toEqual([
       "Post: thebeedevs - meet-workerbee-the-easy-way-to-build-smart-blockchain-bots",
@@ -404,12 +396,11 @@ test.describe("Bot Realistic Scenarios", () => {
   });
 
   test("2.5 - Should be able to create economic activity tracker", async({ createWorkerBeeTest }) => {
-    const result = await createWorkerBeeTest((bot, resolve, reject) => {
+    const result = await createWorkerBeeTest((bot, resolve, reject, chain) => {
       const content: string[] = [];
 
       bot
-        .providePastOperations(97347575, 97347585)
-        .onWhaleAlert(bot.chain!.hiveCoins(1000))
+        .onWhaleAlert(chain!.hiveCoins(1000))
         .or.onExchangeTransfer()
         .or.onInternalMarketOperation()
         .subscribe({
@@ -432,7 +423,7 @@ test.describe("Bot Realistic Scenarios", () => {
           },
           complete: () => resolve(content)
         });
-    }, true);
+    }, 97347575, 97347585, true);
 
     expect(result).toEqual([
       "Whale: honey-swap -> hive-engine - 403",
@@ -449,7 +440,6 @@ test.describe("Bot Realistic Scenarios", () => {
       const content: string[] = [];
 
       bot
-        .providePastOperations(97547200, 97547250)
         .onPosts("thebeedevs")
         .or.onVotes("thebeedevs")
         .or.onFollow("thebeedevs")
@@ -478,7 +468,7 @@ test.describe("Bot Realistic Scenarios", () => {
           },
           complete: () => resolve(content)
         });
-    }, true);
+    }, 97547200, 97547250, true);
 
     expect(result).toEqual([
       "Post: thebeedevs - meet-workerbee-the-easy-way-to-build-smart-blockchain-bots",

@@ -7,7 +7,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const capturedPosts: string[] = [];
 
-      bot.providePastOperations(96549390, 96549415).onPosts("mtyszczak", "author2", "author3").subscribe({
+      bot.onPosts("mtyszczak", "author2", "author3").subscribe({
         next(data) {
           for (const author of ["mtyszczak", "author2", "author3"])
             data.posts[author]?.forEach(({ operation }) => {
@@ -20,7 +20,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
         },
         complete: () => resolve(capturedPosts)
       });
-    });
+    }, 96549390, 96549415);
 
     expect(result).toEqual(["Post by mtyszczak: hi-ve-everyone"]);
   });
@@ -29,7 +29,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const capturedPosts: Array<{ author: string; blockNumber: number }> = [];
 
-      bot.providePastOperations(97632050, 97632075).onBlock().or.onPosts("comandoyeya", "daddydog").subscribe({
+      bot.onBlock().or.onPosts("comandoyeya", "daddydog").subscribe({
         next(data) {
           for (const author of ["comandoyeya", "daddydog"])
             data.posts[author]?.forEach(({ operation }) => {
@@ -46,7 +46,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
         },
         complete: () => resolve(capturedPosts)
       });
-    });
+    }, 97632050, 97632075);
 
     expect(result).toEqual([
       {
@@ -69,7 +69,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
        * Monitor an account known to create comments in this range.
        * Also check for comments in the same range to verify account was active
        */
-      bot.providePastOperations(96549690, 96549715).onPosts("gtg").or.onComments("gtg").subscribe({
+      bot.onPosts("gtg").or.onComments("gtg").subscribe({
         next(data) {
           // Count posts (should be 0)
           data.posts["gtg"]?.forEach(() => {
@@ -87,7 +87,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
         },
         complete: () => resolve({ postsDetected, commentsDetected })
       });
-    });
+    }, 96549690, 96549715);
 
     // Should detect comments but NOT posts
     expect(result.commentsDetected).toBeGreaterThan(0);
@@ -106,7 +106,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
        * Monitor multiple accounts for posts (should not trigger for comment activity)
        * Also Verify these accounts were active with comments
        */
-      bot.providePastOperations(96549690, 96549715).onPosts(...testAccounts).or.onComments(...testAccounts).subscribe({
+      bot.onPosts(...testAccounts).or.onComments(...testAccounts).subscribe({
         next(data) {
           testAccounts.forEach(account => {
             data.posts[account]?.forEach(() => {
@@ -124,7 +124,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
         },
         complete: () => resolve({ postResults, commentResults })
       });
-    });
+    }, 96549690, 96549715);
 
     const totalComments = Object.values(result.commentResults).reduce((sum, count) => sum + count, 0);
     const totalPosts = Object.values(result.postResults).reduce((sum, count) => sum + count, 0);
@@ -142,7 +142,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
        * Monitor for posts from a specific account
        * Also Verify other accounts were posting in this range
        */
-      bot.providePastOperations(96549390, 96549415).onPosts("nonexistent-account").or.onPosts("mtyszczak").subscribe({
+      bot.onPosts("nonexistent-account").or.onPosts("mtyszczak").subscribe({
         next(data) {
           data.posts["nonexistent-account"]?.forEach(() => {
             monitoredAccountPosts++;
@@ -158,7 +158,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
         },
         complete: () => resolve({ monitoredAccountPosts, otherAccountPosts })
       });
-    });
+    }, 96549390, 96549415);
 
     // Should NOT detect posts from monitored account, but should detect from other account
     expect(result.monitoredAccountPosts).toBe(0);
@@ -171,7 +171,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
 
       try {
         // Test with no accounts (edge case)
-        bot.providePastOperations(96549390, 96549415).onPosts().subscribe({
+        bot.onPosts().subscribe({
           next(_data) {
             dataReceived = true;
             console.log("Data received for empty account list");
@@ -185,7 +185,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
       } catch {
         reject(new Error("Unexpected error occurred"));
       }
-    });
+    }, 96549390, 96549415);
 
     expect(result).toBeFalsy();
   });
@@ -194,7 +194,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const capturedComments: string[] = [];
 
-      bot.providePastOperations(96549690, 96549715).onComments("gtg", "moretea", "khantaimur").subscribe({
+      (bot).onComments("gtg", "moretea", "khantaimur").subscribe({
         next(data) {
           for (const author of ["gtg", "moretea", "khantaimur"])
             data.comments[author]?.forEach(({ operation }) => {
@@ -207,7 +207,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
         },
         complete: () => resolve(capturedComments)
       });
-    });
+    }, 96549690, 96549715);
 
     expect(result).toEqual([
       "Comment by moretea: re-leothreads-2xpn8nyzd",
@@ -220,7 +220,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const capturedComments: Array<{ author: string; blockNumber: number }> = [];
 
-      bot.providePastOperations(97634334, 97634348).onBlock().or.onComments("zayyar99", "beckyroyal").subscribe({
+      (bot).onBlock().or.onComments("zayyar99", "beckyroyal").subscribe({
         next(data) {
           for (const author of ["zayyar99", "beckyroyal"])
             data.comments[author]?.forEach(({ operation }) => {
@@ -236,7 +236,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
         },
         complete: () => resolve(capturedComments)
       });
-    });
+    }, 97634334, 97634348);
 
     expect(result).toEqual([
       {
@@ -260,7 +260,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
        * Monitor an account known to create posts in this range for comments (should not trigger)
        * Also check for posts in the same range to verify account was active with posts
        */
-      bot.providePastOperations(96549390, 96549415).onComments("mtyszczak").or.onPosts("mtyszczak").subscribe({
+      (bot).onComments("mtyszczak").or.onPosts("mtyszczak").subscribe({
         next(data) {
           // Count comments (should be 0)
           data.comments["mtyszczak"]?.forEach(() => {
@@ -278,7 +278,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
         },
         complete: () => resolve({ commentsDetected, postsDetected })
       });
-    });
+    }, 96549390, 96549415);
 
     // Should detect posts but NOT comments
     expect(result.postsDetected).toBeGreaterThan(0);
@@ -297,7 +297,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
        * Monitor multiple accounts for comments (should not trigger for post activity)
        * Also verify these accounts were active with posts
        */
-      bot.providePastOperations(96549390, 96549415).onComments(...testAccounts).or.onPosts(...testAccounts).subscribe({
+      (bot).onComments(...testAccounts).or.onPosts(...testAccounts).subscribe({
         next(data) {
           testAccounts.forEach(account => {
             data.comments[account]?.forEach(() => {
@@ -315,7 +315,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
         },
         complete: () => resolve({ commentResults, postResults })
       });
-    });
+    }, 96549390, 96549415);
 
     const totalPosts = Object.values(result.postResults).reduce((sum, count) => sum + count, 0);
     const totalComments = Object.values(result.commentResults).reduce((sum, count) => sum + count, 0);
@@ -333,7 +333,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
        * Monitor for comments from a specific account that doesn't commented
        * Also verify other accounts were commenting in this range
        */
-      bot.providePastOperations(96549690, 96549715).onComments("nonexistent-commenter").or.onComments("gtg").subscribe({
+      (bot).onComments("nonexistent-commenter").or.onComments("gtg").subscribe({
         next(data) {
           data.comments["nonexistent-commenter"]?.forEach(() => {
             monitoredAccountComments++;
@@ -349,7 +349,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
         },
         complete: () => resolve({ monitoredAccountComments, otherAccountComments })
       });
-    });
+    }, 96549690, 96549715);
 
     // Should NOT detect comments from monitored account, but should detect from other account
     expect(result.monitoredAccountComments).toBe(0);
@@ -362,7 +362,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
 
       try {
         // Test with no accounts (edge case)
-        bot.providePastOperations(96549690, 96549715).onComments().subscribe({
+        (bot).onComments().subscribe({
           next(_data) {
             dataReceived = true;
             console.log("Data received for empty comment account list");
@@ -376,7 +376,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
       } catch {
         reject(new Error("Unexpected error occurred"));
       }
-    });
+    }, 96549690, 96549715);
 
     expect(result).toBeFalsy();
   });
@@ -385,8 +385,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const capturedPosts: string[] = [];
 
-      bot
-        .providePastOperations(96549390, 96549415)
+      (bot)
         .onPosts("mtyszczak", "author2", "author3")
         .or.onComments("secret-art", "author2", "author3")
         .subscribe({
@@ -407,7 +406,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
           },
           complete: () => resolve(capturedPosts)
         });
-    });
+    }, 96549390, 96549415);
 
     expect(result).toEqual([
       "Comment by secret-art: re-jfang003-sxg1lb",
@@ -422,7 +421,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const capturedVotes: string[] = [];
 
-      bot.providePastOperations(96549390, 96549415).onVotes("dhedge", "winanda").subscribe({
+      (bot).onVotes("dhedge", "winanda").subscribe({
         next(data) {
           for (const voter of ["dhedge", "winanda"])
             data.votes[voter]?.forEach(({ operation }) => {
@@ -435,7 +434,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
         },
         complete: () => resolve(capturedVotes)
       });
-    });
+    }, 96549390, 96549415);
 
     expect(result).toEqual([
       "Vote by winanda on xlety/is-it-really-worth-creating",
@@ -448,7 +447,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const capturedVotes: Array<{ voter: string; blockNumber: number }> = [];
 
-      bot.providePastOperations(96549390, 96549404).onBlock().or.onVotes("noctury", "the-burn").subscribe({
+      (bot).onBlock().or.onVotes("noctury", "the-burn").subscribe({
         next(data) {
           for (const voter of ["noctury", "the-burn"])
             data.votes[voter]?.forEach(({ operation }) => {
@@ -464,7 +463,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
         },
         complete: () => resolve(capturedVotes)
       });
-    });
+    }, 96549390, 96549404);
 
     expect(result).toEqual([
       {
@@ -487,7 +486,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
        * Monitor an account known to create posts/comments but does not vote in this range
        * Also Check for posts to verify account was active
        */
-      bot.providePastOperations(96549390, 96549415).onVotes("mtyszczak").or.onPosts("mtyszczak").or.onComments("mtyszczak").subscribe({
+      (bot).onVotes("mtyszczak").or.onPosts("mtyszczak").or.onComments("mtyszczak").subscribe({
         next(data) {
           // Count votes (should be 0)
           data.votes["mtyszczak"]?.forEach(() => {
@@ -509,7 +508,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
         },
         complete: () => resolve({ votesDetected, commentOperationsDetected })
       });
-    });
+    }, 96549390, 96549415);
 
     // Should detect posts/comments but no votes from this account in this range
     expect(result.commentOperationsDetected).toBeGreaterThan(0);
@@ -525,7 +524,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
        * Monitor for votes from a specific account that doesn't vote much
        * Also Verify other accounts were voting in this range
        */
-      bot.providePastOperations(96549390, 96549415).onVotes("nonexistent-voter").or.onVotes("noctury").subscribe({
+      (bot).onVotes("nonexistent-voter").or.onVotes("noctury").subscribe({
         next(data) {
           data.votes["nonexistent-voter"]?.forEach(() => {
             monitoredAccountVotes++;
@@ -541,7 +540,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
         },
         complete: () => resolve({ monitoredAccountVotes, otherAccountVotes })
       });
-    });
+    }, 96549390, 96549415);
 
     // Should NOT detect votes from monitored account, but should detect from other account
     expect(result.monitoredAccountVotes).toBe(0);
@@ -554,7 +553,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
 
       try {
         // Test with no accounts (edge case)
-        bot.providePastOperations(96549390, 96549415).onVotes().subscribe({
+        (bot).onVotes().subscribe({
           next(_data) {
             dataReceived = true;
             console.log("Data received for empty votes account list");
@@ -568,7 +567,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
       } catch {
         reject(new Error("Unexpected error occurred"));
       }
-    });
+    }, 96549390, 96549415);
 
     expect(result).toBeFalsy();
   });
@@ -577,7 +576,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const capturedPosts: string[] = [];
 
-      bot.providePastOperations(96549390, 96549415)
+      (bot)
         .onPosts("mtyszczak").or.or.or.or.or.onComments("secret-art")
         .subscribe({
           next(data) {
@@ -598,7 +597,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
           },
           complete: () => resolve(capturedPosts)
         });
-    });
+    }, 96549390, 96549415);
 
     expect(result).toEqual([
       "Comment by secret-art: re-jfang003-sxg1lb",

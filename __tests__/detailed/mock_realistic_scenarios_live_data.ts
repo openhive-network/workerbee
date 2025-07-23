@@ -34,7 +34,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
       let post: { text: string, accountName: string, manabar: string } | undefined;
       let comment: { text: string, accountName: string, manabar: string } | undefined;
 
-      bot.observe.onPosts("gtg")
+      bot.onPosts("gtg")
         .or.onComments("gtg")
         .or.onVotes("gtg")
         .provideAccounts("gtg")
@@ -98,7 +98,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     const result = await createMockWorkerBeeTest((bot, resolve, reject) => {
       let manabarData: string | undefined;
 
-      bot.observe.onAccountsBalanceChange(false, "gtg")
+      bot.onAccountsBalanceChange(false, "gtg")
         .or.onAccountsMetadataChange("gtg")
         .or.onAccountsManabarPercent(0, 100, "gtg")
         .provideAccounts("gtg")
@@ -139,7 +139,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
 
   test("3.3 - Should be able to create market alert system", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<number>((bot, resolve, reject) => {
-      bot.observe.onFeedPriceChange(95)
+      bot.onFeedPriceChange(95)
         .or.onFeedPriceNoChange(1)
         .or.onWitnessesMissedBlocks(5, "gtg")
         .provideFeedPriceData()
@@ -167,11 +167,11 @@ test.describe("Realistic Scenarios with Live Data", () => {
   });
 
   test("3.5 - Should be able to create investment portfolio monitor", async ({ createMockWorkerBeeTest }) => {
-    const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
+    const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject, chain) => {
       const marketOperations: string[] = [];
 
-      bot.observe.onAccountsBalanceChange(true, "gtg", "blocktrades")
-        .or.onWhaleAlert(bot.chain!.hiveCoins(1000))
+      bot.onAccountsBalanceChange(true, "gtg", "blocktrades")
+        .or.onWhaleAlert(chain!.hiveCoins(1000))
         .or.onExchangeTransfer()
         .provideAccounts("gtg", "blocktrades")
         .subscribe({
@@ -206,7 +206,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const contentOperations: string[] = [];
 
-      bot.observe.onPosts("mtyszczak")
+      bot.onPosts("mtyszczak")
         .or.onPosts("fwaszkiewicz")
         .or.onReblog("thebeedevs")
         .subscribe({
@@ -244,7 +244,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     const result = await createMockWorkerBeeTest<string>((bot, resolve, reject) => {
       const content: string[] = [];
 
-      bot.observe.onAccountsManabarPercent(/* UPVOTE */ 0, 90, "gtg")
+      bot.onAccountsManabarPercent(/* UPVOTE */ 0, 90, "gtg")
         .or.onPosts("fwaszkiewicz")
         .or.onComments("fwaszkiewicz")
         .provideManabarData(/* UPVOTE */ 0, "gtg")
@@ -275,7 +275,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
 
-      bot.observe.onBlock()
+      bot.onBlock()
         .provideAccounts("gtg")
         .provideRcAccounts("gtg")
         .provideManabarData(/* RC */2, "gtg")
@@ -313,7 +313,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
 
-      bot.observe.onBlock()
+      bot.onBlock()
         .provideAccounts("gtg", "blocktrades", "thebeedevs")
         .provideManabarData(/* RC */2, "gtg", "blocktrades", "thebeedevs")
         .provideWitnesses("gtg", "blocktrades")
@@ -356,7 +356,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
 
-      bot.observe.onBlock()
+      bot.onBlock()
         .or.onInternalMarketOperation()
         .or.onExchangeTransfer()
         .provideBlockData()
@@ -393,7 +393,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
 
-      bot.observe.onFollow("gtg")
+      bot.onFollow("gtg")
         .or.onFollow("blocktrades")
         .or.onReblog("gtg")
         .or.onMention("gtg")
@@ -440,7 +440,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
 
-      bot.observe.onPosts("gtg")
+      bot.onPosts("gtg")
         .or.onComments("gtg")
         .or.onVotes("gtg")
         .or.onReblog("gtg")
