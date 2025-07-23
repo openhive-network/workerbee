@@ -1,17 +1,22 @@
 // WORK IN PROGRESS
 
+interface ICommentPostIdentity {
+  author: IAuthorIdentity;
+  id: string;
+}
+
 interface IVote {
   weight: number;
   upvote: boolean;
   voter: string;
 }
 
-interface ICommunityShort {
+interface ICommunityIdentity {
   id: number;
   name: string;
   title: string;
 }
-interface ICommunity extends ICommunityShort {
+interface ICommunity extends ICommunityIdentity {
   about: string;
   admins: string[];
   avatar_url: string;
@@ -21,14 +26,14 @@ interface ICommunity extends ICommunityShort {
   pending_count: number;
 }
 
-interface IAuthorShort {
+interface IAuthorIdentity {
   id: number;
   name: string;
   avatar: string;
-    url: string;
+  url: string;
 }
 
-interface IBlogUser extends IAuthorShort {
+interface IBlogUser extends IAuthorIdentity {
   creation_date: Date;
   comment_count: number;
   post_count: number;
@@ -37,14 +42,19 @@ interface IBlogUser extends IAuthorShort {
   description: string;
 }
 
-interface IComment {
-  id: string;
-  author: IAuthorShort;
-  content: string;
+interface ICommonPostCommentFunctions {
+  enumComments: (filter: unknown, page: number) => Iterable<IComment>;
+  enumMentionedAccounts: () => Iterable<IAuthorIdentity>;
+  enumVotes: (filter: unknown, page: number) => Iterable<IVote>;
+  getContent: () => string;
+}
+
+
+interface IComment extends ICommentPostIdentity, ICommonPostCommentFunctions {
   published_at: Date;
   updated_at: Date;
   url: string;
-  enumVotes: (filter: unknown, page: number) => Iterable<IVote>;
+  slug: string;
 }
 
 interface ISession {
@@ -52,31 +62,25 @@ interface ISession {
 }
 
 
-interface IPostProperties {
-  id: string;
+interface IPostProperties extends ICommentPostIdentity {
   title: string;
   slug: string;
-  author: IAuthorShort;
   summary: string;
   tags: string[];
-  community: ICommunityShort;
+  community: ICommunityIdentity;
   published_at: Date;
   updated_at: Date;
   url: string;
 }
 
-interface IPost extends IPostProperties {
-  content: string;
-  enumComments: (filter: unknown, page: number) => Iterable<IComment>;
-  enumMentionedAccounts: () => Iterable<IAuthorShort>;
+interface IPost extends IPostProperties, ICommonPostCommentFunctions {
   getTitleImage: () => string;
-  enumVotes: (filter: unknown, page: number) => Iterable<IVote>;
 }
 
 interface IActiveBloggingPlatform {
   post: (post_data: IPost) => void;
   comment: (post: string, comment_data: IComment) => void;
-  vote: (post: string, vote_data: IVote ) => void;
+  vote: (post: string) => void;
   reblog: (post: string) => void;
 }
 
