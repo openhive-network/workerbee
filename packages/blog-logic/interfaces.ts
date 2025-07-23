@@ -12,7 +12,6 @@ interface IVote {
 }
 
 interface ICommunityIdentity {
-  id: number;
   name: string;
   title: string;
 }
@@ -27,7 +26,7 @@ interface ICommunity extends ICommunityIdentity {
 }
 
 interface IAuthorIdentity {
-  id: number;
+  id: string;
   name: string;
   avatar: string;
   url: string;
