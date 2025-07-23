@@ -5,7 +5,7 @@ import { test } from "../assets/jest-helper";
 test.describe("Bot Providers", () => {
   test("Should be able to provide witnesses", async({ createWorkerBeeTest }) => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
-      const observer = bot.observe.onBlock().provideWitnesses("gtg");
+      const observer = bot.onBlock().provideWitnesses("gtg");
 
       observer.subscribe({
         next: (data) => {
@@ -18,7 +18,7 @@ test.describe("Bot Providers", () => {
         },
         complete: () => resolve()
       });
-    }, true);
+    }, undefined, undefined, true);
 
     expect(result["gtg"]).toBeDefined();
     expect(result["gtg"].owner).toBe("gtg");
@@ -28,7 +28,7 @@ test.describe("Bot Providers", () => {
 
   test("Should be able to provide RC accounts", async({ createWorkerBeeTest }) => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
-      const observer = bot.observe.onBlock().provideRcAccounts("gtg");
+      const observer = bot.onBlock().provideRcAccounts("gtg");
 
       observer.subscribe({
         next: (data) => {
@@ -41,7 +41,7 @@ test.describe("Bot Providers", () => {
         },
         complete: () => resolve()
       });
-    }, true);
+    }, undefined, undefined, true);
 
     expect(result["gtg"]).toBeDefined();
     expect(result["gtg"].name).toBe("gtg");
@@ -50,7 +50,7 @@ test.describe("Bot Providers", () => {
 
   test("Should be able to provide feed price data", async({ createWorkerBeeTest }) => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
-      const observer = bot.observe.onBlock().provideFeedPriceData();
+      const observer = bot.onBlock().provideFeedPriceData();
 
       observer.subscribe({
         next: (data) => {
@@ -63,7 +63,7 @@ test.describe("Bot Providers", () => {
         },
         complete: () => resolve()
       });
-    }, true);
+    }, undefined, undefined, true);
 
     expect(result).toHaveProperty("currentMedianHistory");
     expect(result).toHaveProperty("currentMinHistory");
@@ -73,7 +73,7 @@ test.describe("Bot Providers", () => {
 
   test("Should be able to provide block header data", async({ createWorkerBeeTest }) => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
-      const observer = bot.observe.onBlock().provideBlockHeaderData();
+      const observer = bot.onBlock().provideBlockHeaderData();
 
       observer.subscribe({
         next: (data) => {
@@ -86,7 +86,7 @@ test.describe("Bot Providers", () => {
         },
         complete: () => resolve()
       });
-    }, true);
+    }, undefined, undefined, true);
 
     expect(result.number).not.toBeNaN();
     expect(result).toHaveProperty("timestamp");
@@ -95,7 +95,7 @@ test.describe("Bot Providers", () => {
 
   test("Should be able to provide block data", async({ createWorkerBeeTest }) => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
-      const observer = bot.observe.onBlock().provideBlockData();
+      const observer = bot.onBlock().provideBlockData();
 
       observer.subscribe({
         next: (data) => {
@@ -108,7 +108,7 @@ test.describe("Bot Providers", () => {
         },
         complete: () => resolve()
       });
-    }, true);
+    }, undefined, undefined, true);
 
     expect(result.number).not.toBeNaN();
     expect(result).toHaveProperty("transactions");
@@ -117,7 +117,7 @@ test.describe("Bot Providers", () => {
 
   test("Should be able to provide accounts", async({ createWorkerBeeTest }) => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
-      const observer = bot.observe.onBlock().provideAccounts("gtg");
+      const observer = bot.onBlock().provideAccounts("gtg");
 
       observer.subscribe({
         next: (data) => {
@@ -130,7 +130,7 @@ test.describe("Bot Providers", () => {
         },
         complete: () => resolve()
       });
-    }, true);
+    }, undefined, undefined, true);
 
     expect(result["gtg"]).toBeDefined();
     expect(result["gtg"].name).toBe("gtg");
@@ -138,7 +138,7 @@ test.describe("Bot Providers", () => {
 
   test("Should be able to provide manabar data", async({ createWorkerBeeTest }) => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
-      const observer = bot.observe.onBlock().provideManabarData(2, "gtg"); // Upvote manabar
+      const observer = bot.onBlock().provideManabarData(2, "gtg"); // Upvote manabar
 
       observer.subscribe({
         next: (data) => {
@@ -151,7 +151,7 @@ test.describe("Bot Providers", () => {
         },
         complete: () => resolve()
       });
-    }, true);
+    }, undefined, undefined, true);
 
     expect(result["gtg"]).toBeDefined();
     expect(result["gtg"][2].percent).toBeGreaterThanOrEqual(0);
@@ -159,7 +159,7 @@ test.describe("Bot Providers", () => {
 
   test("Should be able to combine witnesses and accounts providers", async({ createWorkerBeeTest }) => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
-      const observer = bot.observe.onBlock()
+      const observer = bot.onBlock()
         .provideWitnesses("gtg")
         .provideAccounts("gtg");
 
@@ -174,7 +174,7 @@ test.describe("Bot Providers", () => {
         },
         complete: () => resolve()
       });
-    }, true);
+    }, undefined, undefined, true);
 
     expect(result.witnesses["gtg"]).toBeDefined();
     expect(result.witnesses["gtg"].owner).toBe("gtg");
@@ -184,7 +184,7 @@ test.describe("Bot Providers", () => {
 
   test("Should be able to combine feed price data and block header providers", async({ createWorkerBeeTest }) => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
-      const observer = bot.observe.onBlock()
+      const observer = bot.onBlock()
         .provideFeedPriceData()
         .provideBlockHeaderData();
 
@@ -199,7 +199,7 @@ test.describe("Bot Providers", () => {
         },
         complete: () => resolve()
       });
-    }, true);
+    }, undefined, undefined, true);
 
     expect(result.feedPrice).toHaveProperty("currentMedianHistory");
     expect(result.feedPrice).toHaveProperty("priceHistory");
@@ -210,7 +210,7 @@ test.describe("Bot Providers", () => {
 
   test("Should be able to combine multiple account-related providers", async({ createWorkerBeeTest }) => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
-      const observer = bot.observe.onBlock()
+      const observer = bot.onBlock()
         .provideAccounts("gtg")
         .provideRcAccounts("gtg")
         .provideManabarData(2, "gtg"); // Upvote manabar
@@ -226,7 +226,7 @@ test.describe("Bot Providers", () => {
         },
         complete: () => resolve()
       });
-    }, true);
+    }, undefined, undefined, true);
 
     expect(result.accounts["gtg"]).toBeDefined();
     expect(result.accounts["gtg"].name).toBe("gtg");
@@ -239,7 +239,7 @@ test.describe("Bot Providers", () => {
 
   test("Should be able to combine block data with feed price data", async({ createWorkerBeeTest }) => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
-      const observer = bot.observe.onBlock()
+      const observer = bot.onBlock()
         .provideBlockData()
         .provideFeedPriceData();
 
@@ -254,7 +254,7 @@ test.describe("Bot Providers", () => {
         },
         complete: () => resolve()
       });
-    }, true);
+    }, undefined, undefined, true);
 
     expect(result.block.number).not.toBeNaN();
     expect(result.block).toHaveProperty("transactions");
@@ -265,7 +265,7 @@ test.describe("Bot Providers", () => {
 
   test("Should be able to combine all available providers", async({ createWorkerBeeTest }) => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
-      const observer = bot.observe.onBlock()
+      const observer = bot.onBlock()
         .provideWitnesses("gtg")
         .provideAccounts("gtg")
         .provideRcAccounts("gtg")
@@ -295,7 +295,7 @@ test.describe("Bot Providers", () => {
         },
         complete: () => resolve()
       });
-    }, true);
+    }, undefined, undefined, true);
 
     // Test witnesses provider
     expect(result.witnesses["gtg"]).toBeDefined();
@@ -326,7 +326,7 @@ test.describe("Bot Providers", () => {
 
   test("Should be able to combine multiple accounts for different providers", async({ createWorkerBeeTest }) => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
-      const observer = bot.observe.onBlock()
+      const observer = bot.onBlock()
         .provideWitnesses("gtg", "steemit")
         .provideAccounts("gtg", "steemit", "blocktrades")
         .provideRcAccounts("gtg", "blocktrades");
@@ -342,7 +342,7 @@ test.describe("Bot Providers", () => {
         },
         complete: () => resolve()
       });
-    }, true);
+    }, undefined, undefined, true);
 
     // Test witnesses for multiple accounts
     expect(result.witnesses["gtg"]).toBeDefined();
