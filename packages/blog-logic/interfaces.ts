@@ -9,7 +9,7 @@ interface IFilters {
   // To be decided
 }
 
-interface ICommentPostIdentity {
+interface ICommentIdentity {
   readonly author: IAuthorIdentity;
   readonly id: string;
 }
@@ -60,7 +60,7 @@ interface ICommonPostCommentFunctions {
 }
 
 
-interface IReply extends ICommentPostIdentity, ICommonPostCommentFunctions {
+interface IReply extends ICommentIdentity, ICommonPostCommentFunctions {
   readonly published_at: Date;
   readonly updated_at: Date;
   readonly url: string;
@@ -72,7 +72,7 @@ interface ISession {
 }
 
 
-interface IPostProperties extends ICommentPostIdentity {
+interface IPostProperties extends ICommentIdentity {
   readonly title: string;
   readonly summary: string;
   readonly tags: string[];
@@ -96,13 +96,13 @@ interface IPostCommentCreationRequirements {
 
 interface IActiveBloggingPlatform {
   post: (post_data: IPostCommentCreationRequirements) => void;
-  comment: (post_or_comment: ICommentPostIdentity, comment_data: IPostCommentCreationRequirements) => void;
-  vote: (post_or_comment: ICommentPostIdentity, voter: string, upvote: boolean, weight: number) => void;
-  reblog: (post_or_comment: ICommentPostIdentity) => void;
-  delete_post: (post_or_comment: ICommentPostIdentity) => void;
-  edit_post: (post_or_comment: ICommentPostIdentity, post_data: IPostCommentCreationRequirements) => void;
-  delete_comment: (post_or_comment: ICommentPostIdentity) => void;
-  edit_comment: (post_or_comment: ICommentPostIdentity, post_data: IPostCommentCreationRequirements) => void;
+  comment: (post_or_comment: ICommentIdentity, comment_data: IPostCommentCreationRequirements) => void;
+  vote: (post_or_comment: ICommentIdentity, voter: string, upvote: boolean, weight: number) => void;
+  reblog: (post_or_comment: ICommentIdentity) => void;
+  delete_post: (post_or_comment: ICommentIdentity) => void;
+  edit_post: (post_or_comment: ICommentIdentity, post_data: IPostCommentCreationRequirements) => void;
+  delete_comment: (post_or_comment: ICommentIdentity) => void;
+  edit_comment: (post_or_comment: ICommentIdentity, post_data: IPostCommentCreationRequirements) => void;
 }
 
 interface BloggingPlatform {
