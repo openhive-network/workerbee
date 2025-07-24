@@ -53,14 +53,14 @@ interface IBlogUser extends IAuthorIdentity {
 }
 
 interface ICommonPostCommentFunctions {
-  enumComments: (filter: IFilters, pagination: IPagination) => Iterable<IComment>;
+  enumReplies(filter: IFilters, pagination: IPagination): Iterable<IReply>;
   enumMentionedAccounts: () => Iterable<IAuthorIdentity>;
   enumVotes: (filter: IFilters, pagination: IPagination) => Iterable<IVote>;
   getContent: () => string;
 }
 
 
-interface IComment extends ICommentPostIdentity, ICommonPostCommentFunctions {
+interface IReply extends ICommentPostIdentity, ICommonPostCommentFunctions {
   readonly published_at: Date;
   readonly updated_at: Date;
   readonly url: string;
