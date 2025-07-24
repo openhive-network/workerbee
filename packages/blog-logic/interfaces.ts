@@ -78,9 +78,16 @@ interface IPost extends IPostProperties, ICommonPostCommentFunctions {
   getSlug: () => string;
 }
 
+interface IPostCommentCreationRequirements {
+  readonly body: string;
+  readonly title?: string;
+  readonly community_id?: string;
+  readonly tags: string[];
+}
+
 interface IActiveBloggingPlatform {
-  post: (post_data: IPost) => void;
-  comment: (post_or_comment: ICommentPostIdentity, comment_data: IComment) => void;
+  post: (post_data: IPostCommentCreationRequirements) => void;
+  comment: (post_or_comment: ICommentPostIdentity, comment_data: IPostCommentCreationRequirements) => void;
   vote: (post_or_comment: ICommentPostIdentity, voter: string, upvote: boolean, weight: number) => void;
   reblog: (post_or_comment: ICommentPostIdentity) => void;
 }
