@@ -1,6 +1,6 @@
 // WORK IN PROGRESS
 
-interface IStandardPagination {
+interface IPagination {
   page: number;
   page_size: number;
 }
@@ -53,9 +53,9 @@ interface IBlogUser extends IAuthorIdentity {
 }
 
 interface ICommonPostCommentFunctions {
-  enumComments: (filter: IFilters, pagination: IStandardPagination) => Iterable<IComment>;
+  enumComments: (filter: IFilters, pagination: IPagination) => Iterable<IComment>;
   enumMentionedAccounts: () => Iterable<IAuthorIdentity>;
-  enumVotes: (filter: IFilters, pagination: IStandardPagination) => Iterable<IVote>;
+  enumVotes: (filter: IFilters, pagination: IPagination) => Iterable<IVote>;
   getContent: () => string;
 }
 
@@ -106,8 +106,8 @@ interface IActiveBloggingPlatform {
 }
 
 interface BloggingPlatform {
-  enumPosts: (filter: IFilters, pagination: IStandardPagination) => Iterable<IPost>;
+  enumPosts: (filter: IFilters, pagination: IPagination) => Iterable<IPost>;
   configureAccountContext: (accont_name: string) => void;
-  enumCommunities: (filter: IFilters, pagination: IStandardPagination) => Iterable<ICommunity>
+  enumCommunities: (filter: IFilters, pagination: IPagination) => Iterable<ICommunity>
   authorize(provider: unknown);
 }
