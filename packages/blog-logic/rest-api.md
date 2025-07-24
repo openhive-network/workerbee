@@ -12,6 +12,7 @@ GET posts/{post-id}/comments/{comment-id}
 POST posts/{post-id}/comments
 PUT posts/{post-id}/comments/{comment-id}
 DELETE posts/{post-id}/comments/{comment-id}
+POST posts/{post-id}/vote
 
 # USER
 
