@@ -37,6 +37,7 @@ interface IFollowListEntry extends IAccountListEntry {
 };
 
 interface IApplicationMutableList<T> {
+  isSettled(): TActionState;
   /**
    * Returns the number of entries in the list. Not settled, means that some upcoming change is processing.
    */
@@ -89,16 +90,16 @@ class ChainDeferredActions {
   }
 
   private async deferredActionStateIndicator(tx: ITransaction, observer: Partial<Observer<TActionState>>, l2Acceptor?: () => Promise<boolean>): Promise<void> {
-    observer.next(TActionState.PENDING);
+    observer.next?.(TActionState.PENDING);
 
     let blockMargin = 3;
 
     return new Promise<void>((resolve, reject) => {
       const onL1Accept = () => {
-        observer.next(TActionState.PROCESSED);
+        observer.next?.(TActionState.PROCESSED);
 
         if( l2Acceptor === undefined) {
-          observer.next(TActionState.COMPLETED);
+          observer.next?.(TActionState.COMPLETED);
           resolve();
           return;
         } 
@@ -110,18 +111,18 @@ class ChainDeferredActions {
               .then((result) => {
                 if (result) {
                   listener.unsubscribe();
-                  observer.next(TActionState.COMPLETED);
+                  observer.next?.(TActionState.COMPLETED);
                   resolve();
                 } else {
                   if(--blockMargin == 0) {
                     listener.unsubscribe();
-                    observer.next(TActionState.TIMEOUT);
+                    observer.next?.(TActionState.TIMEOUT);
                     reject(new Error(`Block: ${blockData.block.number} L2 layer didn't complete action in expected time`));
                   }
                 }
               })
             .catch((err) => {
-              observer.error(err);
+              observer.error?.(err);
               reject(err);
             });
           },
@@ -136,7 +137,7 @@ class ChainDeferredActions {
       this.bot.broadcast(tx)
         .then(onL1Accept)
         .catch((err) => {
-          observer.next(TActionState.REJECTED);
+          observer.next?.(TActionState.REJECTED);
           reject(err);
         });
       });
@@ -173,8 +174,8 @@ const signatureProvider: IOnlineSignatureProvider = await BeekeeperProvider.for(
 const optimisticUI = new ChainDeferredActions(bot);
 
 const follow = await optimisticUI.followBlog(signatureProvider, workingAccount, blogAccount, {
-  next: (state: TActionState) => {
-    log(`Follow action state: ${TActionState[state]}`);
+  next: (data: IFollowListState) => {
+    log(`Follow action state: ${TActionState[data.isSettled()]}`);
   },
   error: (err: Error) => {
     log(`Follow action error: ${err.message}`);
