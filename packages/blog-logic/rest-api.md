@@ -4,7 +4,14 @@
 
 GET posts?(filters, pagination)
 GET posts/{post-id}
-GET posts/{post-od}/comments?(filters, pagination)
+POST posts
+PUT posts/{post-id}
+DELETE posts/{post-id}
+GET posts/{post-id}/comments?(filters, pagination)
+GET posts/{post-id}/comments/{comment-id}
+POST posts/{post-id}/comments
+PUT posts/{post-id}/comments/{comment-id}
+DELETE posts/{post-id}/comments/{comment-id}
 
 # USER
 
