@@ -1,5 +1,7 @@
 // WORK IN PROGRESS
 
+import type { TAccountName, IOnlineSignatureProvider } from "@hiveio/wax";
+
 interface IPagination {
   page: number;
   page_size: number;
@@ -103,7 +105,20 @@ interface IPostCommentCreationRequirements {
   readonly tags: string[];
 }
 
+interface ILoginSession {
+  readonly authenticatedAccount: TAccountName;
+  readonly sessionId: string;
+
+  logout(): Promise<void>
+}
+
+interface IAuthenticationProvider {
+  login(account: TAccountName, signatureProvider: IOnlineSignatureProvider, directLogin: boolean, sessionTimeout: number): Promise<ILoginSession>;
+}
+
 interface IActiveBloggingPlatform {
+  readonly session: ILoginSession;
+
   post: (post_data: IPostCommentCreationRequirements) => void;
   comment: (post_or_comment: ICommentIdentity, comment_data: IPostCommentCreationRequirements) => void;
   vote: (post_or_comment: ICommentIdentity, voter: string, upvote: boolean, weight: number) => void;
@@ -114,9 +129,10 @@ interface IActiveBloggingPlatform {
   edit_comment: (post_or_comment: ICommentIdentity, post_data: IPostCommentCreationRequirements) => void;
 }
 
-interface BloggingPlatform {
+interface IBloggingPlatform {
   enumPosts: (filter: IFilters, pagination: IPagination) => Iterable<IPost>;
   configureAccountContext: (accont_name: string) => void;
   enumCommunities: (filter: IFilters, pagination: IPagination) => Iterable<ICommunity>
-  authorize(provider: unknown);
+
+  authorize(provider: IAuthenticationProvider): Promise<IActiveBloggingPlatform>;
 }
