@@ -65,7 +65,6 @@ interface ISession {
 
 interface IPostProperties extends ICommentPostIdentity {
   readonly title: string;
-  getSlug: () => string;
   readonly summary: string;
   readonly tags: string[];
   readonly community: ICommunityIdentity;
@@ -76,13 +75,14 @@ interface IPostProperties extends ICommentPostIdentity {
 
 interface IPost extends IPostProperties, ICommonPostCommentFunctions {
   getTitleImage: () => string;
+  getSlug: () => string;
 }
 
 interface IActiveBloggingPlatform {
   post: (post_data: IPost) => void;
-  comment: (post: string, comment_data: IComment) => void;
-  vote: (post: string) => void;
-  reblog: (post: string) => void;
+  comment: (post_or_comment: ICommentPostIdentity, comment_data: IComment) => void;
+  vote: (post_or_comment: ICommentPostIdentity, voter: string, upvote: boolean, weight: number) => void;
+  reblog: (post_or_comment: ICommentPostIdentity) => void;
 }
 
 interface BloggingPlatform {
