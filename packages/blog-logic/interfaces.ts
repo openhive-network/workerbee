@@ -1,5 +1,14 @@
 // WORK IN PROGRESS
 
+interface IStandardPagination {
+  page: number;
+  page_size: number;
+}
+
+interface IFilters {
+  // To be decided
+}
+
 interface ICommentPostIdentity {
   readonly author: IAuthorIdentity;
   readonly id: string;
@@ -44,9 +53,9 @@ interface IBlogUser extends IAuthorIdentity {
 }
 
 interface ICommonPostCommentFunctions {
-  enumComments: (filter: unknown, page: number) => Iterable<IComment>;
+  enumComments: (filter: IFilters, pagination: IStandardPagination) => Iterable<IComment>;
   enumMentionedAccounts: () => Iterable<IAuthorIdentity>;
-  enumVotes: (filter: unknown, page: number) => Iterable<IVote>;
+  enumVotes: (filter: IFilters, pagination: IStandardPagination) => Iterable<IVote>;
   getContent: () => string;
 }
 
@@ -93,7 +102,7 @@ interface IActiveBloggingPlatform {
 }
 
 interface BloggingPlatform {
-  enumPosts: (filter: unknown, page: number) => Iterable<IPost>;
+  enumPosts: (filter: IFilters, pagination: IStandardPagination) => Iterable<IPost>;
   configureAccountContext: (accont_name: string) => void;
   authorize(provider: unknown);
 }
