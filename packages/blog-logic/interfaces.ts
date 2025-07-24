@@ -52,7 +52,10 @@ interface IBlogUser extends IAuthorIdentity {
   getSlug: () => string;
 }
 
-interface ICommonPostCommentFunctions {
+/**
+ * Common representation of a post and reply objects 
+ */
+interface IComment extends ICommentIdentity {
   enumReplies(filter: IFilters, pagination: IPagination): Iterable<IReply>;
   enumMentionedAccounts: () => Iterable<IAuthorIdentity>;
   enumVotes: (filter: IFilters, pagination: IPagination) => Iterable<IVote>;
@@ -60,7 +63,7 @@ interface ICommonPostCommentFunctions {
 }
 
 
-interface IReply extends ICommentIdentity, ICommonPostCommentFunctions {
+interface IReply extends IComment {
   readonly published_at: Date;
   readonly updated_at: Date;
   readonly url: string;
@@ -82,7 +85,7 @@ interface IPostProperties extends ICommentIdentity {
   readonly url: string;
 }
 
-interface IPost extends IPostProperties, ICommonPostCommentFunctions {
+interface IPost extends IPostProperties, IComment {
   getTitleImage: () => string;
   getSlug: () => string;
 }
