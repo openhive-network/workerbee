@@ -9,6 +9,9 @@ interface IFilters {
   // To be decided
 }
 
+/**
+ * Represents a set of data uniquely identifying a post or reply object.
+ */
 interface ICommentIdentity {
   readonly author: IAuthorIdentity;
   readonly id: string;
@@ -56,38 +59,41 @@ interface IBlogUser extends IAuthorIdentity {
  * Common representation of a post and reply objects 
  */
 interface IComment extends ICommentIdentity {
+  readonly published_at: Date;
+  readonly updated_at: Date;
+
   enumReplies(filter: IFilters, pagination: IPagination): Iterable<IReply>;
   enumMentionedAccounts: () => Iterable<IAuthorIdentity>;
   enumVotes: (filter: IFilters, pagination: IPagination) => Iterable<IVote>;
   getContent: () => string;
-}
 
+  /**
+   * Allows to generate a slug for the comment, which can be used in URLs or as a unique identifier.
+   */
+  generateSlug(): string;
+};
 
+/**
+ * Represents a reply to a post or another reply object.
+ */
 interface IReply extends IComment {
-  readonly published_at: Date;
-  readonly updated_at: Date;
-  readonly url: string;
-  getSlug: () => string;
+  readonly parent: ICommentIdentity;
 }
 
 interface ISession {
 
 }
 
-
-interface IPostProperties extends ICommentIdentity {
+/**
+ * Represents a post (article) published on the platform.
+ */
+interface IPost extends IComment {
   readonly title: string;
   readonly summary: string;
   readonly tags: string[];
   readonly community: ICommunityIdentity;
-  readonly published_at: Date;
-  readonly updated_at: Date;
-  readonly url: string;
-}
 
-interface IPost extends IPostProperties, IComment {
   getTitleImage: () => string;
-  getSlug: () => string;
 }
 
 interface IPostCommentCreationRequirements {
