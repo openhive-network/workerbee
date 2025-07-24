@@ -99,10 +99,15 @@ interface IActiveBloggingPlatform {
   comment: (post_or_comment: ICommentPostIdentity, comment_data: IPostCommentCreationRequirements) => void;
   vote: (post_or_comment: ICommentPostIdentity, voter: string, upvote: boolean, weight: number) => void;
   reblog: (post_or_comment: ICommentPostIdentity) => void;
+  delete_post: (post_or_comment: ICommentPostIdentity) => void;
+  edit_post: (post_or_comment: ICommentPostIdentity, post_data: IPostCommentCreationRequirements) => void;
+  delete_comment: (post_or_comment: ICommentPostIdentity) => void;
+  edit_comment: (post_or_comment: ICommentPostIdentity, post_data: IPostCommentCreationRequirements) => void;
 }
 
 interface BloggingPlatform {
   enumPosts: (filter: IFilters, pagination: IStandardPagination) => Iterable<IPost>;
   configureAccountContext: (accont_name: string) => void;
+  enumCommunities: (filter: IFilters, pagination: IStandardPagination) => Iterable<ICommunity>
   authorize(provider: unknown);
 }
