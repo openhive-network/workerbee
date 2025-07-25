@@ -4,7 +4,7 @@ import type { TAccountName, IOnlineSignatureProvider } from "@hiveio/wax";
 
 interface IPagination {
   page: number;
-  page_size: number;
+  pageSize: number;
 }
 
 interface IFilters {
@@ -32,11 +32,11 @@ interface ICommunity extends ICommunityIdentity {
   readonly title: string;
   readonly about: string;
   readonly admins: string[];
-  readonly avatar_url: string;
-  readonly creation_date: Date;
-  readonly subscribers_count: number;
-  readonly authors_count: number;
-  readonly pending_count: number;
+  readonly avatarUrl: string;
+  readonly creationDate: Date;
+  readonly subscribersCount: number;
+  readonly authorsCount: number;
+  readonly pendingCount: number;
   getSlug(): string;
 }
 
@@ -45,11 +45,11 @@ interface IAuthorIdentity {
 }
 
 interface IBlogUser extends IAuthorIdentity {
-  readonly creation_date: Date;
-  readonly comment_count: number;
-  readonly post_count: number;
-  readonly registered_date: Date;
-  readonly last_activity: Date;
+  readonly creationDate: Date;
+  readonly commentCount: number;
+  readonly postCount: number;
+  readonly registeredDate: Date;
+  readonly lastActivity: Date;
   readonly description: string;
   readonly avatar: string;
   readonly url: string;
@@ -61,8 +61,8 @@ interface IBlogUser extends IAuthorIdentity {
  * Common representation of a post and reply objects 
  */
 interface IComment extends ICommentIdentity {
-  readonly published_at: Date;
-  readonly updated_at: Date;
+  readonly publishedAt: Date;
+  readonly updatedAt: Date;
 
   enumReplies(filter: IFilters, pagination: IPagination): Iterable<IReply>;
   enumMentionedAccounts(): Iterable<IAuthorIdentity>;
@@ -113,18 +113,18 @@ interface IActiveBloggingPlatform {
   readonly session: ILoginSession;
 
   post(body: string, tags: string[], title?: string, communityId?: string): void;
-  comment(post_or_comment: ICommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
-  vote(post_or_comment: ICommentIdentity, voter: string, upvote: boolean, weight: number): void;
-  reblog(post_or_comment: ICommentIdentity): void;
-  delete_post(post_or_comment: ICommentIdentity): void;
-  edit_post(post_or_comment: ICommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
-  delete_comment(post_or_comment: ICommentIdentity): void;
-  edit_comment(post_or_comment: ICommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
+  comment(postOrComment: ICommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
+  vote(postOrComment: ICommentIdentity, voter: string, upvote: boolean, weight: number): void;
+  reblog(postOrComment: ICommentIdentity): void;
+  deletePost(postOrComment: ICommentIdentity): void;
+  editPost(postOrComment: ICommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
+  deleteComment(postOrComment: ICommentIdentity): void;
+  editComment(postOrComment: ICommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
 }
 
 interface IBloggingPlatform {
   enumPosts(filter: IFilters, pagination: IPagination): Iterable<IPost>;
-  configureAccountContext(accont_name: string): void;
+  configureAccountContext(accontName: string): void;
   enumCommunities(filter: IFilters, pagination: IPagination): Iterable<ICommunity>
 
   authorize(provider: IAuthenticationProvider): Promise<IActiveBloggingPlatform>;
