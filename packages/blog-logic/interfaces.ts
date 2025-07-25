@@ -98,13 +98,6 @@ interface IPost extends IComment {
   getTitleImage(): string;
 }
 
-interface IPostCommentCreationRequirements {
-  readonly body: string;
-  readonly title?: string;
-  readonly community_id?: string;
-  readonly tags: string[];
-}
-
 interface ILoginSession {
   readonly authenticatedAccount: TAccountName;
   readonly sessionId: string;
@@ -119,14 +112,14 @@ interface IAuthenticationProvider {
 interface IActiveBloggingPlatform {
   readonly session: ILoginSession;
 
-  post(post_data: IPostCommentCreationRequirements): void;
-  comment(post_or_comment: ICommentIdentity, comment_data: IPostCommentCreationRequirements): void;
+  post(body: string, tags: string[], title?: string, communityId?: string): void;
+  comment(post_or_comment: ICommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
   vote(post_or_comment: ICommentIdentity, voter: string, upvote: boolean, weight: number): void;
   reblog(post_or_comment: ICommentIdentity): void;
   delete_post(post_or_comment: ICommentIdentity): void;
-  edit_post(post_or_comment: ICommentIdentity, post_data: IPostCommentCreationRequirements): void;
+  edit_post(post_or_comment: ICommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
   delete_comment(post_or_comment: ICommentIdentity): void;
-  edit_comment(post_or_comment: ICommentIdentity, post_data: IPostCommentCreationRequirements): void;
+  edit_comment(post_or_comment: ICommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
 }
 
 interface IBloggingPlatform {
