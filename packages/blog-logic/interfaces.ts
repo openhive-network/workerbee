@@ -10,7 +10,7 @@ export interface IFilters {
   // To be decided
 }
 
-export interface ICommunityAccountIdentity {
+export interface IAccountCommunityIdentity {
   readonly name: string;
 }
 
@@ -18,7 +18,7 @@ export interface ICommunityAccountIdentity {
  * Represents a set of data uniquely identifying a post or reply object.
  */
 export interface IPostCommentIdentity {
-  readonly author: ICommunityAccountIdentity;
+  readonly author: IAccountCommunityIdentity;
   readonly id: string;
 }
 
@@ -28,7 +28,7 @@ export interface IVote {
   readonly voter: string;
 }
 
-export interface ICommunity extends ICommunityAccountIdentity {
+export interface ICommunity extends IAccountCommunityIdentity {
   readonly title: string;
   readonly about: string;
   readonly admins: string[];
@@ -39,7 +39,7 @@ export interface ICommunity extends ICommunityAccountIdentity {
   readonly pendingCount: number;
   getSlug(): string;
 }
-export interface IAccount extends ICommunityAccountIdentity {
+export interface IAccount extends IAccountCommunityIdentity {
   readonly creationDate: Date;
   readonly commentCount: number;
   readonly lastActivity: Date;
@@ -58,7 +58,7 @@ export interface IAccount extends ICommunityAccountIdentity {
 export interface IComment extends IPostCommentIdentity {
   readonly publishedAt: Date;
   readonly updatedAt: Date;
-  readonly author: ICommunityAccountIdentity;
+  readonly author: IAccountCommunityIdentity;
 
   enumReplies(filter: IFilters, pagination: IPagination): Iterable<IReply>;
   enumMentionedAccounts(): Iterable<IAccount>;
@@ -89,7 +89,7 @@ export interface IPost extends IComment {
   readonly title: string;
   readonly summary: string;
   readonly tags: string[];
-  readonly community?: ICommunityAccountIdentity;
+  readonly community?: IAccountCommunityIdentity;
 
   getTitleImage(): string;
 }
@@ -116,7 +116,7 @@ export interface IActiveBloggingPlatform {
   editPost(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
   deleteComment(postOrComment: IPostCommentIdentity): void;
   editComment(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
-  followBlog()
+  followBlog(authorOrCommunity: IAccountCommunityIdentity)
 }
 
 export interface IBloggingPlatform {
