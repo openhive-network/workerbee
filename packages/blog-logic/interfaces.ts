@@ -1,34 +1,34 @@
 // WORK IN PROGRESS
-
 import type { TAccountName, IOnlineSignatureProvider } from "@hiveio/wax";
 
-interface IPagination {
+export interface IPagination {
   page: number;
   pageSize: number;
 }
 
-interface IFilters {
+export interface IFilters {
   // To be decided
+}
+
+export interface ICommunityAccountIdentity {
+  readonly name: string;
 }
 
 /**
  * Represents a set of data uniquely identifying a post or reply object.
  */
-interface ICommentIdentity {
-  readonly author: IAuthorIdentity;
+export interface IPostCommentIdentity {
+  readonly author: ICommunityAccountIdentity;
   readonly id: string;
 }
 
-interface IVote {
+export interface IVote {
   readonly weight: number;
   readonly upvote: boolean;
   readonly voter: string;
 }
 
-interface ICommunityIdentity {
-  readonly name: string;
-}
-interface ICommunity extends ICommunityIdentity {
+export interface ICommunity extends ICommunityAccountIdentity {
   readonly title: string;
   readonly about: string;
   readonly admins: string[];
@@ -39,17 +39,12 @@ interface ICommunity extends ICommunityIdentity {
   readonly pendingCount: number;
   getSlug(): string;
 }
-
-interface IAuthorIdentity {
-  readonly id: string;
-}
-
-interface IBlogUser extends IAuthorIdentity {
+export interface IAccount extends ICommunityAccountIdentity {
   readonly creationDate: Date;
   readonly commentCount: number;
+  readonly lastActivity: Date;
   readonly postCount: number;
   readonly registeredDate: Date;
-  readonly lastActivity: Date;
   readonly description: string;
   readonly avatar: string;
   readonly url: string;
@@ -58,14 +53,15 @@ interface IBlogUser extends IAuthorIdentity {
 }
 
 /**
- * Common representation of a post and reply objects 
+ * Common representation of a post and reply objects
  */
-interface IComment extends ICommentIdentity {
+export interface IComment extends IPostCommentIdentity {
   readonly publishedAt: Date;
   readonly updatedAt: Date;
+  readonly author: ICommunityAccountIdentity;
 
   enumReplies(filter: IFilters, pagination: IPagination): Iterable<IReply>;
-  enumMentionedAccounts(): Iterable<IAuthorIdentity>;
+  enumMentionedAccounts(): Iterable<IAccount>;
   enumVotes(filter: IFilters, pagination: IPagination): Iterable<IVote>;
   getContent(): string;
 
@@ -78,51 +74,52 @@ interface IComment extends ICommentIdentity {
 /**
  * Represents a reply to a post or another reply object.
  */
-interface IReply extends IComment {
-  readonly parent: ICommentIdentity;
+export interface IReply extends IComment {
+  readonly parent: IPostCommentIdentity;
 }
 
-interface ISession {
+export interface ISession {
 
 }
 
 /**
  * Represents a post (article) published on the platform.
  */
-interface IPost extends IComment {
+export interface IPost extends IComment {
   readonly title: string;
   readonly summary: string;
   readonly tags: string[];
-  readonly community: ICommunityIdentity;
+  readonly community?: ICommunityAccountIdentity;
 
   getTitleImage(): string;
 }
 
-interface ILoginSession {
+export interface ILoginSession {
   readonly authenticatedAccount: TAccountName;
   readonly sessionId: string;
 
   logout(): Promise<void>
 }
 
-interface IAuthenticationProvider {
+export interface IAuthenticationProvider {
   login(account: TAccountName, signatureProvider: IOnlineSignatureProvider, directLogin: boolean, sessionTimeout: number): Promise<ILoginSession>;
 }
 
-interface IActiveBloggingPlatform {
+export interface IActiveBloggingPlatform {
   readonly session: ILoginSession;
 
   post(body: string, tags: string[], title?: string, communityId?: string): void;
-  comment(postOrComment: ICommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
-  vote(postOrComment: ICommentIdentity, voter: string, upvote: boolean, weight: number): void;
-  reblog(postOrComment: ICommentIdentity): void;
-  deletePost(postOrComment: ICommentIdentity): void;
-  editPost(postOrComment: ICommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
-  deleteComment(postOrComment: ICommentIdentity): void;
-  editComment(postOrComment: ICommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
+  comment(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
+  vote(postOrComment: IPostCommentIdentity, voter: string, upvote: boolean, weight: number): void;
+  reblog(postOrComment: IPostCommentIdentity): void;
+  deletePost(postOrComment: IPostCommentIdentity): void;
+  editPost(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
+  deleteComment(postOrComment: IPostCommentIdentity): void;
+  editComment(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
+  followBlog()
 }
 
-interface IBloggingPlatform {
+export interface IBloggingPlatform {
   enumPosts(filter: IFilters, pagination: IPagination): Iterable<IPost>;
   configureAccountContext(accontName: string): void;
   enumCommunities(filter: IFilters, pagination: IPagination): Iterable<ICommunity>
