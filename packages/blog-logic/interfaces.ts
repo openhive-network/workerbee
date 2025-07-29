@@ -6,8 +6,21 @@ export interface IPagination {
   pageSize: number;
 }
 
-export interface IFilters {
+export interface ICommonFilters {
+  readonly startTime?: Date;
+  readonly endTime?: Date;
+}
+
+export interface IVotesFilters extends ICommonFilters {
   // To be decided
+}
+
+export interface IPostCommentsFilters extends ICommonFilters {
+  // To be decided
+}
+
+export interface ICommunityFilters extends ICommonFilters {
+  readonly byName?: string;
 }
 
 export interface IAccountIdentity {
