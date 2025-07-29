@@ -108,15 +108,15 @@ export interface IAuthenticationProvider {
 export interface IActiveBloggingPlatform {
   readonly session: ILoginSession;
 
-  post(body: string, tags: string[], title?: string, communityId?: string): void;
-  comment(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
-  vote(postOrComment: IPostCommentIdentity, voter: string, upvote: boolean, weight: number): void;
-  reblog(postOrComment: IPostCommentIdentity): void;
-  deletePost(postOrComment: IPostCommentIdentity): void;
-  editPost(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
-  deleteComment(postOrComment: IPostCommentIdentity): void;
-  editComment(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): void;
-  followBlog(authorOrCommunity: IAccountCommunityIdentity)
+  post(body: string, tags: string[], title?: string, communityId?: string): Promise<boolean>;
+  comment(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): Promise<boolean>;
+  vote(postOrComment: IPostCommentIdentity, voter: string, upvote: boolean, weight: number): Promise<boolean>;
+  reblog(postOrComment: IPostCommentIdentity): Promise<boolean>;
+  deletePost(postOrComment: IPostCommentIdentity): Promise<boolean>;
+  editPost(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): Promise<boolean>;
+  deleteComment(postOrComment: IPostCommentIdentity): Promise<boolean>;
+  editComment(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): Promise<boolean>;
+  followBlog(authorOrCommunity: IAccountCommunityIdentity): Promise<boolean>;
 }
 
 export interface IBloggingPlatform {
