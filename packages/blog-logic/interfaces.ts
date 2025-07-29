@@ -10,7 +10,11 @@ export interface IFilters {
   // To be decided
 }
 
-export interface IAccountCommunityIdentity {
+export interface IAccountIdentity {
+  readonly name: string;
+}
+
+export interface ICommunityIdentity {
   readonly name: string;
 }
 
@@ -18,7 +22,7 @@ export interface IAccountCommunityIdentity {
  * Represents a set of data uniquely identifying a post or reply object.
  */
 export interface IPostCommentIdentity {
-  readonly author: IAccountCommunityIdentity;
+  readonly author: IAccountIdentity;
   readonly id: string;
 }
 
@@ -28,7 +32,7 @@ export interface IVote {
   readonly voter: string;
 }
 
-export interface ICommunity extends IAccountCommunityIdentity {
+export interface ICommunity extends ICommunityIdentity {
   readonly title: string;
   readonly about: string;
   readonly admins: string[];
@@ -39,7 +43,7 @@ export interface ICommunity extends IAccountCommunityIdentity {
   readonly pendingCount: number;
   getSlug(): string;
 }
-export interface IAccount extends IAccountCommunityIdentity {
+export interface IAccount extends IAccountIdentity {
   readonly creationDate: Date;
   readonly commentCount: number;
   readonly lastActivity: Date;
@@ -58,12 +62,14 @@ export interface IAccount extends IAccountCommunityIdentity {
 export interface IComment extends IPostCommentIdentity {
   readonly publishedAt: Date;
   readonly updatedAt: Date;
-  readonly author: IAccountCommunityIdentity;
+  readonly author: IAccountIdentity;
 
   enumReplies(filter: IFilters, pagination: IPagination): Iterable<IReply>;
   enumMentionedAccounts(): Iterable<IAccount>;
   enumVotes(filter: IFilters, pagination: IPagination): Iterable<IVote>;
   getContent(): string;
+  wasVotedByUser(userName: IAccountIdentity): boolean;
+  getCommensCount(): number;
 
   /**
    * Allows to generate a slug for the comment, which can be used in URLs or as a unique identifier.
@@ -89,7 +95,7 @@ export interface IPost extends IComment {
   readonly title: string;
   readonly summary: string;
   readonly tags: string[];
-  readonly community?: IAccountCommunityIdentity;
+  readonly community?: ICommunityIdentity;
 
   getTitleImage(): string;
 }
@@ -116,7 +122,7 @@ export interface IActiveBloggingPlatform {
   editPost(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): Promise<boolean>;
   deleteComment(postOrComment: IPostCommentIdentity): Promise<boolean>;
   editComment(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): Promise<boolean>;
-  followBlog(authorOrCommunity: IAccountCommunityIdentity): Promise<boolean>;
+  followBlog(authorOrCommunity: IAccountIdentity | ICommunityIdentity): Promise<boolean>;
 }
 
 export interface IBloggingPlatform {
