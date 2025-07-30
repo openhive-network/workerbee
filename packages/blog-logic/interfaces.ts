@@ -12,15 +12,20 @@ export interface ICommonFilters {
 }
 
 export interface IVotesFilters extends ICommonFilters {
-  // To be decided
+  readonly isUpvote?: boolean;
+  readonly voterName?: string;
+  readonly sortBy?: "date" | "weight" | "voter";
 }
 
 export interface IPostCommentsFilters extends ICommonFilters {
-  // To be decided
+  readonly sortBy?: "date" | "votes" | "trending" | "permlink";
+  readonly positiveVotes?: boolean;
+  readonly tags?: string[];
 }
 
 export interface ICommunityFilters extends ICommonFilters {
   readonly byName?: string;
+  readonly tags?: string[];
 }
 
 export interface IAccountIdentity {
@@ -77,9 +82,9 @@ export interface IComment extends IPostCommentIdentity {
   readonly updatedAt: Date;
   readonly author: IAccountIdentity;
 
-  enumReplies(filter: IFilters, pagination: IPagination): Iterable<IReply>;
+  enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IReply>;
   enumMentionedAccounts(): Iterable<IAccount>;
-  enumVotes(filter: IFilters, pagination: IPagination): Iterable<IVote>;
+  enumVotes(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IVote>;
   getContent(): string;
   wasVotedByUser(userName: IAccountIdentity): boolean;
   getCommensCount(): number;
@@ -139,9 +144,9 @@ export interface IActiveBloggingPlatform {
 }
 
 export interface IBloggingPlatform {
-  enumPosts(filter: IFilters, pagination: IPagination): Iterable<IPost>;
+  enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IPost>;
   configureAccountContext(accontName: string): void;
-  enumCommunities(filter: IFilters, pagination: IPagination): Iterable<ICommunity>
+  enumCommunities(filter: ICommunityFilters, pagination: IPagination): Iterable<ICommunity>
 
   authorize(provider: IAuthenticationProvider): Promise<IActiveBloggingPlatform>;
 }
