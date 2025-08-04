@@ -139,9 +139,9 @@ export interface IActiveBloggingPlatform {
   vote(postOrComment: IPostCommentIdentity, upvote: boolean, weight: number, observer?: Partial<Observer<IVote>>): Promise<boolean>;
   reblog(postOrComment: IPostCommentIdentity): Promise<boolean>;
   deletePost(postOrComment: IPostCommentIdentity): Promise<boolean>;
-  editPost(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): Promise<boolean>;
+  editPost(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, observer?: Partial<Observer<IPost>>): Promise<boolean>;
   deleteComment(postOrComment: IPostCommentIdentity): Promise<boolean>;
-  editComment(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): Promise<boolean>;
+  editComment(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, observer?: Partial<Observer<IComment>>): Promise<boolean>;
   followBlog(authorOrCommunity: IAccountIdentity | ICommunityIdentity): Promise<boolean>;
 }
 
