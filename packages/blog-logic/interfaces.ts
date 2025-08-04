@@ -1,5 +1,6 @@
 // WORK IN PROGRESS
 import type { TAccountName, IOnlineSignatureProvider } from "@hiveio/wax";
+import { type Observer } from "../../src/types/subscribable";
 
 export interface IPagination {
   page: number;
@@ -131,10 +132,11 @@ export interface IAuthenticationProvider {
 
 export interface IActiveBloggingPlatform {
   readonly session: ILoginSession;
+  // Add callbacks
 
-  post(body: string, tags: string[], title?: string, communityId?: string): Promise<boolean>;
-  comment(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): Promise<boolean>;
-  vote(postOrComment: IPostCommentIdentity, voter: string, upvote: boolean, weight: number): Promise<boolean>;
+  post(body: string, tags: string[], title?: string, observer?: Partial<Observer<IPost>>): Promise<boolean>;
+  comment(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, observer?: Partial<Observer<IComment>>): Promise<boolean>;
+  vote(postOrComment: IPostCommentIdentity, upvote: boolean, weight: number, observer?: Partial<Observer<IVote>>): Promise<boolean>;
   reblog(postOrComment: IPostCommentIdentity): Promise<boolean>;
   deletePost(postOrComment: IPostCommentIdentity): Promise<boolean>;
   editPost(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, communityId?: string): Promise<boolean>;
@@ -145,8 +147,11 @@ export interface IActiveBloggingPlatform {
 
 export interface IBloggingPlatform {
   enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IPost>;
-  configureAccountContext(accontName: string): void;
+  configureViewContext(accontName: string, communityName?: string): void;
   enumCommunities(filter: ICommunityFilters, pagination: IPagination): Iterable<ICommunity>
 
   authorize(provider: IAuthenticationProvider): Promise<IActiveBloggingPlatform>;
 }
+
+// UI integration with mock data
+
