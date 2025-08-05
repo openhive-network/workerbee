@@ -146,8 +146,10 @@ export interface IActiveBloggingPlatform {
 }
 
 export interface IBloggingPlatform {
+  viewerContext?: IAccountIdentity;
+  communityContext?: ICommunityIdentity;
   enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IPost>;
-  configureViewContext(accontName: string, communityName?: string): void;
+  configureViewContext(accontName: IAccountIdentity, communityName?: ICommunityIdentity): void;
   enumCommunities(filter: ICommunityFilters, pagination: IPagination): Iterable<ICommunity>
 
   authorize(provider: IAuthenticationProvider): Promise<IActiveBloggingPlatform>;
