@@ -78,7 +78,9 @@ const envTestFor = <GlobalType extends IWorkerBeeGlobals>(
     }, { args, globalFunction: globalFunction.name, webFn: fn.toString(), isMockEnv: isMockEnvironment });
 
     if(typeof nodeData === "object") // Remove prototype data from the node result to match webData
-      nodeData = JSON.parse(JSON.stringify(nodeData));
+      nodeData = JSON.parse(JSON.stringify(nodeData, (_key, value) =>
+        typeof value === "bigint" ? value.toString() : value
+      ));
 
     if(checkEqual)
       expect(webData as any).toStrictEqual(nodeData);

@@ -259,7 +259,7 @@ test.describe("WorkerBee Bot events test", () => {
 
             for(const account in data.commentsMetadata)
               for(const permlink in data.commentsMetadata[account]) {
-                rshares = data.commentsMetadata[account][permlink].netRshares.toNumber();
+                rshares = Number(data.commentsMetadata[account][permlink].netRshares);
                 console.info(`Retrieved comment payout of @${account}: ${rshares} rshares for ${permlink}`);
               }
 

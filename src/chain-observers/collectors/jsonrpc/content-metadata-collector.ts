@@ -1,5 +1,4 @@
 import { TAccountName, dateFromString } from "@hiveio/wax";
-import Long from "long";
 import { WorkerBeeError } from "../../../errors";
 import { BucketAggregateQueue } from "../../../types/queue";
 import { nullDate } from "../../../utils/time";
@@ -63,9 +62,9 @@ export class ContentMetadataCollector extends CollectorBase<ContentMetadataClass
             allowsCurationRewards: cashoutInfo.allow_curation_rewards,
             allowsReplies: cashoutInfo.allow_replies,
             allowsVotes: cashoutInfo.allow_votes,
-            authorRewards: Long.fromValue(cashoutInfo.author_rewards),
+            authorRewards: BigInt(cashoutInfo.author_rewards),
             curatorPayoutValue: cashoutInfo.curator_payout_value,
-            netRshares: Long.fromValue(cashoutInfo.net_rshares),
+            netRshares: BigInt(cashoutInfo.net_rshares),
             netVotes: cashoutInfo.net_votes,
             payoutTime: dateFromString(cashoutInfo.cashout_time),
             isPaid: false,
@@ -82,9 +81,9 @@ export class ContentMetadataCollector extends CollectorBase<ContentMetadataClass
             allowsCurationRewards: false,
             allowsReplies: true,
             allowsVotes: true,
-            authorRewards: Long.fromValue(0),
+            authorRewards: BigInt(0),
             curatorPayoutValue: nullPayoutAsset,
-            netRshares: Long.fromValue(0),
+            netRshares: BigInt(0),
             netVotes: 0,
             payoutTime: nullDate,
             isPaid: true,
