@@ -1,5 +1,4 @@
 import type { asset, comment, TAccountName } from "@hiveio/wax";
-import Long from "long";
 import { CollectorClassifierBase } from "./collector-classifier-base";
 
 export interface IHiveContentMetadata {
@@ -50,7 +49,7 @@ export interface IHiveContentMetadata {
    * relative to other content paying out at the same time.
    * @example 150255792948762
    */
-  netRshares: Long;
+  netRshares: bigint;
 
   /**
    * The total number of individual upvotes this content has received.
@@ -114,7 +113,7 @@ export interface IHiveContentMetadata {
    * This will be 0 if the post hasn't paid out yet.
    * @example 0
    */
-  authorRewards: Long;
+  authorRewards: bigint;
 }
 
 export type TContentMetadataAuthorData = Record<string, IHiveContentMetadata>;

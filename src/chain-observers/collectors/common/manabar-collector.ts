@@ -134,10 +134,10 @@ export class ManabarCollector extends CollectorBase<ManabarClassifier> {
 
         let max = accounts.accounts[account].upvoteManabar.max;
 
-        if(max.divide(ONE_HUNDRED_PERCENT).greaterThan(ONE_HUNDRED_PERCENT))
-          max = max.divide(ONE_HUNDRED_PERCENT).multiply(dgpo.downvotePoolPercent);
+        if((max / BigInt(ONE_HUNDRED_PERCENT)) > BigInt(ONE_HUNDRED_PERCENT))
+          max = (max / BigInt(ONE_HUNDRED_PERCENT)) * BigInt(dgpo.downvotePoolPercent);
         else
-          max = max.multiply(dgpo.downvotePoolPercent).divide(ONE_HUNDRED_PERCENT);
+          max = max * BigInt(dgpo.downvotePoolPercent) / BigInt(ONE_HUNDRED_PERCENT);
 
         const calculatedManabarData = this.worker.chain!.calculateCurrentManabarValue(
           time,

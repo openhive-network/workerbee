@@ -1,4 +1,3 @@
-import Long from "long";
 import { AccountClassifier } from "../../classifiers";
 import { IAccount } from "../../classifiers/account-classifier";
 import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
@@ -51,12 +50,12 @@ export class AccountCollector extends CollectorBase<AccountClassifier> {
         accounts[account.name] = {
           name: account.name,
           upvoteManabar: {
-            currentMana: Long.fromValue(account.voting_manabar.current_mana),
-            max: Long.fromValue(account.post_voting_power.amount),
+            currentMana: BigInt(account.voting_manabar.current_mana),
+            max: BigInt(account.post_voting_power.amount),
             lastUpdateTime: new Date(account.voting_manabar.last_update_time * 1000)
           },
           downvoteManabar: {
-            currentMana: Long.fromValue(account.downvote_manabar.current_mana),
+            currentMana: BigInt(account.downvote_manabar.current_mana),
             lastUpdateTime: new Date(account.downvote_manabar.last_update_time * 1000)
           },
           recoveryAccount: account.recovery_account,

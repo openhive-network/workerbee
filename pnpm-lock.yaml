@@ -72,11 +72,8 @@ importers:
   .:
     dependencies:
       '@hiveio/wax':
-        specifier: 1.27.6-rc10-stable.250718075612
-        version: 1.27.6-rc10-stable.250718075612
-      long:
-        specifier: ^5.3.1
-        version: 5.3.1
+        specifier: 1.27.6-rc10-stable.250804212246
+        version: 1.27.6-rc10-stable.250804212246
     devDependencies:
       '@eslint/compat':
         specifier: ^1.2.7
@@ -408,8 +405,8 @@ packages:
     resolution: {integrity: sha1-0v2gSYFhN5MLQzBHIYikUyksu/k=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.11.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
-  '@hiveio/wax@1.27.6-rc10-stable.250718075612':
-    resolution: {integrity: sha1-TYKUMQ158pF6HL+KoE1ze7dYQ/M=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc10-stable.250718075612.tgz}
+  '@hiveio/wax@1.27.6-rc10-stable.250804212246':
+    resolution: {integrity: sha1-qZYJ4ot0Lgy3C0fbeS1WFoxmFEY=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc10-stable.250804212246.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
   '@humanfs/core@0.19.1':
@@ -2020,9 +2017,6 @@ packages:
     resolution: {integrity: sha512-niTvB4gqvtof056rRIrTZvjNYE4rCUzO6X/X+kYjd7WFxXeJ0NwEFnRxX6ehkvv3jTwrXnNdtAak5XYZuIyPFw==}
     engines: {node: '>=18'}
 
-  long@5.3.1:
-    resolution: {integrity: sha512-ka87Jz3gcx/I7Hal94xaN2tZEOPoUOEVftkQqZx2EeQRN7LGdfLlI3FvZ+7WDplm+vK2Urx9ULrvSowtdCieng==}
-
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
 
@@ -3208,10 +3202,9 @@ snapshots:
 
   '@hiveio/beekeeper@1.27.11': {}
 
-  '@hiveio/wax@1.27.6-rc10-stable.250718075612':
+  '@hiveio/wax@1.27.6-rc10-stable.250804212246':
     dependencies:
       events: 3.3.0
-      long: 5.3.1
 
   '@humanfs/core@0.19.1': {}
 
@@ -5151,8 +5144,6 @@ snapshots:
       slice-ansi: 7.1.0
       strip-ansi: 7.1.0
       wrap-ansi: 9.0.0
-
-  long@5.3.1: {}
 
   lru-cache@10.4.3: {}
 

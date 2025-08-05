@@ -1,5 +1,4 @@
 import type { asset } from "@hiveio/wax";
-import Long from "long";
 import { CollectorClassifierBase, TRegisterEvaluationContext } from "./collector-classifier-base";
 
 export interface IHiveAssetDetailedBalance {
@@ -9,12 +8,12 @@ export interface IHiveAssetDetailedBalance {
 }
 
 export interface IManabarData {
-  currentMana: Long;
+  currentMana: bigint;
   lastUpdateTime: Date;
 };
 
 export interface IMaxManabarData extends IManabarData {
-  max: Long;
+  max: bigint;
 }
 
 export interface IHiveAssetWithSavingsDetailedBalance extends IHiveAssetDetailedBalance {
