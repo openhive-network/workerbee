@@ -1,3 +1,7 @@
+// https://developer.wordpress.org/rest-api/reference/
+
+// REST API docs for wordpress
+
 export interface WPPost {
   id: number;
   date: string;
