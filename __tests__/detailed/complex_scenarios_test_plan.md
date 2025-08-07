@@ -382,16 +382,6 @@ bot.observe.onBlock()
   .provideBlockData()
 ```
 
-#### 5.5 Long-Running Historical Analysis
-```typescript
-// Long-running analysis of historical data
-bot.providePastOperations("-365d")
-  .onWhaleAlert(hiveCoins(1000))
-  .or.onPosts("long-term-author")
-  .or.onExchangeTransfer()
-  .provideBlockData()
-```
-
 ### 6. Advanced Use Cases
 
 #### 6.1 Economic Research Platform
@@ -467,13 +457,7 @@ bot.observe.onBlock()
   .provideBlockData()
 ```
 
-#### 7.4 AND Logic Simulation
-```typescript
-// Posts AND manabar check
-const observer1 = bot.observe.onPosts("target-author").onAccountsFullManabar(EManabarType.UPVOTE, "target-author");
-```
-
-#### 7.5 Provider Type Duplication Test
+#### 7.4 Provider Type Duplication Test
 ```typescript
 // Testing same provider types with different arguments
 bot.observe.onBlock()
@@ -486,7 +470,7 @@ bot.observe.onBlock()
   .provideManabarData(EManabarType.RC, "account2")
 ```
 
-#### 7.6 Complex Nested Filter Combinations
+#### 7.5 Complex Nested Filter Combinations
 ```typescript
 // Complex combination of multiple filter types
 bot.observe.onPosts("author1")
@@ -509,7 +493,7 @@ bot.observe.onPosts("author1")
   .provideFeedPriceData()
 ```
 
-#### 7.7 Double Subscribe Prevention Test
+#### 7.6 Double Subscribe Prevention Test (TODO after resolving issue #20)
 ```typescript
 // Testing prevention of double subscribe
 const observer = bot.observe.onPosts("test-author");
@@ -530,7 +514,7 @@ try {
 }
 ```
 
-#### 7.8 Resource Cleanup Stress Test
+#### 7.7 Resource Cleanup Stress Test
 ```typescript
 // Testing proper cleanup under stress
 const observers = [];
@@ -546,7 +530,7 @@ for (let i = 0; i < 100; i++) {
 observers.forEach(observer => observer.unsubscribe());
 ```
 
-#### 7.9 Concurrent Observer Test
+#### 7.8 Concurrent Observer Test
 ```typescript
 // Testing multiple concurrent observers
 const observer1 = bot.observe.onPosts("author1").provideAccounts("author1");
