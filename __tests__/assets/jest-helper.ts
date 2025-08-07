@@ -7,8 +7,9 @@ import { IWorkerBee } from "../../dist/bundle";
 import { TPastQueen } from "../../src/past-queen";
 import { QueenBee } from "../../src/queen";
 import type { IWorkerBeeGlobals, TEnvType } from "./globals";
-import { resetMockCallIndexes } from "./mock/api-mock";
+import { JsonRpcMock, resetMockCallIndexes } from "./mock/api-mock";
 import { resetCallIndexes } from "./mock/jsonRpcMock";
+import { createServer } from "./mock/proxy-mock-server";
 
 type TWorkerBeeTestCallable<R, Args extends any[]> = (globals: IWorkerBeeGlobals, ...args: Args) => (R | Promise<R>);
 
@@ -42,8 +43,9 @@ export interface IWorkerBeeFixtureMethods {
   ) => Promise<T>;
 
   createMockWorkerBeeTest: <T = Record<string, any>>(
-    callback: (bot: QueenBee<{}>, resolve: (retVal?: T) => void, reject: (reason?: any) => void, chain?: IHiveChainInterface) => void,
-    dynamic?: boolean
+    callback: (bot: QueenBee<{}> | IWorkerBee<unknown>, resolve: (retVal?: T) => void, reject: (reason?: any) => void, chain?: IHiveChainInterface) => void,
+    dynamic?: boolean,
+    shouldHaveFullWorkerBeeInterface?: boolean
   ) => Promise<T>;
 }
 
@@ -102,11 +104,12 @@ const createWorkerBeeTest = async <T = Record<string, any>>(
   pastDataFrom?: number,
   pastDataTo?: number,
   dynamic: boolean = false,
-  isMockEnvironment: boolean = false
+  isMockEnvironment: boolean = false,
+  shouldHaveFullWorkerBeeInterface: boolean = false
 ): Promise<T> => {
   const testRunner = dynamic ? envTestFor.dynamic : envTestFor;
 
-  return await testRunner(async ({ WorkerBee }, callbackStr, pastFrom, pastTo, isMock) => {
+  return await testRunner(async ({ WorkerBee }, callbackStr, pastFrom, pastTo, isMock, shouldHaveFullWorkerBeeInterfaceParam) => {
     const bot = isMock
       ? new WorkerBee({
         chainOptions: {
@@ -122,6 +125,8 @@ const createWorkerBeeTest = async <T = Record<string, any>>(
 
     if (!isMock && pastFrom && pastTo)
       finalBot = bot.providePastOperations(pastFrom, pastTo) as unknown as TPastQueen<{}>;
+    else if (shouldHaveFullWorkerBeeInterfaceParam)
+      finalBot = bot as unknown as IWorkerBee<unknown>;
     else
       finalBot = bot.observe as unknown as QueenBee<{}>;
 
@@ -135,7 +140,7 @@ const createWorkerBeeTest = async <T = Record<string, any>>(
     bot.delete();
 
     return returnValue;
-  }, callback.toString(), pastDataFrom, pastDataTo, isMockEnvironment);
+  }, callback.toString(), pastDataFrom, pastDataTo, isMockEnvironment, shouldHaveFullWorkerBeeInterface);
 }
 
 export const test = base.extend<IWorkerBeeTest, IWorkerBeeWorker>({
@@ -161,11 +166,41 @@ export const test = base.extend<IWorkerBeeTest, IWorkerBeeWorker>({
 
   createWorkerBeeTest: ({ workerbeeTest }, use) => {
     use((callback, pastDataFrom, pastDataTo, dynamic) => createWorkerBeeTest(workerbeeTest, callback, pastDataFrom, pastDataTo, dynamic));
-  },
+  }
+});
+
+export const mockTest = base.extend<IWorkerBeeTest, IWorkerBeeWorker>({
+  forEachTest: [async ({ page }, use) => {
+    page.on("console", (msg: ConsoleMessage) => {
+      console.log(">>", msg.type(), msg.text());
+    });
+
+    await page.goto("http://localhost:8080/__tests__/assets/test.html", { waitUntil: "load" });
+
+    resetMockCallIndexes();
+    resetCallIndexes();
+
+    await use();
+  }, { auto: true }],
+
+  forEachWorker: [async ({ browser }, use) => {
+    const closeServer = await createServer(new JsonRpcMock(), 8000);
+
+    await use();
+
+    await browser.close();
+    await closeServer();
+  }, { scope: "worker", auto: true }],
 
   createMockWorkerBeeTest: ({ page }, use) => {
     const mockEnvTestFor = envTestFor(page, createTestFor, true);
     // TODO: Improve types to not cast to `any`
-    use((callback, dynamic) => createWorkerBeeTest(mockEnvTestFor, callback as any, undefined, undefined, dynamic, true));
+    use(
+      (
+        callback,
+        dynamic,
+        shouldHaveFullWorkerBeeInterface
+      ) => createWorkerBeeTest(mockEnvTestFor, callback as any, undefined, undefined, dynamic, true, shouldHaveFullWorkerBeeInterface)
+    );
   }
 });
