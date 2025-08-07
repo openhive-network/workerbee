@@ -4,33 +4,8 @@ import { IWorkerBee, Unsubscribable } from "../../dist/bundle";
 import { QueenBee } from "../../src/queen";
 import { mockTest } from "../assets/jest-helper";
 
-import { JsonRpcMock, resetMockCallIndexes } from "../assets/mock/api-mock";
-import { resetCallIndexes } from "../assets/mock/jsonRpcMock";
-import { createServer } from "../assets/mock/proxy-mock-server";
-
-let browser: ChromiumBrowser;
-
-let closeServer: () => Promise<void>;
-
-test.describe("Realistic Scenarios with Live Data", () => {
-  test.beforeAll(async () => {
-    browser = await chromium.launch({
-      headless: true
-    });
-
-    closeServer = await createServer(new JsonRpcMock(), 8000);
-  });
-
-  test.beforeEach(async ({ page }) => {
-    await page.goto("http://localhost:8080/__tests__/assets/test.html", {
-      waitUntil: "load",
-    });
-
-    resetMockCallIndexes();
-    resetCallIndexes();
-  });
-
-  test("3.1 - Should be able to create real-time social dashboard", async ({ createMockWorkerBeeTest }) => {
+mockTest.describe("Realistic Scenarios with Live Data", () => {
+  mockTest("3.1 - Should be able to create real-time social dashboard", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest((bot, resolve, reject) => {
       let vote: { text: string, accountName: string, manabar: string } | undefined;
       let post: { text: string, accountName: string, manabar: string } | undefined;
@@ -102,7 +77,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("3.2 - Should be able to create account health monitor", async ({ createMockWorkerBeeTest }) => {
+  mockTest("3.2 - Should be able to create account health monitor", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest((bot, resolve, reject) => {
       let manabarData: string | undefined;
 
@@ -145,7 +120,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("3.3 - Should be able to create market alert system", async ({ createMockWorkerBeeTest }) => {
+  mockTest("3.3 - Should be able to create market alert system", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<number>((bot, resolve, reject) => {
       (bot as QueenBee).onFeedPriceChange(95)
         .or.onFeedPriceNoChange(1)
@@ -174,7 +149,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     expect(result).toEqual(134.30962343096238);
   });
 
-  test("3.5 - Should be able to create investment portfolio monitor", async ({ createMockWorkerBeeTest }) => {
+  mockTest("3.5 - Should be able to create investment portfolio monitor", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject, chain) => {
       const marketOperations: string[] = [];
 
@@ -210,7 +185,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("3.6 - Should be able to create content aggregation service", async ({ createMockWorkerBeeTest }) => {
+  mockTest("3.6 - Should be able to create content aggregation service", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const contentOperations: string[] = [];
 
@@ -248,7 +223,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("3.7 - Should be able to create engagement optimization bot", async ({ createMockWorkerBeeTest }) => {
+  mockTest("3.7 - Should be able to create engagement optimization bot", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string>((bot, resolve, reject) => {
       const content: string[] = [];
 
@@ -279,7 +254,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     expect(result).toEqual("Reached 90% of manabar for upvote: 100, available content: Post: fwaszkiewicz - Hi To Hive! 🐝,Comment: fwaszkiewicz -> mtyszczak");
   });
 
-  test("4.1 - Should be able to perform complete account analysis", async ({ createMockWorkerBeeTest }) => {
+  mockTest("4.1 - Should be able to perform complete account analysis", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
 
@@ -317,7 +292,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("4.2 - Should be able to perform multi-account comparison", async ({ createMockWorkerBeeTest }) => {
+  mockTest("4.2 - Should be able to perform multi-account comparison", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
 
@@ -360,7 +335,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("4.3 - Should be able to create comprehensive market analysis", async ({ createMockWorkerBeeTest }) => {
+  mockTest("4.3 - Should be able to create comprehensive market analysis", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
 
@@ -397,7 +372,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("4.4 - Should be able to create social network analysis", async ({ createMockWorkerBeeTest }) => {
+  mockTest("4.4 - Should be able to create social network analysis", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
 
@@ -445,7 +420,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("4.5 - Should be able to create content performance dashboard", async ({ createMockWorkerBeeTest }) => {
+  mockTest("4.5 - Should be able to create content performance dashboard", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
 
@@ -494,7 +469,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("4.6 - Should be able to create governance monitoring system", async ({ createMockWorkerBeeTest }) => {
+  mockTest("4.6 - Should be able to create governance monitoring system", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
 
@@ -683,7 +658,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("5.3 - Should be able to create massive account monitoring", async ({ createMockWorkerBeeTest }) => {
+  mockTest("5.3 - Should be able to create massive account monitoring", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
       const accounts = ["gtg"];
@@ -714,7 +689,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("5.4 - Should be able to create high-frequency event processing", async ({ createMockWorkerBeeTest }) => {
+  mockTest("5.4 - Should be able to create high-frequency event processing", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
 
@@ -757,7 +732,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("6.1 - Should be able to create economic research platform", async ({ createMockWorkerBeeTest }) => {
+  mockTest("6.1 - Should be able to create economic research platform", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject, chain) => {
       const content: string[] = [];
 
@@ -814,7 +789,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("6.2 - Should be able to create content recommendation engine", async ({ createMockWorkerBeeTest }) => {
+  mockTest("6.2 - Should be able to create content recommendation engine", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
 
@@ -860,7 +835,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("6.3 - Should be able to create automated trading signal generator", async ({ createMockWorkerBeeTest }) => {
+  mockTest("6.3 - Should be able to create automated trading signal generator", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject, chain) => {
       const content: string[] = [];
 
@@ -916,7 +891,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("7.1 - Should be able to handle multiple OR chaining", async ({ createMockWorkerBeeTest }) => {
+  mockTest("7.1 - Should be able to handle multiple OR chaining", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
 
@@ -985,7 +960,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("7.2 - Should be able to handle repeated OR operations", async ({ createMockWorkerBeeTest }) => {
+  mockTest("7.2 - Should be able to handle repeated OR operations", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
 
@@ -1016,7 +991,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     ]);
   });
 
-  test("7.3 - Should be able to handle duplicate provider calls", async ({ createMockWorkerBeeTest }) => {
+  mockTest("7.3 - Should be able to handle duplicate provider calls", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       const content: string[] = [];
 
