@@ -45,7 +45,9 @@ test.describe("Realistic Scenarios with Live Data", () => {
               post = {
                 text: `Post: ${operation.author} - ${operation.title}`,
                 accountName: JSON.stringify(data.accounts.gtg?.name),
-                manabar: JSON.stringify(data.manabarData.gtg?.[2]?.currentMana)
+                manabar: JSON.stringify(data.manabarData.gtg?.[2]?.currentMana, (_key, value) =>
+                  typeof value === "bigint" ? value.toString() : value
+                )
               };
             });
 
@@ -53,7 +55,9 @@ test.describe("Realistic Scenarios with Live Data", () => {
               comment = {
                 text: `Comment: ${operation.author} -> ${operation.parent_author}`,
                 accountName: JSON.stringify(data.accounts.gtg?.name),
-                manabar: JSON.stringify(data.manabarData.gtg?.[2]?.currentMana)
+                manabar: JSON.stringify(data.manabarData.gtg?.[2]?.currentMana, (_key, value) =>
+                  typeof value === "bigint" ? value.toString() : value
+                )
               };
             });
 
@@ -61,7 +65,9 @@ test.describe("Realistic Scenarios with Live Data", () => {
               vote = {
                 text: `Vote: ${operation.voter} - ${operation.author}`,
                 accountName: JSON.stringify(data.accounts.gtg?.name),
-                manabar: JSON.stringify(data.manabarData.gtg?.[2]?.currentMana)
+                manabar: JSON.stringify(data.manabarData.gtg?.[2]?.currentMana, (_key, value) =>
+                  typeof value === "bigint" ? value.toString() : value
+                )
               };
             });
 
@@ -78,17 +84,17 @@ test.describe("Realistic Scenarios with Live Data", () => {
     expect(result).toEqual([
       {
         accountName: "\"gtg\"",
-        manabar: "{\"low\":2125861720,\"high\":501074,\"unsigned\":true}",
+        manabar: "\"2152098568737624\"",
         text: "Post: gtg - SkyTeam Airline Alliance - Official partner of HiveFest",
       },
       {
         accountName: "\"gtg\"",
-        manabar: "{\"low\":1965705338,\"high\":37491,\"unsigned\":true}",
+        manabar: "\"161024584599674\"",
         text: "Vote: gtg - hbd.funder",
       },
       {
         accountName: "\"gtg\"",
-        manabar: "{\"low\":2125861720,\"high\":501074,\"unsigned\":true}",
+        manabar: "\"2152098568737624\"",
         text: "Comment: gtg -> purepinay",
       }
     ]);
