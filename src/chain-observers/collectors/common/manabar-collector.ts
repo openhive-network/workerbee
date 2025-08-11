@@ -69,11 +69,18 @@ export class ManabarCollector extends CollectorBase<ManabarClassifier> {
     if (this.rcManabarAccounts.size > 0) {
       const rcAccounts = await data.get(RcAccountClassifier);
       for (const [account] of this.rcManabarAccounts) {
-        if(!rcAccounts.rcAccounts[account])
-          continue;
-
         if (manabarData[account] === undefined)
           manabarData[account] = {};
+
+        if(!rcAccounts.rcAccounts[account]) {
+          manabarData[account][EManabarType.RC] = {
+            currentMana: 0n,
+            lastUpdateTime: new Date(time * 1000),
+            max: 0n,
+            percent: 0
+          };
+          continue;
+        }
 
         const startManabarData = Date.now();
 
@@ -98,11 +105,18 @@ export class ManabarCollector extends CollectorBase<ManabarClassifier> {
     if (this.downvoteManabarAccounts.size > 0 || this.upvoteManabarAccounts.size > 0) {
       const accounts = await data.get(AccountClassifier);
       for (const [account] of this.upvoteManabarAccounts) {
-        if(!accounts.accounts[account])
-          continue;
-
         if (manabarData[account] === undefined)
           manabarData[account] = {};
+
+        if(!accounts.accounts[account]) {
+          manabarData[account][EManabarType.UPVOTE] = {
+            currentMana: 0n,
+            lastUpdateTime: new Date(time * 1000),
+            max: 0n,
+            percent: 0
+          };
+          continue;
+        }
 
         const startManabarData = Date.now();
 
@@ -124,11 +138,18 @@ export class ManabarCollector extends CollectorBase<ManabarClassifier> {
       }
 
       for (const [account] of this.downvoteManabarAccounts) {
-        if(!accounts.accounts[account])
-          continue;
-
         if (manabarData[account] === undefined)
           manabarData[account] = {};
+
+        if(!accounts.accounts[account]) {
+          manabarData[account][EManabarType.DOWNVOTE] = {
+            currentMana: 0n,
+            lastUpdateTime: new Date(time * 1000),
+            max: 0n,
+            percent: 0
+          };
+          continue;
+        }
 
         const startManabarData = Date.now();
 
