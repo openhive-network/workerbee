@@ -38,7 +38,10 @@ export class AccountFullManabarFilter extends FilterBase {
       const manabar = manabarData[account]?.[this.manabarType];
 
       if (manabar === undefined)
-        return false;
+        continue;
+
+      if (manabar.max === 0n)
+        return true;
 
       if(manabar.percent >= this.manabarLoadPercent)
         return true;

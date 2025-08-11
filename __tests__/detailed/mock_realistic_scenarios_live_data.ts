@@ -1210,4 +1210,41 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
 
     expect(result).toEqual("All 3 concurrent observers completed successfully");
   });
+
+  mockTest("Should get manabar callback when account is empty", async ({ createMockWorkerBeeTest }) => {
+    const result = await createMockWorkerBeeTest<string>((bot, resolve, reject) => {
+      (bot as QueenBee).onAccountsManabarPercent(0, 90, "barddev").subscribe({
+        next: (data) => {
+          if (data)
+            resolve(`Manabar data received: (${data.manabarData.barddev?.[0]?.currentMana}/${data.manabarData.barddev?.[0]?.max})`);
+        },
+        error: (err) => {
+          console.error(err);
+          reject(err);
+        }
+      });
+    }, true);
+
+    expect(result).toEqual("Manabar data received: (0/0)");
+  });
+
+  mockTest("Should get manabar callback when one of accounts is empty", async ({ createMockWorkerBeeTest }) => {
+    const result = await createMockWorkerBeeTest<Record<string, string>>((bot, resolve, reject) => {
+      (bot as QueenBee).onAccountsManabarPercent(0, 90, "barddev", "gtg").subscribe({
+        next: (data) => {
+          if (data)
+            resolve({
+              barddev: `Manabar data received: (${data.manabarData.barddev?.[0]?.currentMana}/${data.manabarData.barddev?.[0]?.max})`,
+              gtg: `Manabar data received: (${data.manabarData.gtg?.[0]?.currentMana}/${data.manabarData.gtg?.[0]?.max})`
+            });
+        },
+        error: (err) => {
+          console.error(err);
+          reject(err);
+        }
+      });
+    }, true);
+
+    expect(result).toEqual({ barddev: "Manabar data received: (0/0)", gtg: "Manabar data received: (2897631713028020/2942436075440162)" });
+  });
 });
