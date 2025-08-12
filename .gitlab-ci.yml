@@ -14,6 +14,7 @@ include:
     ref: ab4d4c78df8ebc5b5d7744fe2cfa64c51143fe01
     file:
       - '/templates/npm_projects.gitlab-ci.yml'
+      - '/templates/python_projects.gitlab-ci.yml'
 
 default:
   tags:
@@ -24,6 +25,17 @@ lint:
   extends: .npm_based_job_base
   script:
     - npm run lint-ci
+
+pre-commit-checks:
+  stage: .pre
+  extends: .pre_commit_checks_template
+  variables:
+    PYPROJECT_DIR: "${CI_PROJECT_DIR}/python"
+  artifacts:
+    paths:
+      - "python/poetry.lock"
+    when: always
+    expire_in: 1 week
 
 # Builds and supplements wiki URL so it is available in Wiki and published package README
 build:
