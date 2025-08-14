@@ -1,4 +1,4 @@
-import { IBloggingPlatform, IPost, IPostCommentIdentity, IPostCommentsFilters } from "./interfaces"
+import { IActiveBloggingPlatform, IBloggingPlatform, IComment, IPost, IPostCommentIdentity, IPostCommentsFilters } from "./interfaces"
 import { WPGetPostsParams, WPPost } from "./wordpress-reference"
 
 /*
@@ -15,6 +15,7 @@ We need to get this done in 4 categories:
 
 class RestAPI {
   private bloggingPlatform: IBloggingPlatform;
+  private activeBloggingPlatform: IActiveBloggingPlatform;
 
   private extractFullIdFromPostId (postId: string): IPostCommentIdentity {
     const splitedPostId = postId.split("/");
@@ -75,5 +76,39 @@ class RestAPI {
     const posts = this.bloggingPlatform.enumPosts(filters, {page: params.page || 1, pageSize: params.per_page || 100})
     return posts;
   }
+
+  deletePost(postId: string): void {
+    const postIdentification = this.extractFullIdFromPostId(postId); // Remember about solving ID problem
+    this.activeBloggingPlatform.deletePost(postIdentification);
+  }
+
+  createPost(): void {
+
+  }
+
+  editPost(): void {
+
+  }
+
+  getComment(): IComment {
+
+  }
+
+  getComments(): Iterable<IComment> {
+
+  }
+
+  deleteComment(): void {
+
+  }
+
+  createComment(): void {
+
+  }
+
+  editComment(): void {
+    
+  }
+
 
 }
