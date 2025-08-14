@@ -10,7 +10,7 @@ We need to get this done in 4 categories:
 */
 
 /*
-  Problem 1 - posts in WordPress have ID as number, when ID of Hive posts is accout/permlink.
+  Problem 1 - posts in WordPress have ID as number, when ID of Hive posts is accout/permlink. Everything is identified by
 */
 
 class RestAPI {
@@ -29,7 +29,40 @@ class RestAPI {
   getPostById(postId: string): WPPost {
     const post = this.bloggingPlatform.getPost(this.extractFullIdFromPostId(postId))
     return {
-      
+      id: 0, // TEMP
+      author: 0, // TEMP
+      categories: [],// TEMP we need to transpone tags for this
+      comment_status: 'open', // By default always open
+      content: {
+        protected: false,
+        rendered: post.getContent()
+      },
+      date: post.publishedAt,
+      date_gmt: post.publishedAt,
+      excerpt: {
+        protected: false,
+        rendered: post.summary
+      },
+      featured_media: 0, // TEMP, no idea
+      format: "standard",
+      guid: {
+        rendered:post.generateSlug(),
+      }, // Not sure yet
+      link: post.generateSlug(),
+      meta: {}, // Nothing so far
+      modified: post.updatedAt,
+      modified_gmt: post.updatedAt,
+      ping_status: "closed",
+      slug: post.generateSlug(),
+      status: "publish",
+      sticky: false,
+      tags: [], // convert them later to our text tags
+      template: "", // No idea so far,
+      title: {
+        rendered: post.title
+      },
+      type: "" // uknown
+
     }
   }
 

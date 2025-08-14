@@ -4,11 +4,11 @@
 
 export interface WPPost {
   id: number;
-  date: string;
-  date_gmt: string;
+  date: Date;
+  date_gmt: Date;
   guid: Rendered;
-  modified: string;
-  modified_gmt: string;
+  modified: Date;
+  modified_gmt: Date;
   slug: string;
   status: "publish" | "future" | "draft" | "pending" | "private";
   type: string;
@@ -22,7 +22,7 @@ export interface WPPost {
   ping_status: "open" | "closed";
   sticky: boolean;
   template: string;
-  format: string;
+  format: "standard" | "aside" | "chat" | "gallery" | "link" | "image" | "quote" | "status" | "video" | "audio";
   meta: Record<string, any>;
   categories: number[];
   tags: number[];
