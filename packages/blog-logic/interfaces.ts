@@ -148,6 +148,7 @@ export interface IActiveBloggingPlatform {
 export interface IBloggingPlatform {
   viewerContext?: IAccountIdentity;
   communityContext?: ICommunityIdentity;
+  getPost(postId: IPostCommentIdentity): IPost;
   enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IPost>;
   configureViewContext(accontName: IAccountIdentity, communityName?: ICommunityIdentity): void;
   enumCommunities(filter: ICommunityFilters, pagination: IPagination): Iterable<ICommunity>

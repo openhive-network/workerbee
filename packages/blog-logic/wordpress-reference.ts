@@ -83,3 +83,25 @@ export interface WPComment {
 
   _links?: WPLinks;
 }
+
+export interface WPGetPostsParams {
+  context?: 'view' | 'embed' | 'edit';
+  page?: number;                     // default: 1
+  per_page?: number;                // default: 10, max: 100
+  search?: string;
+  after?: string;                   // ISO 8601 date
+  modified_after?: string;          // ISO 8601 date
+  before?: string;                  // ISO 8601 date
+  modified_before?: string;         // ISO 8601 date
+  author?: number | number[];
+  author_exclude?: number | number[];
+  exclude?: number | number[];
+  include?: number | number[];
+  offset?: number;
+  order?: 'asc' | 'desc';           // default: desc
+  orderby?: 'author' | 'date' | 'id' | 'include' | 'modified' | 'parent' | 'relevance' | 'slug' | 'include_slugs' | 'title';
+  search_columns?: string[];
+  slug?: string | string[];
+  status?: string | string[];
+  _fields?: string[];               // using array syntax for multiple fields
+}
