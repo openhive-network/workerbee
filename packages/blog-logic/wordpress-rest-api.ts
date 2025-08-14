@@ -1,4 +1,4 @@
-import { IBloggingPlatform, IPost, IPostCommentIdentity } from "./interfaces"
+import { IBloggingPlatform, IPost, IPostCommentIdentity, IPostCommentsFilters } from "./interfaces"
 import { WPGetPostsParams, WPPost } from "./wordpress-reference"
 
 /*
@@ -67,7 +67,13 @@ class RestAPI {
   }
 
   getPosts(params: WPGetPostsParams): Iterable<IPost> {
-    return [];
+    const filters: IPostCommentsFilters = {
+      endTime: params.before ? params.before : undefined,
+      startTime: params.after ? params.after : undefined,
+      sortBy: params.orderby ? params.orderby: undefined, // Adjust possible sorts
+    }
+    const posts = this.bloggingPlatform.enumPosts(filters, {page: params.page || 1, pageSize: params.per_page || 100})
+    return posts;
   }
 
 }

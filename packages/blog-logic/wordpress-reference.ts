@@ -89,10 +89,10 @@ export interface WPGetPostsParams {
   page?: number;                     // default: 1
   per_page?: number;                // default: 10, max: 100
   search?: string;
-  after?: string;                   // ISO 8601 date
-  modified_after?: string;          // ISO 8601 date
-  before?: string;                  // ISO 8601 date
-  modified_before?: string;         // ISO 8601 date
+  after?: Date;                   // ISO 8601 date
+  modified_after?: Date;          // ISO 8601 date
+  before?: Date;                  // ISO 8601 date
+  modified_before?: Date;         // ISO 8601 date
   author?: number | number[];
   author_exclude?: number | number[];
   exclude?: number | number[];
