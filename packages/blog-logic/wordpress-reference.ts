@@ -4,11 +4,11 @@
 
 export interface WPPost {
   id: number;
-  date: string;
-  date_gmt: string;
+  date: Date;
+  date_gmt: Date;
   guid: Rendered;
-  modified: string;
-  modified_gmt: string;
+  modified: Date;
+  modified_gmt: Date;
   slug: string;
   status: "publish" | "future" | "draft" | "pending" | "private";
   type: string;
@@ -22,7 +22,7 @@ export interface WPPost {
   ping_status: "open" | "closed";
   sticky: boolean;
   template: string;
-  format: string;
+  format: "standard" | "aside" | "chat" | "gallery" | "link" | "image" | "quote" | "status" | "video" | "audio";
   meta: Record<string, any>;
   categories: number[];
   tags: number[];
@@ -71,15 +71,157 @@ export interface WPComment {
   author_name: string;
   author_email: string;
   author_url: string;
-  date: string;
-  date_gmt: string;
+  date: Date;
+  date_gmt: Date;
   content: Rendered;
   link: string;
-  status: string; // Usually 'approved' or 'hold'
+  status: "publish" | "future" | "draft" | "pending" | "private";
   type: string; // Usually '' (empty string for normal comment)
   author_ip: string;
   author_user_agent: string;
   meta: Record<string, any>;
 
   _links?: WPLinks;
+}
+
+export interface WPGetPostsParams {
+  context?: "view" | "embed" | "edit";
+  page?: number;
+  per_page?: number;
+  search?: string;
+  after?: Date;                   // ISO 8601 date
+  modified_after?: Date;          // ISO 8601 date
+  before?: Date;                  // ISO 8601 date
+  modified_before?: Date;         // ISO 8601 date
+  author?: number | number[];
+  author_exclude?: number | number[];
+  exclude?: number | number[];
+  include?: number | number[];
+  offset?: number;
+  order?: "asc" | "desc";
+  orderby?: "author" | "date" | "id" | "include" | "modified" | "parent" | "relevance" | "slug" | "include_slugs" | "title";
+  search_columns?: string[];
+  slug?: string | string[];
+  status?: string | string[];
+  _fields?: string[];
+}
+
+export interface WPUser {
+  id: number;
+  username?: string;
+  name?: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string
+  url?: string;
+  description?: string;
+  link: string;
+  locale?: string;
+  nickname?: string;
+  slug?: string;
+  registered_date: string;
+  roles?: string[];
+  capabilities?: Record<string, boolean>;
+  extra_capabilities?: Record<string, boolean>;
+  avatar_urls: WPLink;
+  meta?: Record<string, any>;
+}
+
+export interface WPGetCommentsParams {
+  /**
+   * Scope under which the request is made; determines which fields appear in the response.
+   * One of: 'view', 'embed', 'edit'
+   * Default: 'view'
+   */
+  context?: "view" | "embed" | "edit";
+
+  /** Current page of pagination. Default: 1 */
+  page?: number;
+
+  /** Maximum number of items per page. Default: 10 */
+  per_page?: number;
+
+  /** Limit results to comments matching this search string */
+  search?: string;
+
+  /** Limit response to comments published after this ISO-8601 date-time */
+  after?: string;
+
+  /** Limit response to comments published before this ISO-8601 date-time */
+  before?: string;
+
+  /** Limit result set to comments assigned to specific user IDs (requires authorization) */
+  author?: number[];
+
+  /** Exclude comments assigned to specific user IDs (requires authorization) */
+  author_exclude?: number[];
+
+  /** Limit result set to comments from a specific author email (requires authorization) */
+  author_email?: string;
+
+  /** Ensure result set excludes specific comment IDs */
+  exclude?: number[];
+
+  /** Limit result set to specific comment IDs */
+  include?: number[];
+
+  /** Offset the result set by a specific number of items */
+  offset?: number;
+
+  /** Order by ascending or descending. Default: 'desc' */
+  order?: "asc" | "desc";
+
+  /**
+   * Attribute to sort by.
+   * Default: 'date_gmt'
+   * One of: 'date', 'date_gmt', 'id', 'include', 'post', 'parent', 'type'
+   */
+  orderby?: "date" | "date_gmt" | "id" | "include" | "post" | "parent" | "type";
+
+  /** Limit result set to comments with specific parent IDs */
+  parent?: number[];
+
+  /** Exclude comments with specific parent IDs */
+  parent_exclude?: number[];
+
+  /** Limit result set to comments assigned to specific post IDs */
+  post?: number[];
+
+  /**
+   * Limit result set to comments with a specific status (requires authorization).
+   * Example statuses include: 'approve'
+   * Default: 'approve'
+   */
+  status?: string;
+
+  /**
+   * Limit result set to comments of a specific type (requires authorization).
+   * Example: 'comment'
+   * Default: 'comment'
+   */
+  type?: string;
+
+  /** Password for password-protected posts */
+  password?: string;
+}
+
+export interface WPCreatePostPayload {
+  date?: string;
+  date_gmt?: string;
+  slug?: string;
+  status?: "publish" | "future" | "draft" | "pending" | "private";
+  password?: string;
+  title?: { rendered?: string; raw?: string };
+  content?: { rendered?: string; raw?: string };
+  author?: number;
+  excerpt?: { rendered?: string; raw?: string };
+  featured_media?: number;
+  comment_status?: "open" | "closed";
+  ping_status?: "open" | "closed";
+  format?: "standard" | "aside" | "chat" | "gallery" | "link" | "image" | "quote" | "status" | "video" | "audio";
+  sticky?: boolean;
+  template?: string;
+  categories?: number[];
+  tags?: number[];
+  meta?: Record<string, any>;
 }

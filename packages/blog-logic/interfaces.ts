@@ -10,6 +10,7 @@ export interface IPagination {
 export interface ICommonFilters {
   readonly startTime?: Date;
   readonly endTime?: Date;
+  order?: "asc" | "desc";
 }
 
 export interface IVotesFilters extends ICommonFilters {
@@ -19,9 +20,14 @@ export interface IVotesFilters extends ICommonFilters {
 }
 
 export interface IPostCommentsFilters extends ICommonFilters {
-  readonly sortBy?: "date" | "votes" | "trending" | "permlink";
+  readonly sortBy?: "author" | "date" | "id" | "include" | "modified" | "parent" | "relevance" | "slug" | "include_slugs" | "title";
   readonly positiveVotes?: boolean;
   readonly tags?: string[];
+  readonly modificationStartTime?: Date;
+  readonly modificationEndTime?: Date;
+  readonly author?: string;
+  readonly searchInText?: string;
+  readonly slug?: string | string[];
 }
 
 export interface ICommunityFilters extends ICommonFilters {
@@ -42,7 +48,7 @@ export interface ICommunityIdentity {
  */
 export interface IPostCommentIdentity {
   readonly author: IAccountIdentity;
-  readonly id: string;
+  readonly permlink: string;
 }
 
 export interface IVote {
@@ -88,7 +94,9 @@ export interface IComment extends IPostCommentIdentity {
   enumVotes(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IVote>;
   getContent(): string;
   wasVotedByUser(userName: IAccountIdentity): boolean;
-  getCommensCount(): number;
+  getCommentsCount(): number;
+  getParent(): IPostCommentIdentity;
+  getTopPost(): IPostCommentIdentity;
 
   /**
    * Allows to generate a slug for the comment, which can be used in URLs or as a unique identifier.
@@ -148,6 +156,8 @@ export interface IActiveBloggingPlatform {
 export interface IBloggingPlatform {
   viewerContext?: IAccountIdentity;
   communityContext?: ICommunityIdentity;
+  getPost(postId: IPostCommentIdentity): IPost;
+  getComment(commentId: IPostCommentIdentity): IComment;
   enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IPost>;
   configureViewContext(accontName: IAccountIdentity, communityName?: ICommunityIdentity): void;
   enumCommunities(filter: ICommunityFilters, pagination: IPagination): Iterable<ICommunity>

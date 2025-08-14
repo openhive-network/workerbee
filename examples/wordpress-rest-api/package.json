@@ -1,0 +1,21 @@
+{
+  "name": "wordpress-rest-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "private": false,
+  "contributors": [],
+  "scripts": {
+    "dev": "tsx ./wordpress-rest-api.ts"
+  },
+  "dependencies": {
+    "@hiveio/content-renderer": "^2.3.1",
+    "@hiveio/wax": "1.27.6-rc10-stable.250804212246",
+    "@hiveio/workerbee": "file:../..",
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.5"
+  }
+}
