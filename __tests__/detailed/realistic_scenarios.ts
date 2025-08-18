@@ -8,7 +8,7 @@ test.describe("Bot Realistic Scenarios", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const content: string[] = [];
 
-      bot.onPosts("mtyszczak").or.onPosts("nickdongsik").or.onComments("brando28").subscribe({
+      bot.onPosts("mtyszczak").onPosts("nickdongsik").onComments("brando28").subscribe({
         next(data) {
           for (const author in data.posts)
             data.posts[author].forEach(({ operation }) => content.push(`${operation.author} - ${operation.permlink}`));
@@ -35,7 +35,7 @@ test.describe("Bot Realistic Scenarios", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const content: string[] = [];
 
-      bot.onVotes("e-sport-gamer").or.onFollow("fwaszkiewicz").or.onReblog("maxinpower").subscribe({
+      bot.onVotes("e-sport-gamer").onFollow("fwaszkiewicz").onReblog("maxinpower").subscribe({
         next(data) {
           for (const author in data.votes)
             data.votes[author].forEach(({ operation }) => content.push(`Vote: ${operation.voter} - ${operation.permlink}`));
@@ -68,8 +68,8 @@ test.describe("Bot Realistic Scenarios", () => {
 
       bot
         .onWhaleAlert(chain!.hiveCoins(50))
-        .or.onInternalMarketOperation()
-        .or.onExchangeTransfer()
+        .onInternalMarketOperation()
+        .onExchangeTransfer()
         .subscribe({
           next(data) {
             data.exchangeTransferOperations.forEach(({ operation }) => {
@@ -104,7 +104,7 @@ test.describe("Bot Realistic Scenarios", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const content: string[] = [];
 
-      bot.onMention("thebeedevs").or.onPosts("thebeedevs").or.onReblog("thebeedevs").subscribe({
+      bot.onMention("thebeedevs").onPosts("thebeedevs").onReblog("thebeedevs").subscribe({
         next(data) {
           data.posts.thebeedevs?.forEach(({ operation }) => {
             content.push(`Post: ${operation.author} - ${operation.permlink}`);
@@ -139,8 +139,8 @@ test.describe("Bot Realistic Scenarios", () => {
 
       bot
         .onCustomOperation("follow")
-        .or.onCustomOperation("reblog")
-        .or.onNewAccount().subscribe({
+        .onCustomOperation("reblog")
+        .onNewAccount().subscribe({
           next(data) {
             data.customOperations.follow?.forEach(({ operation }) => {
               content.push(`Follow: ${(operation as custom_json).json}`);
@@ -176,10 +176,10 @@ test.describe("Bot Realistic Scenarios", () => {
 
       bot
         .onPosts("thebeedevs")
-        .or.onComments("thebeedevs")
-        .or.onMention("thebeedevs")
-        .or.onReblog("thebeedevs")
-        .or.onVotes("thebeedevs")
+        .onComments("thebeedevs")
+        .onMention("thebeedevs")
+        .onReblog("thebeedevs")
+        .onVotes("thebeedevs")
         .subscribe({
           next(data) {
             data.posts.thebeedevs?.forEach(({ operation }) => {
@@ -223,9 +223,9 @@ test.describe("Bot Realistic Scenarios", () => {
       const content: string[] = [];
 
       bot
-        .or.onWhaleAlert(chain!.hiveCoins(10000))
-        .or.onInternalMarketOperation()
-        .or.onExchangeTransfer()
+        .onWhaleAlert(chain!.hiveCoins(10000))
+        .onInternalMarketOperation()
+        .onExchangeTransfer()
         .subscribe({
           next(data) {
             data.whaleOperations.forEach(({ operation }) => {
@@ -262,7 +262,7 @@ test.describe("Bot Realistic Scenarios", () => {
 
       bot
         .onVotes("thebeedevs")
-        .or.onPosts("thebeedevs")
+        .onPosts("thebeedevs")
         .subscribe({
           next(data) {
             data.votes.thebeedevs?.forEach(({ operation }) => {
@@ -293,7 +293,7 @@ test.describe("Bot Realistic Scenarios", () => {
 
       bot
         .onWhaleAlert(chain!.hiveCoins(10000))
-        .or.onInternalMarketOperation()
+        .onInternalMarketOperation()
         .subscribe({
           next(data) {
             data.whaleOperations.forEach(({ operation }) => {
@@ -325,8 +325,8 @@ test.describe("Bot Realistic Scenarios", () => {
 
       bot
         .onNewAccount()
-        .or.onFollow("thebeedevs")
-        .or.onCustomOperation("follow")
+        .onFollow("thebeedevs")
+        .onCustomOperation("follow")
         .subscribe({
           next(data) {
             data.newAccounts.forEach((operation) => {
@@ -365,8 +365,8 @@ test.describe("Bot Realistic Scenarios", () => {
 
       bot
         .onPosts("thebeedevs")
-        .or.onComments("thebeedevs")
-        .or.onVotes("thebeedevs")
+        .onComments("thebeedevs")
+        .onVotes("thebeedevs")
         .subscribe({
           next(data) {
             data.posts.thebeedevs?.forEach(({ operation }) => {
@@ -401,8 +401,8 @@ test.describe("Bot Realistic Scenarios", () => {
 
       bot
         .onWhaleAlert(chain!.hiveCoins(1000))
-        .or.onExchangeTransfer()
-        .or.onInternalMarketOperation()
+        .onExchangeTransfer()
+        .onInternalMarketOperation()
         .subscribe({
           next(data) {
             data.whaleOperations.forEach(({ operation }) => {
@@ -441,9 +441,9 @@ test.describe("Bot Realistic Scenarios", () => {
 
       bot
         .onPosts("thebeedevs")
-        .or.onVotes("thebeedevs")
-        .or.onFollow("thebeedevs")
-        .or.onReblog("thebeedevs")
+        .onVotes("thebeedevs")
+        .onFollow("thebeedevs")
+        .onReblog("thebeedevs")
         .subscribe({
           next(data) {
             data.posts.thebeedevs?.forEach(({ operation }) => {

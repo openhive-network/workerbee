@@ -35,8 +35,8 @@ test.describe("Realistic Scenarios with Live Data", () => {
       let comment: { text: string, accountName: string, manabar: string } | undefined;
 
       bot.onPosts("gtg")
-        .or.onComments("gtg")
-        .or.onVotes("gtg")
+        .onComments("gtg")
+        .onVotes("gtg")
         .provideAccounts("gtg")
         .provideManabarData(/* RC */ 2, "gtg")
         .subscribe({
@@ -89,7 +89,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
       },
       {
         accountName: "\"gtg\"",
-        manabar: "\"161024584599674\"",
+        manabar: "\"2152098568737624\"",
         text: "Vote: gtg - hbd.funder",
       },
       {
@@ -105,8 +105,8 @@ test.describe("Realistic Scenarios with Live Data", () => {
       let manabarData: string | undefined;
 
       bot.onAccountsBalanceChange(false, "gtg")
-        .or.onAccountsMetadataChange("gtg")
-        .or.onAccountsManabarPercent(0, 100, "gtg")
+        .onAccountsMetadataChange("gtg")
+        .onAccountsManabarPercent(0, 100, "gtg")
         .provideAccounts("gtg")
         .subscribe({
           next(data) {
@@ -146,8 +146,8 @@ test.describe("Realistic Scenarios with Live Data", () => {
   test("3.3 - Should be able to create market alert system", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<number>((bot, resolve, reject) => {
       bot.onFeedPriceChange(95)
-        .or.onFeedPriceNoChange(1)
-        .or.onWitnessesMissedBlocks(5, "gtg")
+        .onFeedPriceNoChange(1)
+        .onWitnessesMissedBlocks(5, "gtg")
         .provideFeedPriceData()
         .subscribe({
           next(data) {
@@ -177,8 +177,8 @@ test.describe("Realistic Scenarios with Live Data", () => {
       const marketOperations: string[] = [];
 
       bot.onAccountsBalanceChange(true, "gtg", "blocktrades")
-        .or.onWhaleAlert(chain!.hiveCoins(1000))
-        .or.onExchangeTransfer()
+        .onWhaleAlert(chain!.hiveCoins(1000))
+        .onExchangeTransfer()
         .provideAccounts("gtg", "blocktrades")
         .subscribe({
           next(data) {
@@ -213,8 +213,8 @@ test.describe("Realistic Scenarios with Live Data", () => {
       const contentOperations: string[] = [];
 
       bot.onPosts("mtyszczak")
-        .or.onPosts("fwaszkiewicz")
-        .or.onReblog("thebeedevs")
+        .onPosts("fwaszkiewicz")
+        .onReblog("thebeedevs")
         .subscribe({
           next(data) {
             data.posts.mtyszczak?.forEach(({ operation }) => {
@@ -251,8 +251,8 @@ test.describe("Realistic Scenarios with Live Data", () => {
       const content: string[] = [];
 
       bot.onAccountsManabarPercent(/* UPVOTE */ 0, 90, "gtg")
-        .or.onPosts("fwaszkiewicz")
-        .or.onComments("fwaszkiewicz")
+        .onPosts("fwaszkiewicz")
+        .onComments("fwaszkiewicz")
         .provideManabarData(/* UPVOTE */ 0, "gtg")
         .subscribe({
           next(data) {
@@ -363,8 +363,8 @@ test.describe("Realistic Scenarios with Live Data", () => {
       const content: string[] = [];
 
       bot.onBlock()
-        .or.onInternalMarketOperation()
-        .or.onExchangeTransfer()
+        .onInternalMarketOperation()
+        .onExchangeTransfer()
         .provideBlockData()
         .provideFeedPriceData()
         .provideAccounts("gtg", "blocktrades")
@@ -400,9 +400,9 @@ test.describe("Realistic Scenarios with Live Data", () => {
       const content: string[] = [];
 
       bot.onFollow("gtg")
-        .or.onFollow("blocktrades")
-        .or.onReblog("gtg")
-        .or.onMention("gtg")
+        .onFollow("blocktrades")
+        .onReblog("gtg")
+        .onMention("gtg")
         .provideAccounts("gtg", "blocktrades")
         .provideManabarData(/* RC */ 2, "gtg", "blocktrades")
         .subscribe({
@@ -412,6 +412,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
             });
 
             data.follows.blocktrades?.forEach(({ operation }) => {
+              console.log("FOLLOW");
               content.push(`Follow: ${operation.follower} -> ${operation.following}, (${data.accounts.blocktrades?.name})`);
             });
 
@@ -447,9 +448,9 @@ test.describe("Realistic Scenarios with Live Data", () => {
       const content: string[] = [];
 
       bot.onPosts("gtg")
-        .or.onComments("gtg")
-        .or.onVotes("gtg")
-        .or.onReblog("gtg")
+        .onComments("gtg")
+        .onVotes("gtg")
+        .onReblog("gtg")
         .provideAccounts("gtg")
         .provideManabarData(/* UPVOTE */ 0, "gtg")
         .provideBlockData()
@@ -484,7 +485,7 @@ test.describe("Realistic Scenarios with Live Data", () => {
     });
 
     expect(result).toEqual([
-      "Vote: gtg - hbd.funder (gtg) (2897631713028020)",
+      "Vote: gtg - hbd.funder (gtg) (18469160006473)",
       "Comment: gtg -> purepinay (gtg) (18469160006473)",
       "Reblog: gtg -> fwaszkiewicz/hi-to-hive (gtg) (18469160006473)",
       "Post: gtg - SkyTeam Airline Alliance - Official partner of HiveFest (gtg) (18469160006473)"

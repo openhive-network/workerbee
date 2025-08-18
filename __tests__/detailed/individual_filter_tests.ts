@@ -29,7 +29,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const capturedPosts: Array<{ author: string; blockNumber: number }> = [];
 
-      bot.onBlock().or.onPosts("comandoyeya", "daddydog").subscribe({
+      bot.onBlock().onPosts("comandoyeya", "daddydog").subscribe({
         next(data) {
           for (const author of ["comandoyeya", "daddydog"])
             data.posts[author]?.forEach(({ operation }) => {
@@ -69,7 +69,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
        * Monitor an account known to create comments in this range.
        * Also check for comments in the same range to verify account was active
        */
-      bot.onPosts("gtg").or.onComments("gtg").subscribe({
+      bot.onPosts("gtg").onComments("gtg").subscribe({
         next(data) {
           // Count posts (should be 0)
           data.posts["gtg"]?.forEach(() => {
@@ -106,7 +106,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
        * Monitor multiple accounts for posts (should not trigger for comment activity)
        * Also Verify these accounts were active with comments
        */
-      bot.onPosts(...testAccounts).or.onComments(...testAccounts).subscribe({
+      bot.onPosts(...testAccounts).onComments(...testAccounts).subscribe({
         next(data) {
           testAccounts.forEach(account => {
             data.posts[account]?.forEach(() => {
@@ -142,7 +142,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
        * Monitor for posts from a specific account
        * Also Verify other accounts were posting in this range
        */
-      bot.onPosts("nonexistent-account").or.onPosts("mtyszczak").subscribe({
+      bot.onPosts("nonexistent-account").onPosts("mtyszczak").subscribe({
         next(data) {
           data.posts["nonexistent-account"]?.forEach(() => {
             monitoredAccountPosts++;
@@ -220,7 +220,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const capturedComments: Array<{ author: string; blockNumber: number }> = [];
 
-      (bot).onBlock().or.onComments("zayyar99", "beckyroyal").subscribe({
+      (bot).onBlock().onComments("zayyar99", "beckyroyal").subscribe({
         next(data) {
           for (const author of ["zayyar99", "beckyroyal"])
             data.comments[author]?.forEach(({ operation }) => {
@@ -260,7 +260,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
        * Monitor an account known to create posts in this range for comments (should not trigger)
        * Also check for posts in the same range to verify account was active with posts
        */
-      (bot).onComments("mtyszczak").or.onPosts("mtyszczak").subscribe({
+      (bot).onComments("mtyszczak").onPosts("mtyszczak").subscribe({
         next(data) {
           // Count comments (should be 0)
           data.comments["mtyszczak"]?.forEach(() => {
@@ -297,7 +297,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
        * Monitor multiple accounts for comments (should not trigger for post activity)
        * Also verify these accounts were active with posts
        */
-      (bot).onComments(...testAccounts).or.onPosts(...testAccounts).subscribe({
+      (bot).onComments(...testAccounts).onPosts(...testAccounts).subscribe({
         next(data) {
           testAccounts.forEach(account => {
             data.comments[account]?.forEach(() => {
@@ -333,7 +333,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
        * Monitor for comments from a specific account that doesn't commented
        * Also verify other accounts were commenting in this range
        */
-      (bot).onComments("nonexistent-commenter").or.onComments("gtg").subscribe({
+      (bot).onComments("nonexistent-commenter").onComments("gtg").subscribe({
         next(data) {
           data.comments["nonexistent-commenter"]?.forEach(() => {
             monitoredAccountComments++;
@@ -387,7 +387,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
 
       (bot)
         .onPosts("mtyszczak", "author2", "author3")
-        .or.onComments("secret-art", "author2", "author3")
+        .onComments("secret-art", "author2", "author3")
         .subscribe({
           next(data) {
             for (const author of ["mtyszczak", "secret-art", "author2", "author3"]) {
@@ -447,7 +447,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const capturedVotes: Array<{ voter: string; blockNumber: number }> = [];
 
-      (bot).onBlock().or.onVotes("noctury", "the-burn").subscribe({
+      (bot).onBlock().onVotes("noctury", "the-burn").subscribe({
         next(data) {
           for (const voter of ["noctury", "the-burn"])
             data.votes[voter]?.forEach(({ operation }) => {
@@ -486,7 +486,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
        * Monitor an account known to create posts/comments but does not vote in this range
        * Also Check for posts to verify account was active
        */
-      (bot).onVotes("mtyszczak").or.onPosts("mtyszczak").or.onComments("mtyszczak").subscribe({
+      (bot).onVotes("mtyszczak").onPosts("mtyszczak").onComments("mtyszczak").subscribe({
         next(data) {
           // Count votes (should be 0)
           data.votes["mtyszczak"]?.forEach(() => {
@@ -524,7 +524,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
        * Monitor for votes from a specific account that doesn't vote much
        * Also Verify other accounts were voting in this range
        */
-      (bot).onVotes("nonexistent-voter").or.onVotes("noctury").subscribe({
+      (bot).onVotes("nonexistent-voter").onVotes("noctury").subscribe({
         next(data) {
           data.votes["nonexistent-voter"]?.forEach(() => {
             monitoredAccountVotes++;
@@ -572,21 +572,21 @@ test.describe("WorkerBee Individual Filter Verification", () => {
     expect(result).toBeFalsy();
   });
 
-  test("Multiple 'or' filters should work correctly", async({ createWorkerBeeTest }) => {
+  test("Multiple 'and' filters should work correctly", async({ createWorkerBeeTest }) => {
     const result = await createWorkerBeeTest((bot, resolve, reject) => {
       const capturedPosts: string[] = [];
 
       (bot)
-        .onPosts("mtyszczak").or.or.or.or.or.onComments("secret-art")
+        .onPosts("mtyszczak").and.and.and.and.and.and.onVotes("jacor").provideBlockData()
         .subscribe({
           next(data) {
-            for (const author of ["mtyszczak", "secret-art"]) {
-              data.posts[author]?.forEach(({ operation }) => {
-                capturedPosts.push(`Post by ${operation.author}: ${operation.permlink}`);
+            for (const author of ["mtyszczak", "jacor"]) {
+              data.posts[author as keyof typeof data["posts"]]?.forEach(({ operation }) => {
+                capturedPosts.push(`Post by ${operation.author}: ${operation.permlink} in block ${data.block.number}`);
               });
 
-              data.comments[author]?.forEach(({ operation }) => {
-                capturedPosts.push(`Comment by ${operation.author}: ${operation.permlink}`);
+              data.votes[author as keyof typeof data["votes"]]?.forEach(({ operation }) => {
+                capturedPosts.push(`Vote by ${operation.voter}: ${operation.permlink} in block ${data.block.number}`);
               });
             }
 
@@ -600,11 +600,8 @@ test.describe("WorkerBee Individual Filter Verification", () => {
     }, 96549390, 96549415);
 
     expect(result).toEqual([
-      "Comment by secret-art: re-jfang003-sxg1lb",
-      "Comment by secret-art: re-aussieninja-sxg1lm",
-      "Post by mtyszczak: hi-ve-everyone",
-      "Comment by secret-art: re-aussieninja-sxg1m5",
-      "Comment by secret-art: re-jfang003-sxg1mg"
+      "Post by mtyszczak: hi-ve-everyone in block 96549402",
+      "Vote by jacor: i-went-to-a-doctors-office-my-vision-is-improving-eng-esp in block 96549402",
     ]);
   });
 });

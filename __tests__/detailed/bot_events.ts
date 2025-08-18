@@ -293,7 +293,7 @@ test.describe("WorkerBee Bot events test", () => {
         new Promise<void>(res => {
           bot.start();
 
-          const observer = bot.observe.onAccountsFullManabar(/* EManabarType.RC */ 2, "initminer").or.onBlockNumber(1);
+          const observer = bot.observe.onAccountsFullManabar(/* EManabarType.RC */ 2, "initminer").onBlockNumber(1);
           observer.subscribe({
             next() {
               res();
@@ -319,7 +319,7 @@ test.describe("WorkerBee Bot events test", () => {
         new Promise<void>(res => {
           bot.start();
 
-          const observer = bot.observe.onBlockNumber(1).or.onAccountsFullManabar(/* EManabarType.RC */ 2, "initminer");
+          const observer = bot.observe.onBlockNumber(1).onAccountsFullManabar(/* EManabarType.RC */ 2, "initminer");
           observer.subscribe({
             next() {
               res();
@@ -349,7 +349,7 @@ test.describe("WorkerBee Bot events test", () => {
           res = _res;
           bot.start();
 
-          const observer = bot.observe.onBlock().or.onBlock().or.onBlock().or.onBlock().or.onBlock();
+          const observer = bot.observe.onBlock().onBlock().onBlock().onBlock().onBlock();
           observer.subscribe({
             next() {
               ++calls;
