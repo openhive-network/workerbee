@@ -88,7 +88,7 @@ export interface IComment extends IPostCommentIdentity {
   enumVotes(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IVote>;
   getContent(): string;
   wasVotedByUser(userName: IAccountIdentity): boolean;
-  getCommensCount(): number;
+  getCommentsCount(): number;
 
   /**
    * Allows to generate a slug for the comment, which can be used in URLs or as a unique identifier.
@@ -149,6 +149,7 @@ export interface IBloggingPlatform {
   viewerContext?: IAccountIdentity;
   communityContext?: ICommunityIdentity;
   getPost(postId: IPostCommentIdentity): IPost;
+  getComment(commentId: IPostCommentIdentity): IComment;
   enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IPost>;
   configureViewContext(accontName: IAccountIdentity, communityName?: ICommunityIdentity): void;
   enumCommunities(filter: ICommunityFilters, pagination: IPagination): Iterable<ICommunity>

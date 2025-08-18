@@ -1,5 +1,5 @@
 import { IActiveBloggingPlatform, IBloggingPlatform, IComment, IPost, IPostCommentIdentity, IPostCommentsFilters } from "./interfaces"
-import { WPGetPostsParams, WPPost } from "./wordpress-reference"
+import { WPComment, WPGetCommentsParams, WPGetPostsParams, WPPost, WPUser } from "./wordpress-reference"
 
 /*
 We need to get this done in 4 categories:
@@ -27,13 +27,13 @@ class RestAPI {
     }
   }
 
-  getPostById(postId: string): WPPost {
+  public getPostById(postId: string): WPPost {
     const post = this.bloggingPlatform.getPost(this.extractFullIdFromPostId(postId))
     return {
       id: 0, // TEMP
       author: 0, // TEMP
-      categories: [],// TEMP we need to transpone tags for this
-      comment_status: 'open', // By default always open
+      categories: [], // TEMP we need to transpone tags for this
+      comment_status: "open", // By default always open
       content: {
         protected: false,
         rendered: post.getContent()
@@ -67,7 +67,7 @@ class RestAPI {
     }
   }
 
-  getPosts(params: WPGetPostsParams): Iterable<IPost> {
+  public getPosts(params: WPGetPostsParams): Iterable<IPost> {
     const filters: IPostCommentsFilters = {
       endTime: params.before ? params.before : undefined,
       startTime: params.after ? params.after : undefined,
@@ -77,38 +77,76 @@ class RestAPI {
     return posts;
   }
 
-  deletePost(postId: string): void {
+  public deletePost(postId: string): void {
     const postIdentification = this.extractFullIdFromPostId(postId); // Remember about solving ID problem
     this.activeBloggingPlatform.deletePost(postIdentification);
   }
 
-  createPost(): void {
+  public createPost(): void {
 
   }
 
-  editPost(): void {
+  public editPost(): void {
 
   }
 
-  getComment(): IComment {
+  public getComment(commentsId: string): WPComment {
+    const commentIdentification = this.extractFullIdFromPostId(commentsId); // Remember about solving ID problem
+    const comment = this.bloggingPlatform.getComment(commentIdentification);
+    return {
+      author: 0, // TEMP
+      author_email: "",
+      author_ip: "",
+      author_name: commentIdentification.author.name,
+      author_url: "",
+      author_user_agent: "",
+      content: {rendered: comment.getContent()},
+      date: comment.publishedAt,
+      date_gmt: comment.publishedAt,
+      id: 0, // TEMP,
+      link: comment.generateSlug(),
+      meta: {},
+      parent: 0, // ID of parent comment later
+      post: 0, // ID of parrent post, difficult
+      status: "publish",
+      type: ""
+    }
+  }
+
+  public getComments(params: WPGetCommentsParams): Iterable<IComment> {
+    const filters = {
+      endTime: params.before ? params.before : undefined,
+      startTime: params.after ? params.after : undefined,
+      sortBy: params.orderby ? params.orderby: undefined, // Adjust possible sorts
+    }
+    const post = this.bloggingPlatform.getPost({author: params.author, id: params.post }) // Get proper types of this
+    const comments = post.enumReplies(filters, {page: params.page || 1, pageSize: params.per_page || 100});
+    return comments;
+  }
+
+  public deleteComment(): void {
 
   }
 
-  getComments(): Iterable<IComment> {
+  public createComment(): void {
 
   }
 
-  deleteComment(): void {
+  public editComment(): void {
 
   }
 
-  createComment(): void {
+  // Users - we do not want to edit or remove them
+
+  public getUser(): WPUser {
+
+  } 
+
+  public getUsers(): Iterable<WPUser> {
 
   }
 
-  editComment(): void {
-    
-  }
+
 
 
 }
