@@ -111,7 +111,7 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
     const blocksAnalyzed: number[] = [];
 
     return new Promise<void>((resolve, reject) => {
-      const listener = this.observe.onTransactionIds(apiTx.id, apiTx.legacy_id).or.onBlock().subscribe({
+      const listener = this.observe.onTransactionIds(apiTx.id, apiTx.legacy_id).onBlock().subscribe({
         next(val) {
           const transaction = val.transactions[apiTx.id] || val.transactions[apiTx.legacy_id];
           if (transaction === undefined) {

@@ -93,19 +93,13 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @returns Unsubscribable object that can be used to unsubscribe from the filters
    */
   public subscribe(observer: Partial<Observer<TPreviousSubscriberData>>): Unsubscribable {
-    if (this.operands.length > 0) {
-      if (this.operands.length === 1) // Optimize by not creating a logical AND filter for only one filter
-        this.filterContainers.push(this.operands[0]);
-      else
-        this.filterContainers.push(new LogicalAndFilter(this.worker, this.operands));
-      this.operands = [];
-    }
+    this.applyAnd();
 
     const committedFilters = this.filterContainers;
-    // Optimize by not creating a logical OR filter for only one filter
-    const orFilter: FilterBase = committedFilters.length === 1 ? committedFilters[0] : new LogicalOrFilter(this.worker, committedFilters);
+    // Optimize by not creating a logical AND filter for only one filter
+    const andFilter: FilterBase = committedFilters.length === 1 ? committedFilters[0] : new LogicalAndFilter(this.worker, committedFilters);
 
-    this.mediator.registerListener(observer, orFilter, Array.from(this.providers.values()));
+    this.mediator.registerListener(observer, andFilter, Array.from(this.providers.values()));
 
     this.onSubscribe();
 
@@ -125,31 +119,33 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     } as Unsubscribable & { timings: Readonly<Record<string, number>> };
   }
 
-  private applyOr(): void {
+  private applyAnd(): void {
     if (this.operands.length > 0) {
-      if (this.operands.length === 1) // Optimize by not creating a logical AND filter for only one filter
+      if (this.operands.length === 1) // Optimize by not creating a logical OR filter for only one filter
         this.filterContainers.push(this.operands[0]);
       else
-        this.filterContainers.push(new LogicalAndFilter(this.worker, this.operands));
+        this.filterContainers.push(new LogicalOrFilter(this.worker, this.operands));
       this.operands = [];
     }
   }
 
   /**
-   * Apply logical OR between the filters.
+   * Apply logical AND between the filters.
    * This is used to combine multiple filters into a single filter.
+   *
+   * @note AND takes precedence over OR, so you can chain multiple `.and` calls to create complex conditions.
    *
    * @example
    * ```ts
-   * workerbee.observe.onPost("test").or.onComment("test").subscribe({
+   * workerbee.observe.onPost("test").and.onComment("test").subscribe({
    *   next: (data) => {
    *     console.log(data);
    *   }
    * });
    * ```
    */
-  public get or(): QueenBee<TPreviousSubscriberData> {
-    this.applyOr();
+  public get and(): QueenBee<TPreviousSubscriberData> {
+    this.applyAnd();
 
     return this as unknown as QueenBee<TPreviousSubscriberData>;
   }
