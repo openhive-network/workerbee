@@ -13,6 +13,8 @@ We need to get this done in 4 categories:
   Problem 1 - posts in WordPress have ID as number, when ID of Hive posts is accout/permlink. Everything is identified by
 */
 
+
+
 class RestAPI {
   private bloggingPlatform: IBloggingPlatform;
   private activeBloggingPlatform: IActiveBloggingPlatform;
@@ -27,8 +29,7 @@ class RestAPI {
     }
   }
 
-  public getPostById(postId: string): WPPost {
-    const post = this.bloggingPlatform.getPost(this.extractFullIdFromPostId(postId))
+  private translateIPostToWPPost(post: IPost): WPPost {
     return {
       id: 0, // TEMP
       author: 0, // TEMP
@@ -67,14 +68,20 @@ class RestAPI {
     }
   }
 
-  public getPosts(params: WPGetPostsParams): Iterable<IPost> {
+  public getPostById(postId: string): WPPost {
+    const post = this.bloggingPlatform.getPost(this.extractFullIdFromPostId(postId))
+    return this.translateIPostToWPPost(post);
+  }
+
+  public * getPosts(params: WPGetPostsParams): Iterable<WPPost> {
     const filters: IPostCommentsFilters = {
       endTime: params.before ? params.before : undefined,
       startTime: params.after ? params.after : undefined,
       sortBy: params.orderby ? params.orderby: undefined, // Adjust possible sorts
     }
-    const posts = this.bloggingPlatform.enumPosts(filters, {page: params.page || 1, pageSize: params.per_page || 100})
-    return posts;
+    const posts = this.bloggingPlatform.enumPosts(filters, {page: params.page || 1, pageSize: params.per_page || 100});
+
+    for (const post of posts) yield this.translateIPostToWPPost(post);
   }
 
   public deletePost(postId: string): void {
@@ -90,14 +97,12 @@ class RestAPI {
 
   }
 
-  public getComment(commentsId: string): WPComment {
-    const commentIdentification = this.extractFullIdFromPostId(commentsId); // Remember about solving ID problem
-    const comment = this.bloggingPlatform.getComment(commentIdentification);
+  private translateICommentToWPComment(comment: IComment): WPComment {
     return {
       author: 0, // TEMP
       author_email: "",
       author_ip: "",
-      author_name: commentIdentification.author.name,
+      author_name: comment.author.name,
       author_url: "",
       author_user_agent: "",
       content: {rendered: comment.getContent()},
@@ -113,7 +118,13 @@ class RestAPI {
     }
   }
 
-  public getComments(params: WPGetCommentsParams): Iterable<IComment> {
+  public getComment(commentsId: string): WPComment {
+    const commentIdentification = this.extractFullIdFromPostId(commentsId); // Remember about solving ID problem
+    const comment = this.bloggingPlatform.getComment(commentIdentification);
+    return this.translateICommentToWPComment(comment);
+  }
+
+  public * getComments(params: WPGetCommentsParams): Iterable<WPComment> {
     const filters = {
       endTime: params.before ? params.before : undefined,
       startTime: params.after ? params.after : undefined,
@@ -121,7 +132,7 @@ class RestAPI {
     }
     const post = this.bloggingPlatform.getPost({author: params.author, id: params.post }) // Get proper types of this
     const comments = post.enumReplies(filters, {page: params.page || 1, pageSize: params.per_page || 100});
-    return comments;
+    for (const comment of comments) yield this.translateICommentToWPComment(comment);
   }
 
   public deleteComment(): void {
