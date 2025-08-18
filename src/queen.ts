@@ -150,6 +150,32 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     return this as unknown as QueenBee<TPreviousSubscriberData>;
   }
 
+  /**
+   * Apply logical OR between the filters.
+   * This is used to combine multiple filters into a single filter.
+   *
+   *
+   * When multiple conditions are met at the same time with OR, WorkerBee is smart enough to only trigger the event once,
+   * preventing duplicate notifications. Moreover if multiple events occur in the same notification cycle, they will be processed together,
+   * ensuring that your logic can account for all relevant changes at once.
+   *
+   * @note OR usage is applied implicitly, so you do not have to use this method
+   *
+   * @note AND takes precedence over OR, so you can chain multiple `.and` calls to create complex conditions.
+   *
+   * @example
+   * ```ts
+   * workerbee.observe.onPost("test").or.onComment("test").subscribe({
+   *   next: (data) => {
+   *     console.log(data);
+   *   }
+   * });
+   * ```
+   */
+  public get or(): QueenBee<TPreviousSubscriberData> {
+    return this as unknown as QueenBee<TPreviousSubscriberData>;
+  }
+
   private pushProvider<T extends new () => ProviderBase>(
     provider: T,
     options: InstanceType<T>["pushOptions"] extends undefined ? {} : Parameters<Exclude<InstanceType<T>["pushOptions"], undefined>>[0] = {}
