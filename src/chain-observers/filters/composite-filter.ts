@@ -30,15 +30,21 @@ abstract class CompositeFilter extends FilterBase {
       forceReject = reject;
     });
 
-    for(const filter of this.operands)
-      filter.match(context).then(evaluationResult => {
-        if(evaluationResult === forceResolveValue)
-          forceResolve();
-        else if (evaluationResult === forceCancelValue)
-          forceReject(new WorkerBeeUnsatisfiedFilterError());
-      }).catch(forceReject);
-
-    await forcePromise;
+    /*
+     * Resolve either when all operands resolve or when one of them resolves to forceResolveValue or rejects with forceCancelValue
+     * Internal note: Promise.race is for OR logic, Promise.all is for AND logic
+     */
+    await Promise.race([
+      Promise.all(
+        this.operands.map(filter => filter.match(context).then(evaluationResult => {
+          if(evaluationResult === forceResolveValue)
+            forceResolve();
+          else if (evaluationResult === forceCancelValue)
+            forceReject(new WorkerBeeUnsatisfiedFilterError());
+        }).catch(forceReject))
+      ),
+      forcePromise
+    ]);
   }
 };
 
