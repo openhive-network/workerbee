@@ -170,11 +170,56 @@ bot.providePastOperations(startBlock, endBlock)
 > [!IMPORTANT]
 > `providePastOperations` provides past data to the bot, allowing you to start processing historical operations and directly switch to the live data without losing any context.
 
-### Combining Observers with `.or`
+### Combining Observers
 
-WorkerBee allows you to combine multiple observers using the `.or` operator. This enables you to create complex conditions where you can react to any one of several events occurring. The resulting observer will fire if any of the chained conditions are met.
+You can subscribe to multiple events, and the observer will trigger when any of the specified conditions are met. This is useful for monitoring multiple accounts or operations without needing to write complex logic.
 
-Here's an example of how to get notified when either a specific account's manabar is full or a certain block number is reached:
+When multiple conditions are met at the same time with OR, WorkerBee is smart enough to only trigger the event once, preventing duplicate notifications. Moreover if multiple events occur in the same notification cycle, they will be processed together, ensuring that your logic can account for all relevant changes at once.
+
+WorkerBee by default uses (implicit) OR between filters:
+
+```typescript
+import WorkerBee from "@hiveio/workerbee";
+
+const bot = new WorkerBee();
+await bot.start();
+
+bot.observe
+  .onImpactedAccounts("alice", "bob", "charlie")
+  .onPostsWithTags("gtg", "blocktrades")
+  .subscribe({
+    next(data) {
+      // This will trigger if any of the accounts have activity OR if posts are detected with specific author
+      console.log(data);
+    },
+    error: console.error
+  });
+```
+
+We can also add explicit OR between them:
+
+```diff
+  import WorkerBee from "@hiveio/workerbee";
+
+  const bot = new WorkerBee();
+  await bot.start();
+
+  bot.observe
+    .onImpactedAccounts("alice", "bob", "charlie")
++   .or
+    .onPostsWithTags("gtg", "blocktrades")
+    .subscribe({
+      next(data) {
+        // This will trigger if any of the accounts have activity OR if posts are detected with specific author
+        console.log(data);
+      },
+      error: console.error
+    });
+```
+
+Yyou can also combine multiple observers using the `.and` operator to create more complex conditions, where you can react to any one of several events occurring. The resulting observer will fire if all of the chained conditions are met.
+
+Here's an example of how to get notified when either a specific account's manabar is full AND a new account is created:
 
 ```typescript
 import { EManabarType } from "@hiveio/wax";
@@ -183,27 +228,48 @@ import WorkerBee from "@hiveio/workerbee";
 const bot = new WorkerBee();
 await bot.start();
 
-console.log("👀 Watching for 'initminer' to have a full RC manabar or for new account...");
+console.log("👀 Watching for 'initminer' to have a full RC manabar and for new account...");
 
 bot.observe
   .onAccountsFullManabar(EManabarType.RC, "initminer")
-  .or.onNewAccount()
+  .and
+  .onNewAccount()
   .subscribe({
     next(data) {
-      if (data.newAccounts) {
-        data.newAccounts.forEach(({ accountName }) => {
-          console.log(`👤 New account created: @${accountName}`);
-        });
-      }
-      if (data.manabarData?.["initminer"]) {
-        console.log("🔋 'initminer' now has a full RC manabar!");
-      }
+      console.log("🔋 'initminer' now has a full RC manabar!");
+
+      data.newAccounts.forEach(({ accountName }) => {
+        console.log(`👤 New account created: @${accountName}`);
+      });
     },
     error: console.error
   });
 ```
 
-Even if multiple conditions are met at the same time, WorkerBee is smart enough to only trigger the event once, preventing duplicate notifications. Moreover if multiple events occur in the same notification cycle, they will be processed together, ensuring that your logic can account for all relevant changes at once.
+> [!NOTE]
+> AND takes precedence over OR, so you can chain multiple `.and` calls to create complex conditions
+
+```typescript
+import { EManabarType } from "@hiveio/wax";
+import WorkerBee from "@hiveio/workerbee";
+
+const bot = new WorkerBee();
+await bot.start();
+
+bot.observe
+  .onAccountsFullManabar(EManabarType.RC, "initminer")
+    .or
+    .onAccountsBalanceChange(false, "initminer")
+  .and
+  .onNewAccount()
+  .subscribe({
+    next() {
+      console.log("🔋 'initminer' now has a full RC manabar or balance changed!");
+      console.log("👤 Also someone created a new account!");
+    },
+    error: console.error
+  });
+```
 
 ### 📢 Broadcasting a Transaction
 
