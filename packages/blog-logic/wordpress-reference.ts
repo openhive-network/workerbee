@@ -204,3 +204,24 @@ export interface WPGetCommentsParams {
   /** Password for password-protected posts */
   password?: string;
 }
+
+export interface WPCreatePostPayload {
+  date?: string;
+  date_gmt?: string;
+  slug?: string;
+  status?: "publish" | "future" | "draft" | "pending" | "private";
+  password?: string;
+  title?: { rendered?: string; raw?: string };
+  content?: { rendered?: string; raw?: string };
+  author?: number;
+  excerpt?: { rendered?: string; raw?: string };
+  featured_media?: number;
+  comment_status?: "open" | "closed";
+  ping_status?: "open" | "closed";
+  format?: "standard" | "aside" | "chat" | "gallery" | "link" | "image" | "quote" | "status" | "video" | "audio";
+  sticky?: boolean;
+  template?: string;
+  categories?: number[];
+  tags?: number[];
+  meta?: Record<string, any>;
+}

@@ -1,5 +1,5 @@
 import { IActiveBloggingPlatform, IBloggingPlatform, IComment, IPost, IPostCommentIdentity, IPostCommentsFilters } from "./interfaces"
-import { WPComment, WPGetCommentsParams, WPGetPostsParams, WPPost, WPUser } from "./wordpress-reference"
+import { WPComment, WPCreatePostPayload, WPGetCommentsParams, WPGetPostsParams, WPPost, WPUser } from "./wordpress-reference"
 
 /*
 We need to get this done in 4 categories:
@@ -89,8 +89,8 @@ class RestAPI {
     this.activeBloggingPlatform.deletePost(postIdentification);
   }
 
-  public createPost(): void {
-
+  public createPost(params: WPCreatePostPayload): void {
+    this.activeBloggingPlatform.post(params.content?.rendered || "", [],  params.title?.rendered) // Add observer in the future.
   }
 
   public editPost(): void {
