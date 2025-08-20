@@ -95,6 +95,8 @@ export interface IComment extends IPostCommentIdentity {
   getContent(): string;
   wasVotedByUser(userName: IAccountIdentity): boolean;
   getCommentsCount(): number;
+  getParent(): IPostCommentIdentity;
+  getTopPost(): IPostCommentIdentity;
 
   /**
    * Allows to generate a slug for the comment, which can be used in URLs or as a unique identifier.

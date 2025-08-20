@@ -24,21 +24,17 @@ export class RestAPI {
     return {author: {name: ""}, permlink: ""};
   }
 
-  private extractFullIdFromPostId (postId: string): IPostCommentIdentity {
-    const splitedPostId = postId.split("/");
-    return {
-      author: {
-        name: splitedPostId[0],
-      },
-      id: splitedPostId[1]
-    }
+  private hashStringToInteger (name: string): number {
+    // Return the converted value.
+    return 0;
   }
+
 
   private translateIPostToWPPost(post: IPost): WPPost {
     return {
-      id: 0, // TEMP
-      author: 0, // TEMP
-      categories: [], // TEMP we need to transpone tags for this
+      id: this.hashStringToInteger(post.permlink), // TEMP
+      author: this.hashStringToInteger(post.author.name), // TEMP
+      categories: [], // No idea what to do with this if tags are a thing
       comment_status: "open", // By default always open
       content: {
         protected: false,
@@ -50,7 +46,7 @@ export class RestAPI {
         protected: false,
         rendered: post.summary
       },
-      featured_media: 0, // TEMP, no idea
+      featured_media: 0, // It can be set to 0
       format: "standard",
       guid: {
         rendered:post.generateSlug(),
@@ -63,12 +59,12 @@ export class RestAPI {
       slug: post.generateSlug(),
       status: "publish",
       sticky: false,
-      tags: [], // convert them later to our text tags
+      tags: post.tags.map((tag) => this.hashStringToInteger(tag)), // convert them later to our text tags
       template: "", // No idea so far,
       title: {
         rendered: post.title
       },
-      type: "" // uknown
+      type: "post" // uknown
 
     }
   }
@@ -110,7 +106,7 @@ export class RestAPI {
 
   private translateICommentToWPComment(comment: IComment): WPComment {
     return {
-      author: 0, // TEMP
+      author: this.hashStringToInteger(comment.author.name),
       author_email: "",
       author_ip: "",
       author_name: comment.author.name,
@@ -119,11 +115,11 @@ export class RestAPI {
       content: {rendered: comment.getContent()},
       date: comment.publishedAt,
       date_gmt: comment.publishedAt,
-      id: 0, // TEMP,
+      id: this.hashStringToInteger(comment.permlink),
       link: comment.generateSlug(),
       meta: {},
-      parent: 0, // ID of parent comment later
-      post: 0, // ID of parrent post, difficult
+      parent: this.hashStringToInteger(comment.getParent().permlink),
+      post: this.hashStringToInteger(comment.getTopPost().permlink),
       status: "publish",
       type: ""
     }
