@@ -3,38 +3,35 @@
  * Category: 👥 Social & Content
  * Demo: onComments() — log new comments by authors.
  *
- * The onComments observer monitors new comment creation on the Hive blockchain:
- * - Filters by specific author account names
- * - Captures replies to posts and nested comment threads
- * - Real-time conversation and engagement tracking
+ * This observer monitors new comment creation on the Hive blockchain. Filters by
+ * specific author account names and captures replies to posts and nested comment
+ * threads. Multiple authors can be monitored at single observer call.
  *
- * This snippet demonstrates:
- * - Author-specific comment monitoring using account filters
- * - Automatic provision of comment data by WorkerBee (content, parent info, etc.)
- * - Comment thread analysis and engagement metrics
+ * Filter Function Inputs:
+ * - `...authors: TAccountName[]` - Author account names to monitor for new comments
  *
- * Data Types & IDE IntelliSense:
- * - `author` (string): The account that created the comment
- * - `permlink` (string): Unique identifier for the comment
- * - `body`: Comment content text
- * - `parent_author` and `parent_permlink`: The post or comment being replied to
- * - `json_metadata`: Additional metadata and app information
- * - IDE will show all available comment properties via IntelliSense
- *
- * Cross-reference: See on-posts.ts for original post monitoring
+ * Callback Data:
+ * The callback receives data of type {@link ICommentProviderData},
+ * which is automatically deduced from the set of configured filters.
  */
-import WorkerBee from "../../../src";
+import WorkerBee from "@hiveio/workerbee";
 
 const bot = new WorkerBee();
 await bot.start();
 
 console.log("⏳ Watching for new comments...");
 
-bot.observe.onComments("gtg").subscribe({
+bot.observe.onComments("guest4test", "guest4test1").subscribe({
+  /*
+   * This observer will trigger when guest4test or guest4test1 creates a new comment.
+   * See on-posts.ts for more details on how observing comment_operation works.
+   * In this case, the callback will occur for comment_operation with not empty parent_author property.
+   */
   next(data) {
-    data.comments.gtg?.forEach(({ operation }) => {
-      console.log(`💬 New comment detected: ${operation.author}/${operation.permlink}`);
-    });
+    if (data.comments.guest4test)
+      data.comments.guest4test?.forEach(({ operation }) => {
+        console.log(`💬 New comment by guest4test: ${operation.author}/${operation.permlink}`);
+      });
   },
   error: console.error
 });

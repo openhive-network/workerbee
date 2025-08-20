@@ -3,25 +3,35 @@
  * Category: ⚙️ Blockchain Infrastructure
  * Demo: onTransactionIds() — monitor specific transaction IDs.
  *
- * The onTransactionIds observer triggers when specific transaction IDs
- * appear on the blockchain. Useful for tracking specific transactions.
+ * This observer triggers when specific transaction IDs appear on the blockchain.
+ * Useful for tracking specific transactions and their inclusion in blocks.
  *
- * Data Types & IDE IntelliSense:
- * - `transactionIds` (string[]): Transaction IDs to monitor
- * - `data.transactions`: Transaction data when IDs are found
- * - IDE shows all available transaction properties via IntelliSense
+ * Filter Function Inputs:
+ * - `...transactionIds: string[]` - Transaction IDs to monitor
+ *
+ * Callback Data:
+ * The callback receives data of type {@link ITransactionProviderData},
+ * which is automatically deduced from the set of configured filters.
  */
-import WorkerBee from "../../../src";
+import WorkerBee from "@hiveio/workerbee";
 
 const bot = new WorkerBee();
 await bot.start();
 
 console.log("⏳ Watching for specific transaction IDs...");
 
-// Example transaction ID (replace with actual ones)
-bot.observe.onTransactionIds("example-tx-id-1").subscribe({
+// Example transaction IDs (replace with actual ones)
+bot.observe.onTransactionIds("example-tx-id-1", "example-tx-id-2").subscribe({
+  /*
+   * This observer will trigger when any of the specified transaction IDs appear on the blockchain.
+   * The callback receives data of type {@link ITransactionProviderData}, which includes:
+   * - `data.transactions` - Contains transaction data for each found transaction ID
+   * All transaction IDs will be present in the data object, but those not found will have undefined values.
+   * You should check for the existence of each transaction before accessing its properties when observing multiple IDs.
+   */
   next(data) {
-    console.log(`🔍 Transaction found: ${data.transactions["example-tx-id-1"]}`);
+    if (data.transactions["example-tx-id-1"])
+      console.log("🔍 Transaction found: example-tx-id-1");
   },
   error: console.error
 });
