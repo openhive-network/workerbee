@@ -10,6 +10,7 @@ export interface IPagination {
 export interface ICommonFilters {
   readonly startTime?: Date;
   readonly endTime?: Date;
+  order?: "asc" | "desc";
 }
 
 export interface IVotesFilters extends ICommonFilters {
@@ -19,9 +20,14 @@ export interface IVotesFilters extends ICommonFilters {
 }
 
 export interface IPostCommentsFilters extends ICommonFilters {
-  readonly sortBy?: "date" | "votes" | "trending" | "permlink";
+  readonly sortBy?: "author" | "date" | "id" | "include" | "modified" | "parent" | "relevance" | "slug" | "include_slugs" | "title";
   readonly positiveVotes?: boolean;
   readonly tags?: string[];
+  readonly modificationStartTime?: Date;
+  readonly modificationEndTime?: Date;
+  readonly author?: string;
+  readonly searchInText?: string;
+  readonly slug?: string | string[];
 }
 
 export interface ICommunityFilters extends ICommonFilters {

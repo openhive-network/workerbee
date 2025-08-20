@@ -80,9 +80,15 @@ export class RestAPI {
 
   public * getPosts(params: WPGetPostsParams): Iterable<WPPost> {
     const filters: IPostCommentsFilters = {
-      endTime: params.before ? params.before : undefined,
-      startTime: params.after ? params.after : undefined,
-      sortBy: params.orderby ? params.orderby: undefined, // Adjust possible sorts
+      endTime: params.before,
+      startTime: params.after,
+      sortBy: params.orderby,
+      modificationStartTime: params.modified_before,
+      modificationEndTime: params.modified_before,
+      order: params.order,
+      slug: params.slug,
+      searchInText: params.search,
+
     }
     const posts = this.bloggingPlatform.enumPosts(filters, {page: params.page || 1, pageSize: params.per_page || 100});
 
@@ -131,9 +137,11 @@ export class RestAPI {
 
   public * getComments(params: WPGetCommentsParams): Iterable<WPComment> {
     const filters = {
-      endTime: params.before ? params.before : undefined,
-      startTime: params.after ? params.after : undefined,
-      sortBy: params.orderby ? params.orderby: undefined, // Adjust possible sorts
+      endTime: params.before,
+      startTime: params.after,
+      sortBy: params.orderby,
+      order: params.order,
+      searchInText: params.search,
     }
     const post = this.bloggingPlatform.getPost({author: params.author, id: params.post }) // Get proper types of this
     const comments = post.enumReplies(filters, {page: params.page || 1, pageSize: params.per_page || 100});
