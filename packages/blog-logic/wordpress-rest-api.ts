@@ -15,9 +15,14 @@ We need to get this done in 4 categories:
 
 
 
-class RestAPI {
+export class RestAPI {
   private bloggingPlatform: IBloggingPlatform;
   private activeBloggingPlatform: IActiveBloggingPlatform;
+
+  private getHivePostCommentIdentificationByWPId (wpInteger: number): IPostCommentIdentity {
+    // Insert all hask code there
+    return {author: {name: ""}, permlink: ""};
+  }
 
   private extractFullIdFromPostId (postId: string): IPostCommentIdentity {
     const splitedPostId = postId.split("/");
@@ -68,8 +73,8 @@ class RestAPI {
     }
   }
 
-  public getPostById(postId: string): WPPost {
-    const post = this.bloggingPlatform.getPost(this.extractFullIdFromPostId(postId))
+  public getPostById(postId: number): WPPost {
+    const post = this.bloggingPlatform.getPost(this.getHivePostCommentIdentificationByWPId(postId))
     return this.translateIPostToWPPost(post);
   }
 
@@ -85,12 +90,12 @@ class RestAPI {
   }
 
   public deletePost(postId: string): void {
-    const postIdentification = this.extractFullIdFromPostId(postId); // Remember about solving ID problem
-    this.activeBloggingPlatform.deletePost(postIdentification);
+    //  const postIdentification = this.extractFullIdFromPostId(postId); // Remember about solving ID problem
+    // this.activeBloggingPlatform.deletePost(postIdentification);
   }
 
   public createPost(params: WPCreatePostPayload): void {
-    this.activeBloggingPlatform.post(params.content?.rendered || "", [],  params.title?.rendered) // Add observer in the future.
+    // this.activeBloggingPlatform.post(params.content?.rendered || "", [],  params.title?.rendered) // Add observer in the future.
   }
 
   public editPost(): void {
@@ -118,8 +123,8 @@ class RestAPI {
     }
   }
 
-  public getComment(commentsId: string): WPComment {
-    const commentIdentification = this.extractFullIdFromPostId(commentsId); // Remember about solving ID problem
+  public getComment(commentsId: number): WPComment {
+    const commentIdentification = this.getHivePostCommentIdentificationByWPId(commentsId); // Remember about solving ID problem
     const comment = this.bloggingPlatform.getComment(commentIdentification);
     return this.translateICommentToWPComment(comment);
   }
@@ -158,6 +163,5 @@ class RestAPI {
   }
 
 
-
-
 }
+

@@ -42,7 +42,7 @@ export interface ICommunityIdentity {
  */
 export interface IPostCommentIdentity {
   readonly author: IAccountIdentity;
-  readonly id: string;
+  readonly permlink: string;
 }
 
 export interface IVote {
