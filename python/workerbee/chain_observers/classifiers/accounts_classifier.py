@@ -16,7 +16,7 @@ from workerbee.chain_observers.classifiers.collector_classifier_base import (
 class HiveAssetDetailedBalance:
     liquid: NaiAsset
     unclaimed: NaiAsset
-    delegated: NaiAsset
+    total: NaiAsset
 
 
 @dataclass
@@ -26,7 +26,7 @@ class ManabarData:
 
 
 @dataclass
-class MaxManabarData:
+class MaxManabarData(ManabarData):
     max: int
 
 
@@ -52,7 +52,7 @@ class AccountBalance:
 @dataclass
 class Account:
     name: str
-    upvote_manabar: ManabarData
+    upvote_manabar: MaxManabarData
     downvote_manabar: ManabarData
     posting_json_metadata: dict[str, Any]
     json_metadata: dict[str, Any]
