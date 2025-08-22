@@ -1,5 +1,7 @@
 import { IActiveBloggingPlatform, IBloggingPlatform, IComment, IPost, IPostCommentIdentity, IPostCommentsFilters } from "./interfaces"
 import { WPComment, WPCreatePostPayload, WPGetCommentsParams, WPGetPostsParams, WPPost, WPUser } from "./wordpress-reference"
+import type { Request, Response } from "express";
+import express from "express";
 
 /*
 We need to get this done in 4 categories:
@@ -18,6 +20,15 @@ We need to get this done in 4 categories:
 export class RestAPI {
   private bloggingPlatform: IBloggingPlatform;
   private activeBloggingPlatform: IActiveBloggingPlatform;
+
+  public createServer () {
+    const app = express();
+
+    app.get("/posts", (req: Request, res: Response) => {
+      const query = req.query;
+      res.json(this.getPosts(query))
+    }) 
+  }
 
   private getHivePostCommentIdentificationByWPId (wpInteger: number): IPostCommentIdentity {
     // Insert all hask code there
