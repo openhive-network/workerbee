@@ -28,6 +28,21 @@ export class RestAPI {
       const query = req.query;
       res.json(this.getPosts(query))
     }) 
+
+    app.get("/comments", (req: Request, res: Response) => {
+      const query = req.query;
+      res.json(this.getComments(query))
+    }) 
+
+    app.get("/post/:id", (req: Request, res: Response) => {
+      const id = Number(req.params.id);
+      res.json(this.getPostById(id))
+    }) 
+
+    app.get("/comments/:id", (req: Request, res: Response) => {
+      const id = Number(req.params.id);
+      res.json(this.getCommentById(id))
+    }) 
   }
 
   private getHivePostCommentIdentificationByWPId (wpInteger: number): IPostCommentIdentity {
@@ -136,7 +151,7 @@ export class RestAPI {
     }
   }
 
-  public getComment(commentsId: number): WPComment {
+  public getCommentById(commentsId: number): WPComment {
     const commentIdentification = this.getHivePostCommentIdentificationByWPId(commentsId); // Remember about solving ID problem
     const comment = this.bloggingPlatform.getComment(commentIdentification);
     return this.translateICommentToWPComment(comment);
