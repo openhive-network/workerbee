@@ -18,8 +18,11 @@ We need to get this done in 4 categories:
 
 
 export class RestAPI {
+
+  constructor (initialBloggingPlatform) {
+    this.bloggingPlatform = initialBloggingPlatform;
+  }
   private bloggingPlatform: IBloggingPlatform;
-  private activeBloggingPlatform: IActiveBloggingPlatform;
 
   public createServer () {
     const app = express();
