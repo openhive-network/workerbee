@@ -1247,4 +1247,32 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
 
     expect(result).toEqual({ barddev: "Manabar data received: (0/0)", gtg: "Manabar data received: (2897631713028020/2942436075440162)" });
   });
+
+  mockTest("Should detect new vote", async ({ createMockWorkerBeeTest }) => {
+    const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
+      (bot as QueenBee).onVotes("gtg").subscribe({
+        next: (data) => {
+          const now = Date.now();
+
+          const votes: string[] = [];
+
+          if (data.votes.gtg)
+            data.votes.gtg?.forEach(({ operation }) => {
+              votes.push(JSON.stringify(operation));
+            });
+
+          if (votes.length > 1 || (Date.now() - now) < 28000)
+            resolve(votes);
+        },
+        error: (err) => {
+          console.error(err);
+          reject(err);
+        }
+      });
+    }, true);
+
+    expect(result).toEqual([
+      "{\"voter\":\"gtg\",\"author\":\"hbd.funder\",\"weight\":10000,\"permlink\":\"re-upvote-this-post-to-fund-hbdstabilizer-20250716t045515z\"}"
+    ]);
+  });
 });
