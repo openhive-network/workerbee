@@ -37,14 +37,29 @@ export class RestAPI {
       res.json(this.getComments(query))
     }) 
 
-    app.get("/post/:id", (req: Request, res: Response) => {
-      const id = Number(req.params.id);
-      res.json(this.getPostById(id))
+    app.get("/categories", (req: Request, res: Response) => {
+      const query = req.query;
+      //res.json()
     }) 
 
-    app.get("/comments/:id", (req: Request, res: Response) => {
-      const id = Number(req.params.id);
-      res.json(this.getCommentById(id))
+    app.get("/tags", (req: Request, res: Response) => {
+      const query = req.query;
+      //res.json()
+    }) 
+
+    app.get("/users", (req: Request, res: Response) => {
+      const query = req.query;
+      //res.json()
+    }) 
+
+    app.get("/media", (req: Request, res: Response) => {
+      const query = req.query;
+      res.json([])
+    }) 
+
+    app.get("/pages", (req: Request, res: Response) => {
+      const query = req.query;
+      res.json([])
     }) 
   }
 
