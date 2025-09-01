@@ -150,6 +150,6 @@ export const post3 = {
   ]
 }
 
-export const allPosts = [post1, post2, post3];
+export const allPosts = [post3, post2, post1];
 
 
