@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import cors from "cors";
 import { categoryHive } from "./mocks/categories";
 import { comments1, comments2, comments3 } from "./mocks/comments";
 import { allPosts, post1, post2, post3 } from "./mocks/posts";
@@ -10,6 +11,7 @@ const PORT = 4000;
 
 // Middleware to parse JSON
 app.use(express.json());
+app.use(cors())
 
 // ✅ All routes inside this router will start with /wp-json/wp/v2
 const apiRouter = express.Router();
