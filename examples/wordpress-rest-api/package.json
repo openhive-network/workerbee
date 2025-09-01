@@ -9,6 +9,7 @@
     "dev": "tsx ./wordpress-rest-api.ts"
   },
   "dependencies": {
+    "@hiveio/wax": "1.27.6-rc10-stable.250804212246",
     "@hiveio/workerbee": "file:../..",
     "cors": "^2.8.5",
     "express": "^5.1.0"
