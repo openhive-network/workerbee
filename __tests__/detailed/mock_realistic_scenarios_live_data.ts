@@ -284,9 +284,9 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
     });
 
     expect(result).toEqual([
-      "Account: gtg, Balance: 0",
-      "RC mana: 161024584599674",
-      "UPVOTE mana: 2897631713028020",
+      "Account: gtg, Balance: 3468",
+      "RC mana: 2152098568737624",
+      "UPVOTE mana: 18469160006473",
       "Block number: 97477291",
       "Feed price: 280/1000"
     ]);
@@ -1025,7 +1025,7 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
     expect(result).toEqual([
       "Duplicate providers block: 97477291",
       "Duplicate providers account: gtg",
-      "Duplicate providers manabar: 161024584599674"
+      "Duplicate providers manabar: 2152098568737624"
     ]);
   });
 
@@ -1064,9 +1064,9 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
       "Provider duplication gtg: gtg",
       "Provider duplication blocktrades: blocktrades",
       "Provider duplication thebeedevs: thebeedevs",
-      "Provider duplication RC gtg: 161024584599674",
+      "Provider duplication RC gtg: 380450521230160",
       "Provider duplication UPVOTE gtg: 2897631713028020",
-      "Provider duplication RC blocktrades: 15564167323386971"
+      "Provider duplication RC blocktrades: 29850078403493"
     ]);
   });
 
@@ -1245,7 +1245,7 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
       });
     }, true);
 
-    expect(result).toEqual({ barddev: "Manabar data received: (0/0)", gtg: "Manabar data received: (2897631713028020/2942436075440162)" });
+    expect(result).toEqual({ barddev: "Manabar data received: (0/0)", gtg: "Manabar data received: (2944815083303610/2967310839581315)" });
   });
 
   mockTest("Should detect new vote", async ({ createMockWorkerBeeTest }) => {

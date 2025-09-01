@@ -1,5 +1,5 @@
 [
-    {
+  {
     "req": {
       "jsonrpc": "2.0",
       "method": "rc_api.find_rc_accounts",
@@ -99,6 +99,57 @@
           }
         ]
       }
+    }
+  },
+  {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "rc_api.find_rc_accounts",
+      "params": {
+        "accounts": [
+          "gtg",
+          "blocktrades"
+        ]
+      },
+      "id": 1
+    },
+    "res": {
+      "jsonrpc": "2.0",
+      "result": {
+        "rc_accounts": [
+          {
+            "account": "gtg",
+            "rc_manabar": {
+              "current_mana": 380450521230160,
+              "last_update_time": 1756721658
+            },
+            "max_rc_creation_adjustment": {
+              "amount": "2020748973",
+              "precision": 6,
+              "nai": "@@000000037"
+            },
+            "max_rc": 2993945278224944,
+            "delegated_rc": 155000000000,
+            "received_delegated_rc": 10174616133
+          },
+          {
+            "account": "blocktrades",
+            "rc_manabar": {
+              "current_mana": 29850078403493,
+              "last_update_time": 1756721643
+            },
+            "max_rc_creation_adjustment": {
+              "amount": "2020748973",
+              "precision": 6,
+              "nai": "@@000000037"
+            },
+            "max_rc": "15765039714758148",
+            "delegated_rc": 16760000000,
+            "received_delegated_rc": 0
+          }
+        ]
+      },
+      "id": 1
     }
   }
 ]

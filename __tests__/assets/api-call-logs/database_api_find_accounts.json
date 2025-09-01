@@ -896,6 +896,191 @@
       "method": "database_api.find_accounts",
       "params": {
         "accounts": [
+          "gtg"
+        ]
+      },
+      "id": 1
+    },
+    "res": {
+      "jsonrpc": "2.0",
+      "result": {
+        "accounts": [
+          {
+            "id": 14007,
+            "name": "gtg",
+            "owner": {
+              "weight_threshold": 1,
+              "account_auths": [],
+              "key_auths": [
+                [
+                  "STM5RLQ1Jh8Kf56go3xpzoodg4vRsgCeWhANXoEXrYH7bLEwSVyjh",
+                  1
+                ],
+                [
+                  "STM6LLegbAgLAy28EHrffBVuANFWcFgmqRMW13wBmTExqFE9SCkg4",
+                  1
+                ]
+              ]
+            },
+            "active": {
+              "weight_threshold": 1,
+              "account_auths": [],
+              "key_auths": [
+                [
+                  "STM4vuEE8F2xyJhwiNCnHxjUVLNXxdFXtVxgghBq5LVLt49zLKLRX",
+                  1
+                ],
+                [
+                  "STM6LLegbAgLAy28EHrffBVuANFWcFgmqRMW13wBmTExqFE9SCkg4",
+                  1
+                ]
+              ]
+            },
+            "posting": {
+              "weight_threshold": 1,
+              "account_auths": [],
+              "key_auths": [
+                [
+                  "STM5tp5hWbGLL1R3tMVsgYdYxLPyAQFdKoYFbT2hcWUmrU42p1MQC",
+                  1
+                ],
+                [
+                  "STM6LLegbAgLAy28EHrffBVuANFWcFgmqRMW13wBmTExqFE9SCkg4",
+                  1
+                ]
+              ]
+            },
+            "memo_key": "STM4uD3dfLvbz7Tkd7of4K9VYGnkgrY5BHSQt52vE52CBL5qBfKHN",
+            "json_metadata": "{\"profile\":{\"witness_description\": \"Gandalf the Grey, building Hive, improving Hive infrastructure.\",\"profile_image\":\"https://grey.house/img/grey_4.jpg\",\"name\":\"Gandalf the Grey\",\"about\":\"IT Wizard, Hive Witness\",\"location\":\"Hive\",\"version\":2}}",
+            "posting_json_metadata": "",
+            "proxy": "",
+            "previous_owner_update": "2016-07-14T23:05:30",
+            "last_owner_update": "2016-07-21T21:48:03",
+            "last_account_update": "2016-07-21T21:48:06",
+            "created": "2016-06-30T17:22:21",
+            "mined": true,
+            "recovery_account": "steem",
+            "last_account_recovery": "2016-07-21T21:48:06",
+            "reset_account": "null",
+            "comment_count": 0,
+            "lifetime_vote_count": 0,
+            "post_count": 57,
+            "can_vote": true,
+            "voting_manabar": {
+              "current_mana": 2890067228183842,
+              "last_update_time": 1474663833
+            },
+            "downvote_manabar": {
+              "current_mana": 4617290001618,
+              "last_update_time": 1474663833
+            },
+            "balance": {
+              "amount": "0",
+              "precision": 3,
+              "nai": "@@000000021"
+            },
+            "savings_balance": {
+              "amount": "0",
+              "precision": 3,
+              "nai": "@@000000021"
+            },
+            "hbd_balance": {
+              "amount": "3468",
+              "precision": 3,
+              "nai": "@@000000013"
+            },
+            "hbd_seconds": "0",
+            "hbd_seconds_last_update": "2016-09-09T17:18:09",
+            "hbd_last_interest_payment": "2016-09-09T17:18:09",
+            "savings_hbd_balance": {
+              "amount": "3468",
+              "precision": 3,
+              "nai": "@@000000013"
+            },
+            "savings_hbd_seconds": "0",
+            "savings_hbd_seconds_last_update": "1970-01-01T00:00:00",
+            "savings_hbd_last_interest_payment": "1970-01-01T00:00:00",
+            "savings_withdraw_requests": 0,
+            "reward_hbd_balance": {
+              "amount": "194",
+              "precision": 3,
+              "nai": "@@000000013"
+            },
+            "reward_hive_balance": {
+              "amount": "0",
+              "precision": 3,
+              "nai": "@@000000021"
+            },
+            "reward_vesting_balance": {
+              "amount": "2617000164",
+              "precision": 6,
+              "nai": "@@000000037"
+            },
+            "reward_vesting_hive": {
+              "amount": "872",
+              "precision": 3,
+              "nai": "@@000000021"
+            },
+            "vesting_shares": {
+              "amount": "18469160006473",
+              "precision": 6,
+              "nai": "@@000000037"
+            },
+            "delegated_vesting_shares": {
+              "amount": "0",
+              "precision": 6,
+              "nai": "@@000000037"
+            },
+            "received_vesting_shares": {
+              "amount": "0",
+              "precision": 6,
+              "nai": "@@000000037"
+            },
+            "vesting_withdraw_rate": {
+              "amount": "0",
+              "precision": 6,
+              "nai": "@@000000037"
+            },
+            "post_voting_power": {
+              "amount": "18469160006473",
+              "precision": 6,
+              "nai": "@@000000037"
+            },
+            "next_vesting_withdrawal": "1969-12-31T23:59:59",
+            "withdrawn": 0,
+            "to_withdraw": 0,
+            "withdraw_routes": 0,
+            "pending_transfers": 0,
+            "curation_rewards": 20403,
+            "posting_rewards": 1973628,
+            "proxied_vsf_votes": [
+              30412408791348,
+              438966760068,
+              0,
+              0
+            ],
+            "witnesses_voted_for": 20,
+            "last_post": "2016-11-14T20:57:27",
+            "last_root_post": "2016-10-10T20:55:45",
+            "last_post_edit": "2016-11-14T20:57:27",
+            "last_vote_time": "2016-09-15T19:46:21",
+            "post_bandwidth": 10000,
+            "pending_claimed_accounts": 0,
+            "open_recurrent_transfers": 0,
+            "is_smt": false,
+            "delayed_votes": [],
+            "governance_vote_expiration_ts": "2017-09-14T10:54:48"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "req": {
+      "jsonrpc": "2.0",
+      "method": "database_api.find_accounts",
+      "params": {
+        "accounts": [
           "gtg",
           "blocktrades"
         ]
@@ -2643,6 +2828,522 @@
             "withdraw_routes": 0,
             "withdrawn": 0,
             "witnesses_voted_for": 0
+          }
+        ]
+      }
+    }
+  },
+  {
+    "req": {"jsonrpc":"2.0", "method":"database_api.find_accounts", "params": {"accounts": ["mtyszczak", "thebeedevs", "gtg"]}, "id":1},
+    "res": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "accounts": [
+          {
+            "active": {
+              "account_auths": [],
+              "key_auths": [
+                [
+                  "STM5Xq7bLQC89TicYpLLjuU8NrQ5ZXJ8QBsApiHQvcrZFXiyUu25R",
+                  1
+                ],
+                [
+                  "STM8matiAM2APWyKuiHPFGhbsGCBXE4qK9AMAkTiNH9EvzbbYDXBo",
+                  1
+                ]
+              ],
+              "weight_threshold": 1
+            },
+            "balance": {
+              "amount": "1",
+              "nai": "@@000000021",
+              "precision": 3
+            },
+            "can_vote": true,
+            "comment_count": 0,
+            "created": "2021-10-14T19:34:09",
+            "curation_rewards": 2418,
+            "delayed_votes": [],
+            "delegated_vesting_shares": {
+              "amount": "0",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "downvote_manabar": {
+              "current_mana": 160380171485,
+              "last_update_time": 1756723785
+            },
+            "governance_vote_expiration_ts": "2026-06-05T19:30:00",
+            "hbd_balance": {
+              "amount": "18731",
+              "nai": "@@000000013",
+              "precision": 3
+            },
+            "hbd_last_interest_payment": "1970-01-01T00:00:00",
+            "hbd_seconds": "0",
+            "hbd_seconds_last_update": "1970-01-01T00:00:00",
+            "id": 2068195,
+            "is_smt": false,
+            "json_metadata": "{}",
+            "last_account_recovery": "1970-01-01T00:00:00",
+            "last_account_update": "2025-06-28T13:01:42",
+            "last_owner_update": "2025-06-09T14:40:30",
+            "last_post": "2025-07-11T14:32:12",
+            "last_post_edit": "2025-07-11T14:32:12",
+            "last_root_post": "2025-06-15T20:04:27",
+            "last_vote_time": "2025-09-01T10:49:45",
+            "lifetime_vote_count": 0,
+            "memo_key": "STM8matiWDmfyNMfFejqfqB63pFvgK3kYPHyevTa8hsWKDBcrTLoN",
+            "mined": false,
+            "name": "mtyszczak",
+            "next_vesting_withdrawal": "1969-12-31T23:59:59",
+            "open_recurrent_transfers": 0,
+            "owner": {
+              "account_auths": [],
+              "key_auths": [
+                [
+                  "STM6matixsBC7GDJGr8NSBKQ6j4XBBsqX8ZTQ1HLc35V1UyaftY6t",
+                  1
+                ],
+                [
+                  "STM88jJsveFTfij9V912dk3tnARKgFYCFypfwQfGKYdWknb9etoYS",
+                  1
+                ]
+              ],
+              "weight_threshold": 1
+            },
+            "pending_claimed_accounts": 0,
+            "pending_transfers": 0,
+            "post_bandwidth": 0,
+            "post_count": 6,
+            "post_voting_power": {
+              "amount": "641520685942",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "posting": {
+              "account_auths": [
+                [
+                  "voterbee",
+                  1
+                ]
+              ],
+              "key_auths": [
+                [
+                  "STM6matiYCM7DuSwSRvQAr9bG32RpP7kYFV4apz35GB84oYfSQVCk",
+                  1
+                ],
+                [
+                  "STM8P7jzSezAB9yS1FwyyEwp8iFQPux8KqJ3gnKERvStDt1YMj14V",
+                  1
+                ]
+              ],
+              "weight_threshold": 1
+            },
+            "posting_json_metadata": "{\"profile\":{\"profile_image\":\"https://images.hive.blog/DQmcLS945UUggJd9TEWCLEQXtLTQ9GmvpkhGDW4GxSsGgC5/bees_dont_let_me_program.png\",\"about\":\"C++/TS Hive Developer\",\"location\":\"Poland\",\"version\":2}}",
+            "posting_rewards": 631351,
+            "previous_owner_update": "2022-07-26T16:23:36",
+            "proxied_vsf_votes": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "proxy": "",
+            "received_vesting_shares": {
+              "amount": "10014000000",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "recovery_account": "appreciator",
+            "reset_account": "null",
+            "reward_hbd_balance": {
+              "amount": "0",
+              "nai": "@@000000013",
+              "precision": 3
+            },
+            "reward_hive_balance": {
+              "amount": "0",
+              "nai": "@@000000021",
+              "precision": 3
+            },
+            "reward_vesting_balance": {
+              "amount": "3025679729",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "reward_vesting_hive": {
+              "amount": "1820",
+              "nai": "@@000000021",
+              "precision": 3
+            },
+            "savings_balance": {
+              "amount": "0",
+              "nai": "@@000000021",
+              "precision": 3
+            },
+            "savings_hbd_balance": {
+              "amount": "65122",
+              "nai": "@@000000013",
+              "precision": 3
+            },
+            "savings_hbd_last_interest_payment": "2025-06-23T19:08:45",
+            "savings_hbd_seconds": "0",
+            "savings_hbd_seconds_last_update": "2025-06-23T19:08:45",
+            "savings_withdraw_requests": 0,
+            "to_withdraw": 0,
+            "vesting_shares": {
+              "amount": "631506685942",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "vesting_withdraw_rate": {
+              "amount": "0",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "voting_manabar": {
+              "current_mana": 628633515461,
+              "last_update_time": 1756723785
+            },
+            "withdraw_routes": 0,
+            "withdrawn": 0,
+            "witnesses_voted_for": 1
+          },
+          {
+            "active": {
+              "account_auths": [],
+              "key_auths": [
+                [
+                  "STM8CidwjgjWMU1yFrr5dRpMddJ3sqwpUJ2vvN8nX3UV6GkoJcu1Z",
+                  1
+                ]
+              ],
+              "weight_threshold": 1
+            },
+            "balance": {
+              "amount": "185",
+              "nai": "@@000000021",
+              "precision": 3
+            },
+            "can_vote": true,
+            "comment_count": 0,
+            "created": "2023-09-14T11:06:45",
+            "curation_rewards": 205316,
+            "delayed_votes": [],
+            "delegated_vesting_shares": {
+              "amount": "0",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "downvote_manabar": {
+              "current_mana": 1148781111608,
+              "last_update_time": 1756715193
+            },
+            "governance_vote_expiration_ts": "2026-08-29T16:51:30",
+            "hbd_balance": {
+              "amount": "95967",
+              "nai": "@@000000013",
+              "precision": 3
+            },
+            "hbd_last_interest_payment": "1970-01-01T00:00:00",
+            "hbd_seconds": "0",
+            "hbd_seconds_last_update": "1970-01-01T00:00:00",
+            "id": 2471034,
+            "is_smt": false,
+            "json_metadata": "",
+            "last_account_recovery": "1970-01-01T00:00:00",
+            "last_account_update": "2025-07-10T14:40:30",
+            "last_owner_update": "1970-01-01T00:00:00",
+            "last_post": "2025-08-22T19:13:45",
+            "last_post_edit": "2025-08-22T19:13:45",
+            "last_root_post": "2025-08-22T19:13:45",
+            "last_vote_time": "2025-09-01T08:26:33",
+            "lifetime_vote_count": 0,
+            "memo_key": "STM5KXGmNUBca3f35Y5sp6Vv42LA8AwGkDVZC6E42M3vzrXQYQ4Xh",
+            "mined": false,
+            "name": "thebeedevs",
+            "next_vesting_withdrawal": "1969-12-31T23:59:59",
+            "open_recurrent_transfers": 0,
+            "owner": {
+              "account_auths": [],
+              "key_auths": [
+                [
+                  "STM7uwP8TNxSvZZKkVmnAC26iKo9wthwfzS6vax2Uh2AkqQuCQfRh",
+                  1
+                ]
+              ],
+              "weight_threshold": 1
+            },
+            "pending_claimed_accounts": 0,
+            "pending_transfers": 0,
+            "post_bandwidth": 0,
+            "post_count": 42,
+            "post_voting_power": {
+              "amount": "4595124446433",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "posting": {
+              "account_auths": [
+                [
+                  "itsola",
+                  1
+                ],
+                [
+                  "mtyszczak",
+                  1
+                ],
+                [
+                  "small.minion",
+                  1
+                ],
+                [
+                  "voterbee",
+                  1
+                ],
+                [
+                  "zgredek",
+                  1
+                ]
+              ],
+              "key_auths": [
+                [
+                  "STM6ovoFrK6WMsh6pTDNMywPuFpAsa5HJbubeyZZsQmhs16Nq6knq",
+                  1
+                ]
+              ],
+              "weight_threshold": 1
+            },
+            "posting_json_metadata": "{\"profile\":{\"profile_image\":\"https://images.hive.blog/DQmNzDBjKGhadc6A8AYyD93SZkJ9RHtS15LSzK3Fw5Da6gw/clive_bee_logo.png\",\"version\":2}}",
+            "posting_rewards": 5604569,
+            "previous_owner_update": "1970-01-01T00:00:00",
+            "proxied_vsf_votes": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "proxy": "gandalf",
+            "received_vesting_shares": {
+              "amount": "0",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "recovery_account": "gtg",
+            "reset_account": "null",
+            "reward_hbd_balance": {
+              "amount": "42",
+              "nai": "@@000000013",
+              "precision": 3
+            },
+            "reward_hive_balance": {
+              "amount": "0",
+              "nai": "@@000000021",
+              "precision": 3
+            },
+            "reward_vesting_balance": {
+              "amount": "2249451399",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "reward_vesting_hive": {
+              "amount": "1355",
+              "nai": "@@000000021",
+              "precision": 3
+            },
+            "savings_balance": {
+              "amount": "0",
+              "nai": "@@000000021",
+              "precision": 3
+            },
+            "savings_hbd_balance": {
+              "amount": "0",
+              "nai": "@@000000013",
+              "precision": 3
+            },
+            "savings_hbd_last_interest_payment": "2025-08-29T17:09:06",
+            "savings_hbd_seconds": "430117782",
+            "savings_hbd_seconds_last_update": "2025-08-29T17:41:24",
+            "savings_withdraw_requests": 1,
+            "to_withdraw": 0,
+            "vesting_shares": {
+              "amount": "4595124446433",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "vesting_withdraw_rate": {
+              "amount": "0",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "voting_manabar": {
+              "current_mana": 4503221957504,
+              "last_update_time": 1756715193
+            },
+            "withdraw_routes": 0,
+            "withdrawn": 0,
+            "witnesses_voted_for": 0
+          },
+          {
+            "active": {
+              "account_auths": [],
+              "key_auths": [
+                [
+                  "STM8NWQYG4BvjGNu8zqqV9fbR7aSCZHcxkVib41PYnpGmPRe6BHVG",
+                  1
+                ]
+              ],
+              "weight_threshold": 1
+            },
+            "balance": {
+              "amount": "96",
+              "nai": "@@000000021",
+              "precision": 3
+            },
+            "can_vote": true,
+            "comment_count": 0,
+            "created": "2016-06-30T17:22:21",
+            "curation_rewards": 463299454,
+            "delayed_votes": [],
+            "delegated_vesting_shares": {
+              "amount": "0",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "downvote_manabar": {
+              "current_mana": 748982140733986,
+              "last_update_time": 1756730742
+            },
+            "governance_vote_expiration_ts": "2026-07-31T20:31:30",
+            "hbd_balance": {
+              "amount": "465",
+              "nai": "@@000000013",
+              "precision": 3
+            },
+            "hbd_last_interest_payment": "2021-06-13T21:34:42",
+            "hbd_seconds": "26576708016",
+            "hbd_seconds_last_update": "2021-06-30T11:10:30",
+            "id": 14007,
+            "is_smt": false,
+            "json_metadata": "{\"profile\":{\"witness_description\": \"Gandalf the Grey, building Hive, improving Hive infrastructure.\",\"profile_image\":\"https://grey.house/img/grey_4.jpg\",\"name\":\"Gandalf the Grey\",\"about\":\"IT Wizard, Hive Witness\",\"location\":\"Hive\",\"version\":2}}",
+            "last_account_recovery": "2016-07-21T21:48:06",
+            "last_account_update": "2025-08-10T13:17:27",
+            "last_owner_update": "2017-03-21T18:37:42",
+            "last_post": "2025-08-30T19:33:33",
+            "last_post_edit": "2025-08-30T19:33:33",
+            "last_root_post": "2025-08-26T23:08:18",
+            "last_vote_time": "2025-09-01T11:21:45",
+            "lifetime_vote_count": 0,
+            "memo_key": "STM4uD3dfLvbz7Tkd7of4K9VYGnkgrY5BHSQt52vE52CBL5qBfKHN",
+            "mined": true,
+            "name": "gtg",
+            "next_vesting_withdrawal": "1969-12-31T23:59:59",
+            "open_recurrent_transfers": 0,
+            "owner": {
+              "account_auths": [],
+              "key_auths": [
+                [
+                  "STM5RLQ1Jh8Kf56go3xpzoodg4vRsgCeWhANXoEXrYH7bLEwSVyjh",
+                  1
+                ]
+              ],
+              "weight_threshold": 1
+            },
+            "pending_claimed_accounts": 69958,
+            "pending_transfers": 0,
+            "post_bandwidth": 10000,
+            "post_count": 7165,
+            "post_voting_power": {
+              "amount": "2995928562935947",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "posting": {
+              "account_auths": [
+                [
+                  "voterbee",
+                  1
+                ]
+              ],
+              "key_auths": [
+                [
+                  "STM5tp5hWbGLL1R3tMVsgYdYxLPyAQFdKoYFbT2hcWUmrU42p1MQC",
+                  1
+                ]
+              ],
+              "weight_threshold": 1
+            },
+            "posting_json_metadata": "{\"profile\":{\"profile_image\":\"https://grey.house/img/gandalf.png\",\"name\":\"Gandalf the Grey\",\"about\":\"IT Wizard, Hive Witness\",\"location\":\"Hive\",\"witness_description\":\"Gandalf the Grey, Building Hive.\",\"version\":2}}",
+            "posting_rewards": 22421109,
+            "previous_owner_update": "2016-07-21T21:48:03",
+            "proxied_vsf_votes": [
+              6347098871690749,
+              5232661877344,
+              0,
+              0
+            ],
+            "proxy": "",
+            "received_vesting_shares": {
+              "amount": "106902000000",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "recovery_account": "roelandp",
+            "reset_account": "null",
+            "reward_hbd_balance": {
+              "amount": "0",
+              "nai": "@@000000013",
+              "precision": 3
+            },
+            "reward_hive_balance": {
+              "amount": "0",
+              "nai": "@@000000021",
+              "precision": 3
+            },
+            "reward_vesting_balance": {
+              "amount": "0",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "reward_vesting_hive": {
+              "amount": "0",
+              "nai": "@@000000021",
+              "precision": 3
+            },
+            "savings_balance": {
+              "amount": "0",
+              "nai": "@@000000021",
+              "precision": 3
+            },
+            "savings_hbd_balance": {
+              "amount": "0",
+              "nai": "@@000000013",
+              "precision": 3
+            },
+            "savings_hbd_last_interest_payment": "2025-07-09T09:55:15",
+            "savings_hbd_seconds": "0",
+            "savings_hbd_seconds_last_update": "2025-07-09T09:55:15",
+            "savings_withdraw_requests": 0,
+            "to_withdraw": 0,
+            "vesting_shares": {
+              "amount": "2995821660935947",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "vesting_withdraw_rate": {
+              "amount": "0",
+              "nai": "@@000000037",
+              "precision": 6
+            },
+            "voting_manabar": {
+              "current_mana": 2970942268483358,
+              "last_update_time": 1756730742
+            },
+            "withdraw_routes": 0,
+            "withdrawn": 0,
+            "witnesses_voted_for": 30
           }
         ]
       }

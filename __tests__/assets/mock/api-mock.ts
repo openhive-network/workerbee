@@ -1,23 +1,12 @@
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "url";
 import type { Request, Response } from "express";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const hasLogFileForMethod = (method: string): boolean => {
-  const logPath = path.resolve(__dirname, "../api-call-logs", `${method.replace(/[^a-zA-Z0-9_]/g, "_")}.json`);
-
-  return fs.existsSync(logPath);
-};
 
 export type TTestAnySerializableTypeExceptUndefined = string | number | boolean | Record<string, unknown> | Array<unknown>;
 
 export type TJsonRpcResponse = {
   id: number;
   jsonrpc: string;
-  result: TTestAnySerializableTypeExceptUndefined;
+  result?: TTestAnySerializableTypeExceptUndefined;
+  error?: TTestAnySerializableTypeExceptUndefined;
 };
 
 export interface IApiMockData {
@@ -25,12 +14,10 @@ export interface IApiMockData {
 }
 
 export interface IJsonRpcMockData {
-  [key: string]: (params: Record<string, unknown>) => unknown;
+  [key: string]: (request: Record<string, unknown>) => TJsonRpcResponse | void;
 }
 
 export type TMockData = IApiMockData | IJsonRpcMockData;
-
-const mockCallIndexes: Record<string, number> = {};
 
 export abstract class AProxyMockResolver {
   public abstract hasHandler(req: Request): boolean;
@@ -38,51 +25,41 @@ export abstract class AProxyMockResolver {
   public abstract handle(req: Request, res: Response): void;
 }
 
-export class JsonRpcMock {
-  public hasHandler (req: Request): boolean {
-    const { method } = req.body;
+export class JsonRpcMock extends AProxyMockResolver {
+  public constructor(
+    private readonly mockData: TMockData
+  ) {
+    super();
+  }
 
-    if (req.method !== "POST" || typeof req.body !== "object" || typeof method !== "string")
+  public hasHandler (req: Request): boolean {
+    if (req.method !== "POST" || typeof req.body !== "object")
       return false;
 
-    return hasLogFileForMethod(method);
+    const { method } = req.body;
+
+    if (typeof method !== "string")
+      return false;
+
+    if (method in this.mockData && typeof this.mockData[method] === "function")
+      return true;
+
+    return false;
   }
 
   public handle (req: Request, res: Response): void {
     const { method } = req.body;
 
-    const logPath = path.resolve(__dirname, "../api-call-logs", `${method.replace(/[^a-zA-Z0-9_]/g, "_")}.json`);
+    if (Object.prototype.hasOwnProperty.call(this.mockData, method)) {
+      const mockFn = this.mockData[method];
+      if (typeof mockFn === "function") {
+        const response = mockFn(req.body);
 
-    if (fs.existsSync(logPath)) {
-      const arr = JSON.parse(fs.readFileSync(logPath, "utf-8"));
-
-      if (!Array.isArray(arr) || arr.length === 0) {
-        res.status(501).json({ error: "No mock data in log file" });
-
+        res.json(response);
         return;
       }
-
-      if (!(method in mockCallIndexes))
-        mockCallIndexes[method] = 0;
-
-      const idx = mockCallIndexes[method];
-      const entry = arr[idx] || arr[arr.length - 1];
-
-      mockCallIndexes[method]++;
-
-      if (!entry || !entry.res)
-        res.status(501).json({ error: `No mock log file for method ${method}` });
-
-      res.json(entry.res);
-
-      return;
     }
-    res.status(501).json({ error: `No mock log file for method ${method}` });
+
+    throw new Error(`Method ${method} is not implemented`);
   }
 }
-
-export const resetMockCallIndexes = (): void => {
-  for (const key in mockCallIndexes)
-    delete mockCallIndexes[key];
-
-};

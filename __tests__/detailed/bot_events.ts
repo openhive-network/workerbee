@@ -141,6 +141,43 @@ test.describe("WorkerBee Bot events test", () => {
     expect(result).toBeGreaterThanOrEqual(1);
   });
 
+  test("Should be able to analyze blocks successively", async({ workerbeeTest }) => {
+    test.setTimeout(60_000);
+    await workerbeeTest.dynamic(async({ WorkerBee }, hiveBlockInterval) => {
+      const bot = new WorkerBee();
+
+      let blockNumber: number | undefined;
+
+      // eslint-disable-next-line no-async-promise-executor
+      await new Promise<void>(async (resolve, reject) => {
+        const observer = bot.observe.onBlock().provideBlockData().subscribe({
+          next(data) {
+            console.info(`Got block #${data.block.number}`);
+            if (typeof blockNumber !== "undefined")
+              if (blockNumber + 1 !== data.block.number) {
+                console.error(`Blocks are not consecutive: ${blockNumber} followed by ${data.block.number}`);
+                reject(new Error("Blocks are not consecutive"));
+                return;
+              }
+
+
+            blockNumber = data.block.number;
+          },
+          error(err) {
+            console.error(err);
+          }
+        });
+
+        await bot.start();
+
+        await new Promise(res => { setTimeout(res, hiveBlockInterval * 5); });
+
+        observer.unsubscribe();
+        resolve();
+      });
+    }, HIVE_BLOCK_INTERVAL);
+  });
+
   test("Should be able to use async iterator on bot", async({ workerbeeTest }) => {
     const result = await workerbeeTest.dynamic(async({ WorkerBee }, hiveBlockInterval) => {
       const bot = new WorkerBee();

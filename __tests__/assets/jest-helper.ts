@@ -7,8 +7,8 @@ import { IWorkerBee } from "../../dist/bundle";
 import { TPastQueen } from "../../src/past-queen";
 import { QueenBee } from "../../src/queen";
 import type { IWorkerBeeGlobals, TEnvType } from "./globals";
-import { JsonRpcMock, resetMockCallIndexes } from "./mock/api-mock";
-import { resetCallIndexes } from "./mock/jsonRpcMock";
+import { JsonRpcMock } from "./mock/api-mock";
+import jsonRpcMockData, { resetMockCallCounters } from "./mock/jsonRpcMock";
 import { createServer } from "./mock/proxy-mock-server";
 
 type TWorkerBeeTestCallable<R, Args extends any[]> = (globals: IWorkerBeeGlobals, ...args: Args) => (R | Promise<R>);
@@ -65,11 +65,9 @@ const envTestFor = <GlobalType extends IWorkerBeeGlobals>(
 
     let nodeData = await fn(await (globalFunction as (...args: any[]) => any)("node"), ...args);
 
-    if (isMockEnvironment) {
-      // Reset mock call indexes between node and web environments
-      resetMockCallIndexes();
-      resetCallIndexes();
-    }
+    // Reset mock call counters between node and web test executions to ensure consistent state
+    if (isMockEnvironment)
+      resetMockCallCounters();
 
     const webData = await page.evaluate(async({ args: pageArgs, globalFunction: globalFn, webFn, isMockEnv }) => {
       /* eslint-disable no-eval */
@@ -177,14 +175,14 @@ export const mockTest = base.extend<IWorkerBeeTest, IWorkerBeeWorker>({
 
     await page.goto("http://localhost:8080/__tests__/assets/test.html", { waitUntil: "load" });
 
-    resetMockCallIndexes();
-    resetCallIndexes();
+    /* Reset mock call counters for progressive responses */
+    resetMockCallCounters();
 
     await use();
   }, { auto: true }],
 
   forEachWorker: [async ({ browser }, use) => {
-    const closeServer = await createServer(new JsonRpcMock(), 8000);
+    const closeServer = await createServer(new JsonRpcMock(jsonRpcMockData), 8000);
 
     await use();
 
