@@ -2,7 +2,7 @@ import { Entry } from "./hive";
 import { WPPost } from "./wp-reference";
 
 export const mapHivePostToWpPost = (hivePost: Entry, wpId: number, accountId: number): WPPost => {
-  const slug = `${hivePost.author}-${hivePost.permlink}`;
+  const slug = `${hivePost.author}_${hivePost.permlink}`;
   const wpPost: WPPost = {
     id:wpId,
     slug,  

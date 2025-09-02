@@ -15,25 +15,28 @@ const extendedHiveChain = hiveChain.extend<ExtendedNodeApi>();
 const app = express();
 const PORT = 4000;
 
+const simpleHash = (str): number => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+  }
+  return (hash >>> 0);
+};
+
+
+
 // Middleware to parse JSON
 app.use(express.json());
 app.use(cors());
 
-let lastAuthorPermlinkId: number  = -1; 
-const authorPermlinkToId = new Map<string, number>();
-
-let lastAccountId: number = -1;
-const accountToId = new Map<string, number>();
+const idToStringMap = new Map<number, string>();
 
 const getAuthorPermlinkFromSlug = (slug: string): {author: string, permlink: string} => {
-  const splitedSlug = slug.split("-");
+  const splitedSlug = slug.split("_");
   const author = splitedSlug[0];
   splitedSlug.shift();
-  const permlink = splitedSlug.join("-");
-  lastAuthorPermlinkId = lastAuthorPermlinkId + 1;
-  authorPermlinkToId.set(slug, lastAuthorPermlinkId);
-  lastAccountId = lastAccountId + 1;
-  accountToId.set(author, lastAccountId); 
+  const permlink = splitedSlug.join("_");
   return {
     author,
     permlink
@@ -48,9 +51,13 @@ apiRouter.get("/posts", async (req: Request, res: Response) => {
     res.json(allPosts);
   else {
     const {author, permlink} = getAuthorPermlinkFromSlug(req.query.slug as string);
+    const authorPermlinkHash = simpleHash(req.query.slug);
+    const authorHash = simpleHash(author);
+    idToStringMap.set(authorPermlinkHash, req.query.slug as string);
+    idToStringMap.set(authorHash, author);
     const result = await extendedHiveChain.api.bridge.get_post({author, permlink, observer: "hive.blog"});
     if (result) {
-      res.json(mapHivePostToWpPost(result, 1, 1));
+      res.json(mapHivePostToWpPost(result, authorPermlinkHash, authorHash));
     } else {
       res.status(404).json({ error: "Post not found" });
     }
