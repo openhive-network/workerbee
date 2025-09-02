@@ -1,4 +1,6 @@
-export const post1 = {
+import { WPPost } from "../wp-reference";
+
+export const post1: WPPost = {
   id: 1,
   date: "2025-08-25T11:10:15",
   date_gmt: "2025-08-25T11:10:15",
@@ -49,7 +51,7 @@ export const post1 = {
   ]
 }
 
-export const post2 = {
+export const post2: WPPost = {
   id: 6,
   date: "2025-08-25T11:11:36",
   date_gmt: "2025-08-25T11:11:36",
@@ -98,7 +100,7 @@ export const post2 = {
   ]
 }
 
-export const post3 = {
+export const post3: WPPost = {
   id: 9,
   date: "2025-08-25T11:12:17",
   date_gmt: "2025-08-25T11:12:17",
