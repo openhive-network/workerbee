@@ -51,7 +51,7 @@ test.describe("WorkerBee Bot events test", () => {
       /// Intentionally sign using legacy method
       const legacySigDigest = newTx.legacy_sigDigest;
       const signature = wallet.signDigest(publicKey, legacySigDigest);
-      newTx.sign(signature);
+      newTx.addSignature(signature);
 
       await bot.start();
 
