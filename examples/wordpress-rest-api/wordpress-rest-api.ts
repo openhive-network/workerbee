@@ -7,7 +7,8 @@ import { tagMock } from "./mocks/tags";
 import { userWordPress } from "./mocks/users";
 import { createHiveChain } from "@hiveio/wax";
 import { ExtendedNodeApi } from "./hive";
-import { mapHivePostToWpPost } from "./hiveToWpMap";
+import { mapHiveCommentToWPComment, mapHivePostToWpPost } from "./hiveToWpMap";
+import { WPComment } from "./wp-reference";
 
 const hiveChain = await createHiveChain();
 const extendedHiveChain = hiveChain.extend<ExtendedNodeApi>();
@@ -66,7 +67,23 @@ apiRouter.get("/posts", async (req: Request, res: Response) => {
 
 });
 
-apiRouter.get("/comments", (req: Request, res: Response) => {
+apiRouter.get("/comments", async (req: Request, res: Response) => {
+  const postId = Number(req.query.post);
+  const postParent = idToStringMap.get(postId);
+  if (postParent) {
+    console.log('CZADERSKI POST PARENT', postParent);
+    const result = await extendedHiveChain.api.bridge.get_discussion({author: postParent.split("_")[0], permlink: postParent.split("_").slice(1).join("_")});
+    if (result) {
+      const wpComments: WPComment[] = []
+      Object.entries(result).forEach(([authorPermlink, comment]) => {
+        const wpComment = mapHiveCommentToWPComment(comment, simpleHash(authorPermlink), postId, simpleHash(comment.author), postId);
+        wpComments.push(wpComment)
+      });
+      console.log('WP COMMENTS', wpComments);
+      res.json(wpComments);
+    }
+    //console.log('RESULT COMMENTS', result);
+  }
   if (req.query.post === "1")
     res.json(comments1);
   else if (req.query.post === "6")

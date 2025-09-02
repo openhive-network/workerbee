@@ -99,5 +99,9 @@ export type ExtendedNodeApi = {
   bridge: {
     get_post_header: TWaxApiRequest<{ author: string; permlink: string }, IGetPostHeader>;
     get_post: TWaxApiRequest<{ author: string; permlink: string; observer: string }, Entry | null>;
+    get_discussion: TWaxApiRequest<
+      { author: string; permlink: string; observer?: string },
+      Record<string, Entry> | null
+    >;
   };
 };
