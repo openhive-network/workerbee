@@ -876,6 +876,38 @@ test.describe("WorkerBee Bot events test", () => {
     expect(result).toBeGreaterThanOrEqual(4);
   });
 
+  test("Should be able to observe exchange transfer operation to exchange account", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+      await bot.start();
+
+      const exchangeTransfer: string[] = [];
+
+      await new Promise<void>(resolve => {
+        bot.providePastOperations(97346930, 97346940).onExchangeTransfer().subscribe({
+          next(data) {
+            data.exchangeTransferOperations.forEach(({ operation }) => {
+              exchangeTransfer.push(`Exchange transfer operation: ${operation.from} -> ${operation.to} - ${operation.amount.amount} HIVE`);
+            });
+          },
+          error(err) {
+            console.error(err);
+          },
+          complete: resolve
+        });
+      });
+
+      bot.stop();
+      bot.delete();
+
+      return exchangeTransfer;
+    });
+
+    expect(result).toEqual([
+      "Exchange transfer operation: inhivepool -> mxchive - 43120 HIVE"
+    ]);
+  });
+
   test("Should be able to observe whale alerts for large transfers", async({ workerbeeTest }) => {
     const result = await workerbeeTest(async({ WorkerBee }) => {
       const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });

@@ -765,7 +765,7 @@
               ]
             },
             "memo_key": "STM4uD3dfLvbz7Tkd7of4K9VYGnkgrY5BHSQt52vE52CBL5qBfKHN",
-            "json_metadata": "{\"profile\":{\"witness_description\": \"Gandalf the Grey, building Hive, improving Hive infrastructure.\",\"profile_image\":\"https://grey.house/img/grey_4.jpg\",\"name\":\"Gandalf the Grey\",\"about\":\"IT Wizard, Hive Witness\",\"location\":\"Hive\",\"version\":2}}",
+            "json_metadata": "{\"profile\":{\"witness_description\": \"Gandalf the Grey, changed metadata.\",\"profile_image\":\"https://grey.house/img/grey_4.jpg\",\"name\":\"Gandalf the Grey\",\"about\":\"IT Wizard, Hive Witness\",\"location\":\"Hive\",\"version\":2}}",
             "posting_json_metadata": "",
             "proxy": "",
             "previous_owner_update": "2016-07-14T23:05:30",

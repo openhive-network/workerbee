@@ -1275,4 +1275,69 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
       "{\"voter\":\"gtg\",\"author\":\"hbd.funder\",\"weight\":10000,\"permlink\":\"re-upvote-this-post-to-fund-hbdstabilizer-20250716t045515z\"}"
     ]);
   });
+
+  mockTest("Should detect account metadata change", async ({ createMockWorkerBeeTest }) => {
+    const result = await createMockWorkerBeeTest<Record<string, any>[]>((bot, resolve, reject) => {
+      (bot as QueenBee).onAccountsMetadataChange("gtg").subscribe({
+        next: (data) => {
+          const now = Date.now();
+
+          const metadata: Record<string, any>[] = [];
+
+          if (data.accounts.gtg)
+            metadata.push(data.accounts.gtg?.jsonMetadata)
+
+          if (metadata.length > 1 || (Date.now() - now) < 28000)
+            resolve(metadata);
+        },
+        error: (err) => {
+          console.error(err);
+          reject(err);
+        }
+      });
+    }, true);
+
+    expect(result).toEqual([
+      {
+        profile: {
+          about: "IT Wizard, Hive Witness",
+          location: "Hive",
+          name: "Gandalf the Grey",
+          profile_image: "https://grey.house/img/grey_4.jpg",
+          version: 2,
+          witness_description: "Gandalf the Grey, changed metadata.",
+        },
+      },
+    ]);
+  });
+
+  mockTest("Should detect account balance change", async ({ createMockWorkerBeeTest }) => {
+    const result = await createMockWorkerBeeTest<Record<string, any>[]>((bot, resolve, reject) => {
+      (bot as QueenBee).onAccountsBalanceChange(false, "gtg").subscribe({
+        next: (data) => {
+          const now = Date.now();
+
+          const balance: Record<string, any>[] = [];
+
+          if (data.accounts.gtg)
+            balance.push(data.accounts.gtg?.balance.HBD.total)
+
+          if (balance.length > 1 || (Date.now() - now) < 28000)
+            resolve(balance);
+        },
+        error: (err) => {
+          console.error(err);
+          reject(err);
+        }
+      });
+    }, true);
+
+    expect(result).toEqual([
+      {
+        amount: "3662",
+        nai: "@@000000013",
+        precision: 3,
+      },
+    ]);
+  });
 });
