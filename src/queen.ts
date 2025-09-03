@@ -311,11 +311,17 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * Subscribes to changes in the balance of a specified account.
    * This method allows monitoring of balance changes for a given account, with an option to include or exclude internal transfers.
    *
+   * Automatically provides the account data in the `next` callback.
+   *
    * @example
    * ```ts
    * workerbee.observe.onAccountsBalanceChange(false, "username").subscribe({
-   *   next: () => {
+   *   next: (data) => {
    *     console.log("@username account balance changed");
+   *     console.log("Account data:", data.accounts["username"]);
+   *     console.log("HIVE balance:", data.accounts["username"].balance.HIVE);
+   *     console.log("HBD balance:", data.accounts["username"].balance.HBD);
+   *     console.log("HP balance:", data.accounts["username"].balance.HP);
    *   }
    * });
    * ```
@@ -324,8 +330,12 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @param accounts The account name to monitor for balance changes.
    * @returns itself
    */
-  public onAccountsBalanceChange(includeInternalTransfers: boolean, ...accounts: TAccountName[]): QueenBee<TPreviousSubscriberData> {
+  public onAccountsBalanceChange<
+    TAccounts extends Array<TAccountName>
+  >(includeInternalTransfers: boolean, ...accounts: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<AccountProvider<TAccounts>["provide"]>>> {
     this.operands.push(new BalanceChangeFilter(this.worker, accounts, includeInternalTransfers));
+
+    this.pushProvider(AccountProvider, { accounts });
 
     return this;
   }
@@ -333,11 +343,16 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   /**
    * Subscribes to changes in the metadata of a specified account.
    *
+   * Automatically provides the account data in the `next` callback.
+   *
    * @example
    * ```ts
    * workerbee.observe.onAccountsMetadataChange("username").subscribe({
-   *   next: () => {
+   *   next: (data) => {
    *     console.log("Account @username metadata changed");
+   *     console.log("Account data:", data.accounts["username"]);
+   *     console.log("JSON metadata:", data.accounts["username"].jsonMetadata);
+   *     console.log("Posting JSON metadata:", data.accounts["username"].postingJsonMetadata);
    *   }
    * });
    * ```
@@ -345,8 +360,12 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @param accounts The account name to monitor for metadata changes.
    * @returns itself
    */
-  public onAccountsMetadataChange(...accounts: TAccountName[]): QueenBee<TPreviousSubscriberData> {
+  public onAccountsMetadataChange<
+    TAccounts extends Array<TAccountName>
+  >(...accounts: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<AccountProvider<TAccounts>["provide"]>>> {
     this.operands.push(new AccountMetadataChangeFilter(this.worker, accounts));
+
+    this.pushProvider(AccountProvider, { accounts });
 
     return this;
   }
