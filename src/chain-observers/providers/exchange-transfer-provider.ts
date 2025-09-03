@@ -41,15 +41,16 @@ export class ExchangeTransferProvider extends ProviderBase {
 
     if(transfer)
       for(const op of transfer) {
-        const exchange = isExchange(op.operation.from);
+        const fromExchange = isExchange(op.operation.from);
+        const toExchange = isExchange(op.operation.to);
 
-        if (exchange)
+        if (fromExchange || toExchange)
           exchangeTransfers.push({
             operation: {
               from: op.operation.from,
               to: op.operation.to,
               amount: op.operation.amount!,
-              exchange
+              exchange: (fromExchange || toExchange) as Exchange
             },
             transaction: op.transaction
           });
@@ -57,15 +58,16 @@ export class ExchangeTransferProvider extends ProviderBase {
 
     if(fromSavings)
       for(const op of fromSavings) {
-        const exchange = isExchange(op.operation.from);
+        const fromExchange = isExchange(op.operation.from);
+        const toExchange = isExchange(op.operation.to);
 
-        if (exchange)
+        if (fromExchange || toExchange)
           exchangeTransfers.push({
             operation: {
               from: op.operation.from,
               to: op.operation.to,
               amount: op.operation.amount!,
-              exchange
+              exchange: (fromExchange || toExchange) as Exchange
             },
             transaction: op.transaction
           });
@@ -73,15 +75,16 @@ export class ExchangeTransferProvider extends ProviderBase {
 
     if(escrow)
       for(const op of escrow) {
-        const exchange = isExchange(op.operation.from);
+        const fromExchange = isExchange(op.operation.from);
+        const toExchange = isExchange(op.operation.to);
 
-        if (exchange)
+        if (fromExchange || toExchange)
           exchangeTransfers.push({
             operation: {
               from: op.operation.from,
               to: op.operation.to,
               amount: op.operation.hbd_amount!,
-              exchange
+              exchange: (fromExchange || toExchange) as Exchange
             },
             transaction: op.transaction
           });
@@ -89,15 +92,16 @@ export class ExchangeTransferProvider extends ProviderBase {
 
     if(recurrent)
       for(const op of recurrent) {
-        const exchange = isExchange(op.operation.from);
+        const fromExchange = isExchange(op.operation.from);
+        const toExchange = isExchange(op.operation.to);
 
-        if (exchange)
+        if (fromExchange || toExchange)
           exchangeTransfers.push({
             operation: {
               from: op.operation.from,
               to: op.operation.to,
               amount: op.operation.amount!,
-              exchange
+              exchange: (fromExchange || toExchange) as Exchange
             },
             transaction: op.transaction
           });

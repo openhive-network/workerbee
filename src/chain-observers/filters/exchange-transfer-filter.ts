@@ -28,22 +28,22 @@ export class ExchangeTransferFilter extends FilterBase {
 
     if(transfer)
       for(const op of transfer)
-        if(isExchange(op.operation.from))
+        if(isExchange(op.operation.from) || isExchange(op.operation.to))
           return true;
 
     if(fromSavings)
       for(const op of fromSavings)
-        if(isExchange(op.operation.from))
+        if(isExchange(op.operation.from) || isExchange(op.operation.to))
           return true;
 
     if(escrow)
       for(const op of escrow)
-        if(isExchange(op.operation.from))
+        if(isExchange(op.operation.from) || isExchange(op.operation.to))
           return true;
 
     if(recurrent)
       for(const op of recurrent)
-        if(isExchange(op.operation.from))
+        if(isExchange(op.operation.from) || isExchange(op.operation.to))
           return true;
 
     return false;
