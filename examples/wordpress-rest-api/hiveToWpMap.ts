@@ -1,3 +1,4 @@
+import { simpleHash } from "./hash-utils";
 import { Entry } from "./hive";
 import { WPComment, WPPost } from "./wp-reference";
 
@@ -33,14 +34,14 @@ export const mapHivePostToWpPost = (hivePost: Entry, wpId: number, accountId: nu
   return wpPost
 }
 
-export const mapHiveCommentToWPComment = (hiveComment: Entry, commentId: number, parentId: number, authorId: number, mainPostId: number): WPComment => {
+export const mapHiveCommentToWPComment = (hiveComment: Entry, commentId: number, mainPostId: number, authorId: number): WPComment => {
+  const parentId = simpleHash(`${hiveComment.parent_author}_${hiveComment.parent_permlink}`);
   const wpComment: WPComment = {
     id: commentId,
     post: mainPostId,
-    parent: parentId, 
+    parent: parentId === mainPostId ? 0 : parentId, // There is no id for parent post 
     author: authorId,
     author_name: hiveComment.author,
-    author_email: "", // Hive does not provide email
     author_url: `https://hive.blog/@${hiveComment.author}`,
     date: new Date(hiveComment.created).toISOString(),
     date_gmt: new Date(hiveComment.created).toISOString(),
@@ -48,11 +49,9 @@ export const mapHiveCommentToWPComment = (hiveComment: Entry, commentId: number,
     link: `http://host/${hiveComment.parent_author}_${hiveComment.parent_permlink}/#comment-${commentId}`,
     status: "approved",
     type: "comment",
-    author_ip: "",
-    author_user_agent: "",
     meta: [],
     author_avatar_urls: {
-      36: `https://images.hive.blog/u/${hiveComment.author}/avatar`,
+      24: `https://images.hive.blog/u/${hiveComment.author}/avatar`,
       48: `https://images.hive.blog/u/${hiveComment.author}/avatar`,
       96: `https://images.hive.blog/u/${hiveComment.author}/avatar`
     }

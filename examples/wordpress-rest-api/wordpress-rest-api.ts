@@ -9,23 +9,13 @@ import { createHiveChain } from "@hiveio/wax";
 import { ExtendedNodeApi } from "./hive";
 import { mapHiveCommentToWPComment, mapHivePostToWpPost } from "./hiveToWpMap";
 import { WPComment } from "./wp-reference";
+import { simpleHash } from "./hash-utils";
 
 const hiveChain = await createHiveChain();
 const extendedHiveChain = hiveChain.extend<ExtendedNodeApi>();
 
 const app = express();
 const PORT = 4000;
-
-const simpleHash = (str): number => {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-  }
-  return (hash >>> 0);
-};
-
-
 
 // Middleware to parse JSON
 app.use(express.json());
@@ -50,6 +40,7 @@ const apiRouter = express.Router();
 apiRouter.get("/posts", async (req: Request, res: Response) => {
   if (req.query.page === "1")
     res.json(allPosts);
+  else if (req.query.slug === "com.chrome.devtools.json") res.json([]);
   else {
     const {author, permlink} = getAuthorPermlinkFromSlug(req.query.slug as string);
     const authorPermlinkHash = simpleHash(req.query.slug);
@@ -71,18 +62,18 @@ apiRouter.get("/comments", async (req: Request, res: Response) => {
   const postId = Number(req.query.post);
   const postParent = idToStringMap.get(postId);
   if (postParent) {
-    console.log('CZADERSKI POST PARENT', postParent);
     const result = await extendedHiveChain.api.bridge.get_discussion({author: postParent.split("_")[0], permlink: postParent.split("_").slice(1).join("_")});
     if (result) {
       const wpComments: WPComment[] = []
       Object.entries(result).forEach(([authorPermlink, comment]) => {
-        const wpComment = mapHiveCommentToWPComment(comment, simpleHash(authorPermlink), postId, simpleHash(comment.author), postId);
-        wpComments.push(wpComment)
+        if (comment.parent_author && comment.parent_permlink) {
+          const wpAuthorPermlink = authorPermlink.replace("/", "_");
+          const wpComment = mapHiveCommentToWPComment(comment, simpleHash(wpAuthorPermlink), postId, simpleHash(comment.author));
+          wpComments.push(wpComment)
+        }
       });
-      console.log('WP COMMENTS', wpComments);
       res.json(wpComments);
     }
-    //console.log('RESULT COMMENTS', result);
   }
   if (req.query.post === "1")
     res.json(comments1);
