@@ -31,6 +31,21 @@ export interface WPPost {
   categories: number[];
   tags: number[];
   class_list: string[];
+  _embed?: {
+    author: Array<{
+      id: number;
+      name: string;
+      url: string;
+      description: string;
+      link: string;
+      slug: string;
+      avatar_urls: {
+        24: string;
+        48: string;
+        96: string;
+      },
+    }>
+  }
 }
 
 // export interface WPComment {
@@ -81,4 +96,16 @@ export interface WPComment {
 
 export interface Content {
   rendered: string
+}
+
+export interface WPTag {
+  id: number,
+  count: number,
+  description: string,
+  link: string,
+  name: string,
+  slug: string,
+  taxonomy: string,
+  meta: []
+
 }
