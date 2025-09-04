@@ -75,10 +75,11 @@ const apiRouter = express.Router();
 
 apiRouter.get("/posts", async (req: Request, res: Response) => {
   if (req.query.page === "1") {
-    const result = await extendedHiveChain.api.bridge.get_ranked_posts({limit: 10, sort: "created", observer: "hive.blog", start_author: "", start_permlink: "", tag: "hive-148441"});
+    let tag = "hive-148441";
+
+    const result = await extendedHiveChain.api.bridge.get_ranked_posts({limit: 10, sort: "created", observer: "hive.blog", start_author: "", start_permlink: "", tag});
     if (result) {
-      cacheHashes(...result.flatMap(({ author, permlink }) => ([author, `${author}_${permlink}`]))),
-      // const postReplies = await Promise.all(result.map(post => getComments(simpleHash(`${post.author}_${post.permlink}`))));
+      cacheHashes(...result.flatMap(({ author, permlink, community_title, json_metadata }) => ([author, `${author}_${permlink}`, community_title || "", ...json_metadata.tags || ""]))),
       res.json(mapAndAddPostsToMap(result));
     }
   }
@@ -89,9 +90,8 @@ apiRouter.get("/posts", async (req: Request, res: Response) => {
     const authorHash = simpleHash(author);
     cacheHashes(req.query.slug as string, author);
     const result = await extendedHiveChain.api.bridge.get_post({author, permlink, observer: "hive.blog"});
-    const replies = await getComments(authorPermlinkHash);
     if (result) {
-      res.json(mapHivePostToWpPost(result, authorPermlinkHash, authorHash, replies));
+      res.json(mapHivePostToWpPost(result, authorPermlinkHash, authorHash));
     } else {
       res.status(404).json({ error: "Post not found" });
     }

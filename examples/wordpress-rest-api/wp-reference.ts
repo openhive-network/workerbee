@@ -31,7 +31,7 @@ export interface WPPost {
   categories: number[];
   tags: number[];
   class_list: string[];
-  _embed?: {
+  _embedded?: {
     replies: WPComment[][];
     author: Array<{
       id: number;
@@ -44,8 +44,9 @@ export interface WPPost {
         24: string;
         48: string;
         96: string;
-      },
-    }>
+      };
+    }>;
+    "wp:term": WPTerm[][];
   };
 }
 
@@ -109,4 +110,12 @@ export interface WPTag {
   taxonomy: string,
   meta: []
 
+}
+
+export interface WPTerm {
+  id: number;
+  link: string;
+  name: string;
+  slug: string;
+  taxonomy: string;
 }

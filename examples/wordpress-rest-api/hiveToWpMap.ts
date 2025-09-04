@@ -1,6 +1,6 @@
 import { simpleHash } from "./hash-utils";
 import { Entry } from "./hive";
-import { WPComment, WPPost, WPTag } from "./wp-reference";
+import { WPComment, WPPost, WPTag, WPTerm } from "./wp-reference";
 import { DefaultRenderer } from "@hiveio/content-renderer";
 
 const renderer = new DefaultRenderer({
@@ -20,10 +20,26 @@ const renderer = new DefaultRenderer({
     ipfsPrefix: "https://ipfs.io/ipfs/" // IPFS gateway to display ipfs images
 });
 
+const mapWpTerm = (termName: string, type: "tag" | "category"): WPTerm => {
+  const termId = simpleHash(termName);
+  const taxonomy: string = type === "tag" ? "post_tag" : "category";
+  const wpTerm: WPTerm = {
+    id: termId,
+    link: `http://localhost/${type}/${termName}/`,
+    name: termName,
+    slug: termName.toLocaleLowerCase(),
+    taxonomy,
+  };
+  return wpTerm;
+}
+
 
 export const mapHivePostToWpPost = (hivePost: Entry, wpId: number, accountId: number, replies: WPComment[] = []): WPPost => {
   const slug = `${hivePost.author}_${hivePost.permlink}`;
-  const tags  = hivePost.json_metadata?.tags?.map((tag) => `tag-${tag}`) || [];
+  const tags  = hivePost.json_metadata?.tags || [];
+  const wpTermTags = tags.map((tag) => mapWpTerm(tag, "tag"));
+  const community = hivePost.community_title;
+  const wpTermCategory = community ? [mapWpTerm(community, "category")] : [];
   const renderedBody = renderer.render(hivePost.body);
   const wpExcerpt = renderedBody.replace(/<[^>]+>/g, '').substring(0, 100);
   const wpPost: WPPost = {
@@ -47,14 +63,11 @@ export const mapHivePostToWpPost = (hivePost: Entry, wpId: number, accountId: nu
     template: "",
     format: "standard",
     meta: {},
-    categories: [],
-    tags: [],
+    categories: [community ? simpleHash(community) : 0],
+    tags: tags.map((tags) => simpleHash(tags)),
     guid: { rendered: `http://host/?p=${wpId}` },
-    class_list: [
-      `category-${hivePost.category}`,
-      ...tags
-    ],
-    _embed: {
+    class_list: [`category-${community}`],
+    _embedded: {
       replies: replies.length > 0 ? [replies] : [],
       author: [{
         id: accountId,
@@ -68,10 +81,10 @@ export const mapHivePostToWpPost = (hivePost: Entry, wpId: number, accountId: nu
           48: `https://images.hive.blog/u/${hivePost.author}/avatar`,
           96: `https://images.hive.blog/u/${hivePost.author}/avatar`
         }
-      }]
-    } 
+      }],
+      "wp:term": [...wpTermTags.map((wpTerm) => [wpTerm]), ...wpTermCategory.map((wpTerm) => [wpTerm])]
+    }
   };
-
   return wpPost
 }
 
