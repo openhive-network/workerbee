@@ -6,9 +6,9 @@ import { allPosts, post1, post2, post3 } from "./mocks/posts";
 import { tagMock } from "./mocks/tags";
 import { userWordPress } from "./mocks/users";
 import { createHiveChain } from "@hiveio/wax";
-import { ExtendedNodeApi } from "./hive";
-import { mapHiveCommentToWPComment, mapHivePostToWpPost } from "./hiveToWpMap";
-import { WPComment } from "./wp-reference";
+import { Entry, ExtendedNodeApi } from "./hive";
+import { mapHiveCommentToWPComment, mapHivePostToWpPost, mapHiveTagsToWpTags } from "./hiveToWpMap";
+import { WPComment, WPPost } from "./wp-reference";
 import { simpleHash } from "./hash-utils";
 
 const hiveChain = await createHiveChain();
@@ -34,12 +34,26 @@ const getAuthorPermlinkFromSlug = (slug: string): {author: string, permlink: str
   }
 }
 
+const mapAndAddPostsToMap = (posts: Entry[]): WPPost[] => { 
+  const mappedPosts: WPPost[] = []
+  posts.forEach(post => {
+    const postId = simpleHash(`${post.author}_${post.permlink}`);
+    const authorId = simpleHash(post.author);
+    mappedPosts.push(mapHivePostToWpPost(post, postId, authorId));
+  });
+  return mappedPosts;
+}
+
 const apiRouter = express.Router();
 
 
 apiRouter.get("/posts", async (req: Request, res: Response) => {
-  if (req.query.page === "1")
-    res.json(allPosts);
+  if (req.query.page === "1") {
+    const result = await extendedHiveChain.api.bridge.get_ranked_posts({limit: 10, sort: "created", observer: "hive.blog", start_author: "", start_permlink: "", tag: "hive-148441"});
+    if (result) {
+      res.json(mapAndAddPostsToMap(result));
+    }
+  }
   else if (req.query.slug === "com.chrome.devtools.json") res.json([]);
   else {
     const {author, permlink} = getAuthorPermlinkFromSlug(req.query.slug as string);
@@ -84,7 +98,10 @@ apiRouter.get("/comments", async (req: Request, res: Response) => {
 });
 
 apiRouter.get("/tags", (req: Request, res: Response) => {
-  res.json(tagMock);
+  const tagSlug = req.query.slug as string
+  if (tagSlug) {
+    res.json(mapHiveTagsToWpTags(tagSlug));
+  }
 });
 
 apiRouter.get("/categories", (req: Request, res: Response) => {

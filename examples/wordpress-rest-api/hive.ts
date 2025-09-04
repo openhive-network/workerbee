@@ -103,5 +103,27 @@ export type ExtendedNodeApi = {
       { author: string; permlink: string; observer?: string },
       Record<string, Entry> | null
     >;
+    get_ranked_posts: TWaxApiRequest<
+      {
+        sort: string;
+        tag: string;
+        start_author: string;
+        start_permlink: string;
+        limit: number;
+        observer: string;
+      },
+      Entry[] | null
+    >;
+    get_account_posts: TWaxApiRequest<
+      {
+        sort: string;
+        account: string;
+        start_author: string;
+        start_permlink: string;
+        limit: number;
+        observer: string;
+      },
+      Entry[] | null
+    >;
   };
 };
