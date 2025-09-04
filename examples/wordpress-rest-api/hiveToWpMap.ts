@@ -13,15 +13,15 @@ const renderer = new DefaultRenderer({
     assetsWidth: 640,
     assetsHeight: 480,
     imageProxyFn: (url: string) => url,
-    usertagUrlFn: (account: string) => "/@" + account,
-    hashtagUrlFn: (hashtag: string) => "/trending/" + hashtag,
+    usertagUrlFn: (account: string) => "https://hive.blog/@" + account,
+    hashtagUrlFn: (hashtag: string) => "https://hive.blog/trending/" + hashtag,
     isLinkSafeFn: (url: string) => true,
     addExternalCssClassToMatchingLinksFn: (url: string) => true,
     ipfsPrefix: "https://ipfs.io/ipfs/" // IPFS gateway to display ipfs images
 });
 
 
-export const mapHivePostToWpPost = (hivePost: Entry, wpId: number, accountId: number): WPPost => {
+export const mapHivePostToWpPost = (hivePost: Entry, wpId: number, accountId: number, replies: WPComment[] = []): WPPost => {
   const slug = `${hivePost.author}_${hivePost.permlink}`;
   const tags  = hivePost.json_metadata?.tags?.map((tag) => `tag-${tag}`) || [];
   const renderedBody = renderer.render(hivePost.body);
@@ -55,6 +55,7 @@ export const mapHivePostToWpPost = (hivePost: Entry, wpId: number, accountId: nu
       ...tags
     ],
     _embed: {
+      replies: replies.length > 0 ? [replies] : [],
       author: [{
         id: accountId,
         name: hivePost.author,

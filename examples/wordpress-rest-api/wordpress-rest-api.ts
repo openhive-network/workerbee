@@ -34,46 +34,17 @@ const getAuthorPermlinkFromSlug = (slug: string): {author: string, permlink: str
   }
 }
 
-const mapAndAddPostsToMap = (posts: Entry[]): WPPost[] => { 
+const mapAndAddPostsToMap = (posts: Entry[], comments: WPComment[][] = []): WPPost[] => { 
   const mappedPosts: WPPost[] = []
-  posts.forEach(post => {
+  posts.forEach((post, index) => {
     const postId = simpleHash(`${post.author}_${post.permlink}`);
     const authorId = simpleHash(post.author);
-    mappedPosts.push(mapHivePostToWpPost(post, postId, authorId));
+    mappedPosts.push(mapHivePostToWpPost(post, postId, authorId, comments[index] || []));
   });
   return mappedPosts;
 }
 
-const apiRouter = express.Router();
-
-
-apiRouter.get("/posts", async (req: Request, res: Response) => {
-  if (req.query.page === "1") {
-    const result = await extendedHiveChain.api.bridge.get_ranked_posts({limit: 10, sort: "created", observer: "hive.blog", start_author: "", start_permlink: "", tag: "hive-148441"});
-    if (result) {
-      res.json(mapAndAddPostsToMap(result));
-    }
-  }
-  else if (req.query.slug === "com.chrome.devtools.json") res.json([]);
-  else {
-    const {author, permlink} = getAuthorPermlinkFromSlug(req.query.slug as string);
-    const authorPermlinkHash = simpleHash(req.query.slug);
-    const authorHash = simpleHash(author);
-    idToStringMap.set(authorPermlinkHash, req.query.slug as string);
-    idToStringMap.set(authorHash, author);
-    const result = await extendedHiveChain.api.bridge.get_post({author, permlink, observer: "hive.blog"});
-    if (result) {
-      res.json(mapHivePostToWpPost(result, authorPermlinkHash, authorHash));
-    } else {
-      res.status(404).json({ error: "Post not found" });
-    }
-    
-  }
-
-});
-
-apiRouter.get("/comments", async (req: Request, res: Response) => {
-  const postId = Number(req.query.post);
+const getComments = async (postId: number): Promise<WPComment[]> => {
   const postParent = idToStringMap.get(postId);
   if (postParent) {
     const result = await extendedHiveChain.api.bridge.get_discussion({author: postParent.split("_")[0], permlink: postParent.split("_").slice(1).join("_")});
@@ -86,15 +57,52 @@ apiRouter.get("/comments", async (req: Request, res: Response) => {
           wpComments.push(wpComment)
         }
       });
-      res.json(wpComments);
+      return wpComments
     }
   }
-  if (req.query.post === "1")
-    res.json(comments1);
-  else if (req.query.post === "6")
-    res.json(comments2);
-  else if (req.query.post === "9")
-    res.json(comments3);
+  return []
+}
+
+const cacheHashes = (...bases: string[]) => {
+  bases.forEach(base => {
+    idToStringMap.set(simpleHash(base), base);
+  })
+}
+
+
+const apiRouter = express.Router();
+
+
+apiRouter.get("/posts", async (req: Request, res: Response) => {
+  if (req.query.page === "1") {
+    const result = await extendedHiveChain.api.bridge.get_ranked_posts({limit: 10, sort: "created", observer: "hive.blog", start_author: "", start_permlink: "", tag: "hive-148441"});
+    if (result) {
+      cacheHashes(...result.flatMap(({ author, permlink }) => ([author, `${author}_${permlink}`]))),
+      // const postReplies = await Promise.all(result.map(post => getComments(simpleHash(`${post.author}_${post.permlink}`))));
+      res.json(mapAndAddPostsToMap(result));
+    }
+  }
+  else if (req.query.slug === "com.chrome.devtools.json") res.json([]);
+  else {
+    const {author, permlink} = getAuthorPermlinkFromSlug(req.query.slug as string);
+    const authorPermlinkHash = simpleHash(req.query.slug);
+    const authorHash = simpleHash(author);
+    cacheHashes(req.query.slug as string, author);
+    const result = await extendedHiveChain.api.bridge.get_post({author, permlink, observer: "hive.blog"});
+    const replies = await getComments(authorPermlinkHash);
+    if (result) {
+      res.json(mapHivePostToWpPost(result, authorPermlinkHash, authorHash, replies));
+    } else {
+      res.status(404).json({ error: "Post not found" });
+    }
+    
+  }
+
+});
+
+apiRouter.get("/comments", async (req: Request, res: Response) => {
+  const postId = Number(req.query.post);
+  res.json(await getComments(postId));
 });
 
 apiRouter.get("/tags", (req: Request, res: Response) => {

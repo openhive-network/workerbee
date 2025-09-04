@@ -32,6 +32,7 @@ export interface WPPost {
   tags: number[];
   class_list: string[];
   _embed?: {
+    replies: WPComment[][];
     author: Array<{
       id: number;
       name: string;
@@ -45,7 +46,7 @@ export interface WPPost {
         96: string;
       },
     }>
-  }
+  };
 }
 
 // export interface WPComment {
