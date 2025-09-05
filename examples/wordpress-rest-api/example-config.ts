@@ -4,5 +4,6 @@ export const wordPressExampleConfig = {
   sort: "created", // "trending" / "hot" / "created" / "promoted" / "payout" / "payout_comments" / "muted"
   startAuthor: "",
   startPermlink: "",
-  postTag: "hive-148441"
+  postTag: "hive-148441",
+  defaultPort: 40000,
 }

@@ -34,7 +34,7 @@ const mapWpTerm = (termName: string, type: "tag" | "category"): WPTerm => {
 }
 
 
-export const mapHivePostToWpPost = (hivePost: Entry, wpId: number, accountId: number, replies: WPComment[] = []): WPPost => {
+export const mapHivePostToWpPost = (hivePost: Entry, wpId: number, accountId: number): WPPost => {
   const slug = `${hivePost.author}_${hivePost.permlink}`;
   const tags  = hivePost.json_metadata?.tags || [];
   const wpTermTags = tags.map((tag) => mapWpTerm(tag, "tag"));
@@ -68,7 +68,7 @@ export const mapHivePostToWpPost = (hivePost: Entry, wpId: number, accountId: nu
     guid: { rendered: `http://host/?p=${wpId}` },
     class_list: [`category-${community}`],
     _embedded: {
-      replies: replies.length > 0 ? [replies] : [],
+      replies: [],
       author: [{
         id: accountId,
         name: hivePost.author,
