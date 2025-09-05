@@ -114,6 +114,7 @@ export const mapHiveCommentToWPComment = (hiveComment: Entry, commentId: number,
   return wpComment;
 }
 
+// For later use
 export const mapHiveTagsToWpTags = (tagSlug: string): WPTag => {
   return {
     id: 1,

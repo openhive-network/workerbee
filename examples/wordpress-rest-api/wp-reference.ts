@@ -49,30 +49,6 @@ export interface WPPost {
     "wp:term": WPTerm[][];
   };
 }
-
-// export interface WPComment {
-//   id: number;
-//   post: number; // Post ID this comment is attached to
-//   parent: number; // Parent comment ID (if it's a reply)
-//   author: number; // User ID (0 if anonymous)
-//   author_name: string;
-//   author_email: string;
-//   author_url: string;
-//   date: string; // Date
-//   date_gmt: string; // Date
-//   content: Rendered;
-//   link: string;
-//   status: "approved";
-//   type: "comment";
-//   author_ip: string;
-//   author_user_agent: string;
-//   meta: string[];
-//   author_avatar_urls: {
-//     36: string;
-//     48: string;
-//     96: string; 
-//   }
-// }
 export interface WPComment {
   id: number;
   post: number;
