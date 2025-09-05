@@ -10,6 +10,7 @@ import { Entry, ExtendedNodeApi } from "./hive";
 import { mapHiveCommentToWPComment, mapHivePostToWpPost, mapHiveTagsToWpTags } from "./hiveToWpMap";
 import { WPComment, WPPost } from "./wp-reference";
 import { simpleHash } from "./hash-utils";
+import { wordPressExampleConfig } from "./example-config";
 
 const hiveChain = await createHiveChain();
 const extendedHiveChain = hiveChain.extend<ExtendedNodeApi>();
@@ -74,17 +75,8 @@ const apiRouter = express.Router();
 
 
 apiRouter.get("/posts", async (req: Request, res: Response) => {
-  if (req.query.page === "1") {
-    let tag = "hive-148441";
-
-    const result = await extendedHiveChain.api.bridge.get_ranked_posts({limit: 10, sort: "created", observer: "hive.blog", start_author: "", start_permlink: "", tag});
-    if (result) {
-      cacheHashes(...result.flatMap(({ author, permlink, community_title, json_metadata }) => ([author, `${author}_${permlink}`, community_title || "", ...json_metadata.tags || ""]))),
-      res.json(mapAndAddPostsToMap(result));
-    }
-  }
-  else if (req.query.slug === "com.chrome.devtools.json") res.json([]);
-  else {
+  if (req.query.slug === "com.chrome.devtools.json") res.json([]);
+  else if (!!req.query.slug) {
     const {author, permlink} = getAuthorPermlinkFromSlug(req.query.slug as string);
     const authorPermlinkHash = simpleHash(req.query.slug);
     const authorHash = simpleHash(author);
@@ -95,7 +87,19 @@ apiRouter.get("/posts", async (req: Request, res: Response) => {
     } else {
       res.status(404).json({ error: "Post not found" });
     }
-    
+  } else {
+    const result = await extendedHiveChain.api.bridge.get_ranked_posts({
+      limit: wordPressExampleConfig.postLimit, 
+      sort: wordPressExampleConfig.sort, 
+      observer: wordPressExampleConfig.observer, 
+      start_author: wordPressExampleConfig.startAuthor, 
+      start_permlink: wordPressExampleConfig.startPermlink, 
+      tag: wordPressExampleConfig.postTag
+    });
+    if (result) {
+      cacheHashes(...result.flatMap(({ author, permlink, community_title, json_metadata }) => ([author, `${author}_${permlink}`, community_title || "", ...json_metadata.tags || ""]))),
+      res.json(mapAndAddPostsToMap(result));
+    }
   }
 
 });
