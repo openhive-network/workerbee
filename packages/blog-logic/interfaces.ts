@@ -20,14 +20,11 @@ export interface IVotesFilters extends ICommonFilters {
 }
 
 export interface IPostCommentsFilters extends ICommonFilters {
-  readonly sortBy?: "author" | "date" | "id" | "include" | "modified" | "parent" | "relevance" | "slug" | "include_slugs" | "title";
-  readonly positiveVotes?: boolean;
-  readonly tags?: string[];
-  readonly modificationStartTime?: Date;
-  readonly modificationEndTime?: Date;
-  readonly author?: string;
-  readonly searchInText?: string;
-  readonly slug?: string | string[];
+  readonly limit: number;
+  readonly sort:  "trending" | "hot" | "created" | "promoted" | "payout" | "payout_comments" | "muted";
+  readonly startAuthor: string;
+  readonly startPermlink: string;
+  readonly tag: string;
 }
 
 export interface ICommunityFilters extends ICommonFilters {
@@ -87,16 +84,14 @@ export interface IAccount extends IAccountIdentity {
 export interface IComment extends IPostCommentIdentity {
   readonly publishedAt: Date;
   readonly updatedAt: Date;
-  readonly author: IAccountIdentity;
 
-  enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IReply>;
-  enumMentionedAccounts(): Iterable<IAccount>;
-  enumVotes(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IVote>;
-  getContent(): string;
-  wasVotedByUser(userName: IAccountIdentity): boolean;
-  getCommentsCount(): number;
-  getParent(): IPostCommentIdentity;
-  getTopPost(): IPostCommentIdentity;
+
+  enumMentionedAccounts(): Promise<Iterable<IAccountIdentity>>;
+  enumVotes(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IVote>>;
+  getContent(): Promise<string>;
+  wasVotedByUser(userName: IAccountIdentity): Promise<boolean>;
+
+
 
   /**
    * Allows to generate a slug for the comment, which can be used in URLs or as a unique identifier.
@@ -108,7 +103,8 @@ export interface IComment extends IPostCommentIdentity {
  * Represents a reply to a post or another reply object.
  */
 export interface IReply extends IComment {
-  readonly parent: IPostCommentIdentity;
+  parent: IPostCommentIdentity;
+  topPost: IPostCommentIdentity;
 }
 
 export interface ISession {
@@ -119,11 +115,13 @@ export interface ISession {
  * Represents a post (article) published on the platform.
  */
 export interface IPost extends IComment {
-  readonly title: string;
-  readonly summary: string;
-  readonly tags: string[];
-  readonly community?: ICommunityIdentity;
+  title: string;
+  summary: string;
+  tags: string[];
+  community?: ICommunityIdentity;
 
+  getCommentsCount(): Promise<number>;
+  enumReplies(filter: ICommonFilters, pagination: IPagination): Promise<Iterable<IReply>>;
   getTitleImage(): string;
 }
 
@@ -155,14 +153,12 @@ export interface IActiveBloggingPlatform {
 
 export interface IBloggingPlatform {
   viewerContext?: IAccountIdentity;
-  communityContext?: ICommunityIdentity;
-  getPost(postId: IPostCommentIdentity): IPost;
-  getComment(commentId: IPostCommentIdentity): IComment;
-  enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IPost>;
-  configureViewContext(accontName: IAccountIdentity, communityName?: ICommunityIdentity): void;
-  enumCommunities(filter: ICommunityFilters, pagination: IPagination): Iterable<ICommunity>
+  getPost(postId: IPostCommentIdentity): Promise<IPost>;
+  enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IPost>>;
+  configureViewContext(accontName: IAccountIdentity): void;
+  enumCommunities(filter: ICommunityFilters, pagination: IPagination): Promise<Iterable<ICommunity>>
 
-  authorize(provider: IAuthenticationProvider): Promise<IActiveBloggingPlatform>;
+  // authorize(provider: IAuthenticationProvider): Promise<IActiveBloggingPlatform>;
 }
 
 // UI integration with mock data
