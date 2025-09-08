@@ -5,5 +5,5 @@ export const wordPressExampleConfig = {
   startAuthor: "",
   startPermlink: "",
   postTag: "hive-148441",
-  defaultPort: 40000,
+  defaultPort: 4000,
 }
