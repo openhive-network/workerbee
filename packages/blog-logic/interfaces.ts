@@ -87,7 +87,6 @@ export interface IAccount extends IAccountIdentity {
 export interface IComment extends IPostCommentIdentity {
   readonly publishedAt: Date;
   readonly updatedAt: Date;
-  readonly author: IAccountIdentity;
 
   enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IReply>;
   enumMentionedAccounts(): Iterable<IAccount>;
@@ -95,8 +94,7 @@ export interface IComment extends IPostCommentIdentity {
   getContent(): string;
   wasVotedByUser(userName: IAccountIdentity): boolean;
   getCommentsCount(): number;
-  getParent(): IPostCommentIdentity;
-  getTopPost(): IPostCommentIdentity;
+
 
   /**
    * Allows to generate a slug for the comment, which can be used in URLs or as a unique identifier.
@@ -109,6 +107,7 @@ export interface IComment extends IPostCommentIdentity {
  */
 export interface IReply extends IComment {
   readonly parent: IPostCommentIdentity;
+  readonly topPost: IPostCommentIdentity;
 }
 
 export interface ISession {
@@ -157,7 +156,6 @@ export interface IBloggingPlatform {
   viewerContext?: IAccountIdentity;
   communityContext?: ICommunityIdentity;
   getPost(postId: IPostCommentIdentity): IPost;
-  getComment(commentId: IPostCommentIdentity): IComment;
   enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IPost>;
   configureViewContext(accontName: IAccountIdentity, communityName?: ICommunityIdentity): void;
   enumCommunities(filter: ICommunityFilters, pagination: IPagination): Iterable<ICommunity>
