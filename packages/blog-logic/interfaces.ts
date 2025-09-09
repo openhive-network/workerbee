@@ -88,12 +88,12 @@ export interface IComment extends IPostCommentIdentity {
   readonly publishedAt: Date;
   readonly updatedAt: Date;
 
-  enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IReply>;
-  enumMentionedAccounts(): Iterable<IAccount>;
-  enumVotes(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IVote>;
-  getContent(): string;
-  wasVotedByUser(userName: IAccountIdentity): boolean;
-  getCommentsCount(): number;
+  enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IReply>>;
+  enumMentionedAccounts(): Promise<Iterable<IAccountIdentity>>;
+  enumVotes(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IVote>>;
+  getContent(): Promise<string>;
+  wasVotedByUser(userName: IAccountIdentity): Promise<boolean>;
+  getCommentsCount(): Promise<number>;
 
 
   /**
@@ -106,8 +106,8 @@ export interface IComment extends IPostCommentIdentity {
  * Represents a reply to a post or another reply object.
  */
 export interface IReply extends IComment {
-  readonly parent: IPostCommentIdentity;
-  readonly topPost: IPostCommentIdentity;
+  parent: IPostCommentIdentity;
+  topPost: IPostCommentIdentity;
 }
 
 export interface ISession {
@@ -118,10 +118,10 @@ export interface ISession {
  * Represents a post (article) published on the platform.
  */
 export interface IPost extends IComment {
-  readonly title: string;
-  readonly summary: string;
-  readonly tags: string[];
-  readonly community?: ICommunityIdentity;
+  title: string;
+  summary: string;
+  tags: string[];
+  community?: ICommunityIdentity;
 
   getTitleImage(): string;
 }
