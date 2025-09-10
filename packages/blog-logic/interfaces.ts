@@ -20,14 +20,11 @@ export interface IVotesFilters extends ICommonFilters {
 }
 
 export interface IPostCommentsFilters extends ICommonFilters {
-  readonly sortBy?: "author" | "date" | "id" | "include" | "modified" | "parent" | "relevance" | "slug" | "include_slugs" | "title";
-  readonly positiveVotes?: boolean;
-  readonly tags?: string[];
-  readonly modificationStartTime?: Date;
-  readonly modificationEndTime?: Date;
-  readonly author?: string;
-  readonly searchInText?: string;
-  readonly slug?: string | string[];
+  readonly limit: number;
+  readonly sort:  "trending" | "hot" | "created" | "promoted" | "payout" | "payout_comments" | "muted";
+  readonly startAuthor: string;
+  readonly startPermlink: string;
+  readonly tag: string;
 }
 
 export interface ICommunityFilters extends ICommonFilters {
@@ -154,13 +151,12 @@ export interface IActiveBloggingPlatform {
 
 export interface IBloggingPlatform {
   viewerContext?: IAccountIdentity;
-  communityContext?: ICommunityIdentity;
-  getPost(postId: IPostCommentIdentity): IPost;
-  enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IPost>;
-  configureViewContext(accontName: IAccountIdentity, communityName?: ICommunityIdentity): void;
-  enumCommunities(filter: ICommunityFilters, pagination: IPagination): Iterable<ICommunity>
+  getPost(postId: IPostCommentIdentity): Promise<IPost>;
+  enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IPost>>;
+  configureViewContext(accontName: IAccountIdentity): void;
+  enumCommunities(filter: ICommunityFilters, pagination: IPagination): Promise<Iterable<ICommunity>>
 
-  authorize(provider: IAuthenticationProvider): Promise<IActiveBloggingPlatform>;
+  // authorize(provider: IAuthenticationProvider): Promise<IActiveBloggingPlatform>;
 }
 
 // UI integration with mock data

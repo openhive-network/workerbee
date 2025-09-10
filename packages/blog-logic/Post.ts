@@ -1,6 +1,6 @@
 import { TWaxExtended } from "@hiveio/wax";
 import { IAccount, IAccountIdentity, ICommunityIdentity, IPagination, IPost, IPostCommentIdentity, IPostCommentsFilters, IReply, IVote } from "./interfaces";
-import { ExtendedNodeApi, getWax } from "./wax";
+import { Entry, ExtendedNodeApi, getWax } from "./wax";
 
 export class Post implements IPost {
 
@@ -22,34 +22,29 @@ export class Post implements IPost {
       this.chain = await getWax();
   }
 
-  private getPostData = async () => {
-    await this.initializeChain();
-    const postData = await this.chain.api.bridge.get_post({author: this.author.name, permlink: this.permlink, observer: "hive.blog"});
-    this.author = {name: postData?.author || ""};
-    this.permlink = postData?.permlink || "";
-    this.publishedAt = new Date(postData?.created || "");
-    this.updatedAt = new Date(postData?.updated || "");
-    this.title = postData?.title || "";
-    this.content = postData?.body || "";
-    this.summary = this.content.substring(0, 140);
-    this.tags = postData?.json_metadata.tags || [];
-  }
-
-  public constructor(authorPermlink: IPostCommentIdentity) {
+  public constructor(authorPermlink: IPostCommentIdentity, postData: Entry) {
     this.initializeChain();
     this.author = authorPermlink.author;
     this.permlink = authorPermlink.permlink;
+
+    this.publishedAt = new Date(postData.created);
+    this.updatedAt = new Date(postData.updated);
+    this.title = postData.title;
+    this.tags = postData.json_metadata?.tags || [];
+    this.summary = postData.json_metadata?.description || "";
+    this.community = postData.community ? {name: postData.community} : undefined;
+    this.content = postData.body;
   }
 
   public generateSlug(): string {
     return `${this.author.name}_${this.permlink}`;
   }
 
-  public enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IReply> {
+  public enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IReply>> {
     return [];
   }
 
-  public enumMentionedAccounts(): Iterable<IAccountIdentity> {
+  public enumMentionedAccounts(): Promise<Iterable<IAccountIdentity>> {
     return [];
   }
 
@@ -61,15 +56,15 @@ export class Post implements IPost {
     return this.content || "";
   }
 
-  public enumVotes(filter: IPostCommentsFilters, pagination: IPagination): Iterable<IVote> {
+  public enumVotes(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IVote>> {
     return [];
   }
 
-  public getCommentsCount(): number {
+  public getCommentsCount(): Promise<number> {
     return 0;
   }
 
-  public wasVotedByUser(userName: IAccountIdentity): boolean {
+  public wasVotedByUser(userName: IAccountIdentity): Promise<boolean> {
     return false;
   }
 
