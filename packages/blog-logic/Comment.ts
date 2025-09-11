@@ -1,6 +1,7 @@
 import { TWaxExtended } from "@hiveio/wax";
 import { IAccount, IAccountIdentity, IComment, ICommunityIdentity, IPagination, IPost, IPostCommentIdentity, IPostCommentsFilters, IReply, IVote } from "./interfaces";
 import { Entry, ExtendedNodeApi, getWax } from "./wax";
+import { Reply } from "./Reply";
 
 export class Comment implements IComment {
 
@@ -17,16 +18,26 @@ export class Comment implements IComment {
   private initializeChain = async () => {
     if (!this.chain)
       this.chain = await getWax();
+    
   }
 
-  public constructor(authorPermlink: IPostCommentIdentity, postCommentData: Entry) {
+  private getData = async () => {
+    const commentData = await this.chain.api.bridge.get_post({author: this.author.name, permlink: this.permlink, observer: "hive.blog"}); // Teemporary hive.blog
+    this.publishedAt = new Date(commentData?.created || "");
+    this.updatedAt = new Date(commentData?.updated || "");
+    this.content = commentData?.body;
+  }
+
+  public constructor(authorPermlink: IPostCommentIdentity, postCommentData?: Entry) {
     this.initializeChain();
     this.author = authorPermlink.author;
     this.permlink = authorPermlink.permlink;
 
-    this.publishedAt = new Date(postCommentData.created);
-    this.updatedAt = new Date(postCommentData.updated);
-    this.content = postCommentData.body;
+    if(postCommentData) {
+      this.publishedAt = new Date(postCommentData.created);
+      this.updatedAt = new Date(postCommentData.updated);
+      this.content = postCommentData.body;
+    }
   }
 
   public generateSlug(): string {
@@ -34,7 +45,16 @@ export class Comment implements IComment {
   }
 
   public async enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IReply>> {
-    return [];
+    const replies = await this.chain.api.bridge.get_discussion({author: this.author.name, permlink: this.permlink, observer: "hive.blog"}) // Temporary hive.blog;
+    if (!replies) {
+      throw "No replies";
+    }
+    return Object.entries(replies)?.map(([authorPermlink, reply]) => new Reply(
+      {author: {name: reply.author}, permlink: reply.permlink},
+      {author: {name: reply.parent_author || ""}, permlink: reply.parent_permlink || ""},
+      {author: this.author, permlink: this.permlink},
+      reply
+    ))
   }
 
   public async enumMentionedAccounts(): Promise<Iterable<IAccountIdentity>> {

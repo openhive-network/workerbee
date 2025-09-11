@@ -14,13 +14,14 @@ export class Post extends Comment implements IPost  {
   public community?: ICommunityIdentity | undefined;
   public summary: string;
 
-  public constructor(authorPermlink: IPostCommentIdentity, postData: Entry) {
+  public constructor(authorPermlink: IPostCommentIdentity, postData?: Entry) {
     super(authorPermlink, postData);
-
-    this.title = postData.title;
-    this.tags = postData.json_metadata?.tags || [];
-    this.summary = postData.json_metadata?.description || "";
-    this.community = postData.community ? {name: postData.community} : undefined;
+    if (postData) {
+      this.title = postData.title;
+      this.tags = postData.json_metadata?.tags || [];
+      this.summary = postData.json_metadata?.description || "";
+      this.community = postData.community ? {name: postData.community} : undefined;
+    }
   }
 
   public async getContent(): Promise<string> {
