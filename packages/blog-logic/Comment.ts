@@ -44,19 +44,6 @@ export class Comment implements IComment {
     return `${this.author.name}_${this.permlink}`;
   }
 
-  public async enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IReply>> {
-    const replies = await this.chain.api.bridge.get_discussion({author: this.author.name, permlink: this.permlink, observer: "hive.blog"}) // Temporary hive.blog;
-    if (!replies) {
-      throw "No replies";
-    }
-    return Object.entries(replies)?.map(([authorPermlink, reply]) => new Reply(
-      {author: {name: reply.author}, permlink: reply.permlink},
-      {author: {name: reply.parent_author || ""}, permlink: reply.parent_permlink || ""},
-      {author: this.author, permlink: this.permlink},
-      reply
-    ))
-  }
-
   public async enumMentionedAccounts(): Promise<Iterable<IAccountIdentity>> {
     return [];
   }

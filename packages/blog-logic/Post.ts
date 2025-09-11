@@ -2,6 +2,7 @@ import { TWaxExtended } from "@hiveio/wax";
 import { IAccount, IAccountIdentity, ICommunityIdentity, IPagination, IPost, IPostCommentIdentity, IPostCommentsFilters, IReply, IVote } from "./interfaces";
 import { Entry, ExtendedNodeApi, getWax } from "./wax";
 import { Comment } from "./Comment";
+import { Reply } from "./Reply";
 
 export class Post extends Comment implements IPost  {
 
@@ -33,6 +34,19 @@ export class Post extends Comment implements IPost  {
 
   public getTitleImage(): string {
     return "";
+  }
+
+  public async enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IReply>> {
+    const replies = await this.chain.api.bridge.get_discussion({author: this.author.name, permlink: this.permlink, observer: "hive.blog"}) // Temporary hive.blog;
+    if (!replies) {
+      throw "No replies";
+    }
+    return Object.entries(replies)?.map(([authorPermlink, reply]) => new Reply(
+      {author: {name: reply.author}, permlink: reply.permlink},
+      {author: {name: reply.parent_author || ""}, permlink: reply.parent_permlink || ""},
+      {author: this.author, permlink: this.permlink},
+      reply
+    ))
   }
 
 }

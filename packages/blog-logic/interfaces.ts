@@ -85,7 +85,7 @@ export interface IComment extends IPostCommentIdentity {
   readonly publishedAt: Date;
   readonly updatedAt: Date;
 
-  enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IReply>>;
+
   enumMentionedAccounts(): Promise<Iterable<IAccountIdentity>>;
   enumVotes(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IVote>>;
   getContent(): Promise<string>;
@@ -120,6 +120,7 @@ export interface IPost extends IComment {
   tags: string[];
   community?: ICommunityIdentity;
 
+  enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IReply>>;
   getTitleImage(): string;
 }
 
