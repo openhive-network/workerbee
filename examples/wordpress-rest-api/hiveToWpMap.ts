@@ -1,3 +1,4 @@
+import { IPost, IReply } from "../../packages/blog-logic/interfaces";
 import { simpleHash } from "./hash-utils";
 import { Entry } from "./hive";
 import { WPComment, WPPost, WPTag, WPTerm } from "./wp-reference";
@@ -88,6 +89,60 @@ export const mapHivePostToWpPost = (hivePost: Entry, wpId: number, accountId: nu
   return wpPost
 }
 
+export const mapIPostToWpPost = async (hivePost: IPost, wpId: number, accountId: number): Promise<WPPost> => {
+  const slug = hivePost.generateSlug();
+  const tags  = hivePost?.tags || [];
+  const wpTermTags = tags.map((tag) => mapWpTerm(tag, "tag"));
+  const community = hivePost.community?.name;
+  const wpTermCategory = community ? [mapWpTerm(community, "category")] : [];
+  const renderedBody = renderer.render(await hivePost.getContent());
+  const wpExcerpt = renderedBody.replace(/<[^>]+>/g, '').substring(0, 100);
+  const wpPost: WPPost = {
+    id:wpId,
+    slug,  
+    date: new Date(hivePost.publishedAt).toISOString(),
+    date_gmt: new Date(hivePost.publishedAt).toISOString(),
+    modified: new Date(hivePost.updatedAt).toISOString(),
+    modified_gmt: new Date(hivePost.updatedAt).toISOString(),
+    status: "publish",
+    type: "post",
+    link: `http://host/${slug}/`,
+    title: { rendered: hivePost.title },
+    content: { rendered: renderedBody, protected: false },
+    excerpt: { rendered: wpExcerpt, protected: false },
+    author: accountId,
+    featured_media: 0,
+    comment_status: "open",
+    ping_status: "open",
+    sticky: false,
+    template: "",
+    format: "standard",
+    meta: {},
+    categories: [community ? simpleHash(community) : 0],
+    tags: tags.map((tags) => simpleHash(tags)),
+    guid: { rendered: `http://host/?p=${wpId}` },
+    class_list: [`category-${community}`],
+    _embedded: {
+      replies: [],
+      author: [{
+        id: accountId,
+        name: hivePost.author.name,
+        url: `https://hive.blog/@${hivePost.author}`,
+        description: "",
+        link: `https://hive.blog/@${hivePost.author}`,
+        slug: hivePost.author.name,
+        avatar_urls: {
+          24: `https://images.hive.blog/u/${hivePost.author}/avatar`,
+          48: `https://images.hive.blog/u/${hivePost.author}/avatar`,
+          96: `https://images.hive.blog/u/${hivePost.author}/avatar`
+        }
+      }],
+      "wp:term": [...wpTermTags.map((wpTerm) => [wpTerm]), ...wpTermCategory.map((wpTerm) => [wpTerm])]
+    }
+  };
+  return wpPost
+}
+
 export const mapHiveCommentToWPComment = (hiveComment: Entry, commentId: number, mainPostId: number, authorId: number): WPComment => {
   const parentId = simpleHash(`${hiveComment.parent_author}_${hiveComment.parent_permlink}`);
   const renderedBody = renderer.render(hiveComment.body);
@@ -102,6 +157,32 @@ export const mapHiveCommentToWPComment = (hiveComment: Entry, commentId: number,
     date_gmt: new Date(hiveComment.created).toISOString(),
     content: { rendered: renderedBody },
     link: `http://host/${hiveComment.parent_author}_${hiveComment.parent_permlink}/#comment-${commentId}`,
+    status: "approved",
+    type: "comment",
+    meta: [],
+    author_avatar_urls: {
+      24: `https://images.hive.blog/u/${hiveComment.author}/avatar`,
+      48: `https://images.hive.blog/u/${hiveComment.author}/avatar`,
+      96: `https://images.hive.blog/u/${hiveComment.author}/avatar`
+    }
+  }
+  return wpComment;
+}
+
+export const mapIReplyToWPComment = async (hiveComment: IReply, commentId: number, mainPostId: number, authorId: number): Promise<WPComment> => {
+  const parentId = simpleHash(`${hiveComment.parent.author}_${hiveComment.parent.permlink}`);
+  const renderedBody = renderer.render(await hiveComment.getContent());
+  const wpComment: WPComment = {
+    id: commentId,
+    post: mainPostId,
+    parent: parentId === mainPostId ? 0 : parentId, // There is no id for parent post 
+    author: authorId,
+    author_name: hiveComment.author.name,
+    author_url: `https://hive.blog/@${hiveComment.author}`,
+    date: new Date(hiveComment.publishedAt).toISOString(),
+    date_gmt: new Date(hiveComment.publishedAt).toISOString(),
+    content: { rendered: renderedBody },
+    link: `http://host/${hiveComment.parent.author.name}_${hiveComment.parent.permlink}/#comment-${commentId}`,
     status: "approved",
     type: "comment",
     meta: [],
