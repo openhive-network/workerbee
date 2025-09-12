@@ -90,7 +90,7 @@ export interface IComment extends IPostCommentIdentity {
   enumVotes(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IVote>>;
   getContent(): Promise<string>;
   wasVotedByUser(userName: IAccountIdentity): Promise<boolean>;
-  getCommentsCount(): Promise<number>;
+
 
 
   /**
@@ -120,6 +120,7 @@ export interface IPost extends IComment {
   tags: string[];
   community?: ICommunityIdentity;
 
+  getCommentsCount(): Promise<number>;
   enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IReply>>;
   getTitleImage(): string;
 }

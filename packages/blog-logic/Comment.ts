@@ -14,18 +14,12 @@ export class Comment implements IComment {
 
 
   protected content?: string;
+  protected votes?: Iterable<IVote>;
 
   private initializeChain = async () => {
     if (!this.chain)
       this.chain = await getWax();
     
-  }
-
-  private getData = async () => {
-    const commentData = await this.chain.api.bridge.get_post({author: this.author.name, permlink: this.permlink, observer: "hive.blog"}); // Teemporary hive.blog
-    this.publishedAt = new Date(commentData?.created || "");
-    this.updatedAt = new Date(commentData?.updated || "");
-    this.content = commentData?.body;
   }
 
   public constructor(authorPermlink: IPostCommentIdentity, postCommentData?: Entry) {
@@ -57,10 +51,6 @@ export class Comment implements IComment {
 
   public async enumVotes(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IVote>> {
     return [];
-  }
-
-  public async getCommentsCount(): Promise<number> {
-    return 0;
   }
 
   public async wasVotedByUser(userName: IAccountIdentity): Promise<boolean> {
