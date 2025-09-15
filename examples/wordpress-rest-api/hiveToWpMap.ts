@@ -126,11 +126,11 @@ export const mapIPostToWpPost = async (hivePost: IPost, wpId: number, accountId:
       replies: [],
       author: [{
         id: accountId,
-        name: hivePost.author.name,
+        name: hivePost.author,
         url: `https://hive.blog/@${hivePost.author}`,
         description: "",
         link: `https://hive.blog/@${hivePost.author}`,
-        slug: hivePost.author.name,
+        slug: hivePost.author,
         avatar_urls: {
           24: `https://images.hive.blog/u/${hivePost.author}/avatar`,
           48: `https://images.hive.blog/u/${hivePost.author}/avatar`,
@@ -170,26 +170,26 @@ export const mapHiveCommentToWPComment = (hiveComment: Entry, commentId: number,
 }
 
 export const mapIReplyToWPComment = async (hiveComment: IReply, commentId: number, mainPostId: number, authorId: number): Promise<WPComment> => {
-  const parentId = simpleHash(`${hiveComment.parent.author.name}_${hiveComment.parent.permlink}`);
+  const parentId = simpleHash(`${hiveComment.parent.author}_${hiveComment.parent.permlink}`);
   const renderedBody = renderer.render(await hiveComment.getContent());
   const wpComment: WPComment = {
     id: commentId,
     post: mainPostId,
     parent: parentId === mainPostId ? 0 : parentId, // There is no id for parent post 
     author: authorId,
-    author_name: hiveComment.author.name,
-    author_url: `https://hive.blog/@${hiveComment.author.name}`,
+    author_name: hiveComment.author,
+    author_url: `https://hive.blog/@${hiveComment.author}`,
     date: new Date(hiveComment.publishedAt).toISOString(),
     date_gmt: new Date(hiveComment.publishedAt).toISOString(),
     content: { rendered: renderedBody },
-    link: `http://host/${hiveComment.parent.author.name}_${hiveComment.parent.permlink}/#comment-${commentId}`,
+    link: `http://host/${hiveComment.parent.author}_${hiveComment.parent.permlink}/#comment-${commentId}`,
     status: "approved",
     type: "comment",
     meta: [],
     author_avatar_urls: {
-      24: `https://images.hive.blog/u/${hiveComment.author.name}/avatar`,
-      48: `https://images.hive.blog/u/${hiveComment.author.name}/avatar`,
-      96: `https://images.hive.blog/u/${hiveComment.author.name}/avatar`
+      24: `https://images.hive.blog/u/${hiveComment.author}/avatar`,
+      48: `https://images.hive.blog/u/${hiveComment.author}/avatar`,
+      96: `https://images.hive.blog/u/${hiveComment.author}/avatar`
     }
   }
   return wpComment;

@@ -44,7 +44,7 @@ export interface ICommunityIdentity {
  * Represents a set of data uniquely identifying a post or reply object.
  */
 export interface IPostCommentIdentity {
-  readonly author: IAccountIdentity;
+  readonly author: string;
   readonly permlink: string;
 }
 
@@ -152,7 +152,7 @@ export interface IActiveBloggingPlatform {
 }
 
 export interface IBloggingPlatform {
-  viewerContext?: IAccountIdentity;
+  viewerContext: IAccountIdentity;
   getPost(postId: IPostCommentIdentity): Promise<IPost>;
   enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IPost>>;
   configureViewContext(accontName: IAccountIdentity): void;
