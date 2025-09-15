@@ -24,6 +24,7 @@ const idToStringMap = new Map<number, string>();
 
 const posts: IPost[] = [];
 const bloggingPlatform: BloggingPlaform = new BloggingPlaform();
+bloggingPlatform.configureViewContext({name: wordPressExampleConfig.observer});
 
 const getAuthorPermlinkFromSlug = (slug: string): {author: string, permlink: string} => {
   const splitedSlug = slug.split("_");
