@@ -121,7 +121,7 @@ export interface IPost extends IComment {
   community?: ICommunityIdentity;
 
   getCommentsCount(): Promise<number>;
-  enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IReply>>;
+  enumReplies(filter: ICommonFilters, pagination: IPagination): Promise<Iterable<IReply>>;
   getTitleImage(): string;
 }
 
