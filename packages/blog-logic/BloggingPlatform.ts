@@ -1,5 +1,13 @@
 import { TWaxExtended } from "@hiveio/wax";
-import { IAccountIdentity, IBloggingPlatform, ICommunity, ICommunityFilters, ICommunityIdentity, IPagination, IPost, IPostCommentIdentity, IPostCommentsFilters } from "./interfaces";
+import { IAccountIdentity,
+  IBloggingPlatform,
+  ICommunity,
+  ICommunityFilters,
+  IPagination,
+  IPost,
+  IPostCommentIdentity,
+  IPostCommentsFilters
+} from "./interfaces";
 import { Post } from "./Post";
 import { ExtendedNodeApi, getWax } from "./wax";
 

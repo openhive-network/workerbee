@@ -1,15 +1,10 @@
-import { TWaxExtended } from "@hiveio/wax";
-import { IAccount, IAccountIdentity, ICommunityIdentity, IPagination, IPost, IPostCommentIdentity, IPostCommentsFilters, IReply, IVote } from "./interfaces";
-import { Entry, ExtendedNodeApi, getWax } from "./wax";
 import { Comment } from "./Comment";
+import { ICommunityIdentity, IPagination, IPost, IPostCommentIdentity, IPostCommentsFilters, IReply } from "./interfaces";
 import { Reply } from "./Reply";
+import { Entry } from "./wax";
 
 export class Post extends Comment implements IPost  {
 
-  public author: IAccountIdentity;
-  public permlink: string;
-  public publishedAt: Date;
-  public updatedAt: Date;
   public title: string;
   public tags: string[];
   public community?: ICommunityIdentity | undefined;
@@ -29,19 +24,28 @@ export class Post extends Comment implements IPost  {
 
   private async fetchReplies(): Promise<IReply[]> {
     if (!this.replies) {
-      const repliesData = await this.chain.api.bridge.get_discussion({author: this.author.name, permlink: this.permlink, observer: "hive.blog"}) // Temporary hive.blog;
-      if (!repliesData) {
+      const repliesData = await this.chain.api.bridge.get_discussion({
+        author: this.author.name,
+        permlink: this.permlink,
+        observer: "hive.blog",
+      }); // Temporary hive.blog;
+      if (!repliesData)
         throw "No replies";
-      }
-      const replies = Object.entries(repliesData)?.map(([authorPermlink, reply]) => new Reply(
-        {author: {name: reply.author}, permlink: reply.permlink},
-        {author: {name: reply.parent_author || ""}, permlink: reply.parent_permlink || ""},
-        {author: this.author, permlink: this.permlink},
-        reply
-      ))
-      this.replies = replies
+      const replies = Object.entries(repliesData)?.map(
+        ([authorPermlink, reply]) =>
+          new Reply(
+            { author: { name: reply.author }, permlink: reply.permlink },
+            {
+              author: { name: reply.parent_author || "" },
+              permlink: reply.parent_permlink || "",
+            },
+            { author: this.author, permlink: this.permlink },
+            reply
+          )
+      );
+      this.replies = replies;
       return replies;
-    } 
+    }
     return this.replies;
   }
 

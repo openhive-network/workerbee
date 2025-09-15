@@ -1,16 +1,10 @@
 import { Comment } from "./Comment";
-import { IAccount, IComment, IPagination, IPostCommentIdentity, IPostCommentsFilters, IReply } from "./interfaces";
+import {  IPostCommentIdentity, IReply } from "./interfaces";
 import { Entry } from "./wax";
 
 
 export class Reply extends Comment implements IReply {
 
-
-
-  public readonly author: { name: string };
-  public readonly permlink: string;
-  public readonly publishedAt: Date;
-  public readonly updatedAt: Date;
   public parent: IPostCommentIdentity;
   public topPost: IPostCommentIdentity;
 
@@ -20,6 +14,6 @@ export class Reply extends Comment implements IReply {
     this.parent = parent;
     this.topPost = topPost;
   }
-  
+
 
 }
