@@ -1,7 +1,6 @@
 import { TWaxExtended } from "@hiveio/wax";
-import { IAccount, IAccountIdentity, IComment, ICommunityIdentity, IPagination, IPost, IPostCommentIdentity, IPostCommentsFilters, IReply, IVote } from "./interfaces";
+import { IAccountIdentity, IComment, IPagination, IPostCommentIdentity, IPostCommentsFilters, IVote } from "./interfaces";
 import { Entry, ExtendedNodeApi, getWax } from "./wax";
-import { Reply } from "./Reply";
 
 export class Comment implements IComment {
 
@@ -19,7 +18,6 @@ export class Comment implements IComment {
   private initializeChain = async () => {
     if (!this.chain)
       this.chain = await getWax();
-    
   }
 
   public constructor(authorPermlink: IPostCommentIdentity, postCommentData?: Entry) {
@@ -39,7 +37,7 @@ export class Comment implements IComment {
   }
 
   public async enumMentionedAccounts(): Promise<Iterable<IAccountIdentity>> {
-    return [];
+    return await [];
   }
 
   public async getContent(): Promise<string> {
@@ -50,11 +48,11 @@ export class Comment implements IComment {
   }
 
   public async enumVotes(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IVote>> {
-    return [];
+    return await [];
   }
 
   public async wasVotedByUser(userName: IAccountIdentity): Promise<boolean> {
-    return false;
+    return await false;
   }
 
 }
