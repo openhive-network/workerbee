@@ -170,7 +170,7 @@ export const mapHiveCommentToWPComment = (hiveComment: Entry, commentId: number,
 }
 
 export const mapIReplyToWPComment = async (hiveComment: IReply, commentId: number, mainPostId: number, authorId: number): Promise<WPComment> => {
-  const parentId = simpleHash(`${hiveComment.parent.author}_${hiveComment.parent.permlink}`);
+  const parentId = simpleHash(`${hiveComment.parent.author.name}_${hiveComment.parent.permlink}`);
   const renderedBody = renderer.render(await hiveComment.getContent());
   const wpComment: WPComment = {
     id: commentId,
@@ -178,7 +178,7 @@ export const mapIReplyToWPComment = async (hiveComment: IReply, commentId: numbe
     parent: parentId === mainPostId ? 0 : parentId, // There is no id for parent post 
     author: authorId,
     author_name: hiveComment.author.name,
-    author_url: `https://hive.blog/@${hiveComment.author}`,
+    author_url: `https://hive.blog/@${hiveComment.author.name}`,
     date: new Date(hiveComment.publishedAt).toISOString(),
     date_gmt: new Date(hiveComment.publishedAt).toISOString(),
     content: { rendered: renderedBody },
@@ -187,9 +187,9 @@ export const mapIReplyToWPComment = async (hiveComment: IReply, commentId: numbe
     type: "comment",
     meta: [],
     author_avatar_urls: {
-      24: `https://images.hive.blog/u/${hiveComment.author}/avatar`,
-      48: `https://images.hive.blog/u/${hiveComment.author}/avatar`,
-      96: `https://images.hive.blog/u/${hiveComment.author}/avatar`
+      24: `https://images.hive.blog/u/${hiveComment.author.name}/avatar`,
+      48: `https://images.hive.blog/u/${hiveComment.author.name}/avatar`,
+      96: `https://images.hive.blog/u/${hiveComment.author.name}/avatar`
     }
   }
   return wpComment;

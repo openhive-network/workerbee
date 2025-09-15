@@ -61,6 +61,19 @@ const mapAndAddtoMapPosts = async (posts: IPost[]): Promise<WPPost[]> => {
 }
 
 
+const mapReplies = async (replies: IReply[], postId: number) : Promise<WPComment[]> => {
+  const wpComments: WPComment[] = []
+  replies.forEach( async (reply) => {
+    if (reply.author.name && reply.permlink) {
+      const wpAuthorPermlink = reply.generateSlug();
+      const wpComment = await mapIReplyToWPComment(reply, simpleHash(wpAuthorPermlink), postId, simpleHash(reply.author.name));
+      wpComments.push(wpComment)
+    }
+  });
+  return await wpComments;
+}
+
+
 apiRouter.get("/posts", async (req: Request, res: Response) => {
   // Default WP call for devtools
   if (req.query.slug === "com.chrome.devtools.json") res.json([]);
@@ -105,15 +118,7 @@ apiRouter.get("/comments", async (req: Request, res: Response) => {
     if (post) {
       const replies = await post.enumReplies({}, {page: 1, pageSize: 10}) as IReply[];
       if (replies) {
-        const wpComments: WPComment[] = []
-        Object.entries(replies).forEach( async ([authorPermlink, reply]) => {
-          if (reply.author.name && reply.permlink) {
-            const wpAuthorPermlink = authorPermlink.replace("/", "_");
-            const wpComment = await mapIReplyToWPComment(reply, simpleHash(wpAuthorPermlink), postId, simpleHash(reply.author.name));
-            wpComments.push(wpComment)
-          }
-        });
-        res.json(wpComments)
+        res.json(await mapReplies(replies, postId))
       }
     }
   } else {

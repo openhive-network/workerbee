@@ -31,8 +31,9 @@ export class Post extends Comment implements IPost  {
       }); // Temporary hive.blog;
       if (!repliesData)
         throw "No replies";
-      const replies = Object.entries(repliesData)?.map(
-        ([authorPermlink, reply]) =>
+      const filteredReplies = Object.values(repliesData).filter((rawReply) => !!rawReply.parent_author)
+      const replies = filteredReplies?.map(
+        (reply) =>
           new Reply(
             { author: { name: reply.author }, permlink: reply.permlink },
             {
@@ -42,7 +43,7 @@ export class Post extends Comment implements IPost  {
             { author: this.author, permlink: this.permlink },
             reply
           )
-      );
+      )
       this.replies = replies;
       return replies;
     }
