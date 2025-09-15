@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import { BlogPostOperation, createHiveChain } from "@hiveio/wax";
-import { Entry, ExtendedNodeApi } from "./hive";
-import { mapHiveCommentToWPComment, mapHivePostToWpPost, mapHiveTagsToWpTags, mapIPostToWpPost, mapIReplyToWPComment } from "./hiveToWpMap";
+import { createHiveChain } from "@hiveio/wax";
+import { ExtendedNodeApi } from "./hive";
+import { mapIPostToWpPost, mapIReplyToWPComment } from "./hiveToWpMap";
 import { WPComment, WPPost } from "./wp-reference";
 import { simpleHash } from "./hash-utils";
 import { wordPressExampleConfig } from "./example-config";
@@ -35,18 +35,6 @@ const getAuthorPermlinkFromSlug = (slug: string): {author: string, permlink: str
     permlink
   }
 }
-
-const mapAndAddPostsToMap = (posts: Entry[]): WPPost[] => { 
-  const mappedPosts: WPPost[] = []
-  posts.forEach((post) => {
-    const postId = simpleHash(`${post.author}_${post.permlink}`);
-    const authorId = simpleHash(post.author);
-    idToStringMap.set(postId, `${post.author}_${post.permlink}`).set(authorId, post.author);
-    mappedPosts.push(mapHivePostToWpPost(post, postId, authorId));
-  });
-  return mappedPosts;
-}
-
 
 const mapAndAddtoMapPosts = async (posts: IPost[]): Promise<WPPost[]> => { 
   const mappedPosts: WPPost[] = [];
