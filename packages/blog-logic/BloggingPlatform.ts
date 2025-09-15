@@ -9,6 +9,7 @@ import { IAccountIdentity,
   IPostCommentsFilters
 } from "./interfaces";
 import { Post } from "./Post";
+import { paginateData } from "./utils";
 import { ExtendedNodeApi, getWax } from "./wax";
 
 export class BloggingPlaform implements IBloggingPlatform {
@@ -35,10 +36,10 @@ export class BloggingPlaform implements IBloggingPlatform {
   public async getPost(postId: IPostCommentIdentity): Promise<IPost> {
     if (!this.chain)
       await this.initializeChain();
-    const postData = await this.chain?.api.bridge.get_post({author: postId.author.name, permlink: postId.permlink, observer: this.viewerContext.name });
+    const postData = await this.chain?.api.bridge.get_post({author: postId.author, permlink: postId.permlink, observer: this.viewerContext.name });
     if (!postData)
       throw new Error("Post not found");
-    return new Post(postId, postData!);
+    return new Post(postId, this, postData!);
   }
 
   public async enumCommunities(filter: ICommunityFilters, pagination: IPagination): Promise<Iterable<ICommunity>> {
@@ -58,8 +59,7 @@ export class BloggingPlaform implements IBloggingPlatform {
     });
     if (!posts)
       throw new Error("Posts not found");
-    return posts?.map((post) => new Post({author: {name: post.author}, permlink: post.permlink}, post))
+    const paginatedPosts = paginateData(posts, pagination);
+    return paginatedPosts?.map((post) => new Post({author: post.author, permlink: post.permlink}, this, post))
   }
-
-
 }

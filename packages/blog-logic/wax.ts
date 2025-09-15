@@ -96,6 +96,18 @@ export interface Entry {
   original_entry?: Entry;
 }
 
+export interface VoteData {
+  percent: number;
+  reputation: number;
+  rshares: number;
+  time: string;
+  timestamp?: number;
+  voter: string;
+  weight: number;
+  reward?: number;
+}
+
+
 export type ExtendedNodeApi = {
   bridge: {
     get_post_header: TWaxApiRequest<{ author: string; permlink: string }, IGetPostHeader>;
@@ -127,6 +139,9 @@ export type ExtendedNodeApi = {
       Entry[] | null
     >;
   };
+  condenser_api: {
+    get_active_votes: TWaxApiRequest<string[], VoteData[]>;
+  }
 };
 
 let chain: Promise<TWaxExtended<ExtendedNodeApi>>;
