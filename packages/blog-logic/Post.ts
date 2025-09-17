@@ -59,6 +59,7 @@ export class Post extends Comment implements IPost  {
   }
 
   public getTitleImage(): string {
+    // The logic is complicated here, it wil be added later.
     return "";
   }
 

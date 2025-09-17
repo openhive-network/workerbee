@@ -1,5 +1,6 @@
 import { TWaxExtended } from "@hiveio/wax";
-import { IAccountIdentity, IBloggingPlatform, IComment, IPagination, IPostCommentIdentity, IPostCommentsFilters, IVote } from "./interfaces";
+import { IAccountIdentity, IBloggingPlatform, IComment, ICommonFilters, IPagination, IPostCommentIdentity, IVote } from "./interfaces";
+import { Vote } from "./Vote";
 import { Entry, ExtendedNodeApi, getWax } from "./wax";
 
 export class Comment implements IComment {
@@ -15,6 +16,7 @@ export class Comment implements IComment {
   protected content?: string;
   protected votes?: Iterable<IVote>;
   protected BloggingPlatform: IBloggingPlatform;
+
 
   private initializeChain = async () => {
     if (!this.chain)
@@ -49,12 +51,16 @@ export class Comment implements IComment {
     return this.content || "";
   }
 
-  public async enumVotes(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IVote>> {
-    return await [];
+  public async enumVotes(filter: ICommonFilters, pagination: IPagination): Promise<Iterable<IVote>> {
+    const votesData = await this.chain.api.condenser_api.get_active_votes([this.author, this.permlink]);
+    const votes = votesData.map((vote) => new Vote(vote));
+    this.votes = votes;
+    return votes;
   }
 
-  public async wasVotedByUser(userName: IAccountIdentity): Promise<boolean> {
-    return await false;
+  public async wasVotedByUser(userName: string): Promise<boolean> {
+    if (!this.votes) await this.enumVotes({}, {page: 1, pageSize: 100}); // Temporary pagination before fix
+    return !!Array.from(this.votes || []).find((vote) => vote.voter === userName)
   }
 
 }

@@ -87,9 +87,9 @@ export interface IComment extends IPostCommentIdentity {
 
 
   enumMentionedAccounts(): Promise<Iterable<IAccountIdentity>>;
-  enumVotes(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IVote>>;
+  enumVotes(filter: ICommonFilters, pagination: IPagination): Promise<Iterable<IVote>>;
   getContent(): Promise<string>;
-  wasVotedByUser(userName: IAccountIdentity): Promise<boolean>;
+  wasVotedByUser(userName: string): Promise<boolean>;
 
 
 
