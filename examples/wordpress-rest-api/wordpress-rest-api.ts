@@ -10,7 +10,6 @@ import { IPost, IReply } from "../../packages/blog-logic/interfaces";
 import { BloggingPlaform } from "../../packages/blog-logic/BloggingPlatform";
 
 const hiveChain = await createHiveChain();
-const extendedHiveChain = hiveChain.extend<ExtendedNodeApi>();
 
 const app = express();
 const PORT = wordPressExampleConfig.defaultPort;
@@ -22,7 +21,7 @@ const apiRouter = express.Router();
 
 const idToStringMap = new Map<number, string>();
 
-const posts: IPost[] = [];
+let posts: IPost[] = [];
 const bloggingPlatform: BloggingPlaform = new BloggingPlaform();
 bloggingPlatform.configureViewContext({name: wordPressExampleConfig.observer});
 
@@ -81,7 +80,7 @@ apiRouter.get("/posts", async (req: Request, res: Response) => {
     }
     // Posts list
   } else {
-    const posts = await bloggingPlatform.enumPosts({
+    const newPosts = await bloggingPlatform.enumPosts({
       limit: wordPressExampleConfig.postLimit, 
       sort: wordPressExampleConfig.sort, 
       startAuthor: wordPressExampleConfig.startAuthor, 
@@ -92,6 +91,7 @@ apiRouter.get("/posts", async (req: Request, res: Response) => {
       pageSize: 10
     }) as IPost[];
     if (posts) {
+      posts = [...posts, ...newPosts];
       res.json(await mapAndAddtoMapPosts(posts));
     }
   }
