@@ -6,6 +6,7 @@ import { AccountFullManabarFilter } from "./chain-observers/filters/account-full
 import { AccountMetadataChangeFilter } from "./chain-observers/filters/account-metadata-change-filter";
 import { AlarmFilter } from "./chain-observers/filters/alarm-filter";
 import { BalanceChangeFilter } from "./chain-observers/filters/balance-change-filter";
+import { BlankFilter } from "./chain-observers/filters/blank-filter";
 import { BlockNumberFilter } from "./chain-observers/filters/block-filter";
 import { CommentFilter, PostFilter } from "./chain-observers/filters/blog-content-filter";
 import { LogicalAndFilter, LogicalOrFilter } from "./chain-observers/filters/composite-filter";
@@ -96,6 +97,10 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     this.applyAnd();
 
     const committedFilters = this.filterContainers;
+    // If no filters are committed, add a blank filter which always evaluates to true, so users can receive data from providers only
+    if (committedFilters.length === 0)
+      committedFilters.push(new BlankFilter(this.worker));
+
     // Optimize by not creating a logical AND filter for only one filter
     const andFilter: FilterBase = committedFilters.length === 1 ? committedFilters[0] : new LogicalAndFilter(this.worker, committedFilters);
 
