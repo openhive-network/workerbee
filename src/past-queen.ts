@@ -5,10 +5,11 @@ import { QueenBee } from "./queen";
 
 export type TPastQueen<TPreviousSubscriberData extends object = {}> = Omit<
   PastQueen<TPreviousSubscriberData>,
-  "onAccountsFullManabar" | "onAccountsBalanceChange" | "onAccountsMetadataChange" |
-  "onFeedPriceChange"     | "onFeedPriceNoChange"     | "provideFeedPriceData"     |
-  "onAlarm"               | "onWitnessesMissedBlocks" | "provideAccounts"          |
-  "provideWitnesses"      | "provideRcAccounts"
+  "onAccountsFullManabar"   | "onAccountsManabarPercent"  | "provideManabarData"       |
+  "onAccountsBalanceChange" | "onAccountsMetadataChange"  | "provideAccounts"          |
+  "onFeedPriceChange"       | "onFeedPriceNoChange"       | "provideFeedPriceData"     |
+  "onAlarm"                 | "onWitnessesMissedBlocks"   | "provideWitnesses"         |
+  "provideRcAccounts"
 >;
 
 export class PastQueen<TPreviousSubscriberData extends object = {}> extends QueenBee<TPreviousSubscriberData> {
