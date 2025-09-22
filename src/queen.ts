@@ -324,9 +324,9 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *   next: (data) => {
    *     console.log("username account balance changed");
    *     console.log("Account data:", data.accounts["username"]);
-   *     console.log("HIVE balance:", data.accounts["username"].balance.HIVE);
-   *     console.log("HBD balance:", data.accounts["username"].balance.HBD);
-   *     console.log("HP balance:", data.accounts["username"].balance.HP);
+   *     console.log("HIVE balance:", data.accounts["username"]?.balance.HIVE);
+   *     console.log("HBD balance:", data.accounts["username"]?.balance.HBD);
+   *     console.log("HP balance:", data.accounts["username"]?.balance.HP);
    *   }
    * });
    * ```
@@ -356,8 +356,8 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *   next: (data) => {
    *     console.log("Account username metadata changed");
    *     console.log("Account data:", data.accounts["username"]);
-   *     console.log("JSON metadata:", data.accounts["username"].jsonMetadata);
-   *     console.log("Posting JSON metadata:", data.accounts["username"].postingJsonMetadata);
+   *     console.log("JSON metadata:", data.accounts["username"]?.jsonMetadata);
+   *     console.log("Posting JSON metadata:", data.accounts["username"]?.postingJsonMetadata);
    *   }
    * });
    * ```
@@ -581,8 +581,9 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * ```ts
    * workerbee.observe.onCustomOperation("sm_claim_reward").subscribe({
    *   next: (data) => {
-   *     for(const { operation } of data.customOperations["sm_claim_reward"])
-   *      console.log("Splinterlands reward claimed:", operation);
+   *     if (data.customOperations["sm_claim_reward"] !== undefined)
+   *       for(const { operation } of data.customOperations["sm_claim_reward"])
+   *         console.log("Splinterlands reward claimed:", operation);
    *   }
    * });
    * ```
@@ -672,8 +673,9 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * ```ts
    * workerbee.observe.onReblog("username").subscribe({
    *   next: (data) => {
-   *     for(const { operation } of data.reblogs["username"])
-   *      console.log("Post reblogged:", operation);
+   *     if (data.reblogs["username"] !== undefined)
+   *       for(const { operation } of data.reblogs["username"])
+   *         console.log("Post reblogged:", operation);
    *   }
    * });
    * ```
@@ -701,8 +703,9 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * ```ts
    * workerbee.observe.onFollow("trustworthy.account").subscribe({
    *   next: (data) => {
-   *     for(const { operation } of data.reblogs["trustworthy.account"])
-   *      console.log("trustworthy.account followed:", operation);
+   *     if (data.reblogs["trustworthy.account"] !== undefined)
+   *       for(const { operation } of data.reblogs["trustworthy.account"])
+   *         console.log("trustworthy.account followed:", operation);
    *   }
    * });
    * ```
@@ -730,8 +733,9 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * ```ts
    * workerbee.observe.onMention("username").subscribe({
    *   next: (data) => {
-   *     for(const operation of data.mentioned["username"])
-   *      console.log("username mentioned in post:", operation);
+   *     if (data.mentioned["username"] !== undefined)
+   *       for(const operation of data.mentioned["username"])
+   *         console.log("username mentioned in post:", operation);
    *   }
    * });
    * ```
@@ -760,8 +764,9 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * ```ts
    * workerbee.observe.onAlarm("username").subscribe({
    *   next: (data) => {
-   *     for(const alarmType of data.alarmsPerAccount["username"])
-   *      console.log("username account alarm!:", alarmType);
+   *     if (data.alarmsPerAccount["username"] !== undefined)
+   *       for(const alarmType of data.alarmsPerAccount["username"])
+   *         console.log("username account alarm!:", alarmType);
    *   }
    * });
    * ```
@@ -873,11 +878,18 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * Automatically provides the block header data in the `next` callback.
    *
+   * Note: `data.block` can be undefined in some cases, e.g. when you applied advanced filter logic in your code,
+   * one of the execution paths evaluated to true, but block provider could not retrieve the block data from the Node API
+   * due to an error. That's why it's always a good practice to check if `data.block` is defined before accessing its
+   * properties with advanced filters. In the example above we used `!` as a TypeScript-only feature - Non-Null Assertions,
+   * which tells the compiler that we are sure that `data.block` is not null or undefined.
+   * In the example with just the {@link onBlock} filter, the block data should always be defined.
+   *
    * @example
    * ```ts
    * workerbee.observe.onBlock().subscribe({
    *   next: (data) => {
-   *     console.log("New block detected:", data.block.number);
+   *     console.log("New block detected:", data.block!.number);
    *   }
    * });
    * ```
@@ -1020,11 +1032,18 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   /**
    * Provides block header data in the `next` callback.
    *
+   * Note: `data.block` can be undefined in some cases, e.g. when you applied advanced filter logic in your code,
+   * one of the execution paths evaluated to true, but block provider could not retrieve the block data from the Node API
+   * due to an error. That's why it's always a good practice to check if `data.block` is defined before accessing its
+   * properties with advanced filters. In the example above we used `!` as a TypeScript-only feature - Non-Null Assertions,
+   * which tells the compiler that we are sure that `data.block` is not null or undefined.
+   * In the example with just the {@link onBlock} filter, the block data should always be defined.
+   *
    * @example
    * ```ts
    * workerbee.observe.onBlock().provideBlockHeaderData().subscribe({
    *   next: (data) => {
-   *     console.log("New block detected:", data.block.number);
+   *     console.log("New block detected:", data.block!.number);
    *   }
    * });
    * ```
@@ -1044,7 +1063,8 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * ```ts
    * workerbee.observe.onBlock().provideManabarData(EManabarType.RC, "username1", "username2").subscribe({
    *   next: (data) => {
-   *     console.log("Account manabar is now loaded %:", data.manabarData["username1"][EManabarType.RC].percent);
+   *     if (data.manabarData["username1"] !== undefined)
+   *       console.log("Account manabar is now loaded %:", data.manabarData["username1"][EManabarType.RC].percent);
    *   }
    * });
    * ```
@@ -1069,12 +1089,19 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * Automatically provides both block header and block data.
    *
+   * Note: `data.block` can be undefined in some cases, e.g. when you applied advanced filter logic in your code,
+   * one of the execution paths evaluated to true, but block provider could not retrieve the block data from the Node API
+   * due to an error. That's why it's always a good practice to check if `data.block` is defined before accessing its
+   * properties with advanced filters. In the example above we used `!` as a TypeScript-only feature - Non-Null Assertions,
+   * which tells the compiler that we are sure that `data.block` is not null or undefined.
+   * In the example with just the {@link onBlock} filter, the block data should always be defined.
+   *
    * @example
    * ```ts
    * workerbee.observe.onBlock().provideBlockData().subscribe({
    *   next: (data) => {
-   *     console.log("New block detected:", data.block.number);
-   *     console.log("Block transactions:", data.block.transactions);
+   *     console.log("New block detected:", data.block!.number);
+   *     console.log("Block transactions:", data.block!.transactions);
    *   }
    * });
    * ```
