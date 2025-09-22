@@ -1193,20 +1193,28 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
   });
 
   mockTest("7.8 Concurrent Observer Test", async ({ createMockWorkerBeeTest }) => {
-    const result = await createMockWorkerBeeTest<string>((bot, resolve) => {
+    const result = await createMockWorkerBeeTest<string>((bot, resolve, testReject) => {
       const observer1 = (bot as IWorkerBee<unknown>).observe.onPosts("mtyszczak").provideAccounts("mtyszczak");
       const observer2 = (bot as IWorkerBee<unknown>).observe.onComments("fwaszkiewicz").provideAccounts("fwaszkiewicz");
       const observer3 = (bot as IWorkerBee<unknown>).observe.onVotes("gtg").provideManabarData(2, "gtg");
 
       Promise.all([
-        new Promise(resolvePromise => observer1.subscribe({ next: resolvePromise })),
-        new Promise(resolvePromise => observer2.subscribe({ next: resolvePromise })),
-        new Promise(resolvePromise => observer3.subscribe({ next: resolvePromise }))
+        new Promise((resolvePromise, reject) => {
+          observer1.subscribe({ next: resolvePromise, error: (e: any) => { console.error(`Error: ${e} caught in observer1`); reject(e); }})
+        }),
+        new Promise((resolvePromise, reject) => {
+          observer2.subscribe({ next: resolvePromise, error: (e: any) => { console.error(`Error: ${e} caught in observer2`); reject(e); }})
+        }),
+        new Promise((resolvePromise, reject) => {
+          observer3.subscribe({ next: resolvePromise, error: (e: any) => { console.error(`Error: ${e} caught in observer3`); reject(e); }})
+        })
       ]).then((results) => {
         // Check if all promises are resolved (results array contains resolved values)
         if (results.length === 3)
           resolve(`All ${results.length} concurrent observers completed successfully`);
-
+      }).catch((e) => {
+        console.error(`Error: ${e} caught in Promise.all`);
+        testReject(e);
       });
     }, false, true);
 
