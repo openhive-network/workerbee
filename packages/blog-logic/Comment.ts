@@ -2,6 +2,7 @@ import { TWaxExtended } from "@hiveio/wax";
 import { IAccountIdentity, IBloggingPlatform, IComment, ICommonFilters, IPagination, IPostCommentIdentity, IVote } from "./interfaces";
 import { Vote } from "./Vote";
 import { Entry, ExtendedNodeApi, getWax } from "./wax";
+import { paginateData } from "./utils";
 
 export class Comment implements IComment {
 
@@ -55,7 +56,7 @@ export class Comment implements IComment {
     const votesData = await this.chain.api.condenser_api.get_active_votes([this.author, this.permlink]);
     const votes = votesData.map((vote) => new Vote(vote));
     this.votes = votes;
-    return votes;
+    return paginateData(votes, pagination);
   }
 
   public async wasVotedByUser(userName: string): Promise<boolean> {

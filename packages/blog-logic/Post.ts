@@ -1,6 +1,7 @@
 import { Comment } from "./Comment";
 import { IBloggingPlatform, ICommunityIdentity, IPagination, IPost, IPostCommentIdentity, IPostCommentsFilters, IReply } from "./interfaces";
 import { Reply } from "./Reply";
+import { paginateData } from "./utils";
 import { Entry } from "./wax";
 
 export class Post extends Comment implements IPost  {
@@ -64,8 +65,8 @@ export class Post extends Comment implements IPost  {
   }
 
   public async enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IReply>> {
-    if (this.replies) return this.replies;
-    return await this.fetchReplies();
+    if (this.replies) return paginateData(this.replies, pagination);
+    return paginateData(await this.fetchReplies(), pagination);
   }
 
   public async getCommentsCount(): Promise<number> {
