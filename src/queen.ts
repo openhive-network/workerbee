@@ -317,7 +317,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * ```ts
    * workerbee.observe.onAccountsBalanceChange(false, "username").subscribe({
    *   next: (data) => {
-   *     console.log("@username account balance changed");
+   *     console.log("username account balance changed");
    *     console.log("Account data:", data.accounts["username"]);
    *     console.log("HIVE balance:", data.accounts["username"].balance.HIVE);
    *     console.log("HBD balance:", data.accounts["username"].balance.HBD);
@@ -349,7 +349,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * ```ts
    * workerbee.observe.onAccountsMetadataChange("username").subscribe({
    *   next: (data) => {
-   *     console.log("Account @username metadata changed");
+   *     console.log("Account username metadata changed");
    *     console.log("Account data:", data.accounts["username"]);
    *     console.log("JSON metadata:", data.accounts["username"].jsonMetadata);
    *     console.log("Posting JSON metadata:", data.accounts["username"].postingJsonMetadata);
@@ -697,7 +697,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * workerbee.observe.onFollow("trustworthy.account").subscribe({
    *   next: (data) => {
    *     for(const { operation } of data.reblogs["trustworthy.account"])
-   *      console.log("@trustworthy.account followed:", operation);
+   *      console.log("trustworthy.account followed:", operation);
    *   }
    * });
    * ```
@@ -726,7 +726,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * workerbee.observe.onMention("username").subscribe({
    *   next: (data) => {
    *     for(const operation of data.mentioned["username"])
-   *      console.log("@username mentioned in post:", operation);
+   *      console.log("username mentioned in post:", operation);
    *   }
    * });
    * ```
@@ -756,7 +756,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * workerbee.observe.onAlarm("username").subscribe({
    *   next: (data) => {
    *     for(const alarmType of data.alarmsPerAccount["username"])
-   *      console.log("@username account alarm!:", alarmType);
+   *      console.log("username account alarm!:", alarmType);
    *   }
    * });
    * ```
@@ -819,7 +819,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * ```ts
    * workerbee.observe.onWitnessesMissedBlocks(5, "username").subscribe({
    *   next: () => {
-   *     console.log("Witness @username has missed 5 or more blocks!");
+   *     console.log("Witness username has missed 5 or more blocks!");
    *   }
    * });
    * ```
