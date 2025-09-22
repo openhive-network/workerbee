@@ -16,7 +16,9 @@ export interface ITransactionByIdProviderOptions {
   transactionIds: string[];
 }
 
-export class TransactionByIdProvider<TIdOfTx extends Array<string> = Array<string>> extends ProviderBase<ITransactionByIdProviderOptions> {
+export class TransactionByIdProvider<
+  TIdOfTx extends Array<string> = Array<string>
+> extends ProviderBase<ITransactionByIdProviderOptions, ITransactionProviderData<TIdOfTx>> {
   public readonly transactionIds = new Set<string>();
 
   public pushOptions(options: ITransactionByIdProviderOptions): void {
@@ -30,10 +32,14 @@ export class TransactionByIdProvider<TIdOfTx extends Array<string> = Array<strin
     ];
   }
 
-  public async provide(data: TProviderEvaluationContext): Promise<ITransactionProviderData<TIdOfTx>> {
-    const result = {
+  public get baseStructure(): ITransactionProviderData<TIdOfTx> {
+    return {
       transactions: {}
     };
+  }
+
+  public async provide(data: TProviderEvaluationContext): Promise<ITransactionProviderData<TIdOfTx>> {
+    const result = this.baseStructure;
 
     const block = await data.get(BlockClassifier);
     for(const txId of this.transactionIds)

@@ -22,11 +22,17 @@ export interface IExchangeTransferProviderData {
  * This is because the escrow_transfer operation is used for both HIVE and HBD transfers.
  * If you want to extract the HIVE amount, you should extract it directly from the provided operations within transaction.
  */
-export class ExchangeTransferProvider extends ProviderBase {
+export class ExchangeTransferProvider extends ProviderBase<{}, IExchangeTransferProviderData> {
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [
       OperationClassifier
     ]
+  }
+
+  public get baseStructure(): IExchangeTransferProviderData {
+    return {
+      exchangeTransferOperations: new WorkerBeeIterable([])
+    };
   }
 
   public async provide(data: TProviderEvaluationContext): Promise<IExchangeTransferProviderData> {
@@ -107,8 +113,10 @@ export class ExchangeTransferProvider extends ProviderBase {
           });
       }
 
-    return {
-      exchangeTransferOperations: new WorkerBeeIterable(exchangeTransfers)
-    };
+    const result = this.baseStructure;
+
+    result.exchangeTransferOperations = new WorkerBeeIterable(exchangeTransfers);
+
+    return result;
   }
 }

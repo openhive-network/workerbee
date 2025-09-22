@@ -5,10 +5,10 @@ import { TProviderEvaluationContext } from "../factories/data-evaluation-context
 import { ProviderBase } from "./provider-base";
 
 export interface IBlockProviderData {
-  block: IBlockHeaderData & IBlockData;
+  block?: IBlockHeaderData & IBlockData;
 };
 
-export class BlockProvider extends ProviderBase {
+export class BlockProvider extends ProviderBase<{}, IBlockProviderData> {
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [
       BlockHeaderClassifier,
@@ -16,15 +16,21 @@ export class BlockProvider extends ProviderBase {
     ]
   }
 
+  public get baseStructure(): IBlockProviderData {
+    return {};
+  }
+
   public async provide(data: TProviderEvaluationContext): Promise<IBlockProviderData> {
+    const result = this.baseStructure;
+
     const blockHeader = await data.get(BlockHeaderClassifier);
     const block = await data.get(BlockClassifier);
 
-    return {
-      block: {
-        ...blockHeader,
-        ...block
-      }
+    result.block = {
+      ...blockHeader,
+      ...block
     };
+
+    return result;
   }
 }

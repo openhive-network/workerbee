@@ -16,7 +16,9 @@ export interface IWitnessProviderOptions {
   accounts: string[];
 }
 
-export class WitnessProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IWitnessProviderOptions> {
+export class WitnessProvider<
+  TAccounts extends Array<TAccountName> = Array<TAccountName>
+> extends ProviderBase<IWitnessProviderOptions, IWitnessProviderData<TAccounts>> {
   public readonly witnesses = new Set<TAccountName>();
 
   public pushOptions(options: IWitnessProviderOptions): void {
@@ -32,10 +34,14 @@ export class WitnessProvider<TAccounts extends Array<TAccountName> = Array<TAcco
     return classifiers;
   }
 
-  public async provide(data: TProviderEvaluationContext): Promise<IWitnessProviderData<TAccounts>> {
-    const result = {
+  public get baseStructure(): IWitnessProviderData<TAccounts> {
+    return {
       witnesses: {}
     };
+  }
+
+  public async provide(data: TProviderEvaluationContext): Promise<IWitnessProviderData<TAccounts>> {
+    const result = this.baseStructure;
 
     const { witnesses } = await data.get(WitnessClassifier);
     for(const witness of this.witnesses)

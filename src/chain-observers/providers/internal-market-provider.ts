@@ -28,11 +28,17 @@ export interface IInternalMarketProviderData {
   internalMarketOperations: WorkerBeeIterable<IOperationTransactionPair<TInternalMarketOperation>>;
 };
 
-export class InternalMarketProvider extends ProviderBase {
+export class InternalMarketProvider extends ProviderBase<{}, IInternalMarketProviderData> {
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [
       OperationClassifier
     ]
+  }
+
+  public get baseStructure(): IInternalMarketProviderData {
+    return {
+      internalMarketOperations: new WorkerBeeIterable([])
+    };
   }
 
   public async provide(data: TProviderEvaluationContext): Promise<IInternalMarketProviderData> {
@@ -88,8 +94,10 @@ export class InternalMarketProvider extends ProviderBase {
           transaction: op.transaction
         });
 
-    return {
-      internalMarketOperations: new WorkerBeeIterable(internalMarketOperations)
-    };
+    const result = this.baseStructure;
+
+    result.internalMarketOperations = new WorkerBeeIterable(internalMarketOperations);
+
+    return result;
   }
 }

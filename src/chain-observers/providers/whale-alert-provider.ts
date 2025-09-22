@@ -20,7 +20,7 @@ export interface IWhaleAlertProviderOptions {
   assets: asset[];
 }
 
-export class WhaleAlertProvider extends ProviderBase<IWhaleAlertProviderOptions> {
+export class WhaleAlertProvider extends ProviderBase<IWhaleAlertProviderOptions, IWhaleAlertProviderData> {
   public readonly assets = new Map<string, asset>();
 
   public pushOptions(options: IWhaleAlertProviderOptions): void {
@@ -32,6 +32,12 @@ export class WhaleAlertProvider extends ProviderBase<IWhaleAlertProviderOptions>
     return [
       OperationClassifier
     ]
+  }
+
+  public get baseStructure(): IWhaleAlertProviderData {
+    return {
+      whaleOperations: new WorkerBeeIterable([])
+    };
   }
 
   public async provide(data: TProviderEvaluationContext): Promise<IWhaleAlertProviderData> {
@@ -103,8 +109,10 @@ export class WhaleAlertProvider extends ProviderBase<IWhaleAlertProviderOptions>
             });
     }
 
-    return {
-      whaleOperations: new WorkerBeeIterable(whaleOperations)
-    };
+    const result = this.baseStructure;
+
+    result.whaleOperations = new WorkerBeeIterable(whaleOperations);
+
+    return result;
   }
 }

@@ -17,7 +17,9 @@ export interface IMentionedAccountProviderOptions {
   accounts: string[];
 }
 
-export class MentionedAccountProvider<TMentions extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IMentionedAccountProviderOptions> {
+export class MentionedAccountProvider<
+  TMentions extends Array<TAccountName> = Array<TAccountName>
+> extends ProviderBase<IMentionedAccountProviderOptions, IMentionedAccountProviderData<TMentions>> {
   public readonly accounts = new Set<TAccountName>();
 
   public pushOptions(options: IMentionedAccountProviderOptions): void {
@@ -31,8 +33,14 @@ export class MentionedAccountProvider<TMentions extends Array<TAccountName> = Ar
     ];
   }
 
+  public get baseStructure(): IMentionedAccountProviderData<TMentions> {
+    return {
+      mentioned: {}
+    };
+  }
+
   public async provide(data: TProviderEvaluationContext): Promise<IMentionedAccountProviderData<TMentions>> {
-    const mentioned = {} as IMentionedAccountProviderData<TMentions>["mentioned"];
+    const result = this.baseStructure;
 
     const { operationsPerType } = await data.get(OperationClassifier);
 
@@ -53,20 +61,18 @@ export class MentionedAccountProvider<TMentions extends Array<TAccountName> = Ar
         while ((match = mentionRegex.exec(operation.body)) !== null && !foundMention) {
           const mentionedAccount = match[1] as TAccountName;
           if (this.accounts.has(mentionedAccount)) {
-            if (!mentioned[mentionedAccount])
-              mentioned[mentionedAccount] = [];
+            if (!result.mentioned[mentionedAccount])
+              result.mentioned[mentionedAccount] = [];
 
-            mentioned[mentionedAccount].push(operation);
+            result.mentioned[mentionedAccount].push(operation);
             foundMention = true;
           }
         }
       }
 
-    for(const account in mentioned)
-      mentioned[account] = new WorkerBeeIterable(mentioned[account]);
+    for(const account in result.mentioned)
+      result.mentioned[account] = new WorkerBeeIterable(result.mentioned[account]);
 
-    return {
-      mentioned
-    } as IMentionedAccountProviderData<TMentions>;
+    return result;
   }
 }

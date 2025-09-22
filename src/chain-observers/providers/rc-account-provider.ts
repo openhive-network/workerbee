@@ -16,7 +16,9 @@ export interface IRcAccountsProviderOptions {
   accounts: string[];
 }
 
-export class RcAccountProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IRcAccountsProviderOptions> {
+export class RcAccountProvider<
+  TAccounts extends Array<TAccountName> = Array<TAccountName>
+> extends ProviderBase<IRcAccountsProviderOptions, IRcAccountProviderData<TAccounts>> {
   public readonly rcAccounts = new Set<TAccountName>();
 
   public pushOptions(options: IRcAccountsProviderOptions): void {
@@ -32,10 +34,14 @@ export class RcAccountProvider<TAccounts extends Array<TAccountName> = Array<TAc
     return classifiers;
   }
 
-  public async provide(data: TProviderEvaluationContext): Promise<IRcAccountProviderData<TAccounts>> {
-    const result = {
+  public get baseStructure(): IRcAccountProviderData<TAccounts> {
+    return {
       rcAccounts: {}
     };
+  }
+
+  public async provide(data: TProviderEvaluationContext): Promise<IRcAccountProviderData<TAccounts>> {
+    const result = this.baseStructure;
 
     const rcAccounts = await data.get(RcAccountClassifier);
     for(const rcAccount of this.rcAccounts)

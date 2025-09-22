@@ -50,8 +50,9 @@ export class ObserverMediator {
 
         // Launch all providers in parallel
         const allDataToProvide: Promise<any>[] = [];
+        // Call a provider, catch errors and forward data (either full on success or base structure on error for type consistency)
         for(const provider of providers)
-          allDataToProvide.push(provider.provide(context).catch(error => listener.error?.(error)));
+          allDataToProvide.push(provider.provide(context).catch(error => { listener.error?.(error); return provider.baseStructure; }));
 
         // Wait for all providers to finish and merge their results
         for(const promiseData of allDataToProvide) {
@@ -63,7 +64,7 @@ export class ObserverMediator {
 
         this.factory.addTiming("providers", Date.now() - startProvider);
 
-        await (listener.next?.(providedData) as Promise<void> | void);
+        await (listener.next?.(providedData) as Promise<any> | any);
       }).catch(error => listener.error?.(error));
 
     this.factory.postNotify(this, context);

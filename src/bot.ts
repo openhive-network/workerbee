@@ -115,6 +115,9 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
         next(val) {
           const transaction = val.transactions[apiTx.id] || val.transactions[apiTx.legacy_id];
           if (transaction === undefined) {
+            if (val.block === undefined)
+              throw new WorkerBeeError("Block data is missing in the block event");
+
             blocksAnalyzed.push(val.block.number);
 
             return;
@@ -205,6 +208,9 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
     // Create a single observer that will listen for block data
     const observer = this.observe.onBlock().provideBlockData().subscribe({
       next: data => {
+        if (data.block === undefined)
+          return; // Ignore empty block data
+
         if(promiseToResolveCb !== undefined) {
           // Resolve the waiting promise in queue with the block data and pass it to the next iteration of user loop
           promiseToResolveCb({ value: data.block, done: false });

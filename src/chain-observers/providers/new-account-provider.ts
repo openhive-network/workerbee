@@ -19,13 +19,19 @@ export interface INewAccountProviderData {
   newAccounts: WorkerBeeIterable<TNewAccountProvided>;
 };
 
-export class NewAccountProvider extends ProviderBase {
+export class NewAccountProvider extends ProviderBase<{}, INewAccountProviderData> {
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [OperationClassifier];
   }
 
+  public get baseStructure(): INewAccountProviderData {
+    return {
+      newAccounts: new WorkerBeeIterable([])
+    };
+  }
+
   public async provide(data: TProviderEvaluationContext): Promise<INewAccountProviderData> {
-    const result: TNewAccountProvided[] = [];
+    const newAccounts: TNewAccountProvided[] = [];
 
     const { operationsPerType } = await data.get(OperationClassifier);
 
@@ -43,7 +49,7 @@ export class NewAccountProvider extends ProviderBase {
         // eslint-disable-next-line no-empty
         } catch {}
 
-      result.push({
+      newAccounts.push({
         accountName: operation.new_account_name,
         active: operation.active!,
         creator: operation.creator,
@@ -54,8 +60,10 @@ export class NewAccountProvider extends ProviderBase {
       });
     }
 
-    return {
-      newAccounts: new WorkerBeeIterable(result)
-    } as INewAccountProviderData;
+    const result = this.baseStructure;
+
+    result.newAccounts = new WorkerBeeIterable(newAccounts);
+
+    return result;
   }
 }

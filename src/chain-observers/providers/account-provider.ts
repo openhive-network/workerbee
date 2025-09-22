@@ -17,7 +17,9 @@ export interface IAccountProviderOptions {
   accounts: string[];
 }
 
-export class AccountProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IAccountProviderOptions> {
+export class AccountProvider<
+  TAccounts extends Array<TAccountName> = Array<TAccountName>
+> extends ProviderBase<IAccountProviderOptions, IAccountProviderData<TAccounts>> {
   public readonly accounts = new Set<TAccountName>();
 
   public pushOptions(options: IAccountProviderOptions): void {
@@ -33,10 +35,14 @@ export class AccountProvider<TAccounts extends Array<TAccountName> = Array<TAcco
     return contexts;
   }
 
-  public async provide(data: TProviderEvaluationContext): Promise<IAccountProviderData<TAccounts>> {
-    const result = {
+  public get baseStructure(): IAccountProviderData<TAccounts> {
+    return {
       accounts: {}
     };
+  }
+
+  public async provide(data: TProviderEvaluationContext): Promise<IAccountProviderData<TAccounts>> {
+    const result = this.baseStructure;
 
     const accounts = await data.get(AccountClassifier);
     for(const account of this.accounts)

@@ -13,26 +13,32 @@ export interface IFeedPriceData {
 }
 
 export interface IFeedPriceProviderData {
-  feedPrice: IFeedPriceData;
+  feedPrice?: IFeedPriceData;
 };
 
-export class FeedPriceProvider extends ProviderBase {
+export class FeedPriceProvider extends ProviderBase<{}, IFeedPriceProviderData> {
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [
       FeedPriceClassifier
     ]
   }
 
+  public get baseStructure(): IFeedPriceProviderData {
+    return {};
+  }
+
   public async provide(data: TProviderEvaluationContext): Promise<IFeedPriceProviderData> {
+    const result = this.baseStructure;
+
     const { currentMedianHistory, currentMinHistory, currentMaxHistory, priceHistory } = await data.get(FeedPriceClassifier);
 
-    return {
-      feedPrice: {
-        currentMedianHistory,
-        currentMinHistory,
-        currentMaxHistory,
-        priceHistory: new WorkerBeeIterable(priceHistory)
-      }
+    result.feedPrice = {
+      currentMedianHistory,
+      currentMinHistory,
+      currentMaxHistory,
+      priceHistory: new WorkerBeeIterable(priceHistory)
     };
+
+    return result;
   }
 }

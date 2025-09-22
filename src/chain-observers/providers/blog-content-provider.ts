@@ -36,9 +36,10 @@ export interface IPostProviderData<TAccounts extends Array<TAccountName>> {
 
 // Base class for blog content providers (posts and comments)
 export abstract class BlogContentProvider<
+  TStructure extends object = object,
   TAccounts extends Array<TAccountName> = Array<TAccountName>,
   TOptions extends object = object
-> extends ProviderBase<TOptions> {
+> extends ProviderBase<TOptions, TStructure> {
   public readonly authors = new Map<TAccountName, ICommentData | undefined>();
   protected readonly isPost: boolean;
 
@@ -91,7 +92,9 @@ export abstract class BlogContentProvider<
   }
 }
 
-export class CommentProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends BlogContentProvider<TAccounts, ICommentProviderOptions> {
+export class CommentProvider<
+  TAccounts extends Array<TAccountName> = Array<TAccountName>
+> extends BlogContentProvider<ICommentProviderData<TAccounts>, TAccounts, ICommentProviderOptions> {
   public constructor() {
     super(false); // False = not posts, i.e., comments
   }
@@ -101,16 +104,32 @@ export class CommentProvider<TAccounts extends Array<TAccountName> = Array<TAcco
       this.authors.set(account, parentCommentFilter);
   }
 
-  public async provide(data: TProviderEvaluationContext): Promise<ICommentProviderData<TAccounts>> {
+  public get baseStructure(): ICommentProviderData<TAccounts> {
     return {
-      comments: await this.createProviderData(data)
+      comments: {}
     };
+  }
+
+  public async provide(data: TProviderEvaluationContext): Promise<ICommentProviderData<TAccounts>> {
+    const result = this.baseStructure;
+
+    result.comments = await this.createProviderData(data);
+
+    return result;
   }
 }
 
-export class PostProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends BlogContentProvider<TAccounts, IPostProviderOptions> {
+export class PostProvider<
+  TAccounts extends Array<TAccountName> = Array<TAccountName>
+> extends BlogContentProvider<IPostProviderData<TAccounts>, TAccounts, IPostProviderOptions> {
   public constructor() {
     super(true); // True = posts
+  }
+
+  public get baseStructure(): IPostProviderData<TAccounts> {
+    return {
+      posts: {}
+    };
   }
 
   public pushOptions(options: IPostProviderOptions): void {
@@ -119,9 +138,11 @@ export class PostProvider<TAccounts extends Array<TAccountName> = Array<TAccount
   }
 
   public async provide(data: TProviderEvaluationContext): Promise<IPostProviderData<TAccounts>> {
-    return {
-      posts: await this.createProviderData(data)
-    };
+    const result = this.baseStructure;
+
+    result.posts = await this.createProviderData(data);
+
+    return result;
   }
 }
 

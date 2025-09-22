@@ -16,7 +16,9 @@ export interface IManabarProviderOptions {
   manabarData: IManabarCollectorOptions[];
 }
 
-export class ManabarProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IManabarProviderOptions> {
+export class ManabarProvider<
+  TAccounts extends Array<TAccountName> = Array<TAccountName>
+> extends ProviderBase<IManabarProviderOptions, IManabarProviderData<TAccounts>> {
   public readonly manabarData = new Map<TAccountName, Set<EManabarType>>();
 
   public pushOptions(options: IManabarProviderOptions): void {
@@ -38,10 +40,14 @@ export class ManabarProvider<TAccounts extends Array<TAccountName> = Array<TAcco
     return contexts;
   }
 
-  public async provide(data: TProviderEvaluationContext): Promise<IManabarProviderData<TAccounts>> {
-    const result = {
+  public get baseStructure(): IManabarProviderData<TAccounts> {
+    return {
       manabarData: {}
     };
+  }
+
+  public async provide(data: TProviderEvaluationContext): Promise<IManabarProviderData<TAccounts>> {
+    const result = this.baseStructure;
 
     const { manabarData } = await data.get(ManabarClassifier);
     for(const [account, manabarTypes] of this.manabarData) {

@@ -29,9 +29,10 @@ export interface IPostMetadataProviderData<TAccounts extends Array<TAccountName>
 
 // Base class for blog content providers (posts and comments)
 export abstract class ContentMetadataProvider<
+  TStructure extends object = object,
   TAccounts extends Array<TAccountName> = Array<TAccountName>,
   TOptions extends object = object
-> extends ProviderBase<TOptions> {
+> extends ProviderBase<TOptions, TStructure> {
   public readonly authors = new Set<TAccountName>();
   protected readonly isPost: boolean;
 
@@ -68,7 +69,7 @@ export abstract class ContentMetadataProvider<
 }
 
 export class CommentMetadataProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>>
-  extends ContentMetadataProvider<TAccounts, ICommentMetadataProviderOptions> {
+  extends ContentMetadataProvider<ICommentMetadataProviderData<TAccounts>, TAccounts, ICommentMetadataProviderOptions> {
   public constructor() {
     super(false); // False = not posts, i.e., comments
   }
@@ -78,15 +79,23 @@ export class CommentMetadataProvider<TAccounts extends Array<TAccountName> = Arr
       this.authors.add(account);
   }
 
-  public async provide(data: TProviderEvaluationContext): Promise<ICommentMetadataProviderData<TAccounts>> {
+  public get baseStructure(): ICommentMetadataProviderData<TAccounts> {
     return {
-      commentsMetadata: await this.createProviderData(data)
+      commentsMetadata: {}
     };
+  }
+
+  public async provide(data: TProviderEvaluationContext): Promise<ICommentMetadataProviderData<TAccounts>> {
+    const result = this.baseStructure;
+
+    result.commentsMetadata = await this.createProviderData(data);
+
+    return result;
   }
 }
 
 export class PostMetadataProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>>
-  extends ContentMetadataProvider<TAccounts, IPostMetadataProviderOptions> {
+  extends ContentMetadataProvider<IPostMetadataProviderData<TAccounts>, TAccounts, IPostMetadataProviderOptions> {
   public constructor() {
     super(true); // True = posts
   }
@@ -96,10 +105,18 @@ export class PostMetadataProvider<TAccounts extends Array<TAccountName> = Array<
       this.authors.add(account);
   }
 
-  public async provide(data: TProviderEvaluationContext): Promise<IPostMetadataProviderData<TAccounts>> {
+  public get baseStructure(): IPostMetadataProviderData<TAccounts> {
     return {
-      postsMetadata: await this.createProviderData(data)
+      postsMetadata: {}
     };
+  }
+
+  public async provide(data: TProviderEvaluationContext): Promise<IPostMetadataProviderData<TAccounts>> {
+    const result = this.baseStructure;
+
+    result.postsMetadata = await this.createProviderData(data);
+
+    return result;
   }
 }
 
