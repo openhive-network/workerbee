@@ -121,8 +121,38 @@ test.describe("WorkerBee Bot events test", () => {
       let blocksParsed = 0;
       const observer = bot.observe.onBlock().subscribe({
         next(data) {
-          console.info(`Got block #${data.block.number}`);
+          console.info(`Got block #${data.block!.number}`);
           ++blocksParsed;
+        },
+        error(err) {
+          console.error(err);
+        }
+      });
+
+      await bot.start();
+
+      await new Promise(res => { setTimeout(res, hiveBlockInterval * 2); });
+
+      observer.unsubscribe();
+
+      return blocksParsed;
+    }, HIVE_BLOCK_INTERVAL);
+
+    expect(result).toBeGreaterThanOrEqual(1);
+  });
+
+  test("Should not fail when async next callback fails", async({ workerbeeTest }) => {
+    const result = await workerbeeTest.dynamic(async({ WorkerBee }, hiveBlockInterval) => {
+      const bot = new WorkerBee();
+
+      let blocksParsed = 0;
+      const observer = bot.observe.onBlock().subscribe({
+        /* eslint-disable-next-line require-await */
+        async next(data) {
+          console.info(`Got block #${data.block!.number}`);
+          ++blocksParsed;
+
+          throw new Error("Intentional error in next()");
         },
         error(err) {
           console.error(err);
@@ -152,16 +182,16 @@ test.describe("WorkerBee Bot events test", () => {
       await new Promise<void>(async (resolve, reject) => {
         const observer = bot.observe.onBlock().provideBlockData().subscribe({
           next(data) {
-            console.info(`Got block #${data.block.number}`);
+            console.info(`Got block #${data.block!.number}`);
             if (typeof blockNumber !== "undefined")
-              if (blockNumber + 1 !== data.block.number) {
-                console.error(`Blocks are not consecutive: ${blockNumber} followed by ${data.block.number}`);
+              if (blockNumber + 1 !== data.block!.number) {
+                console.error(`Blocks are not consecutive: ${blockNumber} followed by ${data.block!.number}`);
                 reject(new Error("Blocks are not consecutive"));
                 return;
               }
 
 
-            blockNumber = data.block.number;
+            blockNumber = data.block!.number;
           },
           error(err) {
             console.error(err);
@@ -295,8 +325,8 @@ test.describe("WorkerBee Bot events test", () => {
             let rshares: number | undefined;
 
             for(const account in data.commentsMetadata)
-              for(const permlink in data.commentsMetadata[account]) {
-                rshares = Number(data.commentsMetadata[account][permlink].netRshares);
+              for(const permlink in data.commentsMetadata[account as "gtg"]) {
+                rshares = Number(data.commentsMetadata[account as "gtg"]![permlink].netRshares);
                 console.info(`Retrieved comment payout of @${account}: ${rshares} rshares for ${permlink}`);
               }
 
@@ -418,7 +448,7 @@ test.describe("WorkerBee Bot events test", () => {
       await new Promise<void>(resolve => {
         bot.providePastOperations(500017, 500020).onBlock().provideBlockHeaderData().subscribe({
           next(data) {
-            console.log(`Got block #${data.block.number}`);
+            console.log(`Got block #${data.block!.number}`);
 
             ++calls;
           },
@@ -455,7 +485,7 @@ test.describe("WorkerBee Bot events test", () => {
           next(data) {
             gotTx = true;
 
-            console.log(`Got transaction #${block!.transaction_ids[0]} in block ${data.block.number}: ${
+            console.log(`Got transaction #${block!.transaction_ids[0]} in block ${data.block!.number}: ${
               data.transactions[block!.transaction_ids[0]]!.operations.length} operations`);
           },
           error(err) {
@@ -516,7 +546,7 @@ test.describe("WorkerBee Bot events test", () => {
               return;
 
             data.impactedAccounts["lolzbot"].forEach(({ transaction }) => {
-              console.log(`Got transaction #${transaction.id} for lolzbot in block #${data.block.number}`);
+              console.log(`Got transaction #${transaction.id} for lolzbot in block #${data.block!.number}`);
 
               ++calls;
             });
@@ -549,7 +579,7 @@ test.describe("WorkerBee Bot events test", () => {
 
         observer.onBlock().provideBlockData().subscribe({
           next(data) {
-            console.log(`Got block #${data.block.number}`);
+            console.log(`Got block #${data.block!.number}`);
 
             ++calls;
           },

@@ -11,10 +11,10 @@ test.describe("Bot Realistic Scenarios", () => {
       bot.onPosts("mtyszczak").onPosts("nickdongsik").onComments("brando28").subscribe({
         next(data) {
           for (const author in data.posts)
-            data.posts[author].forEach(({ operation }) => content.push(`${operation.author} - ${operation.permlink}`));
+            data.posts[author as keyof typeof data.posts]?.forEach(({ operation }) => content.push(`${operation.author} - ${operation.permlink}`));
 
           for (const author in data.comments)
-            data.comments[author].forEach(({ operation }) => content.push(`${operation.author} - ${operation.permlink}`));
+            data.comments[author as keyof typeof data.comments]?.forEach(({ operation }) => content.push(`${operation.author} - ${operation.permlink}`));
         },
         error: (err) => {
           console.error(err);
@@ -38,13 +38,19 @@ test.describe("Bot Realistic Scenarios", () => {
       bot.onVotes("e-sport-gamer").onFollow("fwaszkiewicz").onReblog("maxinpower").subscribe({
         next(data) {
           for (const author in data.votes)
-            data.votes[author].forEach(({ operation }) => content.push(`Vote: ${operation.voter} - ${operation.permlink}`));
+            data.votes[author as keyof typeof data.votes]?.forEach(({ operation }) => {
+              content.push(`Vote: ${operation.voter} - ${operation.permlink}`)
+            });
 
           for (const author in data.follows)
-            data.follows[author].forEach(({ operation }) => content.push(`Follow: ${operation.follower} - ${operation.following}`));
+            data.follows[author as keyof typeof data.follows]?.forEach(({ operation }) => {
+              content.push(`Follow: ${operation.follower} - ${operation.following}`)
+            });
 
           for (const author in data.reblogs)
-            data.reblogs[author].forEach(({ operation }) => content.push(`Reblog: ${operation.author} - ${operation.permlink}`));
+            data.reblogs[author as keyof typeof data.reblogs]?.forEach(({ operation }) => {
+              content.push(`Reblog: ${operation.author} - ${operation.permlink}`)
+            });
         },
         error: (err) => {
           console.error(err);

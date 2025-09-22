@@ -130,7 +130,7 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
           next(data) {
             let percentChange = 0;
 
-            const priceHistoryArray = Array.from(data.feedPrice.priceHistory);
+            const priceHistoryArray = Array.from(data.feedPrice!.priceHistory);
 
             const price1 = Number.parseInt(priceHistoryArray[0].base!.amount) / Number.parseInt(priceHistoryArray[0].quote!.amount);
             const price2 = Number.parseInt(priceHistoryArray[1].base!.amount) / Number.parseInt(priceHistoryArray[1].quote!.amount);
@@ -270,8 +270,10 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
             content.push(`Account: ${data.accounts.gtg?.name}, Balance: ${data.accounts.gtg?.balance.HBD.savings.amount}`);
             content.push(`RC mana: ${data.rcAccounts.gtg?.rcManabar.currentMana}`);
             content.push(`UPVOTE mana: ${data.manabarData.gtg?.[0]?.currentMana}`);
-            content.push(`Block number: ${data.block.number}`);
-            content.push(`Feed price: ${Array.from(data.feedPrice.priceHistory)[0].base!.amount}/${Array.from(data.feedPrice.priceHistory)[0].quote!.amount}`);
+            content.push(`Block number: ${data.block!.number}`);
+            content.push(
+              `Feed price: ${Array.from(data.feedPrice!.priceHistory)[0].base!.amount}/${Array.from(data.feedPrice!.priceHistory)[0].quote!.amount}`
+            );
 
             if (content.length >= 5)
               resolve(content);
@@ -348,11 +350,11 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
         .subscribe({
           next(data) {
             data.internalMarketOperations.forEach(({ operation }) => {
-              content.push(`Internal market operation: owner: ${operation.owner}, order id: ${operation.orderId}, block : ${data.block.number}`);
+              content.push(`Internal market operation: owner: ${operation.owner}, order id: ${operation.orderId}, block : ${data.block!.number}`);
             });
 
             data.exchangeTransferOperations.forEach(({ operation }) => {
-              content.push(`Exchange transfer: ${operation.from} -> ${operation.to} (${operation.amount.amount}), block: ${data.block.number}`);
+              content.push(`Exchange transfer: ${operation.from} -> ${operation.to} (${operation.amount.amount}), block: ${data.block!.number}`);
             });
 
             if (content.length >= 2)
@@ -486,7 +488,7 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
             if (data.witnesses.blocktrades && data.witnesses.blocktrades.totalMissedBlocks >= 3)
               content.push(`Witness missed blocks: blocktrades - ${data.witnesses.blocktrades.totalMissedBlocks}`);
 
-            const priceHistoryArray = Array.from(data.feedPrice.priceHistory);
+            const priceHistoryArray = Array.from(data.feedPrice!.priceHistory);
 
             if (priceHistoryArray.length >= 2) {
               const price1 = Number.parseInt(priceHistoryArray[0].base!.amount) / Number.parseInt(priceHistoryArray[0].quote!.amount);
@@ -700,7 +702,7 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
         .provideBlockData()
         .subscribe({
           next(data) {
-            content.push(`Block processed: ${data.block.number}`);
+            content.push(`Block processed: ${data.block!.number}`);
 
             data.votes.gtg?.forEach(({ operation }) => {
               content.push(`High-frequency vote: ${operation.voter} -> ${operation.author}`);
@@ -748,7 +750,7 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
               content.push(`Economic whale alert: ${operation.from} -> ${operation.to} (${operation.amount.amount})`);
             });
 
-            const priceHistoryArray = Array.from(data.feedPrice.priceHistory);
+            const priceHistoryArray = Array.from(data.feedPrice!.priceHistory);
             if (priceHistoryArray.length >= 2) {
               const price1 = Number.parseInt(priceHistoryArray[0].base!.amount) / Number.parseInt(priceHistoryArray[0].quote!.amount);
               const price2 = Number.parseInt(priceHistoryArray[1].base!.amount) / Number.parseInt(priceHistoryArray[1].quote!.amount);
@@ -851,7 +853,7 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
               content.push(`Trading signal - Large whale movement: ${operation.from} -> ${operation.to} (${operation.amount.amount})`);
             });
 
-            const priceHistoryArray = Array.from(data.feedPrice.priceHistory);
+            const priceHistoryArray = Array.from(data.feedPrice!.priceHistory);
             if (priceHistoryArray.length >= 2) {
               const price1 = Number.parseInt(priceHistoryArray[0].base!.amount) / Number.parseInt(priceHistoryArray[0].quote!.amount);
               const price2 = Number.parseInt(priceHistoryArray[1].base!.amount) / Number.parseInt(priceHistoryArray[1].quote!.amount);
@@ -969,7 +971,7 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
         .provideBlockData()
         .subscribe({
           next(data) {
-            content.push(`Repeated OR block: ${data.block.number}`);
+            content.push(`Repeated OR block: ${data.block!.number}`);
 
             data.posts.gtg?.forEach(({ operation }) => {
               content.push(`Repeated OR post: ${operation.author} - ${operation.title}`);
@@ -1008,7 +1010,7 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
         .provideBlockData()
         .subscribe({
           next(data) {
-            content.push(`Duplicate providers block: ${data.block.number}`);
+            content.push(`Duplicate providers block: ${data.block!.number}`);
             content.push(`Duplicate providers account: ${data.accounts.gtg?.name}`);
             content.push(`Duplicate providers manabar: ${data.manabarData.gtg?.[2]?.currentMana}`);
 

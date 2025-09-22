@@ -10,7 +10,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
       bot.onPosts("mtyszczak", "author2", "author3").subscribe({
         next(data) {
           for (const author of ["mtyszczak", "author2", "author3"])
-            data.posts[author]?.forEach(({ operation }) => {
+            data.posts[author as "mtyszczak" | "author2" | "author3"]?.forEach(({ operation }) => {
               capturedPosts.push(`Post by ${operation.author}: ${operation.permlink}`);
             });
         },
@@ -32,10 +32,10 @@ test.describe("WorkerBee Individual Filter Verification", () => {
       bot.onBlock().onPosts("comandoyeya", "daddydog").subscribe({
         next(data) {
           for (const author of ["comandoyeya", "daddydog"])
-            data.posts[author]?.forEach(({ operation }) => {
+            data.posts[author as "comandoyeya" | "daddydog"]?.forEach(({ operation }) => {
               capturedPosts.push({
                 author: operation.author,
-                blockNumber: data.block.number
+                blockNumber: data.block!.number
               });
             });
 
@@ -197,7 +197,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
       (bot).onComments("gtg", "moretea", "khantaimur").subscribe({
         next(data) {
           for (const author of ["gtg", "moretea", "khantaimur"])
-            data.comments[author]?.forEach(({ operation }) => {
+            data.comments[author as "gtg" | "moretea" | "khantaimur"]?.forEach(({ operation }) => {
               capturedComments.push(`Comment by ${operation.author}: ${operation.permlink}`);
             });
         },
@@ -223,10 +223,10 @@ test.describe("WorkerBee Individual Filter Verification", () => {
       (bot).onBlock().onComments("zayyar99", "beckyroyal").subscribe({
         next(data) {
           for (const author of ["zayyar99", "beckyroyal"])
-            data.comments[author]?.forEach(({ operation }) => {
+            data.comments[author as "zayyar99" | "beckyroyal"]?.forEach(({ operation }) => {
               capturedComments.push({
                 author: operation.author,
-                blockNumber: data.block.number
+                blockNumber: data.block!.number
               });
             });
         },
@@ -391,11 +391,11 @@ test.describe("WorkerBee Individual Filter Verification", () => {
         .subscribe({
           next(data) {
             for (const author of ["mtyszczak", "secret-art", "author2", "author3"]) {
-              data.comments[author]?.forEach(({ operation }) => {
+              data.comments[author as "secret-art" | "author2" | "author3"]?.forEach(({ operation }) => {
                 capturedPosts.push(`Comment by ${operation.author}: ${operation.permlink}`);
               });
 
-              data.posts[author]?.forEach(({ operation }) => {
+              data.posts[author as "mtyszczak" | "author2" | "author3"]?.forEach(({ operation }) => {
                 capturedPosts.push(`Post by ${operation.author}: ${operation.permlink}`);
               });
             }
@@ -424,7 +424,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
       (bot).onVotes("dhedge", "winanda").subscribe({
         next(data) {
           for (const voter of ["dhedge", "winanda"])
-            data.votes[voter]?.forEach(({ operation }) => {
+            data.votes[voter as "dhedge" | "winanda"]?.forEach(({ operation }) => {
               capturedVotes.push(`Vote by ${operation.voter} on ${operation.author}/${operation.permlink}`);
             });
         },
@@ -450,10 +450,10 @@ test.describe("WorkerBee Individual Filter Verification", () => {
       (bot).onBlock().onVotes("noctury", "the-burn").subscribe({
         next(data) {
           for (const voter of ["noctury", "the-burn"])
-            data.votes[voter]?.forEach(({ operation }) => {
+            data.votes[voter as "noctury" | "the-burn"]?.forEach(({ operation }) => {
               capturedVotes.push({
                 voter: operation.voter,
-                blockNumber: data.block.number
+                blockNumber: data.block!.number
               });
             });
         },
@@ -582,11 +582,11 @@ test.describe("WorkerBee Individual Filter Verification", () => {
           next(data) {
             for (const author of ["mtyszczak", "jacor"]) {
               data.posts[author as keyof typeof data["posts"]]?.forEach(({ operation }) => {
-                capturedPosts.push(`Post by ${operation.author}: ${operation.permlink} in block ${data.block.number}`);
+                capturedPosts.push(`Post by ${operation.author}: ${operation.permlink} in block ${data.block!.number}`);
               });
 
               data.votes[author as keyof typeof data["votes"]]?.forEach(({ operation }) => {
-                capturedPosts.push(`Vote by ${operation.voter}: ${operation.permlink} in block ${data.block.number}`);
+                capturedPosts.push(`Vote by ${operation.voter}: ${operation.permlink} in block ${data.block!.number}`);
               });
             }
 
