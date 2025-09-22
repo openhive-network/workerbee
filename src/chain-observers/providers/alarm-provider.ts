@@ -26,9 +26,7 @@ export interface IAlarmProviderOptions {
   accounts: string[];
 }
 
-export class AlarmProvider<
-  TAccounts extends Array<TAccountName> = Array<TAccountName>
-> extends ProviderBase<IAlarmProviderOptions, IAlarmAccountsData<TAccounts>> {
+export class AlarmProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IAlarmProviderOptions> {
   public readonly accounts = new Set<TAccountName>();
 
   public pushOptions(options: IAlarmProviderOptions): void {
@@ -49,14 +47,10 @@ export class AlarmProvider<
     return contexts;
   }
 
-  public get baseStructure(): IAlarmAccountsData<TAccounts> {
-    return {
-      alarmsPerAccount: {}
-    };
-  }
-
   public async provide(data: TProviderEvaluationContext): Promise<IAlarmAccountsData<TAccounts>> {
-    const result = this.baseStructure;
+    const result: IAlarmAccountsData<TAccounts> = {
+      alarmsPerAccount: {} as TAlarmAccounts<TAccounts>
+    };
 
     const ensureHasAccount = (account: TAccountName) => {
       if (result.alarmsPerAccount[account] === undefined)

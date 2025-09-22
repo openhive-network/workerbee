@@ -35,7 +35,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
             data.posts[author as "comandoyeya" | "daddydog"]?.forEach(({ operation }) => {
               capturedPosts.push({
                 author: operation.author,
-                blockNumber: data.block!.number
+                blockNumber: data.block.number
               });
             });
 
@@ -226,7 +226,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
             data.comments[author as "zayyar99" | "beckyroyal"]?.forEach(({ operation }) => {
               capturedComments.push({
                 author: operation.author,
-                blockNumber: data.block!.number
+                blockNumber: data.block.number
               });
             });
         },
@@ -453,7 +453,7 @@ test.describe("WorkerBee Individual Filter Verification", () => {
             data.votes[voter as "noctury" | "the-burn"]?.forEach(({ operation }) => {
               capturedVotes.push({
                 voter: operation.voter,
-                blockNumber: data.block!.number
+                blockNumber: data.block.number
               });
             });
         },
@@ -582,11 +582,11 @@ test.describe("WorkerBee Individual Filter Verification", () => {
           next(data) {
             for (const author of ["mtyszczak", "jacor"]) {
               data.posts[author as keyof typeof data["posts"]]?.forEach(({ operation }) => {
-                capturedPosts.push(`Post by ${operation.author}: ${operation.permlink} in block ${data.block!.number}`);
+                capturedPosts.push(`Post by ${operation.author}: ${operation.permlink} in block ${data.block.number}`);
               });
 
               data.votes[author as keyof typeof data["votes"]]?.forEach(({ operation }) => {
-                capturedPosts.push(`Vote by ${operation.voter}: ${operation.permlink} in block ${data.block!.number}`);
+                capturedPosts.push(`Vote by ${operation.voter}: ${operation.permlink} in block ${data.block.number}`);
               });
             }
 

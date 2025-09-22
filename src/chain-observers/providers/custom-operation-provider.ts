@@ -18,7 +18,7 @@ export interface ICustomOperationProviderOptions {
 
 export class CustomOperationProvider<
   TOperationId extends Array<string | number> = Array<string | number>
-> extends ProviderBase<ICustomOperationProviderOptions, ICustomOperationProviderData<TOperationId>> {
+> extends ProviderBase<ICustomOperationProviderOptions> {
   public readonly ids = new Set<string | number>();
 
   public pushOptions(options: ICustomOperationProviderOptions): void {
@@ -30,14 +30,10 @@ export class CustomOperationProvider<
     return [OperationClassifier]
   }
 
-  public get baseStructure(): ICustomOperationProviderData<TOperationId> {
-    return {
-      customOperations: {}
-    };
-  }
-
   public async provide(data: TProviderEvaluationContext): Promise<ICustomOperationProviderData<TOperationId>> {
-    const result = this.baseStructure;
+    const result = {
+      customOperations: {}
+    } as ICustomOperationProviderData<TOperationId>;
 
     const accounts = await data.get(OperationClassifier);
     if (accounts.operationsPerType.custom_json_operation)

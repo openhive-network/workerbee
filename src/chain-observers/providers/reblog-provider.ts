@@ -23,9 +23,7 @@ export interface IReblogProviderOptions {
   accounts: TAccountName[];
 }
 
-export class ReblogProvider<
-  TAccounts extends Array<TAccountName> = Array<string>
-> extends ProviderBase<IReblogProviderOptions, IReblogProviderData<TAccounts>> {
+export class ReblogProvider<TAccounts extends Array<TAccountName> = Array<string>> extends ProviderBase<IReblogProviderOptions> {
   public readonly accounts = new Set<string>();
 
   public pushOptions(options: IReblogProviderOptions): void {
@@ -37,14 +35,10 @@ export class ReblogProvider<
     return [OperationClassifier]
   }
 
-  public get baseStructure(): IReblogProviderData<TAccounts> {
-    return {
-      reblogs: {}
-    };
-  }
-
   public async provide(data: TProviderEvaluationContext): Promise<IReblogProviderData<TAccounts>> {
-    const result = this.baseStructure;
+    const result = {
+      reblogs: {}
+    } as IReblogProviderData<TAccounts>;
 
     const accounts = await data.get(OperationClassifier);
     if (accounts.operationsPerType.custom_json_operation)

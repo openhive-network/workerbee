@@ -22,9 +22,7 @@ export interface IFollowProviderOptions {
   accounts: TAccountName[];
 }
 
-export class FollowProvider<
-  TAccounts extends Array<TAccountName> = Array<string>
-> extends ProviderBase<IFollowProviderOptions, IFollowProviderData<TAccounts>> {
+export class FollowProvider<TAccounts extends Array<TAccountName> = Array<string>> extends ProviderBase<IFollowProviderOptions> {
   public readonly accounts = new Set<string>();
 
   public pushOptions(options: IFollowProviderOptions): void {
@@ -36,14 +34,10 @@ export class FollowProvider<
     return [OperationClassifier]
   }
 
-  public get baseStructure(): IFollowProviderData<TAccounts> {
-    return {
-      follows: {}
-    };
-  }
-
   public async provide(data: TProviderEvaluationContext): Promise<IFollowProviderData<TAccounts>> {
-    const result = this.baseStructure;
+    const result = {
+      follows: {}
+    } as IFollowProviderData<TAccounts>;
 
     const accounts = await data.get(OperationClassifier);
     if (accounts.operationsPerType.custom_json_operation)

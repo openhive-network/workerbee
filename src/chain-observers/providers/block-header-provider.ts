@@ -4,27 +4,23 @@ import { TProviderEvaluationContext } from "../factories/data-evaluation-context
 import { ProviderBase } from "./provider-base";
 
 export interface IBlockHeaderProviderData {
-  block?: IBlockHeaderData;
+  block: IBlockHeaderData;
 };
 
-export class BlockHeaderProvider extends ProviderBase<{}, IBlockHeaderProviderData> {
+export class BlockHeaderProvider extends ProviderBase {
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [
       BlockHeaderClassifier
     ]
   }
 
-  public get baseStructure(): IBlockHeaderProviderData {
-    return {};
-  }
-
   public async provide(data: TProviderEvaluationContext): Promise<IBlockHeaderProviderData> {
-    const result = this.baseStructure;
-
     const blockHeader = await data.get(BlockHeaderClassifier);
 
-    result.block = { ...blockHeader };
-
-    return result;
+    return {
+      block: {
+        ...blockHeader
+      }
+    };
   }
 }

@@ -878,18 +878,11 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * Automatically provides the block header data in the `next` callback.
    *
-   * Note: `data.block` can be undefined in some cases, e.g. when you applied advanced filter logic in your code,
-   * one of the execution paths evaluated to true, but block provider could not retrieve the block data from the Node API
-   * due to an error. That's why it's always a good practice to check if `data.block` is defined before accessing its
-   * properties with advanced filters. In the example above we used `!` as a TypeScript-only feature - Non-Null Assertions,
-   * which tells the compiler that we are sure that `data.block` is not null or undefined.
-   * In the example with just the {@link onBlock} filter, the block data should always be defined.
-   *
    * @example
    * ```ts
    * workerbee.observe.onBlock().subscribe({
    *   next: (data) => {
-   *     console.log("New block detected:", data.block!.number);
+   *     console.log("New block detected:", data.block.number);
    *   }
    * });
    * ```
@@ -1032,18 +1025,11 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   /**
    * Provides block header data in the `next` callback.
    *
-   * Note: `data.block` can be undefined in some cases, e.g. when you applied advanced filter logic in your code,
-   * one of the execution paths evaluated to true, but block provider could not retrieve the block data from the Node API
-   * due to an error. That's why it's always a good practice to check if `data.block` is defined before accessing its
-   * properties with advanced filters. In the example above we used `!` as a TypeScript-only feature - Non-Null Assertions,
-   * which tells the compiler that we are sure that `data.block` is not null or undefined.
-   * In the example with just the {@link onBlock} filter, the block data should always be defined.
-   *
    * @example
    * ```ts
    * workerbee.observe.onBlock().provideBlockHeaderData().subscribe({
    *   next: (data) => {
-   *     console.log("New block detected:", data.block!.number);
+   *     console.log("New block detected:", data.block.number);
    *   }
    * });
    * ```
@@ -1089,19 +1075,12 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    *
    * Automatically provides both block header and block data.
    *
-   * Note: `data.block` can be undefined in some cases, e.g. when you applied advanced filter logic in your code,
-   * one of the execution paths evaluated to true, but block provider could not retrieve the block data from the Node API
-   * due to an error. That's why it's always a good practice to check if `data.block` is defined before accessing its
-   * properties with advanced filters. In the example above we used `!` as a TypeScript-only feature - Non-Null Assertions,
-   * which tells the compiler that we are sure that `data.block` is not null or undefined.
-   * In the example with just the {@link onBlock} filter, the block data should always be defined.
-   *
    * @example
    * ```ts
    * workerbee.observe.onBlock().provideBlockData().subscribe({
    *   next: (data) => {
-   *     console.log("New block detected:", data.block!.number);
-   *     console.log("Block transactions:", data.block!.transactions);
+   *     console.log("New block detected:", data.block.number);
+   *     console.log("Block transactions:", data.block.transactions);
    *   }
    * });
    * ```

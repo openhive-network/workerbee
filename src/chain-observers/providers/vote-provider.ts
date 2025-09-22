@@ -17,9 +17,7 @@ export interface IVoteProviderOptions {
   voters: string[];
 }
 
-export class VoteProvider<
-  TAccounts extends Array<TAccountName> = Array<TAccountName>
-> extends ProviderBase<IVoteProviderOptions, IVoteProviderData<TAccounts>> {
+export class VoteProvider<TAccounts extends Array<TAccountName> = Array<TAccountName>> extends ProviderBase<IVoteProviderOptions> {
   public readonly voters = new Set<TAccountName>();
 
   public pushOptions(options: IVoteProviderOptions): void {
@@ -31,14 +29,10 @@ export class VoteProvider<
     return [OperationClassifier]
   }
 
-  public get baseStructure(): IVoteProviderData<TAccounts> {
-    return {
-      votes: {}
-    };
-  }
-
   public async provide(data: TProviderEvaluationContext): Promise<IVoteProviderData<TAccounts>> {
-    const result = this.baseStructure;
+    const result = {
+      votes: {}
+    } as IVoteProviderData<TAccounts>;
 
     const operations = await data.get(OperationClassifier);
     if (operations.operationsPerType.vote_operation)
