@@ -63,7 +63,7 @@ export class ObserverMediator {
 
         this.factory.addTiming("providers", Date.now() - startProvider);
 
-        listener.next?.(providedData);
+        await (listener.next?.(providedData) as Promise<void> | void);
       }).catch(error => listener.error?.(error));
 
     this.factory.postNotify(this, context);
