@@ -157,7 +157,8 @@ export interface IBloggingPlatform {
   getPost(postId: IPostCommentIdentity): Promise<IPost>;
   enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IPost>>;
   configureViewContext(accontName: IAccountIdentity): void;
-  enumCommunities(filter: ICommunityFilters, pagination: IPagination): Promise<Iterable<ICommunity>>
+  enumCommunities(filter: ICommunityFilters, pagination: IPagination): Promise<Iterable<ICommunity>>;
+  // To do: add getAccount method later
 
   // authorize(provider: IAuthenticationProvider): Promise<IActiveBloggingPlatform>;
 }

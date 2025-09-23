@@ -14,15 +14,13 @@ export class Post extends Comment implements IPost  {
 
   private replies?: IReply[];
 
-  public constructor(authorPermlink: IPostCommentIdentity, bloggingPlatform: IBloggingPlatform, postData?: Entry) {
+  public constructor(authorPermlink: IPostCommentIdentity, bloggingPlatform: IBloggingPlatform, postData: Entry) {
     super(authorPermlink, bloggingPlatform, postData);
-    if (postData) {
-      this.title = postData.title;
-      this.tags = postData.json_metadata?.tags || [];
-      this.summary = postData.json_metadata?.description || "";
-      this.community = postData.community ? {name: postData.community} : undefined;
-      this.communityTitle = postData.community_title
-    }
+    this.title = postData.title;
+    this.tags = postData.json_metadata?.tags || [];
+    this.summary = postData.json_metadata?.description || "";
+    this.community = postData.community ? {name: postData.community} : undefined;
+    this.communityTitle = postData.community_title
   }
 
   private async fetchReplies(): Promise<IReply[]> {
