@@ -8,8 +8,9 @@ export class Post extends Comment implements IPost  {
 
   public title: string;
   public tags: string[];
-  public community?: ICommunityIdentity | undefined;
+  public community?: ICommunityIdentity;
   public summary: string;
+  public communityTitle?: string;
 
   private replies?: IReply[];
 
@@ -20,6 +21,7 @@ export class Post extends Comment implements IPost  {
       this.tags = postData.json_metadata?.tags || [];
       this.summary = postData.json_metadata?.description || "";
       this.community = postData.community ? {name: postData.community} : undefined;
+      this.communityTitle = postData.community_title
     }
   }
 

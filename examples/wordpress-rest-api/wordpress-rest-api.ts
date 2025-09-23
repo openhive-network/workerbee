@@ -105,7 +105,7 @@ apiRouter.get("/comments", async (req: Request, res: Response) => {
     const {author, permlink} = getAuthorPermlinkFromSlug(postParent);
     const post = posts.find((post) => post.author === author && post.permlink === permlink);
     if (post) {
-      const replies = await post.enumReplies({}, {page: 1, pageSize: 10}) as IReply[];
+      const replies = await post.enumReplies({}, {page: 1, pageSize: 1000}) as IReply[];
       if (replies) {
         res.json(await mapReplies(replies, postId))
       }

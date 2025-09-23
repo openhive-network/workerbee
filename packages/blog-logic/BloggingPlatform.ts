@@ -9,8 +9,8 @@ import { IAccountIdentity,
   IPostCommentsFilters
 } from "./interfaces";
 import { Post } from "./Post";
-import { ExtendedNodeApi, getWax } from "./wax";
 import { paginateData } from "./utils";
+import { ExtendedNodeApi, getWax } from "./wax";
 
 export class BloggingPlaform implements IBloggingPlatform {
   public viewerContext: IAccountIdentity;
@@ -58,10 +58,8 @@ export class BloggingPlaform implements IBloggingPlatform {
       tag: filter.tag
     });
     if (!posts)
-    throw new Error("Posts not found");
+      throw new Error("Posts not found");
     const paginatedPosts = paginateData(posts, pagination);
     return paginatedPosts?.map((post) => new Post({author: post.author, permlink: post.permlink}, this, post))
   }
-
-
 }

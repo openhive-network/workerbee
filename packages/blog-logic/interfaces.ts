@@ -119,6 +119,7 @@ export interface IPost extends IComment {
   summary: string;
   tags: string[];
   community?: ICommunityIdentity;
+  communityTitle?: string;
 
   getCommentsCount(): Promise<number>;
   enumReplies(filter: ICommonFilters, pagination: IPagination): Promise<Iterable<IReply>>;

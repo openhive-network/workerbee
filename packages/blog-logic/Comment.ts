@@ -1,8 +1,8 @@
 import { TWaxExtended } from "@hiveio/wax";
 import { IAccountIdentity, IBloggingPlatform, IComment, ICommonFilters, IPagination, IPostCommentIdentity, IVote } from "./interfaces";
+import { paginateData } from "./utils";
 import { Vote } from "./Vote";
 import { Entry, ExtendedNodeApi, getWax } from "./wax";
-import { paginateData } from "./utils";
 
 export class Comment implements IComment {
 

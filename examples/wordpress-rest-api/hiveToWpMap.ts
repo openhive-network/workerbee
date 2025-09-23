@@ -39,7 +39,7 @@ export const mapIPostToWpPost = async (hivePost: IPost, wpId: number, accountId:
   const slug = hivePost.generateSlug();
   const tags  = hivePost?.tags || [];
   const wpTermTags = tags.map((tag) => mapWpTerm(tag, "tag"));
-  const community = hivePost.community?.name;
+  const community = hivePost.communityTitle;
   const wpTermCategory = community ? [mapWpTerm(community, "category")] : [];
   const renderedBody = renderer.render(await hivePost.getContent());
   const wpExcerpt = renderedBody.replace(/<[^>]+>/g, '').substring(0, 100);
