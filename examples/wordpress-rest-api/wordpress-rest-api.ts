@@ -38,26 +38,26 @@ const getAuthorPermlinkFromSlug = (slug: string): {author: string, permlink: str
 
 const mapAndAddtoMapPosts = async (posts: IPost[]): Promise<WPPost[]> => { 
   const mappedPosts: WPPost[] = [];
-  posts.forEach(async (post) => {
+  await Promise.all(posts.map(async (post) => {
     const postId = simpleHash(`${post.author}_${post.permlink}`);
     const authorId = simpleHash(post.author);
     idToStringMap.set(postId, `${post.author}_${post.permlink}`).set(authorId, post.author);
     posts.push(post);
     mappedPosts.push(await mapIPostToWpPost(post, postId, authorId));
-  });
-  return await mappedPosts;
+  })); 
+  return mappedPosts;
 }
 
 
 const mapReplies = async (replies: IReply[], postId: number) : Promise<WPComment[]> => {
-  const wpComments: WPComment[] = []
-  replies.forEach( async (reply) => {
+  const wpComments: WPComment[] = [];
+  await Promise.all(  replies.map( async (reply) => {
     if (reply.author && reply.permlink) {
-      const wpAuthorPermlink = reply.generateSlug();
+      const wpAuthorPermlink = reply.getSlug();
       const wpComment = await mapIReplyToWPComment(reply, simpleHash(wpAuthorPermlink), postId, simpleHash(reply.author));
       wpComments.push(wpComment)
     }
-  });
+  }));
   return await wpComments;
 }
 
@@ -103,6 +103,7 @@ apiRouter.get("/comments", async (req: Request, res: Response) => {
   const postParent = idToStringMap.get(postId);
   if (postParent) {
     const {author, permlink} = getAuthorPermlinkFromSlug(postParent);
+    // Delete array of posts, get replies here.
     const post = posts.find((post) => post.author === author && post.permlink === permlink);
     if (post) {
       const replies = await post.enumReplies({}, {page: 1, pageSize: 1000}) as IReply[];

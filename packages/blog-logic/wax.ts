@@ -1,6 +1,82 @@
-import { createHiveChain, TWaxExtended,
-  TWaxApiRequest
+import {
+  createHiveChain,
+  TWaxExtended,
+  TWaxApiRequest,
+  ApiAuthority,
+  NaiAsset
 } from "@hiveio/wax";
+
+export interface AccountProfile {
+  about?: string;
+  cover_image?: string;
+  location?: string;
+  blacklist_description?: string;
+  muted_list_description?: string;
+  name?: string;
+  profile_image?: string;
+  website?: string;
+  pinned?: string;
+  witness_description?: string;
+  witness_owner?: string;
+}
+export interface AccountFollowStats {
+  follower_count: number;
+  following_count: number;
+  account: string;
+}
+
+export interface FullAccount {
+  vesting_balance: string | NaiAsset;
+  name: string;
+  owner: ApiAuthority;
+  active: ApiAuthority;
+  posting: ApiAuthority;
+  memo_key: string;
+  post_count: number;
+  created: string;
+  reputation: string | number;
+  json_metadata: string;
+  posting_json_metadata: string;
+  last_vote_time: string;
+  last_post: string;
+  reward_hbd_balance: string;
+  reward_vesting_hive: string;
+  reward_hive_balance: string;
+  reward_vesting_balance: string;
+  governance_vote_expiration_ts: string;
+  balance: string;
+  vesting_shares: string;
+  hbd_balance: string;
+  savings_balance: string;
+  savings_hbd_balance: string;
+  savings_hbd_seconds: string;
+  savings_hbd_last_interest_payment: string;
+  savings_hbd_seconds_last_update: string;
+  next_vesting_withdrawal: string;
+  delegated_vesting_shares: string;
+  received_vesting_shares: string;
+  vesting_withdraw_rate: string;
+  to_withdraw: number;
+  withdrawn: number;
+  witness_votes: string[];
+  proxy: string;
+  proxied_vsf_votes: number[] | string[];
+  voting_manabar: {
+    current_mana: string | number;
+    last_update_time: number;
+  };
+  voting_power: number;
+  downvote_manabar: {
+    current_mana: string | number;
+    last_update_time: number;
+  };
+  profile?: AccountProfile;
+  follow_stats?: AccountFollowStats;
+  __loaded?: true;
+  proxyVotes?: Array<unknown>;
+  // Temporary properties for UI purposes
+  _temporary?: boolean;
+}
 
 
 export interface IGetPostHeader {
@@ -11,7 +87,7 @@ export interface IGetPostHeader {
 }
 
 export interface JsonMetadata {
-  image: string;
+  image: string[];
   links?: string[];
   flow?: {
     pictures: {
@@ -107,6 +183,33 @@ export interface VoteData {
   reward?: number;
 }
 
+export interface CommunityData {
+  about: string;
+  admins?: string[];
+  avatar_url: string;
+  created_at: string;
+  description: string;
+  flag_text: string;
+  id: number;
+  is_nsfw: boolean;
+  lang: string;
+  name: string;
+  num_authors: number;
+  num_pending: number;
+  subscribers: number;
+  sum_pending: number;
+  settings?: object;
+  team: string[][];
+  title: string;
+  type_id: number;
+  context: {
+    role: string;
+    subscribed: boolean;
+    title: string;
+    _temporary?: boolean;
+  };
+  _temporary?: boolean;
+}
 
 export type ExtendedNodeApi = {
   bridge: {
@@ -138,9 +241,14 @@ export type ExtendedNodeApi = {
       },
       Entry[] | null
     >;
+    list_communities: TWaxApiRequest<
+    { sort: string; query?: string | null; observer: string },
+    CommunityData[] | null
+  >;
   };
   condenser_api: {
     get_active_votes: TWaxApiRequest<string[], VoteData[]>;
+    get_accounts: TWaxApiRequest<[string[]], FullAccount[]>;
   }
 };
 

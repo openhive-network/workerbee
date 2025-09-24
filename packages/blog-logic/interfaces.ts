@@ -28,8 +28,8 @@ export interface IPostCommentsFilters extends ICommonFilters {
 }
 
 export interface ICommunityFilters extends ICommonFilters {
-  readonly byName?: string;
-  readonly tags?: string[];
+  readonly sort: string;
+  readonly query: string
 }
 
 export interface IAccountIdentity {
@@ -67,14 +67,11 @@ export interface ICommunity extends ICommunityIdentity {
 }
 export interface IAccount extends IAccountIdentity {
   readonly creationDate: Date;
-  readonly commentCount: number;
   readonly lastActivity: Date;
   readonly postCount: number;
   readonly registeredDate: Date;
   readonly description: string;
   readonly avatar: string;
-  readonly url: string;
-  readonly name: string;
   getSlug(): string;
 }
 
@@ -86,17 +83,15 @@ export interface IComment extends IPostCommentIdentity {
   readonly updatedAt: Date;
 
 
-  enumMentionedAccounts(): Promise<Iterable<IAccountIdentity>>;
+  enumMentionedAccounts(): Promise<Iterable<string>>;
   enumVotes(filter: ICommonFilters, pagination: IPagination): Promise<Iterable<IVote>>;
   getContent(): Promise<string>;
   wasVotedByUser(userName: string): Promise<boolean>;
 
-
-
   /**
    * Allows to generate a slug for the comment, which can be used in URLs or as a unique identifier.
    */
-  generateSlug(): string;
+  getSlug(): string;
 };
 
 /**
@@ -150,6 +145,7 @@ export interface IActiveBloggingPlatform {
   deleteComment(postOrComment: IPostCommentIdentity): Promise<boolean>;
   editComment(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, observer?: Partial<Observer<IComment>>): Promise<boolean>;
   followBlog(authorOrCommunity: IAccountIdentity | ICommunityIdentity): Promise<boolean>;
+  getAccount(accountName: string): Promise<IAccount>;
 }
 
 export interface IBloggingPlatform {
@@ -159,6 +155,9 @@ export interface IBloggingPlatform {
   configureViewContext(accontName: IAccountIdentity): void;
   enumCommunities(filter: ICommunityFilters, pagination: IPagination): Promise<Iterable<ICommunity>>;
   // To do: add getAccount method later
+
+  overwrittenGetTitleImage?: () => string;
+  overwriteGetTitleImage(callback: () => string): void;
 
   // authorize(provider: IAuthenticationProvider): Promise<IActiveBloggingPlatform>;
 }
