@@ -49,6 +49,7 @@ import { TransactionByIdProvider } from "./chain-observers/providers/transaction
 import { VoteProvider } from "./chain-observers/providers/vote-provider";
 import { WhaleAlertProvider } from "./chain-observers/providers/whale-alert-provider";
 import { WitnessProvider } from "./chain-observers/providers/witness-provider";
+import { WorkerBeeError } from "./errors";
 import type { Observer, Unsubscribable } from "./types/subscribable";
 import { calculateRelativeTime } from "./utils/time";
 
@@ -61,6 +62,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   protected providers = new Map<new () => ProviderBase, ProviderBase>();
   protected operands: FilterBase[] = [];
   protected filterContainers: FilterBase[] = [];
+  private isObserverLocked: boolean = false;
 
   /**
    * Internal function to be called when the subscription is created.
@@ -94,6 +96,11 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @returns Unsubscribable object that can be used to unsubscribe from the filters
    */
   public subscribe(observer: Partial<Observer<TPreviousSubscriberData>>): Unsubscribable {
+    if (this.isObserverLocked)
+      throw new WorkerBeeError("Double subscription not allowed. Each QueenBee instance can only be subscribed to once.");
+
+    this.isObserverLocked = true;
+
     this.applyAnd();
 
     const committedFilters = this.filterContainers;
@@ -119,6 +126,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
       },
       unsubscribe: () => {
         this.mediator.unregisterListener(observer);
+        // Note: isObserverLocked remains true to prevent re-subscription
         this.onUnsubscribe();
       }
     } as Unsubscribable & { timings: Readonly<Record<string, number>> };
