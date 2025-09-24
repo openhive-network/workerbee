@@ -28,8 +28,8 @@ export interface IPostCommentsFilters extends ICommonFilters {
 }
 
 export interface ICommunityFilters extends ICommonFilters {
-  readonly byName?: string;
-  readonly tags?: string[];
+  readonly sort: string;
+  readonly query: string
 }
 
 export interface IAccountIdentity {
@@ -90,8 +90,6 @@ export interface IComment extends IPostCommentIdentity {
   enumVotes(filter: ICommonFilters, pagination: IPagination): Promise<Iterable<IVote>>;
   getContent(): Promise<string>;
   wasVotedByUser(userName: string): Promise<boolean>;
-
-
 
   /**
    * Allows to generate a slug for the comment, which can be used in URLs or as a unique identifier.

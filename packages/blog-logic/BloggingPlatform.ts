@@ -1,4 +1,5 @@
 import { TWaxExtended } from "@hiveio/wax";
+import { Community } from "./Community";
 import { IAccountIdentity,
   IBloggingPlatform,
   ICommunity,
@@ -43,6 +44,8 @@ export class BloggingPlaform implements IBloggingPlatform {
   }
 
   public async enumCommunities(filter: ICommunityFilters, pagination: IPagination): Promise<Iterable<ICommunity>> {
+    const communities = await this.chain?.api.bridge.list_communities({observer: this.viewerContext.name, sort: filter.sort, query: filter.query});
+    if (communities) return paginateData(communities.map((community) => new Community(community)), pagination);
     return await [];
   }
 

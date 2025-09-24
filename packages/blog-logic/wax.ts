@@ -107,6 +107,34 @@ export interface VoteData {
   reward?: number;
 }
 
+export interface CommunityData {
+  about: string;
+  admins?: string[];
+  avatar_url: string;
+  created_at: string;
+  description: string;
+  flag_text: string;
+  id: number;
+  is_nsfw: boolean;
+  lang: string;
+  name: string;
+  num_authors: number;
+  num_pending: number;
+  subscribers: number;
+  sum_pending: number;
+  settings?: object;
+  team: string[][];
+  title: string;
+  type_id: number;
+  context: {
+    role: string;
+    subscribed: boolean;
+    title: string;
+    _temporary?: boolean;
+  };
+  _temporary?: boolean;
+}
+
 
 export type ExtendedNodeApi = {
   bridge: {
@@ -138,6 +166,10 @@ export type ExtendedNodeApi = {
       },
       Entry[] | null
     >;
+    list_communities: TWaxApiRequest<
+    { sort: string; query?: string | null; observer: string },
+    CommunityData[] | null
+  >;
   };
   condenser_api: {
     get_active_votes: TWaxApiRequest<string[], VoteData[]>;
