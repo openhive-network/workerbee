@@ -141,6 +141,115 @@ test.describe("WorkerBee Bot events test", () => {
     expect(result).toBeGreaterThanOrEqual(1);
   });
 
+  test("Should not allow double subscription to observers", async({ workerbeeTest }) => {
+    const result = await workerbeeTest.dynamic(({ WorkerBee }) => {
+      const bot = new WorkerBee();
+
+      const observer = bot.observe.onBlock();
+
+      // First subscription should work fine
+      observer.subscribe({
+        next(_data) {
+          // Block handler
+        },
+        error(err) {
+          console.error(err);
+        }
+      });
+
+      // Second subscription should throw an error
+      try {
+        observer.subscribe({
+          next(_data) {
+            // Block handler
+          },
+          error(err) {
+            console.error(err);
+          }
+        });
+        return false; // Should not reach here - the second subscribe should have thrown
+      } catch (error) {
+        return (error as Error).message === "Double subscription not allowed. Each QueenBee instance can only be subscribed to once.";
+      }
+    });
+
+    expect(result).toBe(true);
+  });
+
+  test("Should not allow subscription after unsubscribe", async({ workerbeeTest }) => {
+    const result = await workerbeeTest.dynamic(({ WorkerBee }) => {
+      const bot = new WorkerBee();
+
+      const observer = bot.observe.onBlock();
+
+      // First subscription should work
+      const subscription1 = observer.subscribe({
+        next(_data) {
+          // Block handler
+        },
+        error(_err) {
+          // Error handler
+        }
+      });
+
+      // Unsubscribe
+      subscription1.unsubscribe();
+
+      // Try to subscribe again - this should now fail
+      try {
+        observer.subscribe({
+          next(_data) {
+            // Block handler
+          },
+          error(_err) {
+            // Error handler
+          }
+        });
+        return false; // Should not reach here - the second subscribe should have thrown
+      } catch (error: any) {
+        return error.message === "Double subscription not allowed. Each QueenBee instance can only be subscribed to once.";
+      }
+    });
+
+    expect(result).toBe(true);
+  });
+
+  test("Should allow subscription to other observes", async({ workerbeeTest }) => {
+    const result = await workerbeeTest.dynamic(({ WorkerBee }) => {
+      const bot = new WorkerBee();
+
+      const observer1 = bot.observe.onBlock();
+
+      // First subscription should work
+      observer1.subscribe({
+        next(_data) {
+          // Block handler
+        },
+        error(_err) {
+          // Error handler
+        }
+      });
+
+      const observer2 = bot.observe.onBlock();
+
+      try {
+        observer2.subscribe({
+          next(_data) {
+            // Block handler
+          },
+          error(_err) {
+            // Error handler
+          }
+        });
+        return true;
+      } catch {
+        return false;
+      }
+    });
+
+    expect(result).toBe(true);
+  });
+
   test("Should not fail when async next callback fails", async({ workerbeeTest }) => {
     const result = await workerbeeTest.dynamic(async({ WorkerBee }, hiveBlockInterval) => {
       const bot = new WorkerBee();
