@@ -1,6 +1,7 @@
 import { TWaxExtended } from "@hiveio/wax";
+import { Account } from "./Account";
 import { Community } from "./Community";
-import { IAccountIdentity,
+import { IAccount, IAccountIdentity,
   IBloggingPlatform,
   ICommunity,
   ICommunityFilters,
@@ -64,5 +65,14 @@ export class BloggingPlaform implements IBloggingPlatform {
       throw new Error("Posts not found");
     const paginatedPosts = paginateData(posts, pagination);
     return paginatedPosts?.map((post) => new Post({author: post.author, permlink: post.permlink}, this, post))
+  }
+
+  public async getAccount(accontName: string): Promise<IAccount> {
+    if (!this.chain)
+      await this.initializeChain();
+    const account = await this.chain?.api.condenser_api.get_accounts([[accontName]]);
+    if (!account)
+      throw new Error("Account not found");
+    return new Account(account[0]);
   }
 }

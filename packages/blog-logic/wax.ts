@@ -248,6 +248,7 @@ export type ExtendedNodeApi = {
   };
   condenser_api: {
     get_active_votes: TWaxApiRequest<string[], VoteData[]>;
+    get_accounts: TWaxApiRequest<[string[]], FullAccount[]>;
   }
 };
 

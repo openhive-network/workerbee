@@ -145,6 +145,7 @@ export interface IActiveBloggingPlatform {
   deleteComment(postOrComment: IPostCommentIdentity): Promise<boolean>;
   editComment(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, observer?: Partial<Observer<IComment>>): Promise<boolean>;
   followBlog(authorOrCommunity: IAccountIdentity | ICommunityIdentity): Promise<boolean>;
+  getAccount(accountName: string): Promise<IAccount>;
 }
 
 export interface IBloggingPlatform {
