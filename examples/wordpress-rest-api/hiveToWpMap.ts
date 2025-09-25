@@ -42,7 +42,8 @@ export const mapIPostToWpPost = async (hivePost: IPost, wpId: number, accountId:
   const community = hivePost.communityTitle;
   const wpTermCategory = community ? [mapWpTerm(community, "category")] : [];
   const renderedBody = renderer.render(await hivePost.getContent());
-  const wpExcerpt = renderedBody.replace(/<[^>]+>/g, '').substring(0, 100);
+  const titleImage = hivePost.getTitleImage();
+  const wpExcerpt = renderer.render(`${titleImage} \n \n ${renderedBody.replace(/<[^>]+>/g, '').substring(0, 100)}...`);
   const wpPost: WPPost = {
     id:wpId,
     slug,  

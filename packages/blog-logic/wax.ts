@@ -87,7 +87,7 @@ export interface IGetPostHeader {
 }
 
 export interface JsonMetadata {
-  image: string;
+  image: string[];
   links?: string[];
   flow?: {
     pictures: {

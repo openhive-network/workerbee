@@ -13,6 +13,8 @@ export class Post extends Comment implements IPost  {
   public communityTitle?: string;
 
   private replies?: IReply[];
+  private postImage?: string;
+  private postData?: Entry
 
   public constructor(authorPermlink: IPostCommentIdentity, bloggingPlatform: IBloggingPlatform, postData: Entry) {
     super(authorPermlink, bloggingPlatform, postData);
@@ -21,6 +23,8 @@ export class Post extends Comment implements IPost  {
     this.summary = postData.json_metadata?.description || "";
     this.community = postData.community ? {name: postData.community} : undefined;
     this.communityTitle = postData.community_title
+    this.postImage = postData.json_metadata.image[0];
+    this.postData = postData;
   }
 
   private async fetchReplies(): Promise<IReply[]> {
@@ -60,8 +64,7 @@ export class Post extends Comment implements IPost  {
   }
 
   public getTitleImage(): string {
-    // The logic is complicated here, it wil be added later.
-    return "";
+    return this.postImage || ""
   }
 
   public async enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IReply>> {
