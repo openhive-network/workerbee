@@ -16,7 +16,7 @@ export class Comment implements IComment {
 
   protected content?: string;
   protected votes?: Iterable<IVote>;
-  protected BloggingPlatform: IBloggingPlatform;
+  protected bloggingPlatform: IBloggingPlatform;
 
 
   private initializeChain = async () => {
@@ -28,7 +28,7 @@ export class Comment implements IComment {
     this.initializeChain();
     this.author = authorPermlink.author;
     this.permlink = authorPermlink.permlink;
-    this.BloggingPlatform = bloggingPlatform
+    this.bloggingPlatform = bloggingPlatform
     this.publishedAt = new Date(postCommentData.created);
     this.updatedAt = new Date(postCommentData.updated);
     this.content = postCommentData.body;

@@ -17,13 +17,16 @@ import { ExtendedNodeApi, getWax } from "./wax";
 export class BloggingPlaform implements IBloggingPlatform {
   public viewerContext: IAccountIdentity;
 
-  private chain?: TWaxExtended<ExtendedNodeApi>
+  private chain?: TWaxExtended<ExtendedNodeApi>;
+
 
   private initializeChain = async () => {
     if (!this.chain)
       this.chain = await getWax();
   }
 
+
+  public overwrittenGetTitleImage?: () => string;
 
   public constructor() {
     this.viewerContext = {name: "hive.blog"}; // Set default
@@ -74,5 +77,11 @@ export class BloggingPlaform implements IBloggingPlatform {
     if (!account)
       throw new Error("Account not found");
     return new Account(account[0]);
+  }
+
+  // Section for overwritting methods
+
+  public overwriteGetTitleImage(callbackMethod: () => string) {
+    this.overwriteGetTitleImage = callbackMethod;
   }
 }

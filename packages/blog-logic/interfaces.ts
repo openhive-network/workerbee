@@ -156,6 +156,9 @@ export interface IBloggingPlatform {
   enumCommunities(filter: ICommunityFilters, pagination: IPagination): Promise<Iterable<ICommunity>>;
   // To do: add getAccount method later
 
+  overwrittenGetTitleImage?: () => string;
+  overwriteGetTitleImage(callback: () => string): void;
+
   // authorize(provider: IAuthenticationProvider): Promise<IActiveBloggingPlatform>;
 }
 

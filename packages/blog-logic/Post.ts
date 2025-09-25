@@ -32,7 +32,7 @@ export class Post extends Comment implements IPost  {
       const repliesData = await this.chain!.api.bridge.get_discussion({
         author: this.author,
         permlink: this.permlink,
-        observer: this.BloggingPlatform.viewerContext.name,
+        observer: this.bloggingPlatform.viewerContext.name,
       }); // Temporary hive.blog;
       if (!repliesData)
         throw "No replies";
@@ -41,7 +41,7 @@ export class Post extends Comment implements IPost  {
         (reply) =>
           new Reply(
             { author: reply.author, permlink: reply.permlink },
-            this.BloggingPlatform,
+            this.bloggingPlatform,
             {
               author: reply.parent_author || "",
               permlink: reply.parent_permlink || "",
@@ -59,11 +59,12 @@ export class Post extends Comment implements IPost  {
   public async getContent(): Promise<string> {
     if (this.content)
       return this.content;
-    await this.chain!.api.bridge.get_post({author: this.author, permlink: this.permlink, observer: this.BloggingPlatform.viewerContext.name});
+    await this.chain!.api.bridge.get_post({author: this.author, permlink: this.permlink, observer: this.bloggingPlatform.viewerContext.name});
     return this.content || "";
   }
 
   public getTitleImage(): string {
+    if (this.bloggingPlatform.overwrittenGetTitleImage) return this.bloggingPlatform.overwrittenGetTitleImage()
     return this.postImage || ""
   }
 
