@@ -67,14 +67,11 @@ export interface ICommunity extends ICommunityIdentity {
 }
 export interface IAccount extends IAccountIdentity {
   readonly creationDate: Date;
-  readonly commentCount: number;
   readonly lastActivity: Date;
   readonly postCount: number;
   readonly registeredDate: Date;
   readonly description: string;
   readonly avatar: string;
-  readonly url: string;
-  readonly name: string;
   getSlug(): string;
 }
 
