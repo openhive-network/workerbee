@@ -53,7 +53,7 @@ const mapReplies = async (replies: IReply[], postId: number) : Promise<WPComment
   const wpComments: WPComment[] = []
   replies.forEach( async (reply) => {
     if (reply.author && reply.permlink) {
-      const wpAuthorPermlink = reply.generateSlug();
+      const wpAuthorPermlink = reply.getSlug();
       const wpComment = await mapIReplyToWPComment(reply, simpleHash(wpAuthorPermlink), postId, simpleHash(reply.author));
       wpComments.push(wpComment)
     }

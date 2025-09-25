@@ -21,6 +21,6 @@ export class Account implements IAccount {
   }
 
   public getSlug(): string {
-    return "" // To do: generate WordPress Account slug later
+    return this.name;
   }
 }

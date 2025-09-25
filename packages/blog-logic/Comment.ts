@@ -34,7 +34,7 @@ export class Comment implements IComment {
     this.content = postCommentData.body;
   }
 
-  public generateSlug(): string {
+  public getSlug(): string {
     return `${this.author}_${this.permlink}`;
   }
 

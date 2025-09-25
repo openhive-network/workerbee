@@ -36,7 +36,7 @@ const mapWpTerm = (termName: string, type: "tag" | "category"): WPTerm => {
 
 
 export const mapIPostToWpPost = async (hivePost: IPost, wpId: number, accountId: number): Promise<WPPost> => {
-  const slug = hivePost.generateSlug();
+  const slug = hivePost.getSlug();
   const tags  = hivePost?.tags || [];
   const wpTermTags = tags.map((tag) => mapWpTerm(tag, "tag"));
   const community = hivePost.communityTitle;

@@ -26,6 +26,6 @@ export class Community implements ICommunity {
   }
 
   public getSlug(): string {
-    return "" // To do: generate WordPress Category slug later
+    return this.title
   }
 }

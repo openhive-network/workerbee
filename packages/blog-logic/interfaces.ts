@@ -91,7 +91,7 @@ export interface IComment extends IPostCommentIdentity {
   /**
    * Allows to generate a slug for the comment, which can be used in URLs or as a unique identifier.
    */
-  generateSlug(): string;
+  getSlug(): string;
 };
 
 /**
