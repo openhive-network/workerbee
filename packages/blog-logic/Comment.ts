@@ -6,7 +6,7 @@ import { Entry, ExtendedNodeApi, getWax } from "./wax";
 
 export class Comment implements IComment {
 
-  protected chain: TWaxExtended<ExtendedNodeApi>
+  protected chain?: TWaxExtended<ExtendedNodeApi>
 
   public author: string;
   public permlink: string;
@@ -24,17 +24,14 @@ export class Comment implements IComment {
       this.chain = await getWax();
   }
 
-  public constructor(authorPermlink: IPostCommentIdentity, bloggingPlatform: IBloggingPlatform, postCommentData?: Entry, ) {
+  public constructor(authorPermlink: IPostCommentIdentity, bloggingPlatform: IBloggingPlatform, postCommentData: Entry, ) {
     this.initializeChain();
     this.author = authorPermlink.author;
     this.permlink = authorPermlink.permlink;
     this.BloggingPlatform = bloggingPlatform
-
-    if(postCommentData) {
-      this.publishedAt = new Date(postCommentData.created);
-      this.updatedAt = new Date(postCommentData.updated);
-      this.content = postCommentData.body;
-    }
+    this.publishedAt = new Date(postCommentData.created);
+    this.updatedAt = new Date(postCommentData.updated);
+    this.content = postCommentData.body;
   }
 
   public generateSlug(): string {
@@ -48,12 +45,12 @@ export class Comment implements IComment {
   public async getContent(): Promise<string> {
     if (this.content)
       return this.content;
-    await this.chain.api.bridge.get_post({author: this.author, permlink: this.permlink, observer: "hive.blog"});
+    await this.chain!.api.bridge.get_post({author: this.author, permlink: this.permlink, observer: "hive.blog"});
     return this.content || "";
   }
 
   public async enumVotes(filter: ICommonFilters, pagination: IPagination): Promise<Iterable<IVote>> {
-    const votesData = await this.chain.api.condenser_api.get_active_votes([this.author, this.permlink]);
+    const votesData = await this.chain!.api.condenser_api.get_active_votes([this.author, this.permlink]);
     const votes = votesData.map((vote) => new Vote(vote));
     this.votes = votes;
     return paginateData(votes, pagination);

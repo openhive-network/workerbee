@@ -25,7 +25,7 @@ export class Post extends Comment implements IPost  {
 
   private async fetchReplies(): Promise<IReply[]> {
     if (!this.replies) {
-      const repliesData = await this.chain.api.bridge.get_discussion({
+      const repliesData = await this.chain!.api.bridge.get_discussion({
         author: this.author,
         permlink: this.permlink,
         observer: this.BloggingPlatform.viewerContext.name,
@@ -55,7 +55,7 @@ export class Post extends Comment implements IPost  {
   public async getContent(): Promise<string> {
     if (this.content)
       return this.content;
-    await this.chain.api.bridge.get_post({author: this.author, permlink: this.permlink, observer: this.BloggingPlatform.viewerContext.name});
+    await this.chain!.api.bridge.get_post({author: this.author, permlink: this.permlink, observer: this.BloggingPlatform.viewerContext.name});
     return this.content || "";
   }
 
