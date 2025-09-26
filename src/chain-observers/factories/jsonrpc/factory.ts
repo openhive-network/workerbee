@@ -1,10 +1,8 @@
 import { WorkerBee } from "../../../bot";
 import {
-  AccountClassifier, BlockClassifier, BlockHeaderClassifier,
-  ChangeRecoveryInProgressClassifier, ContentMetadataClassifier, DeclineVotingRightsClassifier,
-  DynamicGlobalPropertiesClassifier, FeedPriceClassifier,
-  ImpactedAccountClassifier, ManabarClassifier, OperationClassifier,
-  RcAccountClassifier, WitnessClassifier
+  AccountClassifier, BlockClassifier, BlockHeaderClassifier, ChangeRecoveryInProgressClassifier,
+  ContentMetadataClassifier, DeclineVotingRightsClassifier, DynamicGlobalPropertiesClassifier, FeedPriceClassifier,
+  ImpactedAccountClassifier, ManabarClassifier, OperationClassifier, RcAccountClassifier, WitnessClassifier
 } from "../../classifiers";
 import { BlockHeaderCollector } from "../../collectors/common/block-header-collector";
 import { ImpactedAccountCollector } from "../../collectors/common/impacted-account-collector";
@@ -19,9 +17,13 @@ import { DynamicGlobalPropertiesCollector } from "../../collectors/jsonrpc/dynam
 import { FeedPriceCollector } from "../../collectors/jsonrpc/feed-price-collector";
 import { RcAccountCollector } from "../../collectors/jsonrpc/rc-account-collector";
 import { WitnessCollector } from "../../collectors/jsonrpc/witness-collector";
-import { FactoryBase } from "../factory-base";
+import { ObserverMediator } from "../../observer-mediator";
+import { DataEvaluationContext } from "../data-evaluation-context";
+import { EClassifierOrigin, FactoryBase } from "../factory-base";
 
 export class JsonRpcFactory extends FactoryBase {
+  private previousBlockNumber?: number;
+
   public constructor(
     protected readonly worker: WorkerBee
   ) {
@@ -40,5 +42,11 @@ export class JsonRpcFactory extends FactoryBase {
     super.registerClassifier(DeclineVotingRightsClassifier, DeclineVotingRightsCollector, worker);
     super.registerClassifier(ManabarClassifier, ManabarCollector, worker);
     super.registerClassifier(ContentMetadataClassifier, ContentMetadataCollector, worker);
+
+    super.pushClassifier(DynamicGlobalPropertiesClassifier, EClassifierOrigin.FACTORY);
+  }
+
+  public preNotify(context: DataEvaluationContext, mediator: ObserverMediator): Promise<boolean> {
+    return super.preNotify(context, mediator, this.previousBlockNumber);
   }
 }

@@ -26,7 +26,7 @@ export class PastQueen<TPreviousSubscriberData extends object = {}> extends Quee
     this.worker.mediator.extend(this.mediator);
   }
 
-  protected onSubscribe(): void {
-    this.mediator.notify();
+  protected async onSubscribe(): Promise<void> {
+    await this.mediator.notify();
   }
 }

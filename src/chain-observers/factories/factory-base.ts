@@ -1,6 +1,7 @@
 import type { WorkerBee } from "../../bot";
 import { WorkerBeeError } from "../../errors";
 import { createFactoryCircularDependencyErrorMessage, createFactoryUnsupportedClassifierErrorMessage } from "../../utils/error-helper";
+import { DynamicGlobalPropertiesClassifier } from "../classifiers";
 import { CollectorClassifierBase, IEvaluationContextClass, TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { CollectorBase } from "../collectors/collector-base";
 import { ObserverMediator } from "../observer-mediator";
@@ -110,7 +111,19 @@ export class FactoryBase {
     }
   }
 
-  public preNotify(_mediator: ObserverMediator): void {}
+  public async preNotify(context: DataEvaluationContext, _mediator: ObserverMediator, previousBlockNumber?: number): Promise<boolean> {
+    if (!previousBlockNumber)
+      return true;
+
+    const dgp = await context.get(DynamicGlobalPropertiesClassifier);
+
+    // Ensure we have the block header classifier for the current head block
+    if (previousBlockNumber !== dgp.headBlockNumber)
+      return true;
+
+    return false;
+  }
+
   public postNotify(_mediator: ObserverMediator, _context: DataEvaluationContext): void {}
 
   public pushClassifier(classifier: TRegisterEvaluationContext, origin: EClassifierOrigin, stack: IEvaluationContextClass[] = []): void {

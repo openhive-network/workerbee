@@ -28,10 +28,13 @@ export class ObserverMediator {
     this.factory.extend(other.factory);
   }
 
-  public notify() {
-    this.factory.preNotify(this);
-
+  public async notify() {
     const context = this.factory.collect();
+
+    const shouldContinue = await this.factory.preNotify(context, this);
+
+    if (!shouldContinue)
+      return;
 
     const startFilter = Date.now();
 
@@ -67,7 +70,7 @@ export class ObserverMediator {
         await (listener.next?.(providedData) as Promise<any> | any);
       }).catch(error => listener.error?.(error));
 
-    this.factory.postNotify(this, context);
+    await this.factory.postNotify(this, context);
   }
 
   public registerListener(listener: Partial<Observer<any>>, filter: FilterBase, providers: Iterable<ProviderBase>) {

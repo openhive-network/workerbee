@@ -13,7 +13,6 @@ import { DataEvaluationContext } from "../data-evaluation-context";
 import { EClassifierOrigin, FactoryBase } from "../factory-base";
 
 export class HistoryDataFactory extends FactoryBase {
-  private hasDGPOClassifier = false;
   private previousBlockNumber?: number;
 
   public constructor(
@@ -30,15 +29,13 @@ export class HistoryDataFactory extends FactoryBase {
     super.registerClassifier(OperationClassifier, OperationCollector, worker);
     // This is intended use of JSON-RPC collector for content metadata as there may be future payouts in past content:
     super.registerClassifier(ContentMetadataClassifier, ContentMetadataCollector, worker);
+
+    // Ensure we have DGPO classifier registered from the start
+    super.pushClassifier(DynamicGlobalPropertiesClassifier, EClassifierOrigin.FACTORY);
   }
 
-  public preNotify(): void {
-    // Ensure we have DGPO classifier
-    if (this.hasDGPOClassifier)
-      return;
-
-    this.pushClassifier(DynamicGlobalPropertiesClassifier, EClassifierOrigin.FACTORY);
-    this.hasDGPOClassifier = true;
+  public preNotify(context: DataEvaluationContext, mediator: ObserverMediator): Promise<boolean> {
+    return super.preNotify(context, mediator, this.previousBlockNumber);
   }
 
   public postNotify(mediator: ObserverMediator, context: DataEvaluationContext): void {
