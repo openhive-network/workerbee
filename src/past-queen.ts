@@ -27,6 +27,6 @@ export class PastQueen<TPreviousSubscriberData extends object = {}> extends Quee
   }
 
   protected onSubscribe(): void {
-    this.mediator.notify();
+    void this.mediator.notify();
   }
 }

@@ -28,46 +28,55 @@ export class ObserverMediator {
     this.factory.extend(other.factory);
   }
 
-  public notify() {
-    this.factory.preNotify(this);
+  public async notify() {
+    try {
+      const context = this.factory.collect();
 
-    const context = this.factory.collect();
+      const shouldContinue = await this.factory.preNotify(context, this);
 
-    const startFilter = Date.now();
+      if (!shouldContinue)
+        return;
 
-    // Start providing parsed, cached data to filters
-    for(const [listener, { filter, providers }] of this.filters.entries())
-      filter.match(context).then(async(matched) => {
-        this.factory.addTiming("filters", Date.now() - startFilter);
+      const startFilter = Date.now();
 
-        if(!matched)
-          return;
+      // Start providing parsed, cached data to filters
+      for(const [listener, { filter, providers }] of this.filters.entries())
+        filter.match(context).then(async(matched) => {
+          this.factory.addTiming("filters", Date.now() - startFilter);
 
-        const startProvider = Date.now();
+          if(!matched)
+            return;
 
-        // Join all providers data for user (1 level nested)
-        const providedData = {};
+          const startProvider = Date.now();
 
-        // Launch all providers in parallel
-        const allDataToProvide: Promise<any>[] = [];
-        for(const provider of providers)
-          allDataToProvide.push(provider.provide(context));
+          // Join all providers data for user (1 level nested)
+          const providedData = {};
 
-        const allDataResolved = await Promise.all(allDataToProvide);
+          // Launch all providers in parallel
+          const allDataToProvide: Promise<any>[] = [];
+          for(const provider of providers)
+            allDataToProvide.push(provider.provide(context));
 
-        // Wait for all providers to finish and merge their results
-        for(const providerResult of allDataResolved)
-          for(const key in providerResult)
-            if (providerResult[key] !== undefined)
-              providedData[key] = providerResult[key];
+          const allDataResolved = await Promise.all(allDataToProvide);
+
+          // Wait for all providers to finish and merge their results
+          for(const providerResult of allDataResolved)
+            for(const key in providerResult)
+              if (providerResult[key] !== undefined)
+                providedData[key] = providerResult[key];
 
 
-        this.factory.addTiming("providers", Date.now() - startProvider);
+          this.factory.addTiming("providers", Date.now() - startProvider);
 
-        await (listener.next?.(providedData) as Promise<any> | any);
-      }).catch(error => listener.error?.(error));
+          await (listener.next?.(providedData) as Promise<any> | any);
+        }).catch(error => listener.error?.(error));
 
-    this.factory.postNotify(this, context);
+      await this.factory.postNotify(context, this);
+    } catch (error) {
+      // If any preNotify or postNotify error happens, we should notify all listeners
+      for(const listener of this.filters.keys())
+        listener.error?.(error);
+    }
   }
 
   public registerListener(listener: Partial<Observer<any>>, filter: FilterBase, providers: Iterable<ProviderBase>) {

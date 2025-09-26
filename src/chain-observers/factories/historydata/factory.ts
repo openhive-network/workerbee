@@ -13,9 +13,6 @@ import { DataEvaluationContext } from "../data-evaluation-context";
 import { EClassifierOrigin, FactoryBase } from "../factory-base";
 
 export class HistoryDataFactory extends FactoryBase {
-  private hasDGPOClassifier = false;
-  private previousBlockNumber?: number;
-
   public constructor(
     worker: WorkerBee,
     public readonly fromBlock: number,
@@ -30,27 +27,29 @@ export class HistoryDataFactory extends FactoryBase {
     super.registerClassifier(OperationClassifier, OperationCollector, worker);
     // This is intended use of JSON-RPC collector for content metadata as there may be future payouts in past content:
     super.registerClassifier(ContentMetadataClassifier, ContentMetadataCollector, worker);
+
+    // Ensure we have DGPO classifier registered from the start
+    super.pushClassifier(DynamicGlobalPropertiesClassifier, EClassifierOrigin.FACTORY);
   }
 
-  public preNotify(): void {
-    // Ensure we have DGPO classifier
-    if (this.hasDGPOClassifier)
-      return;
+  public async preNotify(context: DataEvaluationContext, mediator: ObserverMediator): Promise<boolean> {
+    const blockChanged = await super.preNotify(context, mediator);
 
-    this.pushClassifier(DynamicGlobalPropertiesClassifier, EClassifierOrigin.FACTORY);
-    this.hasDGPOClassifier = true;
+    if (!blockChanged) {
+      mediator.unregisterAllListeners();
+
+      return false;
+    }
+
+    return true;
   }
 
-  public postNotify(mediator: ObserverMediator, context: DataEvaluationContext): void {
-    context.get(DynamicGlobalPropertiesClassifier).then(dgp => {
-      if (this.toBlock && dgp.headBlockNumber >= this.toBlock)
-        mediator.unregisterAllListeners();
-      else if (!this.toBlock && dgp?.headBlockNumber === this.previousBlockNumber)
-        mediator.unregisterAllListeners();
-      else
-        mediator.notify();
+  public async postNotify(context: DataEvaluationContext, mediator: ObserverMediator): Promise<void> {
+    await super.postNotify(context, mediator);
 
-      this.previousBlockNumber = dgp.headBlockNumber;
-    });
+    if (this.toBlock && this.currentBlockNumber! >= this.toBlock)
+      mediator.unregisterAllListeners();
+    else
+      void mediator.notify();
   }
 }

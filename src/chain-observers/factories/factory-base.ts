@@ -1,6 +1,7 @@
 import type { WorkerBee } from "../../bot";
 import { WorkerBeeError } from "../../errors";
 import { createFactoryCircularDependencyErrorMessage, createFactoryUnsupportedClassifierErrorMessage } from "../../utils/error-helper";
+import { DynamicGlobalPropertiesClassifier } from "../classifiers";
 import { CollectorClassifierBase, IEvaluationContextClass, TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { CollectorBase } from "../collectors/collector-base";
 import { ObserverMediator } from "../observer-mediator";
@@ -17,6 +18,7 @@ export type AnyCollectorClass = new (...args: any[]) => CollectorBase<CollectorC
 export class FactoryBase {
   protected collectors = new Map<AnyCollectorClass, CollectorBase<CollectorClassifierBase<any, any, any, any, any>>>();
   protected collectorsPerClassifier = new Map<IEvaluationContextClass, AnyCollectorClass>();
+  protected currentBlockNumber?: number;
 
   public constructor(
     protected readonly worker: WorkerBee
@@ -110,8 +112,35 @@ export class FactoryBase {
     }
   }
 
-  public preNotify(_mediator: ObserverMediator): void {}
-  public postNotify(_mediator: ObserverMediator, _context: DataEvaluationContext): void {}
+  /**
+   * Called by mediator before any notification processing begins for a data collection cycle.
+   * This method determines whether the factory should proceed with processing the current cycle.
+   * If this method returns true, filters, providers, callbacks and {@link postNotify} will be executed normally.
+   * If this method returns false, the entire processing cycle will be skipped, including filters, providers, callbacks and {@link postNotify}.
+   */
+  public async preNotify(context: DataEvaluationContext, _mediator: ObserverMediator): Promise<boolean> {
+    // If this is the first run (no previous block processed), we should proceed
+    const dgp = await context.get(DynamicGlobalPropertiesClassifier);
+
+    /*
+     * If the current head block is different from the last processed block, we should proceed
+     * Will be also true for the first run as currentBlockNumber is undefined
+     */
+    const hasBlockNumberChanged = this.currentBlockNumber !== dgp.headBlockNumber;
+
+    this.currentBlockNumber = dgp.headBlockNumber;
+
+    // If we've already processed this block, skip processing
+    return hasBlockNumberChanged;
+  }
+
+  /**
+   * Called by mediator after all notification processing has completed for a data collection cycle.
+   * This method provides an opportunity to perform cleanup, finalization, or post-processing
+   * tasks after all observers have been notified.
+   * Note: Getting inside this method does not mean all filters and callbacks has been processed (ended).
+   */
+  public async postNotify(_context: DataEvaluationContext, _mediator: ObserverMediator): Promise<void> {}
 
   public pushClassifier(classifier: TRegisterEvaluationContext, origin: EClassifierOrigin, stack: IEvaluationContextClass[] = []): void {
     const classifierClass = "class" in classifier ? classifier.class : classifier;
