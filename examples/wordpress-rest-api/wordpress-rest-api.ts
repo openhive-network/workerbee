@@ -1,15 +1,12 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import { createHiveChain } from "@hiveio/wax";
-import { ExtendedNodeApi } from "./hive";
 import { mapIPostToWpPost, mapIReplyToWPComment } from "./hiveToWpMap";
 import { WPComment, WPPost } from "./wp-reference";
 import { simpleHash } from "./hash-utils";
 import { wordPressExampleConfig } from "./example-config";
 import { IPost, IReply } from "../../packages/blog-logic/interfaces";
-import { BloggingPlaform } from "../../packages/blog-logic/BloggingPlatform";
-
-const hiveChain = await createHiveChain();
+import { getWax } from "../../packages/blog-logic/wax";
+import { DataProvider } from "../../packages/blog-logic/DataProvider";
 
 const app = express();
 const PORT = wordPressExampleConfig.defaultPort;
@@ -21,9 +18,11 @@ const apiRouter = express.Router();
 
 const idToStringMap = new Map<number, string>();
 
+const chain = await getWax();
+
 let posts: IPost[] = [];
-const bloggingPlatform: BloggingPlaform = new BloggingPlaform();
-bloggingPlatform.configureViewContext({name: wordPressExampleConfig.observer});
+const dataProvider: DataProvider = new DataProvider(chain);
+dataProvider.bloggingPlatform.configureViewContext({name: wordPressExampleConfig.observer});
 
 const getAuthorPermlinkFromSlug = (slug: string): {author: string, permlink: string} => {
   const splitedSlug = slug.split("_");
@@ -71,7 +70,7 @@ apiRouter.get("/posts", async (req: Request, res: Response) => {
     const authorPermlinkHash = simpleHash(req.query.slug);
     const authorHash = simpleHash(author);
     idToStringMap.set(authorPermlinkHash, req.query.slug as string).set(authorHash, author);
-    const post = await bloggingPlatform.getPost({author: author, permlink});
+    const post = await dataProvider.bloggingPlatform.getPost({author: author, permlink});
     posts.push(post);
     if (post) {
       res.json(await mapIPostToWpPost(post, authorPermlinkHash, authorHash));
@@ -80,7 +79,7 @@ apiRouter.get("/posts", async (req: Request, res: Response) => {
     }
     // Posts list
   } else {
-    const newPosts = await bloggingPlatform.enumPosts({
+    const newPosts = await dataProvider.bloggingPlatform.enumPosts({
       limit: wordPressExampleConfig.postLimit, 
       sort: wordPressExampleConfig.sort, 
       startAuthor: wordPressExampleConfig.startAuthor, 

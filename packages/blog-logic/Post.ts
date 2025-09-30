@@ -3,7 +3,6 @@ import { DataProvider } from "./DataProvider";
 import { ICommunityIdentity, IPagination, IPost, IPostCommentIdentity, IPostCommentsFilters, IReply } from "./interfaces";
 import { Reply } from "./Reply";
 import { paginateData } from "./utils";
-import { Entry } from "./wax";
 
 export class Post extends Comment implements IPost  {
 
@@ -16,14 +15,15 @@ export class Post extends Comment implements IPost  {
   private replies?: Iterable<IReply>;
   private postImage?: string;
 
-  public constructor(authorPermlink: IPostCommentIdentity, dataProvider: DataProvider, postData: Entry) {
-    super(authorPermlink, dataProvider, postData);
-    this.title = postData.title;
-    this.tags = postData.json_metadata?.tags || [];
-    this.summary = postData.json_metadata?.description || "";
-    this.community = postData.community ? {name: postData.community} : undefined;
-    this.communityTitle = postData.community_title
-    this.postImage = postData.json_metadata.image[0];
+  public constructor(authorPermlink: IPostCommentIdentity, dataProvider: DataProvider) {
+    super(authorPermlink, dataProvider);
+    const post = dataProvider.getPost(authorPermlink);
+    this.title = post?.title || "";
+    this.tags = post?.json_metadata?.tags || [];
+    this.summary = post?.json_metadata?.description || "";
+    this.community = post?.community ? {name: post.community} : undefined;
+    this.communityTitle = post?.community_title
+    this.postImage = post?.json_metadata.image?.[0];
   }
 
   /**
@@ -49,8 +49,7 @@ export class Post extends Comment implements IPost  {
               author: reply.parent_author || "",
               permlink: reply.parent_permlink || "",
             },
-            { author: this.author, permlink: this.permlink },
-            reply
+            { author: this.author, permlink: this.permlink }
           )
       )
       this.replies = replies;

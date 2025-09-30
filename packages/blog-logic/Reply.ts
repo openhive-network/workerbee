@@ -1,7 +1,6 @@
 import { Comment } from "./Comment";
 import { DataProvider } from "./DataProvider";
 import { IPostCommentIdentity, IReply } from "./interfaces";
-import { Entry } from "./wax";
 
 export class Reply extends Comment implements IReply {
   public parent: IPostCommentIdentity;
@@ -11,10 +10,9 @@ export class Reply extends Comment implements IReply {
     authorPermlink: IPostCommentIdentity,
     dataProvider: DataProvider,
     parent: IPostCommentIdentity,
-    topPost: IPostCommentIdentity,
-    replyData: Entry
+    topPost: IPostCommentIdentity
   ) {
-    super(authorPermlink, dataProvider, replyData);
+    super(authorPermlink, dataProvider);
     this.parent = parent;
     this.topPost = topPost;
   }

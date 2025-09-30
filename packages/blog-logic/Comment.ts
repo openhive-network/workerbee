@@ -2,7 +2,6 @@ import { DataProvider } from "./DataProvider";
 import { IComment, IPagination, IPostCommentIdentity, IVote, IVotesFilters } from "./interfaces";
 import { paginateData } from "./utils";
 import { Vote } from "./Vote";
-import { Entry } from "./wax";
 
 export class Comment implements IComment {
 
@@ -18,13 +17,14 @@ export class Comment implements IComment {
 
 
   // Refactor blogginPlatform and data into dataProvider with promises.
-  public constructor(authorPermlink: IPostCommentIdentity, dataProvider: DataProvider, postCommentData: Entry, ) {
+  public constructor(authorPermlink: IPostCommentIdentity, dataProvider: DataProvider ) {
     this.author = authorPermlink.author;
     this.permlink = authorPermlink.permlink;
     this.dataProvider = dataProvider;
-    this.publishedAt = new Date(postCommentData.created);
-    this.updatedAt = new Date(postCommentData.updated);
-    this.content = postCommentData.body;
+    const post = dataProvider.getPost(authorPermlink);
+    this.publishedAt = new Date(post?.created || "");
+    this.updatedAt = new Date(post?.updated || "");
+    this.content = post?.body;
   }
 
   /**

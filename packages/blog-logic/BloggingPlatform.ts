@@ -39,10 +39,8 @@ export class BloggingPlaform implements IBloggingPlatform {
    * @returns post object
    */
   public async getPost(postId: IPostCommentIdentity): Promise<IPost> {
-    const postData = await this.dataProvider.chain.api.bridge.get_post({author: postId.author, permlink: postId.permlink, observer: this.viewerContext.name });
-    if (!postData)
-      throw new Error("Post not found");
-    return new Post(postId, this.dataProvider, postData!);
+    await this.dataProvider.fetchPost(postId);
+    return new Post(postId, this.dataProvider);
   }
 
   /**
@@ -64,18 +62,9 @@ export class BloggingPlaform implements IBloggingPlatform {
    * @returns iterable of posts
    */
   public async enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IPost>> {
-    const posts = await this.dataProvider.chain.api.bridge.get_ranked_posts({
-      limit: filter.limit,
-      sort: filter.sort,
-      observer: this.viewerContext.name,
-      start_author: filter.startAuthor,
-      start_permlink: filter.startPermlink,
-      tag: filter.tag
-    });
-    if (!posts)
-      throw new Error("Posts not found");
-    const paginatedPosts = paginateData(posts, pagination);
-    return paginatedPosts?.map((post) => new Post({author: post.author, permlink: post.permlink}, this.dataProvider, post))
+    const postsIds = await this.dataProvider.enumPosts(filter);
+    const paginatedPostsIds = paginateData(Array.from(postsIds), pagination);
+    return paginatedPostsIds.map((post) => new Post({author: post.author, permlink: post.permlink}, this.dataProvider))
   }
 
   /**
