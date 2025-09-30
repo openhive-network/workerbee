@@ -28,7 +28,7 @@ export class HistoryDataFactory extends FactoryBase {
     // This is intended use of JSON-RPC collector for content metadata as there may be future payouts in past content:
     super.registerClassifier(ContentMetadataClassifier, ContentMetadataCollector, worker);
 
-    // Ensure we have DGPO classifier registered from the start
+    // We have to push classifier after registering its implementation as collector. Maybe this should be handled internally?
     super.pushClassifier(DynamicGlobalPropertiesClassifier, EClassifierOrigin.FACTORY);
   }
 

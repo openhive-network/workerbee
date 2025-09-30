@@ -19,6 +19,8 @@ export const createFactoryUnsupportedClassifierErrorMessage = (
   errorMessage += ` "${classifierClass.name}". See "collectors" property in "FactoryBase"\n`;
   errorMessage += "  - You are a developer, creating new provider or filter and tried to use them to observe actions with"
   errorMessage += ` "${factoryName}" factory, which does not provide binding for "${classifierClass.name}". See "collectors" property in "FactoryBase"\n`;
+  errorMessage += `  - You are a developer, creating new "${factoryName}" factory`
+  errorMessage += ` and tried to push classifier "${classifierClass.name}" as the factory's dependency before registering its implementation as collector.\n`;
 
   return errorMessage;
 };

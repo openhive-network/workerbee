@@ -39,6 +39,7 @@ export class JsonRpcFactory extends FactoryBase {
     super.registerClassifier(ManabarClassifier, ManabarCollector, worker);
     super.registerClassifier(ContentMetadataClassifier, ContentMetadataCollector, worker);
 
+    // We have to push classifier after registering its implementation as collector. Maybe this should be handled internally?
     super.pushClassifier(DynamicGlobalPropertiesClassifier, EClassifierOrigin.FACTORY);
   }
 }
