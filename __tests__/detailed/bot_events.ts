@@ -564,7 +564,7 @@ test.describe("WorkerBee Bot events test", () => {
           error(err) {
             console.error(err);
           },
-          complete: resolve
+          complete: () => setTimeout(resolve, 1000) // Wait a while to collect all the calls
         });
       })
 
@@ -574,7 +574,7 @@ test.describe("WorkerBee Bot events test", () => {
       return calls;
     });
 
-    expect(result).toBeGreaterThanOrEqual(3);
+    expect(result).toBe(4);
   });
 
   test("Should be able to parse blocks from the past - transaction id observe", async({ workerbeeTest }) => {
@@ -643,7 +643,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to parse blocks from the past - impacted accounts", async({ workerbeeTest }) => {
-    const result = await workerbeeTest.dynamic(async({ WorkerBee }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
       const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
       await bot.start();
 
@@ -663,7 +663,7 @@ test.describe("WorkerBee Bot events test", () => {
           error(err) {
             console.error(err);
           },
-          complete: resolve
+          complete: () => setTimeout(resolve, 1000) // Wait a while to collect all the calls before destroying the chain object
         });
       })
 
