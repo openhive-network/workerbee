@@ -37,15 +37,27 @@ export class BlockCollector extends CollectorBase<BlockClassifier> {
     if (this.currentContainerIndex === -1 || this.currentContainerIndex >= this.cachedBlocksData.length) {
       this.currentContainerIndex = 0;
       const startGetBlockRange = Date.now();
-      ({ blocks: this.cachedBlocksData } = await this.worker.chain!.api.block_api.get_block_range({
+      const blockRangeResponse = await this.worker.chain!.api.block_api.get_block_range({
         starting_block_num: this.currentBlockIndex,
         count: this.toBlock === undefined ? MAX_TAKE_BLOCKS : (
           this.currentBlockIndex + MAX_TAKE_BLOCKS > this.toBlock ? this.toBlock - this.currentBlockIndex + 1 : MAX_TAKE_BLOCKS
         )
-      }));
+      });
       data.addTiming("block_api.get_block_range", Date.now() - startGetBlockRange);
 
-      if (this.cachedBlocksData.length === 0)
+      if (blockRangeResponse === null || blockRangeResponse.blocks === undefined)
+        throw new WorkerBeeError(`BlockCollector: Invalid block range response starting from block #${this.currentBlockIndex}`);
+
+      ({ blocks: this.cachedBlocksData } = blockRangeResponse);
+
+      if (this.cachedBlocksData.length === 0) {
+        /*
+         * Handle the case when this is the first call and we get no blocks back
+         * This can be caused by invalid fromBlock provided or no blocks produced yet
+         */
+        if (this.currentBlockIndex === this.fromBlock)
+          throw new WorkerBeeError(`BlockCollector: No blocks returned from get_block_range starting from block #${this.fromBlock}`);
+
         return {
           /*
            * Instruct TypeScript typings that BlockClassifier.name is actualy a Classifier name we expect.
@@ -58,6 +70,7 @@ export class BlockCollector extends CollectorBase<BlockClassifier> {
           [BlockHeaderClassifier.name as "BlockHeaderClassifier"]:
             this.previousBlockHeaderData as TAvailableClassifiers["BlockHeaderClassifier"]
         };
+      }
     }
 
     const startBlockAnalysis = Date.now();
