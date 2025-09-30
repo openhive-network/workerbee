@@ -6,7 +6,7 @@ This project maps data from Hive and returns it as proper WordPress API. It will
 
 * Get project and get submodules.
 * Go into `example/wordpress-rest-api`.
-* `pnpm install`.
+* `pnpm install --ignore-workspace`.
 * Change `example-config.ts` file to get the data you want to see on main page.
 * `pnpm run dev` for deployment. Rest API should be ready to work with your front end.
 
