@@ -22,7 +22,7 @@ export class Post extends Comment implements IPost  {
     this.summary = postData.json_metadata?.description || "";
     this.community = postData.community ? {name: postData.community} : undefined;
     this.communityTitle = postData.community_title
-    this.postImage = postData.json_metadata.image[0];
+    this.postImage = postData.json_metadata.image?.[0];
   }
 
   /**
