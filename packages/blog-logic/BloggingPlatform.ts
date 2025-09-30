@@ -1,6 +1,6 @@
-import { TWaxExtended, TWaxRestExtended } from "@hiveio/wax";
 import { Account } from "./Account";
 import { Community } from "./Community";
+import { DataProvider } from "./DataProvider";
 import { IAccount, IAccountIdentity,
   IBloggingPlatform,
   ICommunity,
@@ -12,26 +12,16 @@ import { IAccount, IAccountIdentity,
 } from "./interfaces";
 import { Post } from "./Post";
 import { paginateData } from "./utils";
-import { ExtendedNodeApi, ExtendedRestApi, getWax } from "./wax";
 
 export class BloggingPlaform implements IBloggingPlatform {
+  private dataProvider: DataProvider;
   public viewerContext: IAccountIdentity;
-
-  private chain?: TWaxExtended<ExtendedNodeApi, TWaxRestExtended<ExtendedRestApi>>;
-
-
-  private initializeChain = async () => {
-    if (!this.chain)
-      this.chain = await getWax();
-  }
-  // Add initilaize chain to constructor
-
 
   public overwrittenGetTitleImage?: () => string;
 
-  public constructor() {
+  public constructor(dataProvider: DataProvider) {
     this.viewerContext = {name: "hive.blog"}; // Set default
-    this.initializeChain();
+    this.dataProvider = dataProvider;
   }
 
   /**
@@ -49,11 +39,10 @@ export class BloggingPlaform implements IBloggingPlatform {
    * @returns post object
    */
   public async getPost(postId: IPostCommentIdentity): Promise<IPost> {
-    await this.initializeChain();
-    const postData = await this.chain?.api.bridge.get_post({author: postId.author, permlink: postId.permlink, observer: this.viewerContext.name });
+    const postData = await this.dataProvider.chain.api.bridge.get_post({author: postId.author, permlink: postId.permlink, observer: this.viewerContext.name });
     if (!postData)
       throw new Error("Post not found");
-    return new Post(postId, this, postData!);
+    return new Post(postId, this.dataProvider, postData!);
   }
 
   /**
@@ -63,8 +52,7 @@ export class BloggingPlaform implements IBloggingPlatform {
    * @returns iterable of community objects
    */
   public async enumCommunities(filter: ICommunityFilters, pagination: IPagination): Promise<Iterable<ICommunity>> {
-    await this.initializeChain();
-    const communities = await this.chain?.api.bridge.list_communities({observer: this.viewerContext.name, sort: filter.sort, query: filter.query});
+    const communities = await this.dataProvider.chain.api.bridge.list_communities({observer: this.viewerContext.name, sort: filter.sort, query: filter.query});
     if (communities) return paginateData(communities.map((community) => new Community(community)), pagination);
     return await [];
   }
@@ -76,8 +64,7 @@ export class BloggingPlaform implements IBloggingPlatform {
    * @returns iterable of posts
    */
   public async enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IPost>> {
-    await this.initializeChain();
-    const posts = await this.chain?.api.bridge.get_ranked_posts({
+    const posts = await this.dataProvider.chain.api.bridge.get_ranked_posts({
       limit: filter.limit,
       sort: filter.sort,
       observer: this.viewerContext.name,
@@ -88,7 +75,7 @@ export class BloggingPlaform implements IBloggingPlatform {
     if (!posts)
       throw new Error("Posts not found");
     const paginatedPosts = paginateData(posts, pagination);
-    return paginatedPosts?.map((post) => new Post({author: post.author, permlink: post.permlink}, this, post))
+    return paginatedPosts?.map((post) => new Post({author: post.author, permlink: post.permlink}, this.dataProvider, post))
   }
 
   /**
@@ -97,8 +84,7 @@ export class BloggingPlaform implements IBloggingPlatform {
    * @returns account object
    */
   public async getAccount(accontName: string): Promise<IAccount> {
-    await this.initializeChain();
-    const account = await this.chain?.restApi["hafbe-api"].accounts.account({accountName: accontName});
+    const account = await this.dataProvider.chain.restApi["hafbe-api"].accounts.account({accountName: accontName});
     if (!account)
       throw new Error("Account not found");
     return new Account(account);

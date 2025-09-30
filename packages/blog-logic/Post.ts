@@ -1,5 +1,6 @@
 import { Comment } from "./Comment";
-import { IBloggingPlatform, ICommunityIdentity, IPagination, IPost, IPostCommentIdentity, IPostCommentsFilters, IReply } from "./interfaces";
+import { DataProvider } from "./DataProvider";
+import { ICommunityIdentity, IPagination, IPost, IPostCommentIdentity, IPostCommentsFilters, IReply } from "./interfaces";
 import { Reply } from "./Reply";
 import { paginateData } from "./utils";
 import { Entry } from "./wax";
@@ -15,8 +16,8 @@ export class Post extends Comment implements IPost  {
   private replies?: Iterable<IReply>;
   private postImage?: string;
 
-  public constructor(authorPermlink: IPostCommentIdentity, bloggingPlatform: IBloggingPlatform, postData: Entry) {
-    super(authorPermlink, bloggingPlatform, postData);
+  public constructor(authorPermlink: IPostCommentIdentity, dataProvider: DataProvider, postData: Entry) {
+    super(authorPermlink, dataProvider, postData);
     this.title = postData.title;
     this.tags = postData.json_metadata?.tags || [];
     this.summary = postData.json_metadata?.description || "";
@@ -30,12 +31,11 @@ export class Post extends Comment implements IPost  {
    * @returns iterable of replies
    */
   private async fetchReplies(): Promise<Iterable<IReply>> {
-    this.initializeChain();
     if (!this.replies) {
-      const repliesData = await this.chain!.api.bridge.get_discussion({
+      const repliesData = await this.dataProvider.chain.api.bridge.get_discussion({
         author: this.author,
         permlink: this.permlink,
-        observer: this.bloggingPlatform.viewerContext.name,
+        observer: this.dataProvider.bloggingPlatform.viewerContext.name,
       });
       if (!repliesData)
         throw "No replies";
@@ -44,7 +44,7 @@ export class Post extends Comment implements IPost  {
         (reply) =>
           new Reply(
             { author: reply.author, permlink: reply.permlink },
-            this.bloggingPlatform,
+            this.dataProvider,
             {
               author: reply.parent_author || "",
               permlink: reply.parent_permlink || "",
@@ -64,7 +64,7 @@ export class Post extends Comment implements IPost  {
    * @returns Link to title image
    */
   public getTitleImage(): string {
-    if (this.bloggingPlatform.overwrittenGetTitleImage) return this.bloggingPlatform.overwrittenGetTitleImage()
+    if (this.dataProvider.bloggingPlatform.overwrittenGetTitleImage) return this.dataProvider.bloggingPlatform.overwrittenGetTitleImage()
     return this.postImage || ""
   }
 
@@ -75,7 +75,6 @@ export class Post extends Comment implements IPost  {
    * @returns iterable of replies objects
    */
   public async enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IReply>> {
-    this.initializeChain();
     if (this.replies) return paginateData(Array.from(this.replies), pagination);
     return paginateData(await this.fetchReplies() as IReply[], pagination);
   }
@@ -84,7 +83,6 @@ export class Post extends Comment implements IPost  {
    * Get number of comments (replies) for given post.
    */
   public async getCommentsCount(): Promise<number> {
-    this.initializeChain();
     if (this.replies) return Array.from(this.replies).length;
 
     return (Array.from(await this.fetchReplies())).length;

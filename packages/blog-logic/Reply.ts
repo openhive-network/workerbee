@@ -1,5 +1,6 @@
 import { Comment } from "./Comment";
-import { IBloggingPlatform, IPostCommentIdentity, IReply } from "./interfaces";
+import { DataProvider } from "./DataProvider";
+import { IPostCommentIdentity, IReply } from "./interfaces";
 import { Entry } from "./wax";
 
 export class Reply extends Comment implements IReply {
@@ -8,12 +9,12 @@ export class Reply extends Comment implements IReply {
 
   public constructor(
     authorPermlink: IPostCommentIdentity,
-    bloggingPlatform: IBloggingPlatform,
+    dataProvider: DataProvider,
     parent: IPostCommentIdentity,
     topPost: IPostCommentIdentity,
     replyData: Entry
   ) {
-    super(authorPermlink, bloggingPlatform, replyData);
+    super(authorPermlink, dataProvider, replyData);
     this.parent = parent;
     this.topPost = topPost;
   }

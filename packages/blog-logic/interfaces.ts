@@ -152,7 +152,7 @@ export interface IBloggingPlatform {
   enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IPost>>;
   configureViewContext(accontName: IAccountIdentity): void;
   enumCommunities(filter: ICommunityFilters, pagination: IPagination): Promise<Iterable<ICommunity>>;
-  // To do: add getAccount method later
+  getAccount(accontName: string): Promise<IAccount>;
 
   overwrittenGetTitleImage?: () => string;
   overwriteGetTitleImage(callback: () => string): void;
