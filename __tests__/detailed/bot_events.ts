@@ -548,8 +548,58 @@ test.describe("WorkerBee Bot events test", () => {
     expect(result).toBeLessThanOrEqual(3);
   });
 
-  test("Should be able to parse blocks from the past", async({ workerbeeTest }) => {
-    const result = await workerbeeTest.dynamic(async({ WorkerBee }) => {
+  test("Should capture intentional error - negative block number", async({ workerbeeTest }) => {
+    // Should time out if no error is captured
+    await workerbeeTest(async({ WorkerBee }) => {
+      const bot = new WorkerBee();
+      await bot.start();
+
+      await new Promise<void>((resolve, reject) => {
+        bot.providePastOperations(-1, -1).onBlock().subscribe({
+          next(data) { // Should not get here
+            console.log(`Got block #${data.block.number}`);
+            reject(new Error("Should not get into this callback"));
+          },
+          error(err) {
+            console.error("Inside of test - intentional error:", err);
+
+            resolve();
+          }
+        });
+      })
+
+      bot.stop();
+      bot.delete();
+    });
+  });
+
+  test("Should capture intentional error - block in the future", async({ workerbeeTest }) => {
+    // Should time out if no error is captured
+    await workerbeeTest(async({ WorkerBee }) => {
+      const bot = new WorkerBee();
+      await bot.start();
+
+      await new Promise<void>((resolve, reject) => {
+        bot.providePastOperations(Number.MAX_SAFE_INTEGER - 1000, Number.MAX_SAFE_INTEGER).onBlock().subscribe({
+          next(data) { // Should not get here
+            console.log(`Got block #${data.block.number}`);
+            reject(new Error("Should not get into this callback"));
+          },
+          error(err) {
+            console.error("Inside of test - intentional error:", err);
+
+            resolve();
+          }
+        });
+      })
+
+      bot.stop();
+      bot.delete();
+    });
+  });
+
+  test("Should be able to parse blocks from the past - exact amount of blocks", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee }) => {
       const bot = new WorkerBee();
       await bot.start();
 
