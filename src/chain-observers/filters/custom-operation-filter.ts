@@ -29,10 +29,6 @@ export class CustomOperationFilter extends FilterBase {
       if (this.ids.has(operation.id))
         return true;
 
-    for(const { operation } of (operationsPerType.custom_operation ?? []))
-      if (this.ids.has(operation.id))
-        return true;
-
     return false;
   }
 }

@@ -579,9 +579,10 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   }
 
   /**
-   * Subscribes to notifications when a custom operation with a specific ID is processed.
+   * Subscribes to notifications when a custom JSON operation with a specific ID is processed.
    *
    * Automatically provides the custom JSON operation in the `next` callback.
+   * Note: This method only monitors custom_json_operation types.
    *
    * Note: This method implicitly applies the OR operator between the specified ids.
    *
@@ -596,11 +597,11 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * });
    * ```
    *
-   * @param ids The ID of the custom operation to monitor.
+   * @param ids The ID of the custom JSON operation to monitor.
    * @returns itself
    */
   public onCustomOperation<
-    TOperationId extends Array<string | number>
+    TOperationId extends Array<string>
   >(...ids: TOperationId): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CustomOperationProvider<TOperationId>["provide"]>>> {
     this.operands.push(new CustomOperationFilter(this.worker, ids));
     this.pushProvider(CustomOperationProvider, { ids });
