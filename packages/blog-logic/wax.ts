@@ -3,7 +3,8 @@ import {
   TWaxExtended,
   TWaxApiRequest,
   ApiAuthority,
-  NaiAsset
+  NaiAsset,
+  TWaxRestExtended
 } from "@hiveio/wax";
 
 export interface AccountProfile {
@@ -211,6 +212,59 @@ export interface CommunityData {
   _temporary?: boolean;
 }
 
+export interface IVoteListItem {
+  id: number;
+  voter: string;
+  author: string;
+  permlink: string;
+  weight: string;
+  rshares: number;
+  vote_percent: number;
+  last_update: string;
+  num_changes: number;
+}
+
+export interface AccountDetails {
+  id: number;
+  name: string;
+  can_vote: boolean;
+  mined: boolean;
+  proxy: string;
+  recovery_account: string;
+  last_account_recovery: Date;
+  created: Date;
+  reputation: number;
+  json_metadata: string;
+  posting_json_metadata: string;
+  profile_image: string;
+  hbd_balance: number;
+  balance: number;
+  vesting_shares: string;
+  vesting_balance: number;
+  hbd_saving_balance: number;
+  savings_balance: number;
+  savings_withdraw_requests: number;
+  reward_hbd_balance: number;
+  reward_hive_balance: number;
+  reward_vesting_balance: string;
+  reward_vesting_hive: number;
+  posting_rewards: string;
+  curation_rewards: string;
+  delegated_vesting_shares: string;
+  received_vesting_shares: string;
+  proxied_vsf_votes: number[] | string[];
+  withdrawn: string;
+  vesting_withdraw_rate: string;
+  to_withdraw: string;
+  withdraw_routes: number;
+  delayed_vests: string;
+  witness_votes: string[];
+  witnesses_voted_for: number;
+  ops_count: number;
+  is_witness: boolean;
+  governanceTs: any;
+}
+
 export type ExtendedNodeApi = {
   bridge: {
     get_post_header: TWaxApiRequest<{ author: string; permlink: string }, IGetPostHeader>;
@@ -246,17 +300,35 @@ export type ExtendedNodeApi = {
     CommunityData[] | null
   >;
   };
-  condenser_api: {
-    get_active_votes: TWaxApiRequest<string[], VoteData[]>;
-    get_accounts: TWaxApiRequest<[string[]], FullAccount[]>;
+  database_api: {
+    list_votes: TWaxApiRequest<
+      {
+        start: [string, string, string] | null;
+        limit: number;
+        order: "by_comment_voter" | "by_voter_comment";
+      },
+      { votes: IVoteListItem[] }
+    >;
   }
 };
 
-let chain: Promise<TWaxExtended<ExtendedNodeApi>>;
+export type ExtendedRestApi = {
+  "hafbe-api": {
+    accounts: {
+      account: {
+        params: { accountName: string };
+        result: AccountDetails,
+        urlPath: "{accountName}",
+      },
+  }
+  }
+};
+
+let chain: Promise<TWaxExtended<ExtendedNodeApi, TWaxRestExtended<ExtendedRestApi>>>;
 
 export const getWax = () => {
   if (!chain)
-    return chain = createHiveChain().then(chain => chain.extend<ExtendedNodeApi>());
+    return chain = createHiveChain().then(chain => chain.extend<ExtendedNodeApi>().extendRest<ExtendedRestApi>({}));
 
   return chain;
 };

@@ -1,5 +1,5 @@
 import { TWaxExtended } from "@hiveio/wax";
-import { IBloggingPlatform, IComment, ICommonFilters, IPagination, IPostCommentIdentity, IVote } from "./interfaces";
+import { IBloggingPlatform, IComment, IPagination, IPostCommentIdentity, IVote, IVotesFilters } from "./interfaces";
 import { paginateData } from "./utils";
 import { Vote } from "./Vote";
 import { Entry, ExtendedNodeApi, getWax } from "./wax";
@@ -65,11 +65,11 @@ export class Comment implements IComment {
    * @param pagination
    * @returns Iterable of Votes.
    */
-  public async enumVotes(filter: ICommonFilters, pagination: IPagination): Promise<Iterable<IVote>> {
+  public async enumVotes(filter: IVotesFilters, pagination: IPagination): Promise<Iterable<IVote>> {
     this.initializeChain();
     // Get rid of condenser API
-    const votesData = await this.chain!.api.condenser_api.get_active_votes([this.author, this.permlink]);
-    const votes = votesData.map((vote) => new Vote(vote));
+    const votesData = await this.chain!.api.database_api.list_votes({limit: filter.limit, order: filter.votesSort, start: null});
+    const votes = votesData.votes.map((vote) => new Vote(vote));
     this.votes = votes;
     return paginateData(votes, pagination);
   }
@@ -80,7 +80,7 @@ export class Comment implements IComment {
    */
   public async wasVotedByUser(userName: string): Promise<boolean> {
     this.initializeChain();
-    if (!this.votes) await this.enumVotes({}, {page: 1, pageSize: 10000}); // Temporary pagination before fix
+    if (!this.votes) await this.enumVotes({limit: 10000, votesSort: "by_comment_voter"}, {page: 1, pageSize: 10000}); // Temporary pagination before fix
     return !!Array.from(this.votes || []).find((vote) => vote.voter === userName)
   }
 

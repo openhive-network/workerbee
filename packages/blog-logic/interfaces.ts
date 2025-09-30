@@ -14,11 +14,9 @@ export interface ICommonFilters {
 }
 
 export interface IVotesFilters extends ICommonFilters {
-  readonly isUpvote?: boolean;
-  readonly voterName?: string;
-  readonly sortBy?: "date" | "weight" | "voter";
+  readonly limit: number;
+  readonly votesSort: "by_comment_voter" | "by_voter_comment";
 }
-
 export interface IPostCommentsFilters extends ICommonFilters {
   readonly limit: number;
   readonly sort:  "trending" | "hot" | "created" | "promoted" | "payout" | "payout_comments" | "muted";
@@ -84,7 +82,7 @@ export interface IComment extends IPostCommentIdentity {
 
 
   enumMentionedAccounts(): Promise<Iterable<string>>;
-  enumVotes(filter: ICommonFilters, pagination: IPagination): Promise<Iterable<IVote>>;
+  enumVotes(filter: IVotesFilters, pagination: IPagination): Promise<Iterable<IVote>>;
   getContent(): Promise<string>;
   wasVotedByUser(userName: string): Promise<boolean>;
 

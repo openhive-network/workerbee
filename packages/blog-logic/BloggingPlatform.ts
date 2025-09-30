@@ -1,4 +1,4 @@
-import { TWaxExtended } from "@hiveio/wax";
+import { TWaxExtended, TWaxRestExtended } from "@hiveio/wax";
 import { Account } from "./Account";
 import { Community } from "./Community";
 import { IAccount, IAccountIdentity,
@@ -12,12 +12,12 @@ import { IAccount, IAccountIdentity,
 } from "./interfaces";
 import { Post } from "./Post";
 import { paginateData } from "./utils";
-import { ExtendedNodeApi, getWax } from "./wax";
+import { ExtendedNodeApi, ExtendedRestApi, getWax } from "./wax";
 
 export class BloggingPlaform implements IBloggingPlatform {
   public viewerContext: IAccountIdentity;
 
-  private chain?: TWaxExtended<ExtendedNodeApi>;
+  private chain?: TWaxExtended<ExtendedNodeApi, TWaxRestExtended<ExtendedRestApi>>;
 
 
   private initializeChain = async () => {
@@ -98,10 +98,10 @@ export class BloggingPlaform implements IBloggingPlatform {
    */
   public async getAccount(accontName: string): Promise<IAccount> {
     await this.initializeChain();
-    const account = await this.chain?.api.condenser_api.get_accounts([[accontName]]);
+    const account = await this.chain?.restApi["hafbe-api"].accounts.account({accountName: accontName});
     if (!account)
       throw new Error("Account not found");
-    return new Account(account[0]);
+    return new Account(account);
   }
 
   // Section for overwritting methods

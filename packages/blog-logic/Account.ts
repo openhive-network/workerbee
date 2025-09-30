@@ -1,5 +1,5 @@
 import { IAccount } from "./interfaces";
-import { FullAccount } from "./wax";
+import { AccountDetails } from "./wax";
 
 export class Account implements IAccount {
   public readonly name: string;
@@ -10,14 +10,14 @@ export class Account implements IAccount {
   public readonly description: string;
   public readonly avatar: string;
 
-  public constructor(accountData: FullAccount) {
+  public constructor(accountData: AccountDetails) {
     this.name = accountData.name;
     this.avatar = JSON.parse(accountData.posting_json_metadata)?.profile.profile_image || "";
     this.creationDate = new Date(accountData.created);
-    this.postCount = accountData.post_count;
-    this.lastActivity = new Date(accountData.last_post);
+    this.postCount = 0; // In this API not available.
+    this.lastActivity = new Date(); // In this API not available.
     this.registeredDate = new Date(accountData.created);
-    this.description = accountData.profile?.about || "";
+    this.description = JSON.parse(accountData.posting_json_metadata)?.about || "";
   }
 
   /**
