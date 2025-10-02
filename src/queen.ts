@@ -1,7 +1,7 @@
 import { asset, EManabarType, TAccountName } from "@hiveio/wax";
 
 import { WorkerBee } from "./bot";
-import { DataEvaluationContext } from "./chain-observers";
+import { CollectorClassifierBase, DataEvaluationContext } from "./chain-observers";
 import { TRegisterEvaluationContext } from "./chain-observers/classifiers/collector-classifier-base";
 import { AccountCreatedFilter } from "./chain-observers/filters/account-created-filter";
 import { AccountFullManabarFilter } from "./chain-observers/filters/account-full-manabar-filter";
@@ -301,6 +301,71 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
         return provider.usedContexts?.() ?? super.usedContexts();
       }
     }, options);
+
+    return this;
+  }
+
+  /**
+   * Allows to create a filter that uses data provided by a provider in the same chain.
+   * This is useful when you want to create a filter that depends on data that is not available in the DEC by default,
+   * e.g. calls to your custom server for status / data.
+   * The provider is guaranteed to be called before the filter.
+   *
+   * @example
+   * ```
+   * bot.observe
+   * .provideAccounts("thebeedevs") // Note: We are mixing provideAccounts with filterPiped here for demonstration purposes
+   * .filterPiped(
+   *   async () => {
+   *     const response = await (await fetch(`https://myapi.io/status?tx=abcdefabdeadc0de`)).json() as string;
+   *
+   *     return {
+   *       status: response
+   *     };
+   *   },
+   *   ({ status }) => status === "confirmed" // React only if the status is "confirmed"
+   * ).subscribe({
+   *   next(data) {
+   *     console.log(`Transaction status: ${data.status}`); // status is now part of the data
+   *     console.log("My account data:", data.accounts.thebeedevs); // accounts is still part of the data
+   *   }
+   * });
+   * ```
+   *
+   * @param provider Function that provides data to be used by the filter
+   * @param filterWithPipedData Function that filters using the data provided by the provider
+   *
+   * @returns itself
+   */
+  public filterPiped<
+    TProviderFn extends (data: DataEvaluationContext) => (Promise<object> | object),
+    TFilterFn extends (pipedData: Awaited<ReturnType<TProviderFn>>, data: DataEvaluationContext) => (Promise<boolean> | boolean)
+  >(provider: TProviderFn, filterWithPipedData: TFilterFn): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<TProviderFn>>> {
+    const InlineAnonymousClassifier = class extends CollectorClassifierBase<{ pipedData: Awaited<ReturnType<TProviderFn>> }> {};
+
+    /// XXX: Maybe in the future we will actually allow multiple custom filters with the sam piped data (with implicit OR between filters)?
+
+    this.pushOperand(Object.assign(Object.create(new BlankFilter()), {
+      async match(data: DataEvaluationContext) {
+        // First retrieve the data we are operating on
+        const providedData = await provider(data) as Awaited<ReturnType<TProviderFn>>;
+
+        // Cache in the store for future provider use using our custom inline anonymous classifier - unique for each piped filter <-> provider pair
+        const store = data.accessStore(InlineAnonymousClassifier);
+
+        store.pipedData = providedData;
+
+        // Check if we can proceed by calling filter for true/false result
+        return await filterWithPipedData(providedData, data);
+      }
+    }));
+    this.pushProvider(class extends ProviderBase {
+      /* eslint-disable-next-line require-await */
+      public async provide(data: DataEvaluationContext) {
+        // Forward the result
+        return data.accessStore(InlineAnonymousClassifier).pipedData;
+      }
+    });
 
     return this;
   }
