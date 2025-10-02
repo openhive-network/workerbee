@@ -17,7 +17,7 @@ export interface IManabarCollectorOptions {
   manabarType: EManabarType;
 }
 
-export class ManabarClassifier extends CollectorClassifierBase<IManabarAccountData, void, void, IManabarCollectorOptions> {
+export class ManabarClassifier extends CollectorClassifierBase<{}, IManabarAccountData, void, void, IManabarCollectorOptions> {
   public static forOptions(options: IManabarCollectorOptions): TRegisterEvaluationContext {
     return {
       class: this, // Intentionally using `this` to refer to the class prototype itself later - even though it is not a class **instance**

@@ -1,4 +1,3 @@
-import type { WorkerBee } from "../../bot";
 import { isExchange } from "../../utils/known-exchanges";
 import { OperationClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
@@ -6,12 +5,6 @@ import type { TFilterEvaluationContext } from "../factories/data-evaluation-cont
 import { FilterBase } from "./filter-base";
 
 export class ExchangeTransferFilter extends FilterBase {
-  public constructor(
-    worker: WorkerBee
-  ) {
-    super(worker);
-  }
-
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [
       OperationClassifier

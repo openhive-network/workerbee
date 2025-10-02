@@ -1,4 +1,3 @@
-import type { WorkerBee } from "../../bot";
 import { BlockHeaderClassifier } from "../classifiers/block-header-classifier";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
@@ -6,10 +5,9 @@ import { FilterBase } from "./filter-base";
 
 export class BlockNumberFilter extends FilterBase {
   public constructor(
-    worker: WorkerBee,
     private readonly number: number
   ) {
-    super(worker);
+    super();
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {

@@ -16,4 +16,4 @@ export interface IFeedPriceData {
   priceHistory: Iterable<price>;
 }
 
-export class FeedPriceClassifier extends CollectorClassifierBase<IFeedPriceData> {}
+export class FeedPriceClassifier extends CollectorClassifierBase<{}, IFeedPriceData> {}

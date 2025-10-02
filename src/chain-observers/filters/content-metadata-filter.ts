@@ -1,5 +1,4 @@
 import type { comment, TAccountName } from "@hiveio/wax";
-import type { WorkerBee } from "../../bot";
 import { ContentMetadataClassifier, ImpactedAccountClassifier, OperationClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
@@ -8,12 +7,11 @@ import { FilterBase } from "./filter-base";
 // Base class for content filters (posts and comments)
 export abstract class BlogContentMetadataFilter extends FilterBase {
   public constructor(
-    worker: WorkerBee,
     private readonly reportAfterMsBeforePayout: number,
     accounts: TAccountName[],
     protected readonly isPost: boolean
   ) {
-    super(worker);
+    super();
 
     this.accounts = new Set(accounts);
   }
@@ -73,21 +71,19 @@ export abstract class BlogContentMetadataFilter extends FilterBase {
 // Filter for comments (replies to posts or other comments)
 export class CommentMetadataFilter extends BlogContentMetadataFilter {
   public constructor(
-    worker: WorkerBee,
     reportAfterMsBeforePayout: number,
     accounts: TAccountName[]
   ) {
-    super(worker, reportAfterMsBeforePayout, accounts, false);
+    super(reportAfterMsBeforePayout, accounts, false);
   }
 }
 
 // Filter for posts (top-level content with empty parent_author)
 export class PostMetadataFilter extends BlogContentMetadataFilter {
   public constructor(
-    worker: WorkerBee,
     reportAfterMsBeforePayout: number,
     accounts: TAccountName[]
   ) {
-    super(worker, reportAfterMsBeforePayout, accounts, true);
+    super(reportAfterMsBeforePayout, accounts, true);
   }
 }

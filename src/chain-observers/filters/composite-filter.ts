@@ -1,4 +1,3 @@
-import type { WorkerBee } from "../../bot";
 import { WorkerBeeUnsatisfiedFilterError } from "../../errors";
 import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import { TFilterEvaluationContext } from "../factories/data-evaluation-context";
@@ -6,10 +5,9 @@ import { FilterBase } from "../filters/filter-base";
 
 abstract class CompositeFilter extends FilterBase {
   public constructor(
-    worker: WorkerBee,
     protected readonly operands: FilterBase[]
   ) {
-    super(worker);
+    super();
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {

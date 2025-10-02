@@ -1,6 +1,8 @@
 import { asset, EManabarType, TAccountName } from "@hiveio/wax";
 
 import { WorkerBee } from "./bot";
+import { DataEvaluationContext } from "./chain-observers";
+import { TRegisterEvaluationContext } from "./chain-observers/classifiers/collector-classifier-base";
 import { AccountCreatedFilter } from "./chain-observers/filters/account-created-filter";
 import { AccountFullManabarFilter } from "./chain-observers/filters/account-full-manabar-filter";
 import { AccountMetadataChangeFilter } from "./chain-observers/filters/account-metadata-change-filter";
@@ -15,7 +17,7 @@ import { CustomOperationFilter } from "./chain-observers/filters/custom-operatio
 import { ExchangeTransferFilter } from "./chain-observers/filters/exchange-transfer-filter";
 import { FeedPriceChangeFilter } from "./chain-observers/filters/feed-price-change-percent-filter";
 import { FeedPriceNoChangeFilter } from "./chain-observers/filters/feed-price-no-change-filter";
-import type { FilterBase } from "./chain-observers/filters/filter-base";
+import type { FilterBase, IFilterBase } from "./chain-observers/filters/filter-base";
 import { FollowFilter } from "./chain-observers/filters/follow-filter";
 import { ImpactedAccountFilter } from "./chain-observers/filters/impacted-account-filter";
 import { InternalMarketFilter } from "./chain-observers/filters/internal-market-filter";
@@ -42,7 +44,7 @@ import { InternalMarketProvider } from "./chain-observers/providers/internal-mar
 import { ManabarProvider } from "./chain-observers/providers/manabar-provider";
 import { MentionedAccountProvider } from "./chain-observers/providers/mention-provider";
 import { NewAccountProvider } from "./chain-observers/providers/new-account-provider";
-import { ProviderBase } from "./chain-observers/providers/provider-base";
+import { IProviderBase, ProviderBase } from "./chain-observers/providers/provider-base";
 import { RcAccountProvider } from "./chain-observers/providers/rc-account-provider";
 import { ReblogProvider } from "./chain-observers/providers/reblog-provider";
 import { TransactionByIdProvider } from "./chain-observers/providers/transaction-provider";
@@ -72,6 +74,12 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * Internal function to be called when the subscription is unsubscribed.
    */
   protected onUnsubscribe(): void {}
+
+  private pushOperand(operand: FilterBase) {
+    this.operands.push(
+      Object.assign(operand, { worker: this.worker })
+    );
+  }
 
   /**
    * Subscribe to the requested filters and providers.
@@ -106,10 +114,10 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     const committedFilters = this.filterContainers;
     // If no filters are committed, add a blank filter which always evaluates to true, so users can receive data from providers only
     if (committedFilters.length === 0)
-      committedFilters.push(new BlankFilter(this.worker));
+      committedFilters.push(new BlankFilter());
 
     // Optimize by not creating a logical AND filter for only one filter
-    const andFilter: FilterBase = committedFilters.length === 1 ? committedFilters[0] : new LogicalAndFilter(this.worker, committedFilters);
+    const andFilter: FilterBase = committedFilters.length === 1 ? committedFilters[0] : new LogicalAndFilter(committedFilters);
 
     this.mediator.registerListener(observer, andFilter, Array.from(this.providers.values()));
 
@@ -137,7 +145,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
       if (this.operands.length === 1) // Optimize by not creating a logical OR filter for only one filter
         this.filterContainers.push(this.operands[0]);
       else
-        this.filterContainers.push(new LogicalOrFilter(this.worker, this.operands));
+        this.filterContainers.push(new LogicalOrFilter(this.operands));
       this.operands = [];
     }
   }
@@ -217,7 +225,82 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @returns itself
    */
   public onBlockNumber(number: number): QueenBee<TPreviousSubscriberData> {
-    this.operands.push(new BlockNumberFilter(this.worker, number));
+    this.pushOperand(new BlockNumberFilter(number));
+
+    return this;
+  }
+
+  /**
+   * Allows to push custom filter to the observer chain.
+   * Note: This allows you to use DEC only for already existing cached requests and store between your custom filters & providers.
+   *       You won't be able to push custom collectors. If you want to achive such a functionality, you should define an entire new factory.
+   *
+   * This method is useful when you want to create complex filters that are not provided by WorkerBee out of the box,
+   * e.g. calls to your custom server for status / data.
+   *
+   * @example
+   * ```ts
+   * bot.observe.filter({
+   *   async match(data) {
+   *     const { currentWitness } = await data.get(DynamicGlobalPropertiesClassifier);
+   *
+   *     return currentWitness === "some-witness";
+   *   }
+   * }).subscribe({
+   *   next() {
+   *     console.log("Current witness is some-witness");
+   *   }
+   * });
+   * ```
+   *
+   * @param filter Filter class to be pushed
+   * @returns itself
+   */
+  public filter(filter: IFilterBase): QueenBee<TPreviousSubscriberData> {
+    this.pushOperand(Object.assign(Object.create(new BlankFilter()), filter));
+
+    return this;
+  }
+
+  /**
+   * Allows to push custom provider to the observer chain.
+   *
+   * @example
+   * ```ts
+   * bot.observe.provide({
+   *   async provide(data) {
+   *     const { currentWitness } = await data.get(DynamicGlobalPropertiesClassifier);
+   *
+   *     return { currentWitness };
+   *   }
+   * }).subscribe({
+   *   next(data) {
+   *     console.log("Current witness is", data.currentWitness);
+   *   }
+   * });
+   * ```
+   *
+   * @param provider Provider class to be pushed
+   * @param options Options to be pushed to the provider (if supported) - forwarded to the provider `pushOptions` method.
+   *                If you don't want to pass any options, you can still use DEC's store feature
+   *
+   * @returns itself
+   */
+  public provide<T extends IProviderBase>(
+    provider: T,
+    options: T["pushOptions"] extends undefined ? {} : Parameters<Exclude<T["pushOptions"], undefined>>[0] = {}
+  ): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<T["provide"]>>> {
+    this.pushProvider(class extends ProviderBase {
+      public async provide(data: DataEvaluationContext) {
+        return await provider.provide(data);
+      }
+      public pushOptions(options: {}): void {
+        provider.pushOptions?.(options);
+      }
+      public usedContexts(): Array<TRegisterEvaluationContext> {
+        return provider.usedContexts?.() ?? super.usedContexts();
+      }
+    }, options);
 
     return this;
   }
@@ -244,7 +327,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public onTransactionIds<
     TIdTxs extends Array<string>
   >(...transactionIds: TIdTxs): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<TransactionByIdProvider<TIdTxs>["provide"]>>> {
-    this.operands.push(new TransactionIdFilter(this.worker, transactionIds));
+    this.pushOperand(new TransactionIdFilter(transactionIds));
     this.pushProvider(TransactionByIdProvider, { transactionIds });
 
     return this;
@@ -313,7 +396,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     percent: number,
     ...accounts: TAccounts
   ): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ManabarProvider<TAccounts>["provide"]>>> {
-    this.operands.push(new AccountFullManabarFilter(this.worker, accounts, manabarType, percent));
+    this.pushOperand(new AccountFullManabarFilter(accounts, manabarType, percent));
 
     this.pushProvider(ManabarProvider, { manabarData: accounts.map(account => ({ account, manabarType })) });
 
@@ -346,7 +429,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public onAccountsBalanceChange<
     TAccounts extends Array<TAccountName>
   >(includeInternalTransfers: boolean, ...accounts: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<AccountProvider<TAccounts>["provide"]>>> {
-    this.operands.push(new BalanceChangeFilter(this.worker, accounts, includeInternalTransfers));
+    this.pushOperand(new BalanceChangeFilter(accounts, includeInternalTransfers));
 
     this.pushProvider(AccountProvider, { accounts });
 
@@ -376,7 +459,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public onAccountsMetadataChange<
     TAccounts extends Array<TAccountName>
   >(...accounts: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<AccountProvider<TAccounts>["provide"]>>> {
-    this.operands.push(new AccountMetadataChangeFilter(this.worker, accounts));
+    this.pushOperand(new AccountMetadataChangeFilter(accounts));
 
     this.pushProvider(AccountProvider, { accounts });
 
@@ -408,7 +491,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public onVotes<
     TAccounts extends TAccountName[]
   >(...voters: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<VoteProvider<TAccounts>["provide"]>>> {
-    this.operands.push(new VoteFilter(this.worker, voters));
+    this.pushOperand(new VoteFilter(voters));
 
     this.pushProvider(VoteProvider, { voters });
 
@@ -440,7 +523,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public onPosts<
     TAccounts extends TAccountName[]
   >(...authors: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<PostProvider<TAccounts>["provide"]>>> {
-    this.operands.push(new PostFilter(this.worker, authors));
+    this.pushOperand(new PostFilter(authors));
 
     this.pushProvider(PostProvider, { authors });
 
@@ -474,7 +557,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   >(...authors: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CommentProvider<TAccounts>["provide"]>>> {
     // TODO: Handle parentPostOrComment?: ICommentData
 
-    this.operands.push(new CommentFilter(this.worker, authors));
+    this.pushOperand(new CommentFilter(authors));
 
     this.pushProvider(CommentProvider, { authors: authors.map(account => ({ account })) });
 
@@ -511,7 +594,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   ): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CommentMetadataProvider<TAccounts>["provide"]>>> {
     const time = typeof relativeTimeMs === "number" ? relativeTimeMs : (Date.now() - calculateRelativeTime(relativeTimeMs).getTime());
 
-    this.operands.push(new CommentMetadataFilter(this.worker, time, authors));
+    this.pushOperand(new CommentMetadataFilter(time, authors));
 
     this.pushProvider(CommentMetadataProvider, { authors });
 
@@ -547,7 +630,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
     QueenBee<TPreviousSubscriberData & Awaited<ReturnType<PostMetadataProvider<TAccounts>["provide"]>>> {
     const time = typeof relativeTimeMs === "number" ? relativeTimeMs : (Date.now() - calculateRelativeTime(relativeTimeMs).getTime());
 
-    this.operands.push(new PostMetadataFilter(this.worker, time, authors));
+    this.pushOperand(new PostMetadataFilter(time, authors));
 
     this.pushProvider(PostMetadataProvider, { authors });
 
@@ -572,7 +655,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @returns itself
    */
   public onNewAccount(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<NewAccountProvider["provide"]>>> {
-    this.operands.push(new AccountCreatedFilter(this.worker));
+    this.pushOperand(new AccountCreatedFilter());
     this.pushProvider(NewAccountProvider);
 
     return this;
@@ -603,7 +686,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public onCustomOperation<
     TOperationId extends Array<string>
   >(...ids: TOperationId): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<CustomOperationProvider<TOperationId>["provide"]>>> {
-    this.operands.push(new CustomOperationFilter(this.worker, ids));
+    this.pushOperand(new CustomOperationFilter(ids));
     this.pushProvider(CustomOperationProvider, { ids });
 
     return this;
@@ -625,7 +708,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @returns itself
    */
   public onFeedPriceChange(percent: number): QueenBee<TPreviousSubscriberData> {
-    this.operands.push(new FeedPriceChangeFilter(this.worker, percent));
+    this.pushOperand(new FeedPriceChangeFilter(percent));
 
     return this;
   }
@@ -646,7 +729,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @returns itself
    */
   public onFeedPriceNoChange(lastHoursCount: number = 24): QueenBee<TPreviousSubscriberData> {
-    this.operands.push(new FeedPriceNoChangeFilter(this.worker, lastHoursCount));
+    this.pushOperand(new FeedPriceNoChangeFilter(lastHoursCount));
 
     return this;
   }
@@ -695,7 +778,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public onReblog<
     TReblogs extends TAccountName[]
   >(...rebloggers: TReblogs): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ReblogProvider<TReblogs>["provide"]>>> {
-    this.operands.push(new ReblogFilter(this.worker, rebloggers));
+    this.pushOperand(new ReblogFilter(rebloggers));
     this.pushProvider(ReblogProvider, { accounts: rebloggers });
 
     return this;
@@ -725,7 +808,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public onFollow<
     TFollows extends TAccountName[]
   >(...followers: TFollows): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<FollowProvider<TFollows>["provide"]>>> {
-    this.operands.push(new FollowFilter(this.worker, followers));
+    this.pushOperand(new FollowFilter(followers));
     this.pushProvider(FollowProvider, { accounts: followers });
 
     return this;
@@ -755,7 +838,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public onMention<
     TMentions extends TAccountName[]
   >(...mentionedAccounts: TMentions): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<MentionedAccountProvider<TMentions>["provide"]>>> {
-    this.operands.push(new PostMentionFilter(this.worker, mentionedAccounts));
+    this.pushOperand(new PostMentionFilter(mentionedAccounts));
     this.pushProvider(MentionedAccountProvider, { accounts: mentionedAccounts });
 
     return this;
@@ -786,7 +869,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public onAlarm<
     TAccounts extends TAccountName[]
   >(...watchAccounts: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<AlarmProvider<TAccounts>["provide"]>>> {
-    this.operands.push(new AlarmFilter(this.worker, watchAccounts));
+    this.pushOperand(new AlarmFilter(watchAccounts));
     this.pushProvider(AlarmProvider, { accounts: watchAccounts });
 
     return this;
@@ -818,7 +901,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
   public onImpactedAccounts<
     TAccounts extends TAccountName[]
   >(...accounts: TAccounts): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ImpactedAccountProvider<TAccounts>["provide"]>>> {
-    this.operands.push(new ImpactedAccountFilter(this.worker, accounts));
+    this.pushOperand(new ImpactedAccountFilter(accounts));
 
     this.pushProvider(ImpactedAccountProvider, { accounts });
 
@@ -848,7 +931,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @returns itself
    */
   public onWitnessesMissedBlocks(missedBlocksMinCount: number, ...witnesses: TAccountName[]): QueenBee<TPreviousSubscriberData> {
-    this.operands.push(new WitnessMissedBlocksFilter(this.worker, witnesses, missedBlocksMinCount));
+    this.pushOperand(new WitnessMissedBlocksFilter(witnesses, missedBlocksMinCount));
 
     return this;
   }
@@ -876,7 +959,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @returns itself
    */
   public onInternalMarketOperation(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<InternalMarketProvider["provide"]>>> {
-    this.operands.push(new InternalMarketFilter(this.worker));
+    this.pushOperand(new InternalMarketFilter());
     this.pushProvider(InternalMarketProvider);
 
     return this;
@@ -898,7 +981,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @returns itself
    */
   public onBlock(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<BlockHeaderProvider["provide"]>>> {
-    this.operands.push(new BlockChangedFilter(this.worker));
+    this.pushOperand(new BlockChangedFilter());
     this.pushProvider(BlockHeaderProvider);
 
     return this;
@@ -995,7 +1078,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @returns itself
    */
   public onWhaleAlert(asset: asset): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<WhaleAlertProvider["provide"]>>> {
-    this.operands.push(new WhaleAlertFilter(this.worker, asset));
+    this.pushOperand(new WhaleAlertFilter(asset));
     this.pushProvider(WhaleAlertProvider, { assets: [asset] });
 
     return this;
@@ -1025,7 +1108,7 @@ export class QueenBee<TPreviousSubscriberData extends object = {}> {
    * @returns itself
    */
   public onExchangeTransfer(): QueenBee<TPreviousSubscriberData & Awaited<ReturnType<ExchangeTransferProvider["provide"]>>> {
-    this.operands.push(new ExchangeTransferFilter(this.worker));
+    this.pushOperand(new ExchangeTransferFilter());
     this.pushProvider(ExchangeTransferProvider);
 
     return this;

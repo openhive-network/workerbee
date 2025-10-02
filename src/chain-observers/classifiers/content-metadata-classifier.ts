@@ -133,4 +133,4 @@ export type TContentMetadataQueryOptions = {
   reportAfterMsBeforePayout?: number;
 };
 
-export class ContentMetadataClassifier extends CollectorClassifierBase<IContentData, IContentData, TContentMetadataQueryOptions> {}
+export class ContentMetadataClassifier extends CollectorClassifierBase<{}, IContentData, IContentData, TContentMetadataQueryOptions> {}

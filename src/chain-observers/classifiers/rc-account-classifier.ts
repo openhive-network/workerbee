@@ -14,7 +14,7 @@ export interface IRcAccountCollectorOptions {
   rcAccount: string;
 }
 
-export class RcAccountClassifier extends CollectorClassifierBase<IRcAccountData, void, void, IRcAccountCollectorOptions> {
+export class RcAccountClassifier extends CollectorClassifierBase<{}, IRcAccountData, void, void, IRcAccountCollectorOptions> {
   public static forOptions(options: IRcAccountCollectorOptions) {
     return {
       class: this, // Intentionally using `this` to refer to the class prototype itself later - even though it is not a class **instance**

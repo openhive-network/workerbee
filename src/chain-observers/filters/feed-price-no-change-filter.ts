@@ -1,4 +1,3 @@
-import type { WorkerBee } from "../../bot";
 import { FeedPriceClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
@@ -10,10 +9,9 @@ export class FeedPriceNoChangeFilter extends FilterBase {
    * @param feedPriceNoChangeIntervals In standard configuration - one interval is one hour, so the default 24 intervals is one day.
    */
   public constructor(
-    worker: WorkerBee,
     private readonly feedPriceNoChangeIntervals: number = 24
   ) {
-    super(worker);
+    super();
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {

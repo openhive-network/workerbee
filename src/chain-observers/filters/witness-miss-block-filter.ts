@@ -1,5 +1,4 @@
 import type { TAccountName } from "@hiveio/wax";
-import type { WorkerBee } from "../../bot";
 import { WitnessClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
@@ -7,11 +6,10 @@ import { FilterBase } from "./filter-base";
 
 export class WitnessMissedBlocksFilter extends FilterBase {
   public constructor(
-    worker: WorkerBee,
     witnesses: TAccountName[],
     private readonly missedBlocksCountMin: number
   ) {
-    super(worker);
+    super();
 
     this.witnesses = new Set(witnesses);
   }

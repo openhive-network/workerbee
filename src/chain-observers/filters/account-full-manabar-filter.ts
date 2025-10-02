@@ -1,5 +1,4 @@
 import { EManabarType } from "@hiveio/wax";
-import type { WorkerBee } from "../../bot";
 import { ManabarClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
@@ -7,12 +6,11 @@ import { FilterBase } from "./filter-base";
 
 export class AccountFullManabarFilter extends FilterBase {
   public constructor(
-    worker: WorkerBee,
     accounts: string[],
     private readonly manabarType: EManabarType,
     private readonly manabarLoadPercent: number = 98
   ) {
-    super(worker);
+    super();
 
     this.accounts = new Set(accounts);
   }

@@ -1,4 +1,3 @@
-import type { WorkerBee } from "../../bot";
 import { BlockClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
@@ -6,10 +5,9 @@ import { FilterBase } from "./filter-base";
 
 export class TransactionIdFilter extends FilterBase {
   public constructor(
-    worker: WorkerBee,
     transactionIds: string[]
   ) {
-    super(worker);
+    super();
 
     this.transactionIds = new Set(transactionIds);
   }

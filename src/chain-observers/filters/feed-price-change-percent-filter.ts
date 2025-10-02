@@ -1,5 +1,4 @@
 import { price } from "@hiveio/wax";
-import type { WorkerBee } from "../../bot";
 import { FeedPriceClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
@@ -7,10 +6,9 @@ import { FilterBase } from "./filter-base";
 
 export class FeedPriceChangeFilter extends FilterBase {
   public constructor(
-    worker: WorkerBee,
     private readonly feedPriceChangePercentMin: number
   ) {
-    super(worker);
+    super();
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {

@@ -39,3 +39,12 @@ export type { IWhaleAlertMetadata, IWhaleAlertProviderData } from "./providers/w
 export type { IWitnessProviderData, TWitnessProvider } from "./providers/witness-provider";
 
 export { Exchange } from "../utils/known-exchanges";
+
+// Export all of the available classifiers for custom filters & providers
+export * from "./classifiers";
+export { CollectorClassifierBase } from "./classifiers/collector-classifier-base";
+
+// For custom filters & providers:
+export { IFilterBase } from "./filters/filter-base";
+export { IProviderBase } from "./providers/provider-base";
+export { DataEvaluationContext } from "./factories/data-evaluation-context";

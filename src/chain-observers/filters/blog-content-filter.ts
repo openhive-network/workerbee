@@ -1,5 +1,4 @@
 import { TAccountName } from "@hiveio/wax";
-import type { WorkerBee } from "../../bot";
 import { OperationClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
@@ -13,12 +12,11 @@ export interface ICommentData {
 // Base class for content filters (posts and comments)
 export abstract class BlogContentFilter extends FilterBase {
   public constructor(
-    worker: WorkerBee,
     accounts: string[],
     protected readonly isPost: boolean,
     protected readonly parentCommentFilter?: ICommentData
   ) {
-    super(worker);
+    super();
 
     this.accounts = new Set(accounts);
   }
@@ -63,20 +61,18 @@ export abstract class BlogContentFilter extends FilterBase {
 // Filter for comments (replies to posts or other comments)
 export class CommentFilter extends BlogContentFilter {
   public constructor(
-    worker: WorkerBee,
     accounts: string[],
     parentCommentFilter?: ICommentData
   ) {
-    super(worker, accounts, false, parentCommentFilter);
+    super(accounts, false, parentCommentFilter);
   }
 }
 
 // Filter for posts (top-level content with empty parent_author)
 export class PostFilter extends BlogContentFilter {
   public constructor(
-    worker: WorkerBee,
     accounts: string[]
   ) {
-    super(worker, accounts, true);
+    super(accounts, true);
   }
 }

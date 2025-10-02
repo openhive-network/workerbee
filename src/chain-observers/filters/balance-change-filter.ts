@@ -1,5 +1,4 @@
 import type { TAccountName } from "@hiveio/wax";
-import type { WorkerBee } from "../../bot";
 import { AccountClassifier } from "../classifiers";
 import { IAccountBalance } from "../classifiers/account-classifier";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
@@ -8,11 +7,10 @@ import { FilterBase } from "./filter-base";
 
 export class BalanceChangeFilter extends FilterBase {
   public constructor(
-    worker: WorkerBee,
     accounts: TAccountName[],
     private readonly includeInternalTransfers: boolean = false
   ) {
-    super(worker);
+    super();
 
     this.accounts = new Set(accounts);
   }

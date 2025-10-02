@@ -1,5 +1,4 @@
 import type { asset } from "@hiveio/wax";
-import type { WorkerBee } from "../../bot";
 import { isGreaterThan } from "../../utils/assets";
 import { OperationClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
@@ -12,10 +11,9 @@ export class WhaleAlertFilter extends FilterBase {
    * @param amount Any amount - HIVE/HBD in coins (no precision)
    */
   public constructor(
-    worker: WorkerBee,
     private readonly asset: asset
   ) {
-    super(worker);
+    super();
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {

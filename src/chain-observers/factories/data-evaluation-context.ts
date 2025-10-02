@@ -90,12 +90,8 @@ export class DataEvaluationContext {
   public accessStore<Classifier extends CollectorClassifierBase<any, any, any, any, any>>(
     classifier: new (...args: any[]) => Classifier
   ): Classifier["storeType"] extends void ? never : Classifier["storeType"] {
-    const store = this.storeData[classifier.name];
-
-    if (store === undefined)
-      throw new WorkerBeeError(createFactoryUnsupportedClassifierErrorMessage(
-        (this.factory as any).__proto__.constructor.name, classifier)
-      );
+    // Allow custom classifiers that are not registered, but have storeType defined
+    const store = this.storeData[classifier.name] || (this.storeData[classifier.name] = {} as any);
 
     return store;
   }

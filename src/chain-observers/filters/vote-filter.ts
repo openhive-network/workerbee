@@ -1,4 +1,3 @@
-import type { WorkerBee } from "../../bot";
 import { OperationClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
@@ -6,10 +5,9 @@ import { FilterBase } from "./filter-base";
 
 export class VoteFilter extends FilterBase {
   public constructor(
-    worker: WorkerBee,
     accounts: string[]
   ) {
-    super(worker);
+    super();
 
     this.accounts = new Set(accounts);
   }

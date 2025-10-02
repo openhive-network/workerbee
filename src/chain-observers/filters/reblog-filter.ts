@@ -1,5 +1,4 @@
 import type { TAccountName } from "@hiveio/wax";
-import type { WorkerBee } from "../../bot";
 import { OperationClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
@@ -7,10 +6,9 @@ import { FilterBase } from "./filter-base";
 
 export class ReblogFilter extends FilterBase {
   public constructor(
-    worker: WorkerBee,
     accounts: TAccountName[]
   ) {
-    super(worker);
+    super();
 
     this.accounts = new Set(accounts);
   }

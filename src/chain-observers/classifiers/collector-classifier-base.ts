@@ -12,11 +12,11 @@ export type TRegisterEvaluationContext = IEvaluationContextClass | {
 }
 
 export class CollectorClassifierBase<
+  TStore extends Record<string, any> = {},
   TGetResult extends void | Record<string, any> = void,
   TQueryResult extends void | Record<string, any> = void,
   TQueryOptions extends void | Record<string, any> = void,
-  TOptions extends undefined | Record<string, any> = undefined,
-  TStore extends Record<string, any> = {}
+  TOptions extends undefined | Record<string, any> = undefined
 > {
   /*
    * Virtual members - visible only on TypeScript level, not at runtime

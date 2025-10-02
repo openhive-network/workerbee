@@ -2,12 +2,17 @@ import type { WorkerBee } from "../../bot";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 
-export abstract class FilterBase {
-  public constructor(
-    protected readonly worker: WorkerBee
-  ) {}
+export interface IFilterBase {
+  usedContexts?(): Array<TRegisterEvaluationContext>;
+  match(data: TFilterEvaluationContext): Promise<boolean>;
+}
 
-  public abstract usedContexts(): Array<TRegisterEvaluationContext>;
+export abstract class FilterBase implements IFilterBase {
+  protected readonly worker!: WorkerBee;
+
+  public usedContexts(): Array<TRegisterEvaluationContext> {
+    return [];
+  }
 
   public abstract match(data: TFilterEvaluationContext): Promise<boolean>;
 }

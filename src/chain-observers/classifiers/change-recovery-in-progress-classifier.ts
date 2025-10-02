@@ -14,7 +14,13 @@ export interface IChangeRecoveryCollectorOptions {
   changeRecoveryAccount: string;
 }
 
-export class ChangeRecoveryInProgressClassifier extends CollectorClassifierBase<IChangeRecoveryInProgressData, void, void, IChangeRecoveryCollectorOptions> {
+export class ChangeRecoveryInProgressClassifier extends CollectorClassifierBase<
+  {},
+  IChangeRecoveryInProgressData,
+  void,
+  void,
+  IChangeRecoveryCollectorOptions
+> {
   public static forOptions(options: IChangeRecoveryCollectorOptions): TRegisterEvaluationContext {
     return {
       class: this, // Intentionally using `this` to refer to the class prototype itself later - even though it is not a class **instance**

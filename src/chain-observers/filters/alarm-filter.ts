@@ -1,5 +1,4 @@
 import type { TAccountName } from "@hiveio/wax";
-import type { WorkerBee } from "../../bot";
 import { AccountClassifier, ChangeRecoveryInProgressClassifier, DeclineVotingRightsClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
@@ -10,10 +9,9 @@ export const ONE_MONTH_MS = 1000 * 60 * 60 * 24 * 31;
 
 export class AlarmFilter extends FilterBase {
   public constructor(
-    worker: WorkerBee,
     accounts: TAccountName[]
   ) {
-    super(worker);
+    super();
 
     this.accounts = new Set(accounts);
   }

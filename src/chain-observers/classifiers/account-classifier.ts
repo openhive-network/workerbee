@@ -51,7 +51,7 @@ export interface IAccountCollectorOptions {
   account: string;
 }
 
-export class AccountClassifier extends CollectorClassifierBase<IAccountData, void, void, IAccountCollectorOptions> {
+export class AccountClassifier extends CollectorClassifierBase<{}, IAccountData, void, void, IAccountCollectorOptions> {
   public static forOptions(options: IAccountCollectorOptions): TRegisterEvaluationContext {
     return {
       class: this, // Intentionally using `this` to refer to the class prototype itself later - even though it is not a class **instance**
