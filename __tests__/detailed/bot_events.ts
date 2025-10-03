@@ -636,16 +636,16 @@ test.describe("WorkerBee Bot events test", () => {
 
       const { block } = await bot.chain!.api.block_api.get_block({ block_num: headBlock - 1 });
 
-      console.log(`Waiting for transaction id ${block.transaction_ids[0]} from block ${headBlock - 1}`);
+      console.log(`Waiting for transaction id ${block!.transaction_ids[0]} from block ${headBlock - 1}`);
 
       let gotTx = false;
       await new Promise<void>(resolve => {
-        bot.providePastOperations(headBlock - 3, headBlock).onTransactionIds(block.transaction_ids[0]).provideBlockHeaderData().subscribe({
+        bot.providePastOperations(headBlock - 3, headBlock).onTransactionIds(block!.transaction_ids[0]).provideBlockHeaderData().subscribe({
           next(data) {
             gotTx = true;
 
-            console.log(`Got transaction #${block.transaction_ids[0]} in block ${data.block.number}: ${
-              data.transactions[block.transaction_ids[0]]!.operations.length} operations`);
+            console.log(`Got transaction #${block!.transaction_ids[0]} in block ${data.block.number}: ${
+              data.transactions[block!.transaction_ids[0]]!.operations.length} operations`);
           },
           error(err) {
             console.error(err);
@@ -1362,5 +1362,116 @@ test.describe("WorkerBee Bot events test", () => {
 
     // This might not trigger in test environment, so we just check it doesn't throw
     expect(typeof result).toBe("boolean");
+  });
+
+  test("Should be able to use custom filter", async({ workerbeeTest }) => {
+    await workerbeeTest(async({ WorkerBee, WorkerBeePackage }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+
+      await bot.start();
+
+      const { current_shuffled_witnesses } = await bot.chain!.extend<{
+        database_api: { get_witness_schedule: { params: {}, result: { current_shuffled_witnesses: string[] } } }
+      }>().api.database_api.get_witness_schedule({});
+
+      await new Promise((resolve) => {
+        bot.observe.filter({
+          async match(data) {
+            // This test will also ensure we can retrieve data from other classifiers
+            const { currentWitness } = await data.get(WorkerBeePackage.DynamicGlobalPropertiesClassifier);
+
+            const isInSchedule = current_shuffled_witnesses.includes(currentWitness);
+
+            console.log("Current witness:", currentWitness, "; is in schedule:", isInSchedule );
+
+            return isInSchedule;
+          }
+        }).subscribe({
+          next() {
+            resolve(true);
+          },
+          error: console.error
+        });
+      });
+
+
+      bot.stop();
+      bot.delete();
+    });
+  });
+
+  test("Should be able to use custom provider", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee, WorkerBeePackage }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+
+      await bot.start();
+
+      const { current_shuffled_witnesses } = await bot.chain!.extend<{
+        database_api: { get_witness_schedule: { params: {}, result: { current_shuffled_witnesses: string[] } } }
+      }>().api.database_api.get_witness_schedule({});
+
+      const result = await new Promise<string>((resolve) => {
+        bot.observe.provide({
+          async provide(data) {
+            const { currentWitness } = await data.get(WorkerBeePackage.DynamicGlobalPropertiesClassifier);
+
+            return { currentWitness };
+          }
+        })
+          .subscribe({
+            next({ currentWitness }) {
+              resolve(currentWitness);
+            },
+            error: console.error
+          });
+      });
+
+
+      bot.stop();
+      bot.delete();
+
+      return current_shuffled_witnesses.includes(result);
+    });
+
+    expect(result).toStrictEqual(true);
+  });
+
+  test("Should be able to use custom filter with piped data", async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee, WorkerBeePackage }) => {
+      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+
+      await bot.start();
+
+      const result = await new Promise<string[]>((resolve) => {
+        bot.observe.filterPiped(
+          async () => {
+            const { current_shuffled_witnesses } = await bot.chain!.extend<{
+              database_api: { get_witness_schedule: { params: {}, result: { current_shuffled_witnesses: string[] } } }
+            }>().api.database_api.get_witness_schedule({});
+
+            return { witnessSchedule: current_shuffled_witnesses };
+          },
+          async ({ witnessSchedule }, data) => {
+            const { currentWitness } = await data.get(WorkerBeePackage.DynamicGlobalPropertiesClassifier);
+
+            return witnessSchedule.includes(currentWitness);
+          }
+        )
+          .subscribe({
+            next({ witnessSchedule }) {
+              resolve(witnessSchedule);
+            },
+            error: console.error
+          });
+      });
+
+
+      bot.stop();
+      bot.delete();
+
+      return result.length;
+    });
+
+    expect(result).toStrictEqual(21);
   });
 });

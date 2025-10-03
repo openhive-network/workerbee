@@ -13,6 +13,7 @@ globalThis.createTestFor = async function createTestFor(env) {
   return {
     beekeeperFactory: beekeeper.default,
     WorkerBee: wb.default,
+    WorkerBeePackage: wb,
     wax
   };
 };
