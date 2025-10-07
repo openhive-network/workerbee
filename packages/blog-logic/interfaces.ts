@@ -17,7 +17,7 @@ export interface IVotesFilters extends ICommonFilters {
   readonly limit: number;
   readonly votesSort: "by_comment_voter" | "by_voter_comment";
 }
-export interface IPostCommentsFilters extends ICommonFilters {
+export interface IPostFilters extends ICommonFilters {
   readonly limit: number;
   readonly sort:  "trending" | "hot" | "created" | "promoted" | "payout" | "payout_comments" | "muted";
   readonly startAuthor: string;
@@ -149,9 +149,11 @@ export interface IActiveBloggingPlatform {
 export interface IBloggingPlatform {
   viewerContext: IAccountIdentity;
   getPost(postId: IPostCommentIdentity): Promise<IPost>;
-  enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IPost>>;
+  enumPosts(filter: IPostFilters, pagination: IPagination): Promise<Iterable<IPost>>;
   configureViewContext(accontName: IAccountIdentity): void;
   enumCommunities(filter: ICommunityFilters, pagination: IPagination): Promise<Iterable<ICommunity>>;
+  getAccount(accontName: string): Promise<IAccount>;
+
   // To do: add getAccount method later
 
   overwrittenGetTitleImage?: () => string;

@@ -8,6 +8,8 @@ import { simpleHash } from "./hash-utils";
 import { wordPressExampleConfig } from "./example-config";
 import { IPost, IReply } from "../../packages/blog-logic/interfaces";
 import { BloggingPlaform } from "../../packages/blog-logic/BloggingPlatform";
+import { DataProvider } from "../../packages/blog-logic/DataProvider";
+import { getWax } from "../../packages/blog-logic/wax";
 
 const hiveChain = await createHiveChain();
 
@@ -21,9 +23,9 @@ const apiRouter = express.Router();
 
 const idToStringMap = new Map<number, string>();
 
-let posts: IPost[] = [];
-const bloggingPlatform: BloggingPlaform = new BloggingPlaform();
-bloggingPlatform.configureViewContext({name: wordPressExampleConfig.observer});
+const chain = await getWax()
+const dataProvider = new DataProvider(chain);
+dataProvider.bloggingPlatform.configureViewContext({name: wordPressExampleConfig.observer});
 
 const getAuthorPermlinkFromSlug = (slug: string): {author: string, permlink: string} => {
   const splitedSlug = slug.split("_");
@@ -71,8 +73,7 @@ apiRouter.get("/posts", async (req: Request, res: Response) => {
     const authorPermlinkHash = simpleHash(req.query.slug);
     const authorHash = simpleHash(author);
     idToStringMap.set(authorPermlinkHash, req.query.slug as string).set(authorHash, author);
-    const post = await bloggingPlatform.getPost({author: author, permlink});
-    posts.push(post);
+    const post = await dataProvider.bloggingPlatform.getPost({author: author, permlink});
     if (post) {
       res.json(await mapIPostToWpPost(post, authorPermlinkHash, authorHash));
     } else {
@@ -80,7 +81,7 @@ apiRouter.get("/posts", async (req: Request, res: Response) => {
     }
     // Posts list
   } else {
-    const newPosts = await bloggingPlatform.enumPosts({
+    const newPosts = await dataProvider.bloggingPlatform.enumPosts({
       limit: wordPressExampleConfig.postLimit, 
       sort: wordPressExampleConfig.sort, 
       startAuthor: wordPressExampleConfig.startAuthor, 
@@ -90,10 +91,7 @@ apiRouter.get("/posts", async (req: Request, res: Response) => {
       page: 1,
       pageSize: 10
     }) as IPost[];
-    if (posts) {
-      posts = [...posts, ...newPosts];
-      res.json(await mapAndAddtoMapPosts(posts));
-    }
+    res.json(await mapAndAddtoMapPosts(newPosts));
   }
 
 });
@@ -104,7 +102,7 @@ apiRouter.get("/comments", async (req: Request, res: Response) => {
   if (postParent) {
     const {author, permlink} = getAuthorPermlinkFromSlug(postParent);
     // Delete array of posts, get replies here.
-    const post = posts.find((post) => post.author === author && post.permlink === permlink);
+    const post = await dataProvider.bloggingPlatform.getPost({author, permlink})
     if (post) {
       const replies = await post.enumReplies({}, {page: 1, pageSize: 1000}) as IReply[];
       if (replies) {

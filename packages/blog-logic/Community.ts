@@ -1,5 +1,6 @@
+import { WorkerBeeError } from "../../src/errors";
+import { DataProvider } from "./DataProvider";
 import { ICommunity } from "./interfaces";
-import { CommunityData } from "./wax";
 
 export class Community implements ICommunity {
   public readonly name: string;
@@ -12,7 +13,9 @@ export class Community implements ICommunity {
   public readonly authorsCount: number;
   public readonly pendingCount: number;
 
-  public constructor(communityData: CommunityData) {
+  public constructor(communityName: string, dataProvider: DataProvider) {
+    const communityData = dataProvider.getCommunity(communityName);
+    if (!communityData) throw new WorkerBeeError("No community");
     this.name = communityData.name;
     this.title = communityData.title;
     this.about = communityData.about;

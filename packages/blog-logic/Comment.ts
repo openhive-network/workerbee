@@ -1,8 +1,8 @@
 import { TWaxExtended } from "@hiveio/wax";
-import { IBloggingPlatform, IComment, IPagination, IPostCommentIdentity, IVote, IVotesFilters } from "./interfaces";
-import { paginateData } from "./utils";
+import { DataProvider } from "./DataProvider";
+import { IComment, IPagination, IPostCommentIdentity, IVote, IVotesFilters } from "./interfaces";
 import { Vote } from "./Vote";
-import { Entry, ExtendedNodeApi, getWax } from "./wax";
+import { ExtendedNodeApi } from "./wax";
 
 export class Comment implements IComment {
 
@@ -16,23 +16,22 @@ export class Comment implements IComment {
 
   protected content?: string;
   protected votes?: Iterable<IVote>;
-  protected bloggingPlatform: IBloggingPlatform;
-
-
-  protected initializeChain = async () => {
-    if (!this.chain)
-      this.chain = await getWax();
-  }
+  protected dataProvider: DataProvider;
 
   // Refactor blogginPlatform and data into dataProvider with promises.
-  public constructor(authorPermlink: IPostCommentIdentity, bloggingPlatform: IBloggingPlatform, postCommentData: Entry, ) {
-    this.initializeChain();
+  public constructor(authorPermlink: IPostCommentIdentity, dataProvider: DataProvider) {
     this.author = authorPermlink.author;
     this.permlink = authorPermlink.permlink;
-    this.bloggingPlatform = bloggingPlatform;
-    this.publishedAt = new Date(`${postCommentData.created}Z`);
-    this.updatedAt = new Date(`${postCommentData.updated}Z`);
-    this.content = postCommentData.body;
+    this.dataProvider = dataProvider;
+    const post = dataProvider.getComment(authorPermlink);
+    this.publishedAt = new Date(post?.created || "");
+    this.updatedAt = new Date(post?.updated || "");
+    this.content = post?.body;
+
+  }
+
+  protected getCommentId(): IPostCommentIdentity {
+    return {author: this.author, permlink: this.permlink};
   }
 
   /**
@@ -66,12 +65,9 @@ export class Comment implements IComment {
    * @returns Iterable of Votes.
    */
   public async enumVotes(filter: IVotesFilters, pagination: IPagination): Promise<Iterable<IVote>> {
-    this.initializeChain();
     // Get rid of condenser API
-    const votesData = await this.chain!.api.database_api.list_votes({limit: filter.limit, order: filter.votesSort, start: null});
-    const votes = votesData.votes.map((vote) => new Vote(vote));
-    this.votes = votes;
-    return paginateData<IVote>(votes, pagination);
+    const voters = await this.dataProvider.enumVotes(this.getCommentId(), filter, pagination);
+    return voters.map((voter) => new Vote(this.getCommentId(), voter, this.dataProvider));
   }
 
   /**
@@ -79,9 +75,9 @@ export class Comment implements IComment {
    * @param userName
    */
   public async wasVotedByUser(userName: string): Promise<boolean> {
-    this.initializeChain();
-    if (!this.votes) await this.enumVotes({limit: 10000, votesSort: "by_comment_voter"}, {page: 1, pageSize: 10000}); // Temporary pagination before fix
-    return Array.from(this.votes || []).some((vote) => vote.voter === userName)
+    let voters = this.dataProvider.getVoters(this.getCommentId());
+    if (!voters) voters = await this.dataProvider.enumVotes(this.getCommentId(), {limit: 1000, votesSort: "by_comment_voter"}, {page: 1, pageSize: 10000});
+    return voters.some((voter) => voter === userName)
   }
 
 }

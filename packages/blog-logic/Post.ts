@@ -1,9 +1,7 @@
-import { WorkerBeeError } from "../../src/errors";
 import { Comment } from "./Comment";
-import { IBloggingPlatform, ICommunityIdentity, IPagination, IPost, IPostCommentIdentity, IPostCommentsFilters, IReply } from "./interfaces";
+import { DataProvider } from "./DataProvider";
+import { ICommonFilters, ICommunityIdentity, IPagination, IPost, IPostCommentIdentity, IReply } from "./interfaces";
 import { Reply } from "./Reply";
-import { paginateData } from "./utils";
-import { Entry } from "./wax";
 
 export class Post extends Comment implements IPost  {
 
@@ -13,59 +11,27 @@ export class Post extends Comment implements IPost  {
   public summary: string;
   public communityTitle?: string;
 
-  private replies?: Iterable<IReply>;
   private postImage?: string;
 
-  public constructor(authorPermlink: IPostCommentIdentity, bloggingPlatform: IBloggingPlatform, postData: Entry) {
-    super(authorPermlink, bloggingPlatform, postData);
-    this.title = postData.title;
-    this.tags = postData.json_metadata?.tags || [];
-    this.summary = postData.json_metadata?.description || "";
-    this.community = postData.community ? {name: postData.community} : undefined;
-    this.communityTitle = postData.community_title
-    this.postImage = postData.json_metadata.image?.[0];
+  public constructor(authorPermlink: IPostCommentIdentity, dataProvider: DataProvider) {
+    super(authorPermlink, dataProvider);
+    const post = dataProvider.getComment(authorPermlink);
+    this.title = post?.title || "";
+    this.tags = post?.json_metadata?.tags || [];
+    this.summary = post?.json_metadata?.description || "";
+    this.community = post?.community ? {name: post.community} : undefined;
+    this.communityTitle = post?.community_title
+    this.postImage = post?.json_metadata.image?.[0];
+
   }
 
-  /**
-   * Fetch and return all replies for post. Do pagination later.
-   * @returns iterable of replies
-   */
-  private async fetchReplies(): Promise<Iterable<IReply>> {
-    this.initializeChain();
-    if (!this.replies) {
-      const repliesData = await this.chain!.api.bridge.get_discussion({
-        author: this.author,
-        permlink: this.permlink,
-        observer: this.bloggingPlatform.viewerContext.name,
-      });
-      if (!repliesData)
-        throw new WorkerBeeError("No replies");
-      const filteredReplies = Object.values(repliesData).filter((rawReply) => !!rawReply.parent_author)
-      const replies = filteredReplies?.map(
-        (reply) =>
-          new Reply(
-            { author: reply.author, permlink: reply.permlink },
-            this.bloggingPlatform,
-            {
-              author: reply.parent_author || "",
-              permlink: reply.parent_permlink || "",
-            },
-            { author: this.author, permlink: this.permlink },
-            reply
-          )
-      )
-      this.replies = replies;
-      return replies;
-    }
-    return this.replies;
-  }
 
   /**
    * Get title image from post content.
    * @returns Link to title image
    */
   public getTitleImage(): string {
-    if (this.bloggingPlatform.overwrittenGetTitleImage) return this.bloggingPlatform.overwrittenGetTitleImage()
+    if (this.dataProvider.bloggingPlatform.overwrittenGetTitleImage) return this.dataProvider.bloggingPlatform.overwrittenGetTitleImage()
     return this.postImage || ""
   }
 
@@ -75,20 +41,21 @@ export class Post extends Comment implements IPost  {
    * @param pagination
    * @returns iterable of replies objects
    */
-  public async enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IReply>> {
-    this.initializeChain();
-    if (this.replies) return paginateData<IReply>(Array.from(this.replies), pagination);
-    return paginateData<IReply>(await this.fetchReplies() as IReply[], pagination);
+  public async enumReplies(filter: ICommonFilters, pagination: IPagination): Promise<Iterable<IReply>> {
+    const postId = {author: this.author, permlink: this.permlink};
+    const repliesIds = await this.dataProvider.enumReplies(postId, filter, pagination) || [];
+    return repliesIds.map((replyId) => new Reply(replyId, this.dataProvider, postId));
   }
 
   /**
    * Get number of comments (replies) for given post.
    */
   public async getCommentsCount(): Promise<number> {
-    this.initializeChain();
-    if (this.replies) return Array.from(this.replies).length;
-
-    return (Array.from(await this.fetchReplies())).length;
+    const postId = {author: this.author, permlink: this.permlink};
+    let repliesIds = this.dataProvider.getRepliesIdsByPost(postId);
+    if (!repliesIds)
+      repliesIds = await this.dataProvider.enumReplies(postId, {}, {page: 1, pageSize: 10000});
+    return repliesIds.length;
   }
 
 }

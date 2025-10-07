@@ -1,7 +1,6 @@
-import { TWaxExtended, TWaxRestExtended } from "@hiveio/wax";
-import { WorkerBeeError } from "../../src/errors";
 import { Account } from "./Account";
 import { Community } from "./Community";
+import { DataProvider } from "./DataProvider";
 import { IAccount, IAccountIdentity,
   IBloggingPlatform,
   ICommunity,
@@ -9,30 +8,19 @@ import { IAccount, IAccountIdentity,
   IPagination,
   IPost,
   IPostCommentIdentity,
-  IPostCommentsFilters
+  IPostFilters
 } from "./interfaces";
 import { Post } from "./Post";
-import { paginateData } from "./utils";
-import { Entry, ExtendedNodeApi, ExtendedRestApi, getWax } from "./wax";
 
 export class BloggingPlaform implements IBloggingPlatform {
+  private dataProvider: DataProvider;
   public viewerContext: IAccountIdentity;
-
-  private chain?: TWaxExtended<ExtendedNodeApi, TWaxRestExtended<ExtendedRestApi>>;
-
-
-  private initializeChain = async () => {
-    if (!this.chain)
-      this.chain = await getWax();
-  }
-  // Add initilaize chain to constructor
-
 
   public overwrittenGetTitleImage?: () => string;
 
-  public constructor() {
+  public constructor(dataProvider: DataProvider) {
     this.viewerContext = {name: "hive.blog"}; // Set default
-    this.initializeChain();
+    this.dataProvider = dataProvider;
   }
 
   /**
@@ -50,11 +38,8 @@ export class BloggingPlaform implements IBloggingPlatform {
    * @returns post object
    */
   public async getPost(postId: IPostCommentIdentity): Promise<IPost> {
-    await this.initializeChain();
-    const postData = await this.chain?.api.bridge.get_post({author: postId.author, permlink: postId.permlink, observer: this.viewerContext.name });
-    if (!postData)
-      throw new WorkerBeeError("Post not found");
-    return new Post(postId, this, postData!);
+    await this.dataProvider.fetchPost(postId);
+    return new Post(postId, this.dataProvider);
   }
 
   /**
@@ -64,10 +49,8 @@ export class BloggingPlaform implements IBloggingPlatform {
    * @returns iterable of community objects
    */
   public async enumCommunities(filter: ICommunityFilters, pagination: IPagination): Promise<Iterable<ICommunity>> {
-    await this.initializeChain();
-    const communities = await this.chain?.api.bridge.list_communities({observer: this.viewerContext.name, sort: filter.sort, query: filter.query});
-    if (communities) return paginateData<ICommunity>(communities.map((community) => new Community(community)), pagination);
-    return await [];
+    const communitiesIds = await this.dataProvider.enumCommunities(filter, pagination);
+    return communitiesIds.map((communityId) => new Community(communityId, this.dataProvider));
   }
 
   /**
@@ -76,20 +59,9 @@ export class BloggingPlaform implements IBloggingPlatform {
    * @param pagination
    * @returns iterable of posts
    */
-  public async enumPosts(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IPost>> {
-    await this.initializeChain();
-    const posts = await this.chain?.api.bridge.get_ranked_posts({
-      limit: filter.limit,
-      sort: filter.sort,
-      observer: this.viewerContext.name,
-      start_author: filter.startAuthor,
-      start_permlink: filter.startPermlink,
-      tag: filter.tag
-    });
-    if (!posts)
-      throw new WorkerBeeError("Posts not found");
-    const paginatedPosts = paginateData<Entry>(posts, pagination);
-    return paginatedPosts?.map((post) => new Post({author: post.author, permlink: post.permlink}, this, post))
+  public async enumPosts(filter: IPostFilters, pagination: IPagination): Promise<Iterable<IPost>> {
+    const postsIds = await this.dataProvider.enumPosts(filter, pagination);
+    return postsIds.map((post) => new Post({author: post.author, permlink: post.permlink}, this.dataProvider))
   }
 
   /**
@@ -98,11 +70,8 @@ export class BloggingPlaform implements IBloggingPlatform {
    * @returns account object
    */
   public async getAccount(accontName: string): Promise<IAccount> {
-    await this.initializeChain();
-    const account = await this.chain?.restApi["hafbe-api"].accounts.account({accountName: accontName});
-    if (!account)
-      throw new WorkerBeeError("Account not found");
-    return new Account(account);
+    await this.dataProvider.fetchAccount(accontName);
+    return new Account(accontName, this.dataProvider);
   }
 
   // Section for overwritting methods
@@ -115,3 +84,4 @@ export class BloggingPlaform implements IBloggingPlatform {
     this.overwriteGetTitleImage = callbackMethod;
   }
 }
+
