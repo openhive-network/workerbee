@@ -1,4 +1,5 @@
 import { IPost, IReply } from "../../packages/blog-logic/interfaces";
+import { wordPressExampleConfig } from "./example-config";
 import { simpleHash } from "./hash-utils";
 import { Entry } from "./hive";
 import { WPComment, WPPost, WPTag, WPTerm } from "./wp-reference";
@@ -26,7 +27,7 @@ const mapWpTerm = (termName: string, type: "tag" | "category"): WPTerm => {
   const taxonomy: string = type === "tag" ? "post_tag" : "category";
   const wpTerm: WPTerm = {
     id: termId,
-    link: `http://localhost/${type}/${termName}/`,
+    link: `${wordPressExampleConfig.host}/${type}/${termName}/`,
     name: termName,
     slug: termName.toLocaleLowerCase(),
     taxonomy,
@@ -53,7 +54,7 @@ export const mapIPostToWpPost = async (hivePost: IPost, wpId: number, accountId:
     modified_gmt: new Date(hivePost.updatedAt).toISOString(),
     status: "publish",
     type: "post",
-    link: `http://host/${slug}/`,
+    link: `${wordPressExampleConfig.host}/${slug}/`,
     title: { rendered: hivePost.title },
     content: { rendered: renderedBody, protected: false },
     excerpt: { rendered: wpExcerpt, protected: false },
@@ -67,7 +68,7 @@ export const mapIPostToWpPost = async (hivePost: IPost, wpId: number, accountId:
     meta: {},
     categories: [community ? simpleHash(community) : 0],
     tags: tags.map((tags) => simpleHash(tags)),
-    guid: { rendered: `http://host/?p=${wpId}` },
+    guid: { rendered: `${wordPressExampleConfig.host}/?p=${wpId}` },
     class_list: [`category-${community}`],
     _embedded: {
       replies: [],
@@ -122,7 +123,7 @@ export const mapHiveTagsToWpTags = (tagSlug: string): WPTag => {
     id: 1,
     count: 1,
     description: "",
-    link: `http://localhost/tag/${tagSlug}/`,
+    link: `${wordPressExampleConfig.host}/tag/${tagSlug}/`,
     name: tagSlug,
     slug: tagSlug,
     taxonomy: "post_tag",

@@ -30,8 +30,8 @@ export class Comment implements IComment {
     this.author = authorPermlink.author;
     this.permlink = authorPermlink.permlink;
     this.bloggingPlatform = bloggingPlatform;
-    this.publishedAt = new Date(postCommentData.created);
-    this.updatedAt = new Date(postCommentData.updated);
+    this.publishedAt = new Date(`${postCommentData.created}Z`);
+    this.updatedAt = new Date(`${postCommentData.updated}Z`);
     this.content = postCommentData.body;
   }
 
@@ -47,7 +47,7 @@ export class Comment implements IComment {
    */
   /* eslint-disable-next-line require-await */
   public async enumMentionedAccounts(): Promise<Iterable<string>> {
-    const regex = /@[a-z0-9.-]+\b/g; // Alphanumeric with . and -, but not on the end.
+    const regex = /@[a-z]+[a-z0-9.-]+[a-z0-9]+\b/g; // Alphanumeric with . and -, but not on the end.
     return this.content?.match(regex) ?? [];
   }
 
@@ -71,7 +71,7 @@ export class Comment implements IComment {
     const votesData = await this.chain!.api.database_api.list_votes({limit: filter.limit, order: filter.votesSort, start: null});
     const votes = votesData.votes.map((vote) => new Vote(vote));
     this.votes = votes;
-    return paginateData(votes, pagination);
+    return paginateData<IVote>(votes, pagination);
   }
 
   /**
@@ -81,7 +81,7 @@ export class Comment implements IComment {
   public async wasVotedByUser(userName: string): Promise<boolean> {
     this.initializeChain();
     if (!this.votes) await this.enumVotes({limit: 10000, votesSort: "by_comment_voter"}, {page: 1, pageSize: 10000}); // Temporary pagination before fix
-    return !!Array.from(this.votes || []).find((vote) => vote.voter === userName)
+    return Array.from(this.votes || []).some((vote) => vote.voter === userName)
   }
 
 }

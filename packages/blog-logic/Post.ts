@@ -1,3 +1,4 @@
+import { WorkerBeeError } from "../../src/errors";
 import { Comment } from "./Comment";
 import { IBloggingPlatform, ICommunityIdentity, IPagination, IPost, IPostCommentIdentity, IPostCommentsFilters, IReply } from "./interfaces";
 import { Reply } from "./Reply";
@@ -38,7 +39,7 @@ export class Post extends Comment implements IPost  {
         observer: this.bloggingPlatform.viewerContext.name,
       });
       if (!repliesData)
-        throw "No replies";
+        throw new WorkerBeeError("No replies");
       const filteredReplies = Object.values(repliesData).filter((rawReply) => !!rawReply.parent_author)
       const replies = filteredReplies?.map(
         (reply) =>
@@ -76,8 +77,8 @@ export class Post extends Comment implements IPost  {
    */
   public async enumReplies(filter: IPostCommentsFilters, pagination: IPagination): Promise<Iterable<IReply>> {
     this.initializeChain();
-    if (this.replies) return paginateData(Array.from(this.replies), pagination);
-    return paginateData(await this.fetchReplies() as IReply[], pagination);
+    if (this.replies) return paginateData<IReply>(Array.from(this.replies), pagination);
+    return paginateData<IReply>(await this.fetchReplies() as IReply[], pagination);
   }
 
   /**

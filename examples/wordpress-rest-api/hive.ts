@@ -2,6 +2,7 @@ import {
   TWaxApiRequest
 } from '@hiveio/wax';
 
+
 export interface IGetPostHeader {
   author: string;
   permlink: string;

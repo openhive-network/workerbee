@@ -6,6 +6,7 @@ export interface WordPressConfig {
   startPermlink: string;
   postTag: string;
   defaultPort: number;
+  host: string;
 }
 
 export const wordPressExampleConfig: WordPressConfig = {
@@ -16,4 +17,5 @@ export const wordPressExampleConfig: WordPressConfig = {
   startPermlink: "",
   postTag: "hive-148441",
   defaultPort: 4000,
+  host: "http://localhost",
 }

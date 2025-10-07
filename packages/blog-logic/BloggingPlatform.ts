@@ -1,4 +1,5 @@
 import { TWaxExtended, TWaxRestExtended } from "@hiveio/wax";
+import { WorkerBeeError } from "../../src/errors";
 import { Account } from "./Account";
 import { Community } from "./Community";
 import { IAccount, IAccountIdentity,
@@ -12,7 +13,7 @@ import { IAccount, IAccountIdentity,
 } from "./interfaces";
 import { Post } from "./Post";
 import { paginateData } from "./utils";
-import { ExtendedNodeApi, ExtendedRestApi, getWax } from "./wax";
+import { Entry, ExtendedNodeApi, ExtendedRestApi, getWax } from "./wax";
 
 export class BloggingPlaform implements IBloggingPlatform {
   public viewerContext: IAccountIdentity;
@@ -52,7 +53,7 @@ export class BloggingPlaform implements IBloggingPlatform {
     await this.initializeChain();
     const postData = await this.chain?.api.bridge.get_post({author: postId.author, permlink: postId.permlink, observer: this.viewerContext.name });
     if (!postData)
-      throw new Error("Post not found");
+      throw new WorkerBeeError("Post not found");
     return new Post(postId, this, postData!);
   }
 
@@ -65,7 +66,7 @@ export class BloggingPlaform implements IBloggingPlatform {
   public async enumCommunities(filter: ICommunityFilters, pagination: IPagination): Promise<Iterable<ICommunity>> {
     await this.initializeChain();
     const communities = await this.chain?.api.bridge.list_communities({observer: this.viewerContext.name, sort: filter.sort, query: filter.query});
-    if (communities) return paginateData(communities.map((community) => new Community(community)), pagination);
+    if (communities) return paginateData<ICommunity>(communities.map((community) => new Community(community)), pagination);
     return await [];
   }
 
@@ -86,8 +87,8 @@ export class BloggingPlaform implements IBloggingPlatform {
       tag: filter.tag
     });
     if (!posts)
-      throw new Error("Posts not found");
-    const paginatedPosts = paginateData(posts, pagination);
+      throw new WorkerBeeError("Posts not found");
+    const paginatedPosts = paginateData<Entry>(posts, pagination);
     return paginatedPosts?.map((post) => new Post({author: post.author, permlink: post.permlink}, this, post))
   }
 
@@ -100,7 +101,7 @@ export class BloggingPlaform implements IBloggingPlatform {
     await this.initializeChain();
     const account = await this.chain?.restApi["hafbe-api"].accounts.account({accountName: accontName});
     if (!account)
-      throw new Error("Account not found");
+      throw new WorkerBeeError("Account not found");
     return new Account(account);
   }
 

@@ -18,7 +18,7 @@ export class Community implements ICommunity {
     this.about = communityData.about;
     this.admins = communityData.admins || [];
     this.avatarUrl = communityData.avatar_url;
-    this.creationDate = new Date(communityData.created_at);
+    this.creationDate = new Date(`${communityData.created_at}Z`);
     this.subscribersCount = communityData.subscribers;
     this.authorsCount = communityData.num_authors;
     this.pendingCount = communityData.num_pending;
@@ -29,6 +29,6 @@ export class Community implements ICommunity {
    * Get standard WordPress slug. It treats community as category.
    */
   public getSlug(): string {
-    return this.title
+    return this.title.toLowerCase().replace(/\s+/g, "-");
   }
 }
