@@ -20,6 +20,10 @@ WorkerBee, based on `wax`, provides a simple yet powerful interface to interact 
 
 ---
 
+## 📖 High-level Documentation
+
+You can find the high-level documentation with snippets for this library at [https://hive.pages.syncad.com/workerbee-doc](https://hive.pages.syncad.com/workerbee-doc)
+
 ## 🚀 Getting Started
 
 ### Installation
