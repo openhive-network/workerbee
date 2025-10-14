@@ -50,6 +50,7 @@ export interface IVote {
   readonly weight: number;
   readonly upvote: boolean;
   readonly voter: string;
+  readonly parentComment: IPostCommentIdentity
 }
 
 export interface ICommunity extends ICommunityIdentity {

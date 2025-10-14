@@ -3,6 +3,7 @@ import { DataProvider } from "./DataProvider";
 import { IPostCommentIdentity, IVote } from "./interfaces";
 
 export class Vote implements IVote {
+  public parentComment: IPostCommentIdentity;
   public upvote: boolean;
   public voter: string;
   public weight: number;
@@ -13,5 +14,6 @@ export class Vote implements IVote {
     this.upvote = Number(voteData.weight) > 0
     this.voter = voteData.voter;
     this.weight = Number(voteData.weight);
+    this.parentComment = {author: voteData.author, permlink: voteData.permlink};
   }
 }
