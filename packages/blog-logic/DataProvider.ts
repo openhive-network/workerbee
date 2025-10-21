@@ -132,7 +132,13 @@ export class DataProvider {
   }
 
   public async enumVotes(commentId: IPostCommentIdentity, filter: IVotesFilters, pagination: IPagination): Promise<string[]> {
-    const votesData = (await this.chain!.api.database_api.list_votes({limit: filter.limit, order: filter.votesSort, start: [commentId.author, commentId.permlink, ""]})).votes;
+    const votesData = (
+      await this.chain!.api.database_api.list_votes({
+        limit: filter.limit,
+        order: filter.votesSort,
+        start: [commentId.author, commentId.permlink, ""],
+      })
+    ).votes;
     const votersForComment: string[] = [];
     const votesByVoters: Map<string, IVoteListItem> = new Map();
     votesData.forEach((voteData) => {
