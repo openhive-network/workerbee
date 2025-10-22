@@ -6,6 +6,9 @@ import {
   NaiAsset,
   TWaxRestExtended
 } from "@hiveio/wax";
+import WaxExtendedData from '@hiveio/wax-api-jsonrpc';
+
+
 
 export interface AccountProfile {
   about?: string;
@@ -328,7 +331,7 @@ let chain: Promise<TWaxExtended<ExtendedNodeApi, TWaxRestExtended<ExtendedRestAp
 
 export const getWax = () => {
   if (!chain)
-    return chain = createHiveChain().then(chain => chain.extend<ExtendedNodeApi>().extendRest<ExtendedRestApi>({}));
+    return chain = createHiveChain().then(chain => chain.extend(WaxExtendedData).extendRest<ExtendedRestApi>({}));
 
   return chain;
 };

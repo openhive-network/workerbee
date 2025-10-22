@@ -82,7 +82,8 @@
     "typedoc": "catalog:typedoc-toolset",
     "typedoc-gitlab-wiki-theme": "catalog:typedoc-toolset",
     "typedoc-plugin-markdown": "catalog:typedoc-toolset",
-    "typescript": "catalog:typescript-toolset"
+    "typescript": "catalog:typescript-toolset",
+    "@hiveio/wax-api-jsonrpc": "^1.27.12"
   },
   "dependencies": {
     "@hiveio/wax": "1.27.6-rc10-stable.250804212246"

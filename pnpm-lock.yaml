@@ -87,6 +87,9 @@ importers:
       '@hiveio/beekeeper':
         specifier: 1.27.11
         version: 1.27.11
+      '@hiveio/wax-api-jsonrpc':
+        specifier: ^1.27.12
+        version: 1.27.12
       '@playwright/test':
         specifier: catalog:playwright-toolset
         version: 1.50.1
@@ -416,6 +419,9 @@ packages:
   '@hiveio/beekeeper@1.27.11':
     resolution: {integrity: sha1-0v2gSYFhN5MLQzBHIYikUyksu/k=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.11.tgz}
     engines: {node: ^20.11 || >= 21.2}
+
+  '@hiveio/wax-api-jsonrpc@1.27.12':
+    resolution: {integrity: sha512-yHYr9DAVwMz9FkKFt7jZtbwX/oYzTcr+pP2JY1BfqOPekNcV5/zJYSh+AsKlw0U14HSGiknMa5lS8SbrM6Lorg==}
 
   '@hiveio/wax@1.27.6-rc10-stable.250804212246':
     resolution: {integrity: sha1-qZYJ4ot0Lgy3C0fbeS1WFoxmFEY=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc10-stable.250804212246.tgz}
@@ -3212,6 +3218,8 @@ snapshots:
       '@shikijs/vscode-textmate': 10.0.1
 
   '@hiveio/beekeeper@1.27.11': {}
+
+  '@hiveio/wax-api-jsonrpc@1.27.12': {}
 
   '@hiveio/wax@1.27.6-rc10-stable.250804212246':
     dependencies:
