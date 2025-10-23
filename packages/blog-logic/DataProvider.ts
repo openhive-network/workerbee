@@ -1,26 +1,27 @@
-import { TWaxExtended, TWaxRestExtended } from "@hiveio/wax";
+import {HafbeTypesAccount} from "@hiveio/wax-api-hafbe"
+import {Community as CommunityData, PostBridgeApi, ActiveVotesDatabaseApi} from "@hiveio/wax-api-jsonrpc";
 import { WorkerBeeError } from "../../src/errors";
 import { BloggingPlaform } from "./BloggingPlatform";
 import { ICommonFilters, ICommunityFilters, IPagination, IPostCommentIdentity, IPostFilters, IVotesFilters } from "./interfaces";
 import { paginateData } from "./utils";
-import { AccountDetails, CommunityData, Entry, ExtendedNodeApi, ExtendedRestApi, IVoteListItem } from "./wax";
+import { WaxExtendedChain } from "./wax";
 
 /**
  * Main class to call all of Blog Logic. The class is responsible for making instances of Blog Logic's objects and
  * getting and caching all the necessary data for them.
  */
 export class DataProvider {
-  public chain: TWaxExtended<ExtendedNodeApi, TWaxRestExtended<ExtendedRestApi>>;
+  public chain: WaxExtendedChain;
   public bloggingPlatform: BloggingPlaform;
 
-  private comments: Map<string, Entry> = new Map();
+  private comments: Map<string, PostBridgeApi> = new Map();
   private repliesByPostId: Map<string, IPostCommentIdentity[]> = new Map();
-  private accounts: Map<string, AccountDetails> = new Map();
+  private accounts: Map<string, HafbeTypesAccount> = new Map();
   private communities: Map<string, CommunityData> = new Map();
-  private votesByCommentsAndVoter: Map<string, Map<string, IVoteListItem>> = new Map();
+  private votesByCommentsAndVoter: Map<string, Map<string, ActiveVotesDatabaseApi>> = new Map();
 
 
-  public constructor(chain: TWaxExtended<ExtendedNodeApi, TWaxRestExtended<ExtendedRestApi>>) {
+  public constructor(chain: WaxExtendedChain) {
     this.chain = chain;
     this.bloggingPlatform = new BloggingPlaform(this);
   }
@@ -32,7 +33,7 @@ export class DataProvider {
     return `${commentId.author}_${commentId.permlink}`
   }
 
-  public getComment(postId: IPostCommentIdentity): Entry | null {
+  public getComment(postId: IPostCommentIdentity): PostBridgeApi | null {
     return this.comments.get(this.convertCommentIdToHash(postId)) || null;
   }
 
@@ -49,11 +50,8 @@ export class DataProvider {
 
   public async enumPosts(filter: IPostFilters, pagination: IPagination): Promise<IPostCommentIdentity[]> {
     const posts = await this.chain.api.bridge.get_ranked_posts({
-      limit: filter.limit,
       sort: filter.sort,
       observer: this.bloggingPlatform.viewerContext.name,
-      start_author: filter.startAuthor,
-      start_permlink: filter.startPermlink,
       tag: filter.tag
     });
     if (!posts)
@@ -92,12 +90,12 @@ export class DataProvider {
     return paginateData(filteredReplies, pagination).map((reply) => ({author: reply.author, permlink: reply.permlink}));
   }
 
-  public getAccount(accountName: string): AccountDetails | null {
+  public getAccount(accountName: string): HafbeTypesAccount | null {
     return this.accounts.get(accountName) || null;
   }
 
   public async fetchAccount(accountName: string): Promise<void> {
-    const account = await this.chain.restApi["hafbe-api"].accounts.account({accountName: accountName});
+    const account = await this.chain.restApi.hafbeApi.accounts.accountName({accountName: accountName});
     if (!account)
       throw new Error("Account not found");
     this.accounts.set(accountName, account);
@@ -121,7 +119,7 @@ export class DataProvider {
     return paginateData(communitiesNames, pagination);
   }
 
-  public getVote(commentId: IPostCommentIdentity, voter: string): IVoteListItem | null {
+  public getVote(commentId: IPostCommentIdentity, voter: string): ActiveVotesDatabaseApi | null {
     return this.votesByCommentsAndVoter.get(this.convertCommentIdToHash(commentId))?.get(voter) || null;
   }
 
@@ -140,7 +138,7 @@ export class DataProvider {
       })
     ).votes;
     const votersForComment: string[] = [];
-    const votesByVoters: Map<string, IVoteListItem> = new Map();
+    const votesByVoters: Map<string, ActiveVotesDatabaseApi> = new Map();
     votesData.forEach((voteData) => {
       votersForComment.push(voteData.voter);
       votesByVoters.set(voteData.voter, voteData);

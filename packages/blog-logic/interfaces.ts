@@ -18,10 +18,7 @@ export interface IVotesFilters extends ICommonFilters {
   readonly votesSort: "by_comment_voter" | "by_voter_comment";
 }
 export interface IPostFilters extends ICommonFilters {
-  readonly limit: number;
   readonly sort:  "trending" | "hot" | "created" | "promoted" | "payout" | "payout_comments" | "muted";
-  readonly startAuthor: string;
-  readonly startPermlink: string;
   readonly tag: string;
 }
 

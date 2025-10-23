@@ -1,0 +1,16 @@
+{
+  "name": "hive-blog-logic",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "private": false,
+  "contributors": [],
+  "dependencies": {
+    "@hiveio/wax": "1.27.6-rc10-stable.250804212246",
+    "@hiveio/wax-api-hafbe": "1.27.12",
+    "@hiveio/wax-api-jsonrpc": "^1.27.12"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.5"
+  }
+}

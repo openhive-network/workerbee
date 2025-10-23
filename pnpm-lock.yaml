@@ -87,9 +87,6 @@ importers:
       '@hiveio/beekeeper':
         specifier: 1.27.11
         version: 1.27.11
-      '@hiveio/wax-api-jsonrpc':
-        specifier: ^1.27.12
-        version: 1.27.12
       '@playwright/test':
         specifier: catalog:playwright-toolset
         version: 1.50.1
@@ -192,6 +189,22 @@ importers:
       typescript:
         specifier: catalog:typescript-toolset
         version: 5.7.3
+
+  packages/blog-logic:
+    dependencies:
+      '@hiveio/wax':
+        specifier: 1.27.6-rc10-stable.250804212246
+        version: 1.27.6-rc10-stable.250804212246
+      '@hiveio/wax-api-hafbe':
+        specifier: 1.27.12
+        version: 1.27.12
+      '@hiveio/wax-api-jsonrpc':
+        specifier: ^1.27.12
+        version: 1.27.12
+    devDependencies:
+      tsx:
+        specifier: ^4.20.5
+        version: 4.20.6
 
 packages:
 
@@ -420,8 +433,11 @@ packages:
     resolution: {integrity: sha1-0v2gSYFhN5MLQzBHIYikUyksu/k=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.11.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
+  '@hiveio/wax-api-hafbe@1.27.12':
+    resolution: {integrity: sha1-2cLBu1vRPRoeIeyLKizlkuWcZnI=, tarball: https://gitlab.syncad.com/api/v4/projects/358/packages/npm/@hiveio/wax-api-hafbe/-/@hiveio/wax-api-hafbe-1.27.12.tgz}
+
   '@hiveio/wax-api-jsonrpc@1.27.12':
-    resolution: {integrity: sha512-yHYr9DAVwMz9FkKFt7jZtbwX/oYzTcr+pP2JY1BfqOPekNcV5/zJYSh+AsKlw0U14HSGiknMa5lS8SbrM6Lorg==}
+    resolution: {integrity: sha1-2zVZzJHNCBIfPZI3qC1xa7gj0v0=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/wax-api-jsonrpc/-/@hiveio/wax-api-jsonrpc-1.27.12.tgz}
 
   '@hiveio/wax@1.27.6-rc10-stable.250804212246':
     resolution: {integrity: sha1-qZYJ4ot0Lgy3C0fbeS1WFoxmFEY=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc10-stable.250804212246.tgz}
@@ -2870,6 +2886,11 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
+  tsx@4.20.6:
+    resolution: {integrity: sha512-ytQKuwgmrrkDTFP4LjR0ToE2nqgy886GpvRSpU0JAnrdBYppuY5rLkRUYPU1yCryb24SsKBTL/hlDQAEFVwtZg==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
+
   tuf-js@1.1.7:
     resolution: {integrity: sha512-i3P9Kgw3ytjELUfpuKVDNBJvk4u5bXL6gskv572mcevPbSKCV3zt3djhmlEQ65yERjIbOSncy7U4cQJaB1CBCg==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
@@ -3218,6 +3239,8 @@ snapshots:
       '@shikijs/vscode-textmate': 10.0.1
 
   '@hiveio/beekeeper@1.27.11': {}
+
+  '@hiveio/wax-api-hafbe@1.27.12': {}
 
   '@hiveio/wax-api-jsonrpc@1.27.12': {}
 
@@ -6162,6 +6185,13 @@ snapshots:
   tslib@2.8.1: {}
 
   tsx@4.19.3:
+    dependencies:
+      esbuild: 0.25.9
+      get-tsconfig: 4.10.0
+    optionalDependencies:
+      fsevents: 2.3.3
+
+  tsx@4.20.6:
     dependencies:
       esbuild: 0.25.9
       get-tsconfig: 4.10.0

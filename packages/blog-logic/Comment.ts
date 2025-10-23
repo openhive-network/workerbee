@@ -1,12 +1,8 @@
-import { TWaxExtended } from "@hiveio/wax";
 import { DataProvider } from "./DataProvider";
 import { IComment, IPagination, IPostCommentIdentity, IVote, IVotesFilters } from "./interfaces";
 import { Vote } from "./Vote";
-import { ExtendedNodeApi } from "./wax";
 
 export class Comment implements IComment {
-
-  protected chain?: TWaxExtended<ExtendedNodeApi>
 
   public author: string;
   public permlink: string;

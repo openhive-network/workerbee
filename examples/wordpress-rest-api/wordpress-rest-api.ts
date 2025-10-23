@@ -114,6 +114,13 @@ apiRouter.get("/comments", async (req: Request, res: Response) => {
   }
 });
 
+apiRouter.get("/test-votes", async (req: Request, res: Response) => {
+  const voteTestId = {author: "theycallmedan", permlink: "i-have-returned"};
+  const post = await dataProvider.bloggingPlatform.getPost(voteTestId);
+  const votes = await post.enumVotes({limit: 1000, votesSort: "by_comment_voter"}, {page: 1, pageSize: 1000});
+  res.json(votes);
+})
+
 apiRouter.get("/tags", (req: Request, res: Response) => {
   res.json([]);
 });
