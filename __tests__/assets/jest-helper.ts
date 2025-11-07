@@ -3,7 +3,7 @@ import { IHiveChainInterface } from "@hiveio/wax";
 import { ConsoleMessage, Page, test as base, expect } from "@playwright/test";
 
 import "./globals";
-import { IWorkerBee } from "../../dist/bundle";
+import { IWorkerBee } from "../../src";
 import { TPastQueen } from "../../src/past-queen";
 import { QueenBee } from "../../src/queen";
 import type { IWorkerBeeGlobals, TEnvType } from "./globals";
@@ -74,7 +74,7 @@ const envTestFor = <GlobalType extends IWorkerBeeGlobals>(
       eval(`window.webEvalFn = ${webFn};`);
       eval(`window.isMockEnvironment = ${isMockEnv};`);
 
-      return (window as Window & typeof globalThis & { webEvalFn: (...args: any[]) => any }).webEvalFn(await globalThis[globalFn]("web"), ...pageArgs);
+      return (window as Window & typeof globalThis & { webEvalFn: (...args: any[]) => any }).webEvalFn(await (globalThis as any)[globalFn]("web"), ...pageArgs);
     }, { args, globalFunction: globalFunction.name, webFn: fn.toString(), isMockEnv: isMockEnvironment });
 
     if(typeof nodeData === "object") // Remove prototype data from the node result to match webData
@@ -89,7 +89,7 @@ const envTestFor = <GlobalType extends IWorkerBeeGlobals>(
   };
 
   const using = function<R, Args extends any[]>(fn: TWorkerBeeTestCallable<R, Args>, ...args: Args): Promise<R> {
-    return runner.bind(undefined, true)(fn as any, ...args);
+    return runner.bind(undefined, true)(fn as any, ...args) as Promise<R>;
   };
   using.dynamic = runner.bind(undefined, false);
 

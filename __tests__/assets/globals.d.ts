@@ -1,5 +1,5 @@
 // We only want to import types here!
-import type beekeeperFactoryType from "@hiveio/beekeeper/web";
+import type beekeeperFactoryType from "@hiveio/beekeeper";
 import type * as Wax from "@hiveio/wax";
 
 import type WorkerBee from "../../src/index";
