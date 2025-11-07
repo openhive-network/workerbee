@@ -14,6 +14,7 @@ export interface IWorkerBeeGlobals {
   WorkerBee: typeof WorkerBee;
   WorkerBeePackage: typeof WorkerBeePackage;
   wax: typeof Wax;
+  bot: WorkerBeePackage.IWorkerBee;
 }
 
 declare global {

@@ -12,6 +12,8 @@ import jsonRpcMockData, { resetMockCallCounters } from "./mock/jsonRpcMock";
 import { createServer } from "./mock/proxy-mock-server";
 
 type TWorkerBeeTestCallable<R, Args extends any[]> = (globals: IWorkerBeeGlobals, ...args: Args) => (R | Promise<R>);
+/* eslint-disable-next-line no-var */
+declare var createTestFor: (env: TEnvType) => Promise<IWorkerBeeGlobals>;
 
 interface IWorkerBeeTestPlaywright {
   forEachTest: void;
@@ -107,7 +109,7 @@ const createWorkerBeeTest = async <T = Record<string, any>>(
 ): Promise<T> => {
   const testRunner = dynamic ? envTestFor.dynamic : envTestFor;
 
-  return await testRunner(async ({ WorkerBee }, callbackStr, pastFrom, pastTo, isMock, shouldHaveFullWorkerBeeInterfaceParam) => {
+  return await testRunner(async ({ WorkerBee, bot: workerBeeBot }, callbackStr, pastFrom, pastTo, isMock, shouldHaveFullWorkerBeeInterfaceParam) => {
     const bot = isMock
       ? new WorkerBee({
         chainOptions: {
@@ -115,7 +117,7 @@ const createWorkerBeeTest = async <T = Record<string, any>>(
           apiTimeout: 0
         }
       })
-      : new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+      : workerBeeBot;
 
     await bot.start();
 

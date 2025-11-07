@@ -10,8 +10,7 @@ const HIVE_BLOCK_INTERVAL = 3000;
 
 test.describe("WorkerBee Bot events test", () => {
   test("Should have a destroyable global module", async({ workerbeeTest }) => {
-    await workerbeeTest(({ WorkerBee }) => {
-      const bot = new WorkerBee();
+    await workerbeeTest(({ bot }) => {
 
       bot.delete();
     });
@@ -23,7 +22,7 @@ test.describe("WorkerBee Bot events test", () => {
        * Prepare helper WorkerBee instance just to provide IHiveChainInterface instance.
        * It is a problem in PW tests to reference whole wax, since its dependencies need to be declared at importmap in test.html
        */
-      const customWaxConfig = { apiEndpoint: "https://api.fake.openhive.network", chainId: "42" };
+      const customWaxConfig = { apiEndpoint: "https://api.fake.openhive.network", chainId: "42", apiTimeout: 0 };
       const customConfig: IStartConfiguration = { chainOptions: customWaxConfig };
 
       const chainOwner = new WorkerBee(customConfig);
@@ -69,7 +68,7 @@ test.describe("WorkerBee Bot events test", () => {
        * Prepare helper WorkerBee instance just to provide IHiveChainInterface instance.
        * It is a problem in PW tests to reference whole wax, since its dependencies need to be declared at importmap in test.html
        */
-      const customWaxConfig = { apiEndpoint: "https://api.openhive.network", chainId: "badf00d" };
+      const customWaxConfig = { apiEndpoint: "https://api.openhive.network", chainId: "badf00d", apiTimeout: 0 };
       const customConfig: IStartConfiguration = { chainOptions: customWaxConfig };
 
       const chainOwner = new WorkerBee(customConfig);
@@ -115,9 +114,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to parse at least 2 blocks from the remote using block observer", async({ workerbeeTest }) => {
-    const result = await workerbeeTest.dynamic(async({ WorkerBee }, hiveBlockInterval) => {
-      const bot = new WorkerBee();
-
+    const result = await workerbeeTest.dynamic(async({ bot }, hiveBlockInterval) => {
       let blocksParsed = 0;
       const observer = bot.observe.onBlock().subscribe({
         next(data) {
@@ -142,9 +139,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should not allow double subscription to observers", async({ workerbeeTest }) => {
-    const result = await workerbeeTest.dynamic(({ WorkerBee }) => {
-      const bot = new WorkerBee();
-
+    const result = await workerbeeTest.dynamic(({ bot }) => {
       const observer = bot.observe.onBlock();
 
       // First subscription should work fine
@@ -177,9 +172,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should not allow subscription after unsubscribe", async({ workerbeeTest }) => {
-    const result = await workerbeeTest.dynamic(({ WorkerBee }) => {
-      const bot = new WorkerBee();
-
+    const result = await workerbeeTest.dynamic(({ bot }) => {
       const observer = bot.observe.onBlock();
 
       // First subscription should work
@@ -215,9 +208,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should allow subscription to other observes", async({ workerbeeTest }) => {
-    const result = await workerbeeTest.dynamic(({ WorkerBee }) => {
-      const bot = new WorkerBee();
-
+    const result = await workerbeeTest.dynamic(({ bot }) => {
       const observer1 = bot.observe.onBlock();
 
       // First subscription should work
@@ -251,9 +242,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should not fail when async next callback fails", async({ workerbeeTest }) => {
-    const result = await workerbeeTest.dynamic(async({ WorkerBee }, hiveBlockInterval) => {
-      const bot = new WorkerBee();
-
+    const result = await workerbeeTest.dynamic(async({ bot }, hiveBlockInterval) => {
       let blocksParsed = 0;
       const observer = bot.observe.onBlock().subscribe({
         /* eslint-disable-next-line require-await */
@@ -282,9 +271,7 @@ test.describe("WorkerBee Bot events test", () => {
 
   test("Should be able to analyze blocks successively", async({ workerbeeTest }) => {
     test.setTimeout(60_000);
-    await workerbeeTest.dynamic(async({ WorkerBee }, hiveBlockInterval) => {
-      const bot = new WorkerBee();
-
+    await workerbeeTest.dynamic(async({ bot }, hiveBlockInterval) => {
       let blockNumber: number | undefined;
 
       // eslint-disable-next-line no-async-promise-executor
@@ -318,9 +305,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to use async iterator on bot", async({ workerbeeTest }) => {
-    const result = await workerbeeTest.dynamic(async({ WorkerBee }, hiveBlockInterval) => {
-      const bot = new WorkerBee();
-
+    const result = await workerbeeTest.dynamic(async({ bot }, hiveBlockInterval) => {
       let blocksParsed = 0;
 
       await Promise.race([
@@ -351,9 +336,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to use full manabar regeneration time observer", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }, hiveBlockInterval) => {
-      const bot = new WorkerBee();
-
+    const result = await workerbeeTest(async({ bot }, hiveBlockInterval) => {
       const result = await Promise.race([
         new Promise<string>((res, rej) => {
           bot.start();
@@ -462,9 +445,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to evaluate or condition in first statement", async({ workerbeeTest }) => {
-    await workerbeeTest(async({ WorkerBee }, hiveBlockInterval) => {
-      const bot = new WorkerBee();
-
+    await workerbeeTest(async({ bot }, hiveBlockInterval) => {
       await Promise.race([
         new Promise<void>(res => {
           bot.start();
@@ -488,9 +469,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to evaluate or condition in second statement", async({ workerbeeTest }) => {
-    await workerbeeTest(async({ WorkerBee }, hiveBlockInterval) => {
-      const bot = new WorkerBee();
-
+    await workerbeeTest(async({ bot }, hiveBlockInterval) => {
       await Promise.race([
         new Promise<void>(res => {
           bot.start();
@@ -514,9 +493,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should call next() only once when all or statements evaluate to true", async({ workerbeeTest }) => {
-    const result = await workerbeeTest.dynamic(async({ WorkerBee }, hiveBlockInterval) => {
-      const bot = new WorkerBee();
-
+    const result = await workerbeeTest.dynamic(async({ bot }, hiveBlockInterval) => {
       let calls = 0;
       let res: () => void;
 
@@ -550,8 +527,7 @@ test.describe("WorkerBee Bot events test", () => {
 
   test("Should capture intentional error - negative block number", async({ workerbeeTest }) => {
     // Should time out if no error is captured
-    await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee();
+    await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       await new Promise<void>((resolve, reject) => {
@@ -575,8 +551,7 @@ test.describe("WorkerBee Bot events test", () => {
 
   test("Should capture intentional error - block in the future", async({ workerbeeTest }) => {
     // Should time out if no error is captured
-    await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee();
+    await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       await new Promise<void>((resolve, reject) => {
@@ -599,8 +574,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to parse blocks from the past - exact amount of blocks", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee();
+    const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       let calls = 0;
@@ -628,8 +602,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to parse blocks from the past - transaction id observe", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee();
+    const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       const { head_block_number: headBlock } = await bot.chain!.api.database_api.get_dynamic_global_properties({});
@@ -664,8 +637,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to parse blocks from the past and print timings - more than 1000", async({ workerbeeTest }) => {
-    const result = await workerbeeTest.dynamic(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest.dynamic(async({ bot }) => {
       await bot.start();
 
       let calls = 0;
@@ -693,8 +665,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to parse blocks from the past - impacted accounts", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       let calls = 0;
@@ -727,8 +698,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to parse blocks from the past - more than relative time", async({ workerbeeTest }) => {
-    const result = await workerbeeTest.dynamic(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest.dynamic(async({ bot }) => {
       await bot.start();
 
       let calls = 0;
@@ -759,8 +729,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe votes on accounts", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       let vote = "";
@@ -789,8 +758,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe posts from specific authors", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       let post = "";
@@ -819,8 +787,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe comments from specific authors", async({ workerbeeTest }) => {
-    const result = await workerbeeTest.dynamic(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest.dynamic(async({ bot }) => {
       await bot.start();
 
       let comment = "";
@@ -849,8 +816,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe new account creation", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       let newAccount = "";
@@ -880,8 +846,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe custom operations", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       let customOp = "";
@@ -910,8 +875,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe reblog operations", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       let reblogedPost = "";
@@ -941,8 +905,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe follow operations", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       let follow = "";
@@ -971,8 +934,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe account mentions in posts", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       let mention = "";
@@ -1002,8 +964,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe internal market operations", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       let marketOpCount = 0;
@@ -1034,8 +995,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe exchange transfer operations", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       let exchangeTransferCount = 0;
@@ -1066,8 +1026,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe exchange transfer operation to exchange account", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       const exchangeTransfer: string[] = [];
@@ -1098,8 +1057,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe whale alerts for large transfers", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       let whaleOpCount = 0;
@@ -1130,8 +1088,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe account balance changes", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       let balanceChanged = false;
@@ -1161,8 +1118,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe account metadata changes", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
 
       let metadataChanged = false;
@@ -1192,9 +1148,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe manabar percentage threshold", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }, hiveBlockInterval) => {
-      const bot = new WorkerBee();
-
+    const result = await workerbeeTest(async({ bot }, hiveBlockInterval) => {
       const result = await Promise.race([
         new Promise<string>((res, rej) => {
           bot.start();
@@ -1229,8 +1183,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe feed price changes", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }, hiveBlockInterval) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }, hiveBlockInterval) => {
 
       const result = await Promise.race([
         new Promise<boolean>((res) => {
@@ -1263,8 +1216,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe feed price no change", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }, hiveBlockInterval) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }, hiveBlockInterval) => {
 
       const result = await Promise.race([
         new Promise<boolean>((res) => {
@@ -1297,8 +1249,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe witness missed blocks", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }, hiveBlockInterval) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }, hiveBlockInterval) => {
 
       const result = await Promise.race([
         new Promise<boolean>((res) => {
@@ -1331,8 +1282,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe account alarms", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee }, hiveBlockInterval) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
+    const result = await workerbeeTest(async({ bot }, hiveBlockInterval) => {
 
       const result = await Promise.race([
         new Promise<boolean>((res) => {
@@ -1365,9 +1315,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to use custom filter", async({ workerbeeTest }) => {
-    await workerbeeTest(async({ WorkerBee, WorkerBeePackage }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
-
+    await workerbeeTest(async({ bot, WorkerBeePackage }) => {
       await bot.start();
 
       const { current_shuffled_witnesses } = await bot.chain!.extend<{
@@ -1401,9 +1349,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to use custom provider", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee, WorkerBeePackage }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
-
+    const result = await workerbeeTest(async({ bot, WorkerBeePackage }) => {
       await bot.start();
 
       const { current_shuffled_witnesses } = await bot.chain!.extend<{
@@ -1437,9 +1383,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to use custom filter with piped data", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee, WorkerBeePackage }) => {
-      const bot = new WorkerBee({ chainOptions: { apiTimeout: 0 } });
-
+    const result = await workerbeeTest(async({ bot, WorkerBeePackage }) => {
       await bot.start();
 
       const result = await new Promise<string[]>((resolve) => {
