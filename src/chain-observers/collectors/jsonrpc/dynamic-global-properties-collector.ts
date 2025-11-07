@@ -3,7 +3,8 @@ import { TCollectorEvaluationContext } from "../../factories/data-evaluation-con
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
 export class DynamicGlobalPropertiesCollector extends CollectorBase<DynamicGlobalPropertiesClassifier> {
-  public async get(_: TCollectorEvaluationContext) {
+  public async get(data: TCollectorEvaluationContext) {
+    const startDgpoAnalysis = Date.now();
     const {
       current_witness,
       head_block_number,
@@ -11,6 +12,7 @@ export class DynamicGlobalPropertiesCollector extends CollectorBase<DynamicGloba
       downvote_pool_percent,
       head_block_id
     } = await this.worker.chain!.api.database_api.get_dynamic_global_properties({});
+    data.addTiming("database_api.get_dynamic_global_properties", Date.now() - startDgpoAnalysis);
 
     return {
       /*
