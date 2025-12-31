@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { expect } from "playwright/test";
-import { IWorkerBee, Unsubscribable } from "../../dist/bundle";
-import { QueenBee } from "../../src/queen";
+import type { IWorkerBee, Unsubscribable } from "../../dist/bundle";
+import type { QueenBee } from "../../src/queen";
 import { mockTest } from "../assets/jest-helper";
 
 mockTest.describe("Realistic Scenarios with Live Data", () => {

@@ -10,11 +10,11 @@ export default defineConfig({
   projects: [
     {
       name: "workerbee_testsuite",
-      testDir: "./__tests__/"
+      testDir: "./dist/tests/"
     },
     {
       name: "workerbee_testsuite_mock",
-      testDir: "./__tests__/",
+      testDir: "./dist/tests/",
       testMatch: "mock*",
       fullyParallel: false
     }

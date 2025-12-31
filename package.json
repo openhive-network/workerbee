@@ -25,7 +25,8 @@
     "prebuild": "ls-engines && husky",
     "build": "tsc",
     "postbuild": "rollup -c && tsx ./npm-common-config/ts-common/terser.ts && size-limit",
-    "pretest": "playwright install chromium",
+    "build:test": "tsc --project tsconfig.tests.json",
+    "pretest": "playwright install chromium && npm run build:test",
     "test": "unset CI && playwright test --workers 4 --max-failures 1 --project=workerbee_testsuite --project=workerbee_testsuite_mock"
   },
   "size-limit": [

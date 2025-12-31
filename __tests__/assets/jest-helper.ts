@@ -3,9 +3,9 @@ import { IHiveChainInterface } from "@hiveio/wax";
 import { ConsoleMessage, Page, test as base, expect } from "@playwright/test";
 
 import "./globals";
-import { IWorkerBee } from "../../src";
-import { TPastQueen } from "../../src/past-queen";
-import { QueenBee } from "../../src/queen";
+import type { IWorkerBee } from "../../dist/bundle";
+import type { TPastQueen } from "../../src/past-queen";
+import type { QueenBee } from "../../src/queen";
 import type { IWorkerBeeGlobals, TEnvType } from "./globals";
 import { JsonRpcMock } from "./mock/api-mock";
 import jsonRpcMockData, { resetMockCallCounters } from "./mock/jsonRpcMock";

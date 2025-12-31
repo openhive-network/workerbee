@@ -2,7 +2,7 @@
 
 import { expect } from "@playwright/test";
 
-import type { IStartConfiguration } from "../../src/bot";
+import type { IStartConfiguration } from "../../dist/bundle";
 
 import { test } from "../assets/jest-helper";
 
