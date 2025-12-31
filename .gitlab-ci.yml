@@ -59,7 +59,10 @@ test:
   stage: test
   extends: .npm_test_template
   variables:
-    PACKAGE_TGZ_PATH: "${BUILT_PACKAGE_PATH}"
+    DIST_DIR: "$CI_PROJECT_DIR/dist"
+  before_script:
+    - export PACKAGE_TGZ_PATH="${DIST_DIR}/$(basename ${BUILT_PACKAGE_PATH})"
+    - !reference [.npm_test_template, before_script]
   needs:
     - job: build
       artifacts: true
@@ -68,10 +71,11 @@ push_to_wiki:
   extends: .npm_push_doc_template
   stage: deploy
   variables:
-    PACKAGE_TGZ_PATH: "${BUILT_PACKAGE_PATH}"
     WIKI_PUSH_TOKEN: "$WIKI_PUSH_TOKEN"
     DIST_DIR: "$CI_PROJECT_DIR/dist"
-
+  before_script:
+    - export PACKAGE_TGZ_PATH="${DIST_DIR}/$(basename ${BUILT_PACKAGE_PATH})"
+    - !reference [.npm_push_doc_template, before_script]
   needs:
     - job: build
       artifacts: true
@@ -82,8 +86,11 @@ deploy_dev_package:
   stage: deploy
   extends: .npm_deploy_package_template
   variables:
-    PACKAGE_TGZ_PATH: "${BUILT_PACKAGE_PATH}"
     NPM_PACKAGE_SCOPE: "@hiveio"
+    DIST_DIR: "$CI_PROJECT_DIR/dist"
+  before_script:
+    - export PACKAGE_TGZ_PATH="${DIST_DIR}/$(basename ${BUILT_PACKAGE_PATH})"
+    - !reference [.npm_deploy_package_template, before_script]
   needs:
     - job: test
     - job: push_to_wiki
@@ -100,7 +107,10 @@ deploy_production_public_npm:
     NPM_PUBLISH_TOKEN: "$INTERNAL_HIDDEN_PUBLISH_TOKEN"
     NPM_PACKAGE_NAME: "workerbee"
     NPM_PROVENANCE_ENABLE: "0" # XXX: Temporarly disable as it is not working - we have to find a way to get it working
-    PACKAGE_TGZ_PATH: "${BUILT_PACKAGE_PATH}"
+    DIST_DIR: "$CI_PROJECT_DIR/dist"
+  before_script:
+    - export PACKAGE_TGZ_PATH="${DIST_DIR}/$(basename ${BUILT_PACKAGE_PATH})"
+    - !reference [.registry_npmjs_org_deploy_package_template, before_script]
   needs:
     - job: deploy_dev_package
     - job: test
