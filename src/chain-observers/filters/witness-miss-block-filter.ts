@@ -5,20 +5,22 @@ import type { TFilterEvaluationContext } from "../factories/data-evaluation-cont
 import { FilterBase } from "./filter-base";
 
 export class WitnessMissedBlocksFilter extends FilterBase {
+  readonly #witnesses: Set<TAccountName>;
+  readonly #missedBlocksCountMin: number;
+
   public constructor(
     witnesses: TAccountName[],
-    private readonly missedBlocksCountMin: number
+    missedBlocksCountMin: number
   ) {
     super();
 
-    this.witnesses = new Set(witnesses);
+    this.#witnesses = new Set(witnesses);
+    this.#missedBlocksCountMin = missedBlocksCountMin;
   }
-
-  private readonly witnesses = new Set<TAccountName>();
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
     const classifiers: TRegisterEvaluationContext[] = [];
-    for (const witness of this.witnesses)
+    for (const witness of this.#witnesses)
       classifiers.push(WitnessClassifier.forOptions({ witness }));
 
     return classifiers;
@@ -30,7 +32,7 @@ export class WitnessMissedBlocksFilter extends FilterBase {
   public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { witnesses } = await data.get(WitnessClassifier);
 
-    for(const witnessName of this.witnesses) {
+    for(const witnessName of this.#witnesses) {
       const witness = witnesses[witnessName];
 
       // If witness is not producing blocks, we do not care about missed blocks
@@ -50,7 +52,7 @@ export class WitnessMissedBlocksFilter extends FilterBase {
        */
       if (this.previousLastBlockNumber === witness.lastConfirmedBlockNum
         && this.initialMissedBlocksCount !== undefined
-        && witness.totalMissedBlocks > (this.initialMissedBlocksCount + this.missedBlocksCountMin)
+        && witness.totalMissedBlocks > (this.initialMissedBlocksCount + this.#missedBlocksCountMin)
       ) {
         // Reset missed blocks count to avoid multiple notifications for the same missed blocks streak
         this.initialMissedBlocksCount = undefined;

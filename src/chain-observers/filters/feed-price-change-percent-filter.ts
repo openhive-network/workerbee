@@ -5,10 +5,13 @@ import type { TFilterEvaluationContext } from "../factories/data-evaluation-cont
 import { FilterBase } from "./filter-base";
 
 export class FeedPriceChangeFilter extends FilterBase {
+  readonly #feedPriceChangePercentMin: number;
+
   public constructor(
-    private readonly feedPriceChangePercentMin: number
+    feedPriceChangePercentMin: number
   ) {
     super();
+    this.#feedPriceChangePercentMin = feedPriceChangePercentMin;
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
@@ -40,6 +43,6 @@ export class FeedPriceChangeFilter extends FilterBase {
 
     this.previousUpdateTimestamp = lastFeedPriceRetrievalTimestamp;
 
-    return percentChange >= this.feedPriceChangePercentMin;
+    return percentChange >= this.#feedPriceChangePercentMin;
   }
 }

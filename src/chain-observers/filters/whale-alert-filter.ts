@@ -6,14 +6,17 @@ import type { TFilterEvaluationContext } from "../factories/data-evaluation-cont
 import { FilterBase } from "./filter-base";
 
 export class WhaleAlertFilter extends FilterBase {
+  readonly #asset: asset;
+
   /**
    * @param worker @internal
    * @param amount Any amount - HIVE/HBD in coins (no precision)
    */
   public constructor(
-    private readonly asset: asset
+    asset: asset
   ) {
     super();
+    this.#asset = asset;
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
@@ -32,24 +35,24 @@ export class WhaleAlertFilter extends FilterBase {
 
     if(transfer)
       for(const op of transfer)
-        if(isGreaterThan(this.asset, op.operation.amount!))
+        if(isGreaterThan(this.#asset, op.operation.amount!))
           return true;
 
     if(fromSavings)
       for(const op of fromSavings)
-        if(isGreaterThan(this.asset, op.operation.amount!))
+        if(isGreaterThan(this.#asset, op.operation.amount!))
           return true;
 
     if(escrow)
       for(const op of escrow)
-        if(isGreaterThan(this.asset, op.operation.hbd_amount!))
+        if(isGreaterThan(this.#asset, op.operation.hbd_amount!))
           return true;
-        else if(isGreaterThan(this.asset, op.operation.hive_amount!))
+        else if(isGreaterThan(this.#asset, op.operation.hive_amount!))
           return true;
 
     if(recurrent)
       for(const op of recurrent)
-        if(isGreaterThan(this.asset, op.operation.amount!))
+        if(isGreaterThan(this.#asset, op.operation.amount!))
           return true;
 
     return false;

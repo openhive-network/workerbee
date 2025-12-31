@@ -6,17 +6,21 @@ import { FilterBase } from "./filter-base";
 
 // Base class for content filters (posts and comments)
 export abstract class BlogContentMetadataFilter extends FilterBase {
+  readonly #reportAfterMsBeforePayout: number;
+  protected readonly accounts: Set<TAccountName>;
+  protected readonly isPost: boolean;
+
   public constructor(
-    private readonly reportAfterMsBeforePayout: number,
+    reportAfterMsBeforePayout: number,
     accounts: TAccountName[],
-    protected readonly isPost: boolean
+    isPost: boolean
   ) {
     super();
 
+    this.#reportAfterMsBeforePayout = reportAfterMsBeforePayout;
     this.accounts = new Set(accounts);
+    this.isPost = isPost;
   }
-
-  protected readonly accounts: Set<TAccountName>;
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [
@@ -51,7 +55,7 @@ export abstract class BlogContentMetadataFilter extends FilterBase {
     if (queryComments.length > 0) {
       const comments = await data.query(ContentMetadataClassifier, {
         requestedData: queryComments,
-        reportAfterMsBeforePayout: this.reportAfterMsBeforePayout
+        reportAfterMsBeforePayout: this.#reportAfterMsBeforePayout
       });
 
       for(const operation of queryComments)

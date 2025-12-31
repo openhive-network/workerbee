@@ -56,10 +56,16 @@ import type { Observer, Unsubscribable } from "./types/subscribable";
 import { calculateRelativeTime } from "./utils/time";
 
 export class QueenBee<TPreviousSubscriberData extends object = {}> {
+  protected readonly worker: WorkerBee;
+  protected readonly mediator: ObserverMediator;
+
   public constructor(
-    protected readonly worker: WorkerBee,
-    protected readonly mediator: ObserverMediator = worker.mediator
-  ) {}
+    worker: WorkerBee,
+    mediator: ObserverMediator = worker.mediator
+  ) {
+    this.worker = worker;
+    this.mediator = mediator;
+  }
 
   protected providers = new Map<new () => ProviderBase, ProviderBase>();
   protected operands: FilterBase[] = [];

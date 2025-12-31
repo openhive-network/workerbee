@@ -7,14 +7,17 @@ import { ProviderBase } from "./providers/provider-base";
 export type ListenerType = (data: DataEvaluationContext) => void;
 
 export class ObserverMediator {
-  public constructor(
-    private readonly factory: FactoryBase
-  ) {}
+  readonly #factory: FactoryBase;
+  #filters = new Map<Partial<Observer<any>>, { filter: FilterBase; providers: Iterable<ProviderBase>; }>();
 
-  private filters = new Map<Partial<Observer<any>>, { filter: FilterBase; providers: Iterable<ProviderBase>; }>();
+  public constructor(
+    factory: FactoryBase
+  ) {
+    this.#factory = factory;
+  }
 
   public get timings () {
-    return this.factory.getTimings();
+    return this.#factory.getTimings();
   }
 
   /**
@@ -22,17 +25,17 @@ export class ObserverMediator {
    * See {@link FactoryBase.extend} for more details.
    */
   public extend(other: ObserverMediator) {
-    for(const [listener, { filter, providers }] of other.filters.entries())
+    for(const [listener, { filter, providers }] of other.#filters.entries())
       this.registerListener(listener, filter, providers);
 
-    this.factory.extend(other.factory);
+    this.#factory.extend(other.#factory);
   }
 
   public async notify() {
     try {
-      const context = this.factory.collect();
+      const context = this.#factory.collect();
 
-      const shouldContinue = await this.factory.preNotify(context, this);
+      const shouldContinue = await this.#factory.preNotify(context, this);
 
       if (!shouldContinue)
         return;
@@ -40,9 +43,9 @@ export class ObserverMediator {
       const startFilter = Date.now();
 
       // Start providing parsed, cached data to filters
-      for(const [listener, { filter, providers }] of this.filters.entries())
+      for(const [listener, { filter, providers }] of this.#filters.entries())
         filter.match(context).then(async(matched) => {
-          this.factory.addTiming("filters", Date.now() - startFilter);
+          this.#factory.addTiming("filters", Date.now() - startFilter);
 
           if(!matched)
             return;
@@ -66,49 +69,49 @@ export class ObserverMediator {
                 providedData[key] = providerResult[key];
 
 
-          this.factory.addTiming("providers", Date.now() - startProvider);
+          this.#factory.addTiming("providers", Date.now() - startProvider);
 
           await (listener.next?.(providedData) as Promise<any> | any);
         }).catch(error => listener.error?.(error));
 
-      await this.factory.postNotify(context, this);
+      await this.#factory.postNotify(context, this);
     } catch (error) {
       // If any preNotify or postNotify error happens, we should notify all listeners
-      for(const listener of this.filters.keys())
+      for(const listener of this.#filters.keys())
         listener.error?.(error);
     }
   }
 
   public registerListener(listener: Partial<Observer<any>>, filter: FilterBase, providers: Iterable<ProviderBase>) {
-    this.filters.set(listener, { filter, providers });
+    this.#filters.set(listener, { filter, providers });
 
     for(const classifier of filter.usedContexts())
-      this.factory.pushClassifier(classifier, EClassifierOrigin.FILTER);
+      this.#factory.pushClassifier(classifier, EClassifierOrigin.FILTER);
 
     for(const classifier of providers)
       for(const usedContext of classifier.usedContexts())
-        this.factory.pushClassifier(usedContext, EClassifierOrigin.PROVIDER);
+        this.#factory.pushClassifier(usedContext, EClassifierOrigin.PROVIDER);
   }
 
   public unregisterListener(listener: Partial<Observer<any>>) {
-    const filter = this.filters.get(listener);
+    const filter = this.#filters.get(listener);
     if (!filter)
       return;
 
     for(const classifier of filter.filter.usedContexts())
-      this.factory.popClassifier(classifier, EClassifierOrigin.FILTER);
+      this.#factory.popClassifier(classifier, EClassifierOrigin.FILTER);
 
     for(const classifier of filter.providers)
       for(const usedContext of classifier.usedContexts())
-        this.factory.popClassifier(usedContext, EClassifierOrigin.PROVIDER);
+        this.#factory.popClassifier(usedContext, EClassifierOrigin.PROVIDER);
 
-    this.filters.delete(listener);
+    this.#filters.delete(listener);
 
     listener.complete?.();
   }
 
   public unregisterAllListeners() {
-    for(const listener of this.filters.keys())
+    for(const listener of this.#filters.keys())
       this.unregisterListener(listener);
   }
 }

@@ -5,17 +5,21 @@ import type { TFilterEvaluationContext } from "../factories/data-evaluation-cont
 import { FilterBase } from "./filter-base";
 
 export class AccountFullManabarFilter extends FilterBase {
+  public readonly accounts: Set<string>;
+  readonly #manabarType: EManabarType;
+  readonly #manabarLoadPercent: number;
+
   public constructor(
     accounts: string[],
-    private readonly manabarType: EManabarType,
-    private readonly manabarLoadPercent: number = 98
+    manabarType: EManabarType,
+    manabarLoadPercent: number = 98
   ) {
     super();
 
     this.accounts = new Set(accounts);
+    this.#manabarType = manabarType;
+    this.#manabarLoadPercent = manabarLoadPercent;
   }
-
-  public readonly accounts: Set<string>;
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
     const context: TRegisterEvaluationContext[] = [];
@@ -23,7 +27,7 @@ export class AccountFullManabarFilter extends FilterBase {
     for(const account of this.accounts)
       context.push(ManabarClassifier.forOptions({
         account,
-        manabarType: this.manabarType
+        manabarType: this.#manabarType
       }));
 
     return context;
@@ -33,7 +37,7 @@ export class AccountFullManabarFilter extends FilterBase {
     const { manabarData } = await data.get(ManabarClassifier);
 
     for(const account of this.accounts) {
-      const manabar = manabarData[account]?.[this.manabarType];
+      const manabar = manabarData[account]?.[this.#manabarType];
 
       if (manabar === undefined)
         continue;
@@ -41,7 +45,7 @@ export class AccountFullManabarFilter extends FilterBase {
       if (manabar.max === 0n)
         return true;
 
-      if(manabar.percent >= this.manabarLoadPercent)
+      if(manabar.percent >= this.#manabarLoadPercent)
         return true;
     }
 

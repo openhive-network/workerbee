@@ -6,20 +6,22 @@ import type { TFilterEvaluationContext } from "../factories/data-evaluation-cont
 import { FilterBase } from "./filter-base";
 
 export class BalanceChangeFilter extends FilterBase {
+  readonly #accounts: Set<TAccountName>;
+  readonly #includeInternalTransfers: boolean;
+
   public constructor(
     accounts: TAccountName[],
-    private readonly includeInternalTransfers: boolean = false
+    includeInternalTransfers: boolean = false
   ) {
     super();
 
-    this.accounts = new Set(accounts);
+    this.#accounts = new Set(accounts);
+    this.#includeInternalTransfers = includeInternalTransfers;
   }
-
-  private readonly accounts: Set<TAccountName>;
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
     const classifiers: Array<TRegisterEvaluationContext> = [];
-    for(const account of this.accounts)
+    for(const account of this.#accounts)
       classifiers.push(AccountClassifier.forOptions({
         account
       }));
@@ -47,7 +49,7 @@ export class BalanceChangeFilter extends FilterBase {
   public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { accounts } = await data.get(AccountClassifier);
 
-    for(const accountName of this.accounts) {
+    for(const accountName of this.#accounts) {
       const account = accounts[accountName];
 
       if (account === undefined)
@@ -59,7 +61,7 @@ export class BalanceChangeFilter extends FilterBase {
         return false;
       }
 
-      if (this.includeInternalTransfers)
+      if (this.#includeInternalTransfers)
         return this.parseInternalTransfers(account.balance);
 
       const changedHP = this.previousBalance.HP.total.amount !== account.balance.HP.total.amount;

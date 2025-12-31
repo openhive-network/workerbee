@@ -4,14 +4,17 @@ import type { TFilterEvaluationContext } from "../factories/data-evaluation-cont
 import { FilterBase } from "./filter-base";
 
 export class FeedPriceNoChangeFilter extends FilterBase {
+  readonly #feedPriceNoChangeIntervals: number;
+
   /**
    * @param worker @internal
    * @param feedPriceNoChangeIntervals In standard configuration - one interval is one hour, so the default 24 intervals is one day.
    */
   public constructor(
-    private readonly feedPriceNoChangeIntervals: number = 24
+    feedPriceNoChangeIntervals: number = 24
   ) {
     super();
+    this.#feedPriceNoChangeIntervals = feedPriceNoChangeIntervals;
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
@@ -46,7 +49,7 @@ export class FeedPriceNoChangeFilter extends FilterBase {
       }
 
       ++index;
-      if (index >= this.feedPriceNoChangeIntervals)
+      if (index >= this.#feedPriceNoChangeIntervals)
         break;
     }
 

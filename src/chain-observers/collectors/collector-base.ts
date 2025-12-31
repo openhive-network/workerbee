@@ -16,11 +16,14 @@ export type TSpecificClassifier<T extends CollectorClassifierBase<any, any, any,
   };
 
 export class CollectorBase<Classifier extends CollectorClassifierBase<any, any, any, any, any>> {
-  public constructor(
-    protected readonly worker: WorkerBee
-  ) {}
+  protected readonly worker: WorkerBee;
+  #registersCount = 0;
 
-  private registersCount = 0;
+  public constructor(
+    worker: WorkerBee
+  ) {
+    this.worker = worker;
+  }
 
   /**
    * We need to return the data in the format of { [classifierName]: { [key]: value } } so
@@ -58,17 +61,17 @@ export class CollectorBase<Classifier extends CollectorClassifierBase<any, any, 
   protected popOptions?(data: Classifier["optionsType"]): void;
 
   public get hasRegistered() {
-    return this.registersCount > 0;
+    return this.#registersCount > 0;
   }
 
   public register(data?: Classifier["optionsType"]) {
-    ++this.registersCount;
+    ++this.#registersCount;
 
     if (data !== undefined)
       this.pushOptions?.(data);
   }
   public unregister(data?: Classifier["optionsType"]) {
-    --this.registersCount;
+    --this.#registersCount;
 
     if (data !== undefined)
       this.popOptions?.(data);

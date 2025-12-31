@@ -4,10 +4,13 @@ import type { TFilterEvaluationContext } from "../factories/data-evaluation-cont
 import { FilterBase } from "./filter-base";
 
 export class BlockNumberFilter extends FilterBase {
+  readonly #number: number;
+
   public constructor(
-    private readonly number: number
+    number: number
   ) {
     super();
+    this.#number = number;
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
@@ -19,6 +22,6 @@ export class BlockNumberFilter extends FilterBase {
   public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const block = await data.get(BlockHeaderClassifier);
 
-    return block.number === this.number;
+    return block.number === this.#number;
   }
 }

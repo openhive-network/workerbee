@@ -19,10 +19,13 @@ export class FactoryBase {
   protected collectors = new Map<AnyCollectorClass, CollectorBase<CollectorClassifierBase<any, any, any, any, any>>>();
   protected collectorsPerClassifier = new Map<IEvaluationContextClass, AnyCollectorClass>();
   protected currentBlockNumber?: number;
+  protected readonly worker: WorkerBee;
 
   public constructor(
-    protected readonly worker: WorkerBee
-  ) {}
+    worker: WorkerBee
+  ) {
+    this.worker = worker;
+  }
 
   private readonly timings: Record<string, number> = {};
   private lastStart = Date.now();

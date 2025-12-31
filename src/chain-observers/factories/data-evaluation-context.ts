@@ -15,38 +15,41 @@ export type TAvailableStores = {
 };
 
 export class DataEvaluationContext {
-  private readonly cachedFunctions = new Map<CollectorBase<any>, Promise<Partial<TAvailableClassifiers>>>();
-  private readonly storeData: TAvailableStores = {} as TAvailableStores;
-  private readonly collectors: TAvailableCollectorFunctions = {} as TAvailableCollectorFunctions;
+  readonly #cachedFunctions = new Map<CollectorBase<any>, Promise<Partial<TAvailableClassifiers>>>();
+  readonly #storeData: TAvailableStores = {} as TAvailableStores;
+  readonly #collectors: TAvailableCollectorFunctions = {} as TAvailableCollectorFunctions;
+  readonly #factory: FactoryBase;
 
   public constructor(
-    private readonly factory: FactoryBase
-  ) {}
+    factory: FactoryBase
+  ) {
+    this.#factory = factory;
+  }
 
   public addTiming(name: string, time: number): void {
-    this.factory.addTiming(name, time);
+    this.#factory.addTiming(name, time);
   }
 
   public inject<T extends IEvaluationContextClass>(
     classifier: T,
     collector: CollectorBase<any>
   ): void {
-    if (this.collectors[classifier.name] !== undefined)
+    if (this.#collectors[classifier.name] !== undefined)
       return; // Already registered
 
-    this.collectors[classifier.name] = collector;
-    this.storeData[classifier.name] = {};
+    this.#collectors[classifier.name] = collector;
+    this.#storeData[classifier.name] = {};
   }
 
   public async get<Classifier extends CollectorClassifierBase<any, any, any, any, any>>(
     classifier: new (...args: any[]) => Classifier
   ): Promise<Classifier["getType"] extends void ? never : Classifier["getType"]> {
-    const collector = this.collectors[classifier.name];
+    const collector = this.#collectors[classifier.name];
 
     if (collector === undefined)
-      throw new WorkerBeeError(createFactoryUnsupportedClassifierErrorMessage((this.factory as any).__proto__.constructor.name, classifier));
+      throw new WorkerBeeError(createFactoryUnsupportedClassifierErrorMessage((this.#factory as any).__proto__.constructor.name, classifier));
 
-    let cached = this.cachedFunctions.get(collector);
+    let cached = this.#cachedFunctions.get(collector);
 
     if (cached === undefined) {
       const startTime = Date.now();
@@ -58,9 +61,9 @@ export class DataEvaluationContext {
         this.addTiming(`${classifier.name}#get`, Date.now() - startTime);
       });
 
-      for(const key in this.collectors)
-        if (this.collectors[key] === collector)
-          this.cachedFunctions.set(collector, cached!);
+      for(const key in this.#collectors)
+        if (this.#collectors[key] === collector)
+          this.#cachedFunctions.set(collector, cached!);
     }
 
     const result = await cached!;
@@ -72,10 +75,10 @@ export class DataEvaluationContext {
     classifier: new (...args: any[]) => Classifier,
     collectorOptions: Classifier["queryOptionsType"]
   ): Promise<Classifier["queryType"] extends void ? never : Classifier["queryType"]> {
-    const collector = this.collectors[classifier.name];
+    const collector = this.#collectors[classifier.name];
 
     if (collector === undefined)
-      throw new WorkerBeeError(createFactoryUnsupportedClassifierErrorMessage((this.factory as any).__proto__.constructor.name, classifier));
+      throw new WorkerBeeError(createFactoryUnsupportedClassifierErrorMessage((this.#factory as any).__proto__.constructor.name, classifier));
 
     const startTime = Date.now();
 
@@ -91,7 +94,7 @@ export class DataEvaluationContext {
     classifier: new (...args: any[]) => Classifier
   ): Classifier["storeType"] extends void ? never : Classifier["storeType"] {
     // Allow custom classifiers that are not registered, but have storeType defined
-    const store = this.storeData[classifier.name] || (this.storeData[classifier.name] = {} as any);
+    const store = this.#storeData[classifier.name] || (this.#storeData[classifier.name] = {} as any);
 
     return store;
   }
