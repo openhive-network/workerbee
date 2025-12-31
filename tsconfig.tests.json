@@ -1,13 +1,8 @@
 {
   "extends": "./npm-common-config/ts-common/tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "./__tests__",
     "baseUrl": ".",
     "outDir": "./dist/tests",
-    "paths": {
-      "../../src": ["./src/index.ts"],
-      "../../src/*": ["./src/*"]
-    },
     "target": "ES2022",
     "lib": [
       "ES2022",
@@ -19,7 +14,8 @@
     "sourceMap": true
   },
   "include": [
-    "./__tests__/**/*.ts"
+    "./__tests__/**/*.ts",
+    "./src/**/*.ts"
   ],
   "exclude": [
     "**/node_modules",
