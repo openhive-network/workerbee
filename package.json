@@ -25,7 +25,7 @@
     "prebuild": "ls-engines && husky",
     "build": "tsc",
     "postbuild": "rollup -c && tsx ./npm-common-config/ts-common/terser.ts && size-limit",
-    "build:test": "tsc --project tsconfig.tests.json && cp -r __tests__/assets/*.html dist/tests/__tests__/assets/ && sed 's|../../dist/bundle|../../../../dist/bundle|g' __tests__/assets/globals.js > dist/tests/__tests__/assets/globals.js",
+    "build:test": "tsc --project tsconfig.tests.json && cp -r __tests__/assets/*.html dist/tests/__tests__/assets/ && cp -r __tests__/assets/api-call-logs dist/tests/__tests__/assets/ && sed 's|../../dist/bundle|../../../../dist/bundle|g' __tests__/assets/globals.js > dist/tests/__tests__/assets/globals.js",
     "pretest": "playwright install chromium && npm run build:test",
     "test": "unset CI && playwright test --workers 4 --max-failures 1 --project=workerbee_testsuite --project=workerbee_testsuite_mock"
   },
