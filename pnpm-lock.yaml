@@ -84,8 +84,8 @@ importers:
         specifier: 1.28.4-rc0
         version: 1.28.4-rc0
       '@hiveio/wax':
-        specifier: '>= 1.28.4-rc0 < 1.28.5'
-        version: 1.28.4-rc0-stable.251120154420
+        specifier: 1.28.4-rc0-stable.260110090505
+        version: 1.28.4-rc0-stable.260110090505
       '@playwright/test':
         specifier: catalog:playwright-toolset
         version: 1.50.1
@@ -404,8 +404,8 @@ packages:
     resolution: {integrity: sha1-qLgaAY/l+gXAdleuIeyaMAo6wxA=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.28.4-rc0.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
-  '@hiveio/wax@1.28.4-rc0-stable.251120154420':
-    resolution: {integrity: sha1-pKaN7wJjxKOf8NTs4l9+hCcDY40=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.28.4-rc0-stable.251120154420.tgz}
+  '@hiveio/wax@1.28.4-rc0-stable.260110090505':
+    resolution: {integrity: sha1-ULIi9pHMANKm7tWf2wI+cJk3Gxs=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.28.4-rc0-stable.260110090505.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
   '@humanfs/core@0.19.1':
@@ -3201,7 +3201,7 @@ snapshots:
 
   '@hiveio/beekeeper@1.28.4-rc0': {}
 
-  '@hiveio/wax@1.28.4-rc0-stable.251120154420':
+  '@hiveio/wax@1.28.4-rc0-stable.260110090505':
     dependencies:
       events: 3.3.0
 

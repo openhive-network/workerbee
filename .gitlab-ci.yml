@@ -4,21 +4,15 @@ stages:
   - test
   - deploy
 
-workflow:
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
-      when: never
-    - if: $CI_COMMIT_BRANCH
-
 variables:
   GIT_DEPTH: 0
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
 
 include:
+  - template: Workflows/Branch-Pipelines.gitlab-ci.yml
   - project: 'hive/common-ci-configuration'
-    ref: 8efd11eebb0cf8d95efef436dd23013d2c594c67
+    ref: 296649fb125e2cb3f22686f2c2bd662b19e17c72
     file:
       - '/templates/npm_projects.gitlab-ci.yml'
 
