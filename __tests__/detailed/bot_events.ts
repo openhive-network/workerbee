@@ -15,7 +15,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   // TODO: This test uses a fake endpoint that doesn't exist. Fix the test to use a mock or real endpoint.
-  test.skip("Allow to broadcast to mirronet chain - broadcast on bot should not throw", async({ workerbeeTest }) => {
+  test("Allow to broadcast to mirronet chain - broadcast on bot should not throw", async({ workerbeeTest }) => {
     await workerbeeTest(async({ WorkerBee, wax, beekeeperFactory }) => {
       /*
        * Prepare helper WorkerBee instance just to provide IHiveChainInterface instance.
@@ -353,7 +353,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   // TODO: This test uses a fake endpoint that doesn't exist. Fix the test to use a mock or real endpoint.
-  test.skip("Should be able to use incoming payout observer", async({ workerbeeTest }) => {
+  test("Should be able to use incoming payout observer", async({ workerbeeTest }) => {
     const result = await workerbeeTest(async({ WorkerBee, wax, beekeeperFactory }) => {
       const chain = await wax.createHiveChain({
         apiTimeout: 0,

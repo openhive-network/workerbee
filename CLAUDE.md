@@ -100,6 +100,11 @@ pnpm test
 - Generic types for filter/provider chains
 - Discriminated unions for operation types
 
+**Testing**
+- Playwright for integration tests
+- Mock data for predictable test scenarios
+- **NEVER** ignore or skip tests. If they are not passing, fix them. If they are related to external services, mock those services.
+
 ## CI/CD Notes
 
 **GitLab Pipeline Stages:**
