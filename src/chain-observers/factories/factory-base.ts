@@ -128,7 +128,8 @@ export class FactoryBase {
      */
     const hasBlockNumberChanged = this.currentBlockNumber !== dgp.headBlockNumber;
 
-    this.currentBlockNumber = dgp.headBlockNumber;
+    if (hasBlockNumberChanged)
+      this.currentBlockNumber = this.currentBlockNumber ? this.currentBlockNumber + 1 : dgp.headBlockNumber;
 
     // If we've already processed this block, skip processing
     return hasBlockNumberChanged;
