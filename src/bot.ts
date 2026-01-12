@@ -1,4 +1,4 @@
-import { IWaxOptionsChain, IHiveChainInterface, TWaxExtended, ITransaction, ApiTransaction, dateFromString } from "@hiveio/wax";
+import { TWaxExtended, ITransaction, ApiTransaction, dateFromString, IHiveChainInterface } from "@hiveio/wax";
 
 import { IBlockData } from "./chain-observers/classifiers/block-classifier";
 import { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
@@ -9,25 +9,9 @@ import type { IWorkerBee, IBroadcastOptions } from "./interfaces";
 import { PastQueen } from "./past-queen";
 import { QueenBee } from "./queen";
 import { calculateRelativeTime } from "./utils/time";
-import { getWax, WaxExtendTypes } from "./wax";
+import { WaxExtendTypes } from "./wax";
 
 const HIVE_BLOCK_INTERVAL = 1000 * 3;
-
-export interface IStartConfiguration {
-  /**
-   * Wax chain options
-   *
-   * @type {?Partial<IWaxOptionsChain>}
-   * @default {}
-   */
-  chainOptions?: Partial<IWaxOptionsChain>;
-
-  /**
-   * Explicit instance of chain interface to be used by workerbee.
-   * This option is exclusive to {@link chainOptions}
-   */
-  explicitChain?: IHiveChainInterface;
-}
 
 export const DEFAULT_WORKERBEE_OPTIONS = {
   chainOptions: {}
@@ -38,10 +22,8 @@ export const DEFAULT_BLOCK_INTERVAL_TIMEOUT_MS = 2000;
 type TAsyncBlockIteratorResolveCallback = (value: IteratorResult<IBlockData & IBlockHeaderData, void>) => void;
 type TAsyncBlockIteratorPromise = Promise<IteratorResult<IBlockData & IBlockHeaderData, void>>;
 
-export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | undefined> {
-  public readonly configuration: IStartConfiguration;
-
-  public chain: TWaxExtended<WaxExtendTypes> | undefined;
+export class WorkerBee implements IWorkerBee {
+  public chain: TWaxExtended<WaxExtendTypes>;
 
   private intervalId: NodeJS.Timeout | undefined = undefined;
 
@@ -60,24 +42,14 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
   public mediator = new ObserverMediator(new JsonRpcFactory(this));
 
   public constructor(
-    configuration: IStartConfiguration = {}
+    chain: IHiveChainInterface
   ) {
-    this.configuration = { ...DEFAULT_WORKERBEE_OPTIONS, ...configuration };
-
-    if(typeof configuration.explicitChain !== "undefined"
-       && typeof configuration.chainOptions !== "undefined")
-      throw new WorkerBeeError("explicitChain and chainOptions parameters are exclusive");
-
-    if (typeof configuration.explicitChain !== "undefined")
-      this.chain = configuration.explicitChain.extend<WaxExtendTypes>();
+    this.chain = chain.extend<WaxExtendTypes>();
   }
 
   public providePastOperations(fromBlock: number, toBlock: number): PastQueen;
   public providePastOperations(relativeTime: string): Promise<PastQueen>;
   public providePastOperations(fromBlockOrRelativeTime: number | string, toBlock?: number): PastQueen | Promise<PastQueen> {
-    if(typeof this.chain === "undefined")
-      throw new WorkerBeeError("Chain is not initialized. Either provide explicit chain or run start()");
-
     if (typeof fromBlockOrRelativeTime === "number" && typeof toBlock === "number")
       return new PastQueen(this, fromBlockOrRelativeTime, toBlock);
 
@@ -95,10 +67,7 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
     });
   }
 
-  public async broadcast(tx: ApiTransaction | ITransaction, options: IBroadcastOptions = {}): Promise<void> {
-    if (!this.running)
-      await this.start();
-
+  public broadcast(tx: ApiTransaction | ITransaction, options: IBroadcastOptions = {}): Promise<void> {
     const toBroadcast: ApiTransaction = "toApiJson" in tx ? tx.toApiJson() as ApiTransaction : tx as ApiTransaction;
 
     if(toBroadcast.signatures.length === 0)
@@ -175,11 +144,7 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
     });
   }
 
-  public async start(): Promise<void> {
-    // Initialize chain and beekepeer if required
-    if(typeof this.chain === "undefined")
-      this.chain = await getWax(this.configuration.chainOptions);
-
+  public start(): void {
     this.stop();
 
     this.intervalId = setInterval(() => {
@@ -257,10 +222,5 @@ export class WorkerBee implements IWorkerBee<TWaxExtended<WaxExtendTypes> | unde
     this.stop();
 
     this.mediator.unregisterAllListeners();
-
-    if(typeof this.configuration.explicitChain === "undefined")
-      this.chain?.delete();
-
-    this.chain = undefined;
   }
 }

@@ -70,10 +70,6 @@ catalogs:
 importers:
 
   .:
-    dependencies:
-      '@hiveio/wax':
-        specifier: 1.28.4-rc0-stable.251120154420
-        version: 1.28.4-rc0-stable.251120154420
     devDependencies:
       '@eslint/compat':
         specifier: ^1.2.7
@@ -87,6 +83,9 @@ importers:
       '@hiveio/beekeeper':
         specifier: 1.28.4-rc0
         version: 1.28.4-rc0
+      '@hiveio/wax':
+        specifier: '>= 1.28.4-rc0 < 1.28.5'
+        version: 1.28.4-rc0-stable.251120154420
       '@playwright/test':
         specifier: catalog:playwright-toolset
         version: 1.50.1

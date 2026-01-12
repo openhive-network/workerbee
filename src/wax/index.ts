@@ -1,4 +1,4 @@
-import { asset, createHiveChain, IWaxOptionsChain, price, TAccountName, TWaxExtended } from "@hiveio/wax";
+import { asset, price, TAccountName } from "@hiveio/wax";
 
 export type share_type = number | string;
 export type time_point_sec = string; // ISO 8601 date string
@@ -78,8 +78,4 @@ export type WaxExtendTypes = {
       }>; };
     };
   }
-};
-
-export const getWax = async(options?: Partial<IWaxOptionsChain>): Promise<TWaxExtended<WaxExtendTypes>> => {
-  return (await createHiveChain(options)).extend<WaxExtendTypes>();
 };

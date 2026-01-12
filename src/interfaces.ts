@@ -1,10 +1,10 @@
-import type { ApiTransaction, IHiveChainInterface, ITransaction, transaction } from "@hiveio/wax";
-import type { IStartConfiguration } from "./bot";
+import type { ApiTransaction, IHiveChainInterface, ITransaction, transaction, TWaxExtended } from "@hiveio/wax";
 import { IBlockData } from "./chain-observers/classifiers/block-classifier";
 import { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
 import { WorkerBeeError } from "./errors";
 import { TPastQueen } from "./past-queen";
 import type { QueenBee } from "./queen";
+import type { WaxExtendTypes } from "./wax";
 
 export interface IBroadcastOptions {
   /**
@@ -29,7 +29,7 @@ export interface IBroadcastData {
   block: IBlockHeaderData;
 }
 
-export interface IWorkerBee<ExplicitChainT = IHiveChainInterface> {
+export interface IWorkerBee {
   /**
    * Indicates if the bot is running
    * @type {boolean}
@@ -38,24 +38,14 @@ export interface IWorkerBee<ExplicitChainT = IHiveChainInterface> {
   readonly running: boolean;
 
   /**
-   * Bot configuration
-   * @type {Readonly<IStartConfiguration>}
-   * @readonly
-   */
-  readonly configuration: Readonly<IStartConfiguration>;
-
-  /**
    * Exposed hive chain interface we are using.
-   * May be undefined if you have not already started our bot.
-   *
-   * Remember that chain property will be initialized during {@link start} call and uninitialized during {@link delete}
-   */ // If an explicit chain was provided, make it always defined, otherwise mark it as possibly undefined, as #start may not have been called yet
-  readonly chain: ExplicitChainT extends IHiveChainInterface ? ExplicitChainT : (undefined | Readonly<IHiveChainInterface>);
+   */
+  readonly chain: TWaxExtended<WaxExtendTypes>;
 
   /**
    * Starts the automation with given configuration
    */
-  start(): Promise<void>;
+  start(): void;
 
   /**
    * Request automation stop
@@ -75,6 +65,8 @@ export interface IWorkerBee<ExplicitChainT = IHiveChainInterface> {
    * If you want to iterate over multiple ranges, you should create a new instance of WorkerBee.
    *
    * Data collected by this method will be preserved for later usage by the live observer.
+   *
+   * Note: Call {@link start} explicitly by yourself if the bot is not running yet, either before this or directly after.
    *
    * @example
    * ```ts
@@ -101,6 +93,8 @@ export interface IWorkerBee<ExplicitChainT = IHiveChainInterface> {
    *
    * Data collected by this method will be preserved for later usage by the live observer.
    *
+   * Note: Call {@link start} explicitly by yourself if the bot is not running yet, either before this or directly after.
+   *
    * @example
    * ```ts
    * workerbee.providePastOperations('-7d').then((provider) => {
@@ -122,6 +116,8 @@ export interface IWorkerBee<ExplicitChainT = IHiveChainInterface> {
 
   /**
    * Allows you to iterate over blocks in live mode
+   *
+   * Note: Call {@link start} explicitly by yourself if the bot is not running yet, either before this or directly after.
    *
    * @example
    * ```ts
@@ -148,7 +144,7 @@ export interface IWorkerBee<ExplicitChainT = IHiveChainInterface> {
    *
    * Requires signed transaction
    *
-   * Note: Implicitly calls {@link start} if the bot is not running yet.
+   * Note: Call {@link start} explicitly by yourself if the bot is not running yet, either before this or directly after.
    *
    * @param tx Protobuf transactoin to broadcast
    * @param options Options for broadcasting
@@ -159,6 +155,8 @@ export interface IWorkerBee<ExplicitChainT = IHiveChainInterface> {
    * Allows you to iterate over blocks indefinitely
    *
    * Ignores errors
+   *
+   * Note: Call {@link start} explicitly by yourself if the bot is not running yet, either before this or directly after.
    *
    * @example
    * ```ts
@@ -174,6 +172,8 @@ export interface IWorkerBee<ExplicitChainT = IHiveChainInterface> {
    *
    * Ignores errors
    *
+   * Note: Call {@link start} explicitly by yourself if the bot is not running yet, either before this or directly after.
+   *
    * @example
    * ```ts
    * for await (const block of workerbee.iterate()) {
@@ -187,6 +187,8 @@ export interface IWorkerBee<ExplicitChainT = IHiveChainInterface> {
    * Allows you to iterate over blocks indefinitely - alias to async iterator
    *
    * Allows to handle errors via try/catch clause around the async iterator
+   *
+   * Note: Call {@link start} explicitly by yourself if the bot is not running yet, either before this or directly after.
    *
    * @param throwOnError If true, the error will be thrown
    *
@@ -208,6 +210,8 @@ export interface IWorkerBee<ExplicitChainT = IHiveChainInterface> {
    *
    * Allows to handle errors via callback
    *
+   * Note: Call {@link start} explicitly by yourself if the bot is not running yet, either before this or directly after.
+   *
    * @param errorHandler Callback function to handle errors
    *
    * @example
@@ -223,9 +227,9 @@ export interface IWorkerBeeConstructor {
   /**
    * Constructs new WorkerBee bot object
    *
-   * @param configuration Configuration for the automation
+   * @param chain Chain interface to the hive compatible chain
    *
    * @note If you do not register an "error" event listener, the error will be dropped silently
    */
-  new<T extends IStartConfiguration>(configuration?: Partial<T>): IWorkerBee<T["explicitChain"]>;
+  new(chain: IHiveChainInterface): IWorkerBee;
 }
