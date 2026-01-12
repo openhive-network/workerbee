@@ -78,13 +78,12 @@
           return;
         }
 
-        bot = new WorkerBee({
-          chainOptions: {
-            apiEndpoint: (typeof process === "object" && process.env && process.env.HIVE_API_HOST) || 'https://api.hive.blog/'
-          }
+        const chain = await (await import("@hiveio/wax")).createHiveChain({
+          apiEndpoint: (typeof process === "object" && process.env && process.env.HIVE_API_HOST) || 'https://api.hive.blog/'
         });
+        bot = new WorkerBee(chain);
 
-        await bot.start();
+        bot.start();
 
         actualBotWork().catch((error) => { log(error, true); });
 

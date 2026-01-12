@@ -14,6 +14,7 @@ export interface IWorkerBeeGlobals {
   WorkerBee: typeof WorkerBee;
   WorkerBeePackage: typeof WorkerBeePackage;
   wax: typeof Wax;
+  chain: Wax.IHiveChainInterface;
   bot: WorkerBeePackage.IWorkerBee;
 }
 

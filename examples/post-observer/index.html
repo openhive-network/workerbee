@@ -219,12 +219,12 @@
         chainId = chainIdNode.value;
         apiEndpoint = apiEndpointInput.value;
 
-        bot = new WorkerBee({
-          chainOptions: {
-            apiEndpoint,
-            chainId
-          }
+        const chain = await (await import("@hiveio/wax")).createHiveChain({
+          apiEndpoint,
+          chainId
         });
+
+        bot = new WorkerBee(chain);
 
         const beekeeper = await beekeeperFactory();
         const session = await beekeeper.createSession("my.salt");

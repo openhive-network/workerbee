@@ -1177,7 +1177,7 @@ mockTest.describe.skip("Realistic Scenarios with Live Data", () => {
       const observers: Unsubscribable[] = [];
 
       for (let i = 0; i < 100; i++) {
-        const observer = (bot as unknown as IWorkerBee<unknown>).observe.onPosts(`author${i}`)
+        const observer = (bot as unknown as IWorkerBee).observe.onPosts(`author${i}`)
           .or.onComments(`author${i}`)
           .provideAccounts(`author${i}`);
 
@@ -1195,9 +1195,9 @@ mockTest.describe.skip("Realistic Scenarios with Live Data", () => {
 
   mockTest("7.8 Concurrent Observer Test", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string>((bot, resolve, testReject) => {
-      const observer1 = (bot as unknown as IWorkerBee<unknown>).observe.onPosts("mtyszczak").provideAccounts("mtyszczak");
-      const observer2 = (bot as unknown as IWorkerBee<unknown>).observe.onComments("fwaszkiewicz").provideAccounts("fwaszkiewicz");
-      const observer3 = (bot as unknown as IWorkerBee<unknown>).observe.onVotes("gtg").provideManabarData(2, "gtg");
+      const observer1 = (bot as unknown as IWorkerBee).observe.onPosts("mtyszczak").provideAccounts("mtyszczak");
+      const observer2 = (bot as unknown as IWorkerBee).observe.onComments("fwaszkiewicz").provideAccounts("fwaszkiewicz");
+      const observer3 = (bot as unknown as IWorkerBee).observe.onVotes("gtg").provideManabarData(2, "gtg");
 
       Promise.all([
         new Promise((resolvePromise, reject) => {

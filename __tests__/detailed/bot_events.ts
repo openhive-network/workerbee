@@ -2,8 +2,6 @@
 
 import { expect } from "@playwright/test";
 
-import type { IStartConfiguration } from "../../dist/bundle";
-
 import { test } from "../assets/jest-helper";
 
 const HIVE_BLOCK_INTERVAL = 3000;
@@ -24,23 +22,16 @@ test.describe("WorkerBee Bot events test", () => {
        * It is a problem in PW tests to reference whole wax, since its dependencies need to be declared at importmap in test.html
        */
       const customWaxConfig = { apiEndpoint: "https://api.fake.openhive.network", chainId: "42", apiTimeout: 0 };
-      const customConfig: IStartConfiguration = { chainOptions: customWaxConfig };
 
-      const chainOwner = new WorkerBee(customConfig);
-      // Call start just to initialize chain member in WorkerBee object.
-      await chainOwner.start();
-      // Stop does not affect chain property, so we can avoid making ineffective api calls.
-      chainOwner.stop();
+      const chain = await wax.createHiveChain(customWaxConfig);
 
-      const localChain = chainOwner.chain!;
+      const bot = new WorkerBee(chain);
 
-      const bot = new WorkerBee({ explicitChain: localChain });
-
-      const newTx = await localChain.createTransaction();
+      const newTx = await chain.createTransaction();
 
       newTx.pushOperation(new wax.ReplyOperation({author: "gtg", permlink: `re-${Date.now()}`, parentAuthor: "hbd.funder",
         parentPermlink: "re-upvote-this-post-to-fund-hbdstabilizer-20250312t045515z", title: "test", body: "Awesome test!",
-        maxAcceptedPayout: localChain.hbdCoins(1000000), percentHbd: 9000, allowVotes: true, allowCurationRewards: true}));
+        maxAcceptedPayout: chain.hbdCoins(1000000), percentHbd: 9000, allowVotes: true, allowCurationRewards: true}));
 
       const bkInstance = await beekeeperFactory({ inMemory: true, enableLogs: false });
       const bkSession = bkInstance.createSession("salt and pepper");
@@ -53,32 +44,24 @@ test.describe("WorkerBee Bot events test", () => {
       const signature = wallet.signDigest(publicKey, legacySigDigest);
       newTx.addSignature(signature);
 
-      await bot.start();
+      bot.start();
 
       await bot.broadcast(newTx, { verifySignatures: true });
 
       bot.delete();
-      chainOwner.delete();
     });
   });
 
   test("Allow to pass explicit extended chain", async({ workerbeeTest }) => {
-    const explicitChainTest = await workerbeeTest(async({ WorkerBee }) => {
-
+    const explicitChainTest = await workerbeeTest(async({ WorkerBee, wax }) => {
       /*
        * Prepare helper WorkerBee instance just to provide IHiveChainInterface instance.
        * It is a problem in PW tests to reference whole wax, since its dependencies need to be declared at importmap in test.html
        */
       const customWaxConfig = { apiEndpoint: "https://api.openhive.network", chainId: "badf00d", apiTimeout: 0 };
-      const customConfig: IStartConfiguration = { chainOptions: customWaxConfig };
+      const chain = await wax.createHiveChain(customWaxConfig);
 
-      const chainOwner = new WorkerBee(customConfig);
-      // Call start just to initialize chain member in WorkerBee object.
-      await chainOwner.start();
-      // Stop does not affect chain property, so we can avoid making ineffective api calls.
-      chainOwner.stop();
-
-      const localChain = chainOwner.chain!.extend<{
+      const localChain = chain!.extend<{
         my_custom_api: {
           nested_call: {
             params: undefined;
@@ -90,19 +73,17 @@ test.describe("WorkerBee Bot events test", () => {
       // Test if TypeScript passes on extended chain:
       localChain.api.my_custom_api.nested_call.endpointUrl = "no-call.local";
 
-      const bot = new WorkerBee({ explicitChain: localChain });
+      const bot = new WorkerBee(chain);
 
       // Should be able to directly call the extended API from the provided chain:
-      const extendedEndpointUrl = bot.chain.api.my_custom_api.nested_call.endpointUrl;
+      const extendedEndpointUrl = localChain.api.my_custom_api.nested_call.endpointUrl;
 
-      await bot.start();
+      bot.start();
 
       // Validate endpoints to easily check that instances match
       const validChainInstance = bot.chain !== undefined && localChain !== undefined && bot.chain.endpointUrl === localChain.endpointUrl;
 
       bot.delete();
-
-      chainOwner.delete();
 
       return {
         validChainInstance,
@@ -127,7 +108,7 @@ test.describe("WorkerBee Bot events test", () => {
         }
       });
 
-      await bot.start();
+      bot.start();
 
       await new Promise(res => { setTimeout(res, hiveBlockInterval * 2); });
 
@@ -374,13 +355,13 @@ test.describe("WorkerBee Bot events test", () => {
   // TODO: This test uses a fake endpoint that doesn't exist. Fix the test to use a mock or real endpoint.
   test.skip("Should be able to use incoming payout observer", async({ workerbeeTest }) => {
     const result = await workerbeeTest(async({ WorkerBee, wax, beekeeperFactory }) => {
-      const bot = new WorkerBee({
-        chainOptions: {
-          apiTimeout: 0,
-          apiEndpoint: "https://api.fake.openhive.network",
-          chainId: "42"
-        }
+      const chain = await wax.createHiveChain({
+        apiTimeout: 0,
+        apiEndpoint: "https://api.fake.openhive.network",
+        chainId: "42"
       });
+
+      const bot = new WorkerBee(chain);
 
       const bkInstance = await beekeeperFactory({ inMemory: true, enableLogs: false });
       const bkSession = bkInstance.createSession("salt and pepper");
@@ -388,7 +369,7 @@ test.describe("WorkerBee Bot events test", () => {
       const { wallet } = await bkSession.createWallet("temp", "pass", true);
       const publicKey = await wallet.importKey("5JNHfZYKGaomSFvd4NUdQ9qMcEAC43kujbfjueTHpVapX1Kzq2n");
 
-      await bot.start();
+      bot.start();
 
       const tx = await bot.chain!.createTransaction();
       const targetTx = tx.transaction;
@@ -557,7 +538,7 @@ test.describe("WorkerBee Bot events test", () => {
       await bot.start();
 
       await new Promise<void>((resolve, reject) => {
-        bot.providePastOperations(Number.MAX_SAFE_INTEGER - 1000, Number.MAX_SAFE_INTEGER).onBlock().subscribe({
+        bot.providePastOperations(2_147_482_640, 2_147_483_640).onBlock().subscribe({
           next(data) { // Should not get here
             console.log(`Got block #${data.block.number}`);
             reject(new Error("Should not get into this callback"));

@@ -87,16 +87,13 @@
           return;
         }
 
-        bot = new WorkerBee({
-          /* You can modify this for testing purposes:
-          chainOptions: {
-            apiEndpoint: 'http://localhost:3000/',
-            chainId: '18dcf0a285365fc58b71f18b3d3fec954aa0c141c44e4e5cb4cf777b9eab274e'
-          }
-          */
+        const chain = await (await import("@hiveio/wax")).createHiveChain({
+          apiEndpoint: 'http://localhost:3000/',
+          chainId: '18dcf0a285365fc58b71f18b3d3fec954aa0c141c44e4e5cb4cf777b9eab274e'
         });
+        bot = new WorkerBee(chain);
 
-        await bot.start();
+        bot.start();
 
         const accountToObserve = String(document.getElementById("acc").value);
 

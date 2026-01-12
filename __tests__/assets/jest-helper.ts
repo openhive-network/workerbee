@@ -45,7 +45,7 @@ export interface IWorkerBeeFixtureMethods {
   ) => Promise<T>;
 
   createMockWorkerBeeTest: <T = Record<string, any>>(
-    callback: (bot: QueenBee<{}> | IWorkerBee<unknown>, resolve: (retVal?: T) => void, reject: (reason?: any) => void, chain?: IHiveChainInterface) => void,
+    callback: (bot: QueenBee<{}> | IWorkerBee, resolve: (retVal?: T) => void, reject: (reason?: any) => void, chain?: IHiveChainInterface) => void,
     dynamic?: boolean,
     shouldHaveFullWorkerBeeInterface?: boolean
   ) => Promise<T>;
@@ -109,24 +109,26 @@ const createWorkerBeeTest = async <T = Record<string, any>>(
 ): Promise<T> => {
   const testRunner = dynamic ? envTestFor.dynamic : envTestFor;
 
-  return await testRunner(async ({ WorkerBee, bot: workerBeeBot }, callbackStr, pastFrom, pastTo, isMock, shouldHaveFullWorkerBeeInterfaceParam) => {
-    const bot = isMock
-      ? new WorkerBee({
-        chainOptions: {
-          apiEndpoint: "http://localhost:8000",
-          apiTimeout: 0
-        }
-      })
-      : workerBeeBot;
+  return await testRunner(async ({ WorkerBee, bot: workerBeeBot, wax }, callbackStr, pastFrom, pastTo, isMock, shouldHaveFullWorkerBeeInterfaceParam) => {
+    let bot = workerBeeBot;
 
-    await bot.start();
+    if (isMock) {
+      const chain = await wax.createHiveChain({
+        apiEndpoint: "http://localhost:8000",
+        apiTimeout: 0
+      });
 
-    let finalBot: IWorkerBee<unknown> | TPastQueen<{}>;
+      bot = new WorkerBee(chain);
+    }
+
+    bot.start();
+
+    let finalBot: IWorkerBee | TPastQueen<{}>;
 
     if (!isMock && pastFrom && pastTo)
       finalBot = bot.providePastOperations(pastFrom, pastTo) as unknown as TPastQueen<{}>;
     else if (shouldHaveFullWorkerBeeInterfaceParam)
-      finalBot = bot as unknown as IWorkerBee<unknown>;
+      finalBot = bot as unknown as IWorkerBee;
     else
       finalBot = bot.observe as unknown as QueenBee<{}>;
 

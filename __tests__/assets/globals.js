@@ -10,17 +10,18 @@ globalThis.createTestFor = async function createTestFor(env) {
   /** @type {import("../../dist/bundle/index.js").default} */
   const WorkerBee = wb.default;
 
+  const chain = await wax.createHiveChain({
+    apiTimeout: 0,
+    apiEndpoint: "https://api.hive.blog"
+  });
+
   // Provide results
   return {
     beekeeperFactory: beekeeper.default,
     WorkerBee,
     WorkerBeePackage: wb,
-    bot: new WorkerBee({
-      chainOptions: {
-        apiTimeout: 0,
-        apiEndpoint: "https://api.hive.blog"
-      }
-    }),
+    bot: new WorkerBee(chain),
+    chain,
     wax
   };
 };
