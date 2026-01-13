@@ -5,12 +5,18 @@ import type { TFilterEvaluationContext } from "../factories/data-evaluation-cont
 import { FilterBase } from "./filter-base";
 
 export class AccountFullManabarFilter extends FilterBase {
+  private readonly manabarType: EManabarType;
+  private readonly manabarLoadPercent: number;
+
   public constructor(
     accounts: string[],
-    private readonly manabarType: EManabarType,
-    private readonly manabarLoadPercent: number = 98
+    manabarType: EManabarType,
+    manabarLoadPercent: number = 98
   ) {
     super();
+
+    this.manabarType = manabarType;
+    this.manabarLoadPercent = manabarLoadPercent;
 
     this.accounts = new Set(accounts);
   }

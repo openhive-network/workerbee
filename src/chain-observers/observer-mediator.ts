@@ -7,9 +7,11 @@ import { ProviderBase } from "./providers/provider-base";
 export type ListenerType = (data: DataEvaluationContext) => void;
 
 export class ObserverMediator {
-  public constructor(
-    private readonly factory: FactoryBase
-  ) {}
+  private readonly factory: FactoryBase;
+
+  public constructor(factory: FactoryBase) {
+    this.factory = factory;
+  }
 
   private filters = new Map<Partial<Observer<any>>, { filter: FilterBase; providers: Iterable<ProviderBase>; }>();
 

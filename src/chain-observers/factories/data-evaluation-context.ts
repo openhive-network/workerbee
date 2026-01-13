@@ -19,9 +19,11 @@ export class DataEvaluationContext {
   private readonly storeData: TAvailableStores = {} as TAvailableStores;
   private readonly collectors: TAvailableCollectorFunctions = {} as TAvailableCollectorFunctions;
 
-  public constructor(
-    private readonly factory: FactoryBase
-  ) {}
+  private readonly factory: FactoryBase;
+
+  public constructor(factory: FactoryBase) {
+    this.factory = factory;
+  }
 
   public addTiming(name: string, time: number): void {
     this.factory.addTiming(name, time);

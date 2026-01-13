@@ -21,7 +21,7 @@ import { EClassifierOrigin, FactoryBase } from "../factory-base";
 
 export class JsonRpcFactory extends FactoryBase {
   public constructor(
-    protected readonly worker: WorkerBee
+    worker: WorkerBee
   ) {
     super(worker);
 

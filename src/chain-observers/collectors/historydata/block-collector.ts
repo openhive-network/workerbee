@@ -15,14 +15,20 @@ export class BlockCollector extends CollectorBase<BlockClassifier> {
   private currentContainerIndex = -1;
   private previousBlockHeaderData?: IBlockHeaderData;
 
+  private readonly fromBlock: number;
+  private readonly toBlock?: number;
+
   public constructor(
-    protected readonly worker: WorkerBee,
-    private readonly fromBlock: number,
-    private readonly toBlock?: number
+    worker: WorkerBee,
+    fromBlock: number,
+    toBlock?: number
   ) {
     super(worker);
 
-    this.currentBlockIndex = fromBlock;
+    this.fromBlock = fromBlock;
+    this.toBlock = toBlock;
+
+    this.currentBlockIndex = this.fromBlock;
 
     if (this.toBlock !== undefined && this.fromBlock > this.toBlock)
       throw new WorkerBeeError(`Invalid block range in history data BlockCollector: ${this.fromBlock} > ${this.toBlock}`);

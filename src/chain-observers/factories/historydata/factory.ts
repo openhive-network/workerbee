@@ -13,12 +13,18 @@ import { DataEvaluationContext } from "../data-evaluation-context";
 import { EClassifierOrigin, FactoryBase } from "../factory-base";
 
 export class HistoryDataFactory extends FactoryBase {
+  public readonly fromBlock: number;
+  public readonly toBlock?: number;
+
   public constructor(
     worker: WorkerBee,
-    public readonly fromBlock: number,
-    public readonly toBlock?: number
+    fromBlock: number,
+    toBlock?: number
   ) {
     super(worker);
+
+    this.fromBlock = fromBlock;
+    this.toBlock = toBlock;
 
     super.registerClassifier(BlockHeaderClassifier, BlockCollector, worker, fromBlock, toBlock);
     super.registerClassifier(DynamicGlobalPropertiesClassifier, DynamicGlobalPropertiesCollector, worker);

@@ -11,12 +11,18 @@ export interface ICommentData {
 
 // Base class for content filters (posts and comments)
 export abstract class BlogContentFilter extends FilterBase {
+  protected readonly isPost: boolean;
+  protected readonly parentCommentFilter?: ICommentData;
+
   public constructor(
     accounts: string[],
-    protected readonly isPost: boolean,
-    protected readonly parentCommentFilter?: ICommentData
+    isPost: boolean,
+    parentCommentFilter?: ICommentData
   ) {
     super();
+
+    this.isPost = isPost;
+    this.parentCommentFilter = parentCommentFilter;
 
     this.accounts = new Set(accounts);
   }

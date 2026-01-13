@@ -16,9 +16,11 @@ export type TSpecificClassifier<T extends CollectorClassifierBase<any, any, any,
   };
 
 export class CollectorBase<Classifier extends CollectorClassifierBase<any, any, any, any, any>> {
-  public constructor(
-    protected readonly worker: WorkerBee
-  ) {}
+  protected readonly worker: WorkerBee;
+
+  public constructor(worker: WorkerBee) {
+    this.worker = worker;
+  }
 
   private registersCount = 0;
 

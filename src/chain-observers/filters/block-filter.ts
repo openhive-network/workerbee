@@ -4,10 +4,14 @@ import type { TFilterEvaluationContext } from "../factories/data-evaluation-cont
 import { FilterBase } from "./filter-base";
 
 export class BlockNumberFilter extends FilterBase {
+  private readonly number: number;
+
   public constructor(
-    private readonly number: number
+    number: number
   ) {
     super();
+
+    this.number = number;
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {

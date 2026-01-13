@@ -26,6 +26,8 @@ export class BucketAggregateQueue<Value> {
   private buckets: Map<number, Array<Value>> = new Map(); // Key = bucketKey, value = array of any type
   private sortedKeys: number[] = []; // Keeps an always-sorted list of bucket keys
 
+  private readonly bucketSize: number;
+
   /**
    * Constructs a new `BucketAggregateQueue`.
    *
@@ -33,8 +35,10 @@ export class BucketAggregateQueue<Value> {
    *                   All keys within the same bucket range are grouped together.
    */
   public constructor(
-    private readonly bucketSize: number
-  ) {}
+    bucketSize: number
+  ) {
+    this.bucketSize = bucketSize;
+  }
 
   /**
    * Enqueues a value into the queue, grouping it into a bucket determined by the provided key.

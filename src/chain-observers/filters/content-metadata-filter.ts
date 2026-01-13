@@ -6,12 +6,18 @@ import { FilterBase } from "./filter-base";
 
 // Base class for content filters (posts and comments)
 export abstract class BlogContentMetadataFilter extends FilterBase {
+  private readonly reportAfterMsBeforePayout: number;
+  protected readonly isPost: boolean;
+
   public constructor(
-    private readonly reportAfterMsBeforePayout: number,
+    reportAfterMsBeforePayout: number,
     accounts: TAccountName[],
-    protected readonly isPost: boolean
+    isPost: boolean
   ) {
     super();
+
+    this.reportAfterMsBeforePayout = reportAfterMsBeforePayout;
+    this.isPost = isPost;
 
     this.accounts = new Set(accounts);
   }

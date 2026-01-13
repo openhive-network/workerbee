@@ -4,10 +4,14 @@ import { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "../filters/filter-base";
 
 abstract class CompositeFilter extends FilterBase {
+  protected readonly operands: FilterBase[];
+
   public constructor(
-    protected readonly operands: FilterBase[]
+    operands: FilterBase[]
   ) {
     super();
+
+    this.operands = operands;
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {

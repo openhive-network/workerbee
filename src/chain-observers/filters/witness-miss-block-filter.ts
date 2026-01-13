@@ -5,12 +5,15 @@ import type { TFilterEvaluationContext } from "../factories/data-evaluation-cont
 import { FilterBase } from "./filter-base";
 
 export class WitnessMissedBlocksFilter extends FilterBase {
+  private readonly missedBlocksCountMin: number;
+
   public constructor(
     witnesses: TAccountName[],
-    private readonly missedBlocksCountMin: number
+    missedBlocksCountMin: number
   ) {
     super();
 
+    this.missedBlocksCountMin = missedBlocksCountMin;
     this.witnesses = new Set(witnesses);
   }
 

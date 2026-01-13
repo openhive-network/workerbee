@@ -7,11 +7,13 @@ import { CollectorBase } from "../collectors/collector-base";
 import { ObserverMediator } from "../observer-mediator";
 import { DataEvaluationContext } from "./data-evaluation-context";
 
-export enum EClassifierOrigin {
-  FILTER = "filter",
-  PROVIDER = "provider",
-  FACTORY = "factory"
-}
+export const EClassifierOrigin = {
+  FILTER: "filter",
+  PROVIDER: "provider",
+  FACTORY: "factory"
+} as const;
+
+export type EClassifierOrigin = typeof EClassifierOrigin[keyof typeof EClassifierOrigin];
 
 export type AnyCollectorClass = new (...args: any[]) => CollectorBase<CollectorClassifierBase<any, any, any, any, any>>;
 
@@ -20,9 +22,11 @@ export class FactoryBase {
   protected collectorsPerClassifier = new Map<IEvaluationContextClass, AnyCollectorClass>();
   protected currentBlockNumber?: number;
 
-  public constructor(
-    protected readonly worker: WorkerBee
-  ) {}
+  protected readonly worker: WorkerBee;
+
+  public constructor(worker: WorkerBee) {
+    this.worker = worker;
+  }
 
   private readonly timings: Record<string, number> = {};
   private lastStart = Date.now();

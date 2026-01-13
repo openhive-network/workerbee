@@ -2,14 +2,17 @@
  * @internal
  */
 export class WorkerBeeError extends Error {
-  public constructor(message: string, public readonly originator?: Error | any) {
-    super(message);
+  public constructor(message: string, originator?: Error | any) {
+    super(message, { cause: originator });
   }
 }
 
 export class BlockNotAvailableError extends WorkerBeeError {
-  public constructor(public readonly blockNumber: number) {
+  public readonly blockNumber: number;
+
+  public constructor(blockNumber: number) {
     super(`Block ${blockNumber} is not available`);
+    this.blockNumber = blockNumber;
   }
 }
 

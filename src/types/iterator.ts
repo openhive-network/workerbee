@@ -13,7 +13,11 @@
  * ```
  */
 export class WorkerBeeIterable<T> implements Iterable<T> {
-  public constructor (private readonly iterable: Iterable<T>) {}
+  protected readonly iterable: Iterable<T>;
+
+  public constructor (iterable: Iterable<T>) {
+    this.iterable = iterable;
+  }
 
   public [Symbol.iterator](): Iterator<T> {
     return this.iterable[Symbol.iterator]();
@@ -30,11 +34,11 @@ export class WorkerBeeIterable<T> implements Iterable<T> {
 }
 
 export class WorkerBeeArrayIterable<T> extends WorkerBeeIterable<T> {
-  public constructor (private readonly array: Array<T> = []) {
+  public constructor (array: Array<T> = []) {
     super(array);
   }
 
   public push(value: T): void {
-    this.array.push(value);
+    (this.iterable as Array<T>).push(value);
   }
 }

@@ -6,14 +6,18 @@ import type { TFilterEvaluationContext } from "../factories/data-evaluation-cont
 import { FilterBase } from "./filter-base";
 
 export class WhaleAlertFilter extends FilterBase {
+  private readonly asset: asset;
+
   /**
    * @param worker @internal
    * @param amount Any amount - HIVE/HBD in coins (no precision)
    */
   public constructor(
-    private readonly asset: asset
+    asset: asset
   ) {
     super();
+
+    this.asset = asset;
   }
 
   public usedContexts(): Array<TRegisterEvaluationContext> {

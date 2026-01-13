@@ -6,11 +6,15 @@ import type { TFilterEvaluationContext } from "../factories/data-evaluation-cont
 import { FilterBase } from "./filter-base";
 
 export class BalanceChangeFilter extends FilterBase {
+  private readonly includeInternalTransfers: boolean;
+
   public constructor(
     accounts: TAccountName[],
-    private readonly includeInternalTransfers: boolean = false
+    includeInternalTransfers: boolean = false
   ) {
     super();
+
+    this.includeInternalTransfers = includeInternalTransfers;
 
     this.accounts = new Set(accounts);
   }

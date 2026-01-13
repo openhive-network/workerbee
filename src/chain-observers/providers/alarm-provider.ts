@@ -6,13 +6,15 @@ import { TProviderEvaluationContext } from "../factories/data-evaluation-context
 import { ONE_MONTH_MS, STEEM_ACCOUNT_NAME } from "../filters/alarm-filter";
 import { ProviderBase } from "./provider-base";
 
-export enum EAlarmType {
-  LEGACY_RECOVERY_ACCOUNT_SET,
-  GOVERNANCE_VOTE_EXPIRATION_SOON,
-  GOVERNANCE_VOTE_EXPIRED,
-  RECOVERY_ACCOUNT_IS_CHANGING,
-  DECLINING_VOTING_RIGHTS
-}
+export const EAlarmType = {
+  LEGACY_RECOVERY_ACCOUNT_SET: 0,
+  GOVERNANCE_VOTE_EXPIRATION_SOON: 1,
+  GOVERNANCE_VOTE_EXPIRED: 2,
+  RECOVERY_ACCOUNT_IS_CHANGING: 3,
+  DECLINING_VOTING_RIGHTS: 4
+} as const;
+
+export type EAlarmType = typeof EAlarmType[keyof typeof EAlarmType];
 
 export type TAlarmAccounts<TAccounts extends Array<TAccountName>> = {
   [K in TAccounts[number]]: WorkerBeeIterable<EAlarmType>;
