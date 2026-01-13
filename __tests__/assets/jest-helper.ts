@@ -1,9 +1,10 @@
 /* eslint-disable no-console */
-import { IHiveChainInterface } from "@hiveio/wax";
-import { ConsoleMessage, Page, test as base, expect } from "@playwright/test";
+import type { IHiveChainInterface } from "@hiveio/wax";
+import { test as base, expect } from "@playwright/test";
+import type { ConsoleMessage, Page } from "@playwright/test";
 
 import "./globals";
-import type { IWorkerBee } from "../../dist/bundle";
+import type { IWorkerBee } from "../../src/index";
 import type { TPastQueen } from "../../src/past-queen";
 import type { QueenBee } from "../../src/queen";
 import type { IWorkerBeeGlobals, TEnvType } from "./globals";

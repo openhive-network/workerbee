@@ -26,10 +26,11 @@ export abstract class AProxyMockResolver {
 }
 
 export class JsonRpcMock extends AProxyMockResolver {
-  public constructor(
-    private readonly mockData: TMockData
-  ) {
+  private readonly mockData: TMockData;
+
+  public constructor(mockData: TMockData) {
     super();
+    this.mockData = mockData;
   }
 
   public hasHandler (req: Request): boolean {
