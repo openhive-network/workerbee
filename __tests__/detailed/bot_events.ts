@@ -46,7 +46,7 @@ test.describe("WorkerBee Bot events test", () => {
 
       bot.start();
 
-      await bot.broadcast(newTx, { verifySignatures: true, expireInMs: 20_000 });
+      await bot.broadcast(newTx, { verifySignatures: true, expireInMs: 10_000 });
 
       bot.delete();
     });

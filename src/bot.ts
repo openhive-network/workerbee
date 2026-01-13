@@ -75,19 +75,28 @@ export class WorkerBee implements IWorkerBee {
 
     const apiTx = this.chain!.createTransactionFromJson(toBroadcast);
 
-    let timeoutId: NodeJS.Timeout | undefined = undefined;
-
-    const blocksAnalyzed: number[] = [];
-
     return new Promise<void>((resolve, reject) => {
-      const listener = this.observe.onTransactionIds(apiTx.id, apiTx.legacy_id).onBlock().subscribe({
-        next(val) {
-          const transaction = val.transactions[apiTx.id] || val.transactions[apiTx.legacy_id];
-          if (transaction === undefined) {
-            blocksAnalyzed.push(val.block.number);
+      const txId = apiTx.id;
+      const legacyTxId = apiTx.legacy_id;
 
+      let firstBlock: number | undefined = undefined;
+      let lastBlock: number | undefined = undefined;
+      let lastBlockchainTime: Date | undefined = undefined;
+
+      let timeoutId: NodeJS.Timeout | undefined = undefined;
+
+      const listener = this.observe.onTransactionIds(txId, legacyTxId).onBlock().subscribe({
+        next(val) {
+          if (firstBlock === undefined)
+            firstBlock = val.block.number;
+
+          lastBlockchainTime = val.block.timestamp;
+          lastBlock = val.block.number;
+
+          const transaction = val.transactions[txId] || val.transactions[legacyTxId];
+          if (transaction === undefined)
             return;
-          }
+
 
           clearTimeout(timeoutId);
           listener.unsubscribe();
@@ -123,14 +132,19 @@ export class WorkerBee implements IWorkerBee {
         timeoutId = setTimeout(async() => {
           listener.unsubscribe();
           const txTime = dateFromString(apiTx.transaction.expiration);
-          let errorMessage = `Transaction #${apiTx.id} broadcasted successfully, but listener has expired.\n`;
-          errorMessage += `Blocks analyzed: ${blocksAnalyzed.join(", ") || "(none)"}\nTransaction broadcast metadata:\n`;
+          let errorMessage = `Transaction #${txId} (legacy: #${legacyTxId}) broadcasted successfully, but listener has expired.\n`;
+          errorMessage += `Blocks analyzed: ${lastBlock ? (firstBlock === lastBlock ? firstBlock : `${firstBlock} - ${lastBlock}`) : "(none)"}\n`;
+          errorMessage += "Transaction broadcast metadata:\n";
           errorMessage += `  - Current timestamp:           ${new Date().toISOString()}\n`;
           errorMessage += `  - Transaction expiration time: ${txTime.toISOString()}\n`;
           try {
-            const { time } = await this.chain!.api.database_api.get_dynamic_global_properties({});
-            const headBlockTime = dateFromString(time);
-            errorMessage += `  - Head block blockchain time:  ${headBlockTime.toISOString()}`;
+            if (!lastBlockchainTime) {
+              const { time } = await this.chain!.api.database_api.get_dynamic_global_properties({});
+              // We do not care about race condition in this case - Blockchain time is only informational
+              /* eslint-disable-next-line require-atomic-updates */
+              lastBlockchainTime = dateFromString(time);
+            }
+            errorMessage += `  - Head block blockchain time:  ${lastBlockchainTime.toISOString()}`;
           } catch {
             errorMessage += "  - (!) Unable to retrieve the blockchain time";
           }
