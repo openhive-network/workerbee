@@ -1,6 +1,6 @@
 import { Comment } from "./Comment";
 import { DataProvider } from "./DataProvider";
-import { IPostCommentIdentity, IReply } from "./interfaces";
+import type { IPostCommentIdentity, IReply } from "./interfaces";
 
 export class Reply extends Comment implements IReply {
   public parent: IPostCommentIdentity;

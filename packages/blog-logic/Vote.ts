@@ -1,6 +1,6 @@
 import { WorkerBeeError } from "../../src/errors";
 import { DataProvider } from "./DataProvider";
-import { IPostCommentIdentity, IVote } from "./interfaces";
+import type { IPostCommentIdentity, IVote } from "./interfaces";
 
 export class Vote implements IVote {
   public parentComment: IPostCommentIdentity;

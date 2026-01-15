@@ -1,6 +1,6 @@
 import { Comment } from "./Comment";
 import { DataProvider } from "./DataProvider";
-import { ICommonFilters, ICommunityIdentity, IPagination, IPost, IPostCommentIdentity, IReply } from "./interfaces";
+import type { ICommonFilters, ICommunityIdentity, IPagination, IPost, IPostCommentIdentity, IReply } from "./interfaces";
 import { Reply } from "./Reply";
 
 export class Post extends Comment implements IPost  {
@@ -13,16 +13,21 @@ export class Post extends Comment implements IPost  {
 
   private postImage?: string;
 
+  /** All images from json_metadata */
+  public readonly images: readonly string[];
+
   public constructor(authorPermlink: IPostCommentIdentity, dataProvider: DataProvider) {
     super(authorPermlink, dataProvider);
     const post = dataProvider.getComment(authorPermlink);
+    const metadata = post?.json_metadata as { tags?: string[]; description?: string; image?: string[] } | undefined;
     this.title = post?.title || "";
-    this.tags = post?.json_metadata?.tags || [];
-    this.summary = post?.json_metadata?.description || "";
+    this.tags = metadata?.tags || [];
+    this.summary = metadata?.description || "";
     this.community = post?.community ? {name: post.community} : undefined;
     this.communityTitle = post?.community_title
-    this.postImage = post?.json_metadata.image?.[0];
+    this.postImage = metadata?.image?.[0];
 
+    this.images = metadata?.image ?? [];
   }
 
 

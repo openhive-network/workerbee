@@ -1,7 +1,7 @@
 import {
   createHiveChain,
-  TWaxExtended,
-  TWaxRestExtended
+  type TWaxExtended,
+  type TWaxRestExtended
 } from "@hiveio/wax";
 import HafbeExtendedData from "@hiveio/wax-api-hafbe";
 import WaxExtendedData from "@hiveio/wax-api-jsonrpc";

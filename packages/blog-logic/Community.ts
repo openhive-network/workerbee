@@ -1,6 +1,6 @@
 import { WorkerBeeError } from "../../src/errors";
 import { DataProvider } from "./DataProvider";
-import { ICommunity } from "./interfaces";
+import type { ICommunity } from "./interfaces";
 
 export class Community implements ICommunity {
   public readonly name: string;

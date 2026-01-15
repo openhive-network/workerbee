@@ -1,10 +1,10 @@
-import {HafbeTypesAccount} from "@hiveio/wax-api-hafbe"
-import {Community as CommunityData, PostBridgeApi, ActiveVotesDatabaseApi} from "@hiveio/wax-api-jsonrpc";
+import type { HafbeTypesAccount } from "@hiveio/wax-api-hafbe"
+import type { Community as CommunityData, PostBridgeApi, ActiveVotesDatabaseApi } from "@hiveio/wax-api-jsonrpc";
 import { WorkerBeeError } from "../../src/errors";
 import { BloggingPlaform } from "./BloggingPlatform";
-import { ICommonFilters, ICommunityFilters, IPagination, IPostCommentIdentity, IPostFilters, IVotesFilters } from "./interfaces";
+import type { IAccountPostsFilters, ICommonFilters, ICommunityFilters, IPagination, IPostCommentIdentity, IPostFilters, IVotesFilters } from "./interfaces";
 import { paginateData } from "./utils";
-import { WaxExtendedChain } from "./wax";
+import type { WaxExtendedChain } from "./wax";
 
 /**
  * Main class to call all of Blog Logic. The class is responsible for making instances of Blog Logic's objects and
@@ -62,6 +62,25 @@ export class DataProvider {
       this.comments.set(this.convertCommentIdToHash(postId), post);
     })
     return paginatedPosts.map((post) => ({author: post.author, permlink: post.permlink}));
+  }
+
+  /**
+   * Fetch posts for a specific account using bridge.get_account_posts
+   */
+  public async enumAccountPosts(filter: IAccountPostsFilters, pagination: IPagination): Promise<IPostCommentIdentity[]> {
+    const posts = await this.chain.api.bridge.get_account_posts({
+      sort: filter.sort,
+      account: filter.account,
+      observer: this.bloggingPlatform.viewerContext.name,
+      limit: pagination.pageSize,
+    });
+    if (!posts)
+      throw new WorkerBeeError("Posts not found");
+    posts.forEach((post) => {
+      const postId = {author: post.author, permlink: post.permlink}
+      this.comments.set(this.convertCommentIdToHash(postId), post);
+    })
+    return posts.map((post) => ({author: post.author, permlink: post.permlink}));
   }
 
   public getRepliesIdsByPost(postId: IPostCommentIdentity): IPostCommentIdentity[] | null {

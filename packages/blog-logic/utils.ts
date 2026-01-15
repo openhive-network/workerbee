@@ -1,4 +1,4 @@
-import { IPagination } from "./interfaces";
+import type { IPagination } from "./interfaces";
 
 export const paginateData = <T>(data: T[], pagination: IPagination): T[] => {
   const {page, pageSize} = pagination
