@@ -71,6 +71,7 @@ test:
 push_to_wiki:
   extends: .npm_push_doc_template
   stage: deploy
+  allow_failure: true  # Cleanup step fails due to proxy - see hive/common-ci-configuration issue
   variables:
     WIKI_PUSH_TOKEN: "$WIKI_PUSH_TOKEN"
     DIST_DIR: "$CI_PROJECT_DIR/dist"
