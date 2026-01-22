@@ -75,6 +75,8 @@ push_to_wiki:
     WIKI_PUSH_TOKEN: "$WIKI_PUSH_TOKEN"
     DIST_DIR: "$CI_PROJECT_DIR/dist"
   before_script:
+    - git config --global --unset-all http.proxy || true
+    - git config --global --unset-all https.proxy || true
     - export PACKAGE_TGZ_PATH="${DIST_DIR}/$(basename ${BUILT_PACKAGE_PATH})"
     - !reference [.npm_push_doc_template, before_script]
   needs:
