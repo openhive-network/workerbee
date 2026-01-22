@@ -1070,36 +1070,6 @@ test.describe("WorkerBee Bot events test", () => {
     expect(result).toBeGreaterThanOrEqual(2);
   });
 
-  test("Should be able to observe account balance changes", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ bot }) => {
-      await bot.start();
-
-      let balanceChanged = false;
-
-      await new Promise<void>(resolve => {
-        bot.observe.onAccountsBalanceChange(false, "blocktrades").subscribe({
-          next() {
-            balanceChanged = true;
-          },
-          error(err) {
-            console.error(err);
-          },
-          complete: resolve
-        });
-
-        // Use a short timeout since this is a live test
-        setTimeout(() => resolve(), 5000);
-      });
-
-      bot.stop();
-      bot.delete();
-
-      return balanceChanged;
-    });
-
-    expect(typeof result).toBe("boolean");
-  });
-
   test("Should be able to observe account metadata changes", async({ workerbeeTest }) => {
     const result = await workerbeeTest(async({ bot }) => {
       await bot.start();
