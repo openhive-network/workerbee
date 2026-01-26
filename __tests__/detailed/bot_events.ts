@@ -1071,7 +1071,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe account balance changes", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ bot }) => {
+    const result = await workerbeeTest.dynamic(async({ bot }) => {
       await bot.start();
 
       let balanceChanged = false;
@@ -1101,7 +1101,7 @@ test.describe("WorkerBee Bot events test", () => {
   });
 
   test("Should be able to observe account metadata changes", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ bot }) => {
+    const result = await workerbeeTest.dynamic(async({ bot }) => {
       await bot.start();
 
       let metadataChanged = false;
