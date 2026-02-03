@@ -1,0 +1,25 @@
+{
+  "name": "hive-blog-logic",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "private": false,
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "contributors": [],
+  "dependencies": {
+    "@hiveio/wax": "1.28.4-rc0-stable.260110090505",
+    "@hiveio/wax-api-hafbe": "1.28.4",
+    "@hiveio/wax-api-jsonrpc": "^1.28.4"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.5"
+  }
+}

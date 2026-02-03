@@ -14,6 +14,14 @@
         }
       }
     },
+    "./blog-logic": {
+      "default": {
+        "import": {
+          "types": "./dist/blog-logic/index.d.ts",
+          "default": "./dist/blog-logic/index.js"
+        }
+      }
+    },
     "./package.json": "./package.json"
   },
   "type": "module",
@@ -23,7 +31,7 @@
     "lint": "npm run lint-ci -- --fix",
     "lint-ci": "eslint --max-warnings=0",
     "prebuild": "ls-engines && husky",
-    "build": "tsc",
+    "build": "tsc && tsc -p packages/blog-logic",
     "postbuild": "rollup -c && tsx ./npm-common-config/ts-common/terser.ts && size-limit",
     "pretest": "playwright install chromium",
     "test": "unset CI && playwright test --workers 4 --max-failures 1 --project=workerbee_testsuite --project=workerbee_testsuite_mock"
@@ -42,7 +50,9 @@
     "README.md",
     "package.json",
     "dist/bundle/index.d.ts",
-    "dist/bundle/index.js"
+    "dist/bundle/index.js",
+    "dist/blog-logic/index.d.ts",
+    "dist/blog-logic/index.js"
   ],
   "devDependencies": {
     "@eslint/compat": "^1.2.7",

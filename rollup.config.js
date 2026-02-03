@@ -35,5 +35,30 @@ export default [
     plugins: [
       dts()
     ]
+  },
+  // Blog-logic bundle
+  {
+    input: "packages/blog-logic/dist/index.js",
+    output: {
+      format: "es",
+      name: "blog-logic",
+      file: "dist/blog-logic/index.js"
+    },
+    plugins: [
+      nodeResolve({
+        preferBuiltins: false,
+        browser: false,
+        resolveOnly: () => false
+      }),
+      commonjs()
+    ]
+  }, {
+    input: "packages/blog-logic/dist/index.d.ts",
+    output: [
+      { file: "dist/blog-logic/index.d.ts", format: "es" }
+    ],
+    plugins: [
+      dts()
+    ]
   }
 ];

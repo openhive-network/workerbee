@@ -47,7 +47,7 @@ export class MentionedAccountProvider<TMentions extends Array<TAccountName> = Ar
 
         postMetadataSet.add(postHash);
 
-        const mentionRegex = /@([a-z0-9.-]+)/gi;
+        const mentionRegex = /@([a-z]+[a-z0-9.-]+[a-z0-9]+\b)/g;
         let match: RegExpExecArray | null;
         let foundMention = false;
         while ((match = mentionRegex.exec(operation.body)) !== null && !foundMention) {

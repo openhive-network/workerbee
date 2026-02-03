@@ -26,7 +26,7 @@ export class PostMentionFilter extends FilterBase {
 
     for(const { operation: { body } } of (operationsPerType.comment_operation ?? [])) {
       // Use regex to find all account mentions in the form of @username
-      const mentionRegex = /@([a-z0-9.-]+)/gi;
+      const mentionRegex = /@([a-z]+[a-z0-9.-]+[a-z0-9]+\b)/g;
       let match: RegExpExecArray | null;
       while ((match = mentionRegex.exec(body)) !== null) {
         const mentionedAccount = match[1] as TAccountName;
