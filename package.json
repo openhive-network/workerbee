@@ -43,6 +43,13 @@
       ],
       "limit": "181 kB",
       "brotli": false
+    },
+    {
+      "path": [
+        "./dist/blog-logic"
+      ],
+      "limit": "46 kB",
+      "brotli": false
     }
   ],
   "files": [
