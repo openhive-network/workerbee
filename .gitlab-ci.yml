@@ -118,3 +118,49 @@ deploy_production_public_npm:
     - job: push_to_wiki
     - job: build
       artifacts: true
+
+# =============================================================================
+# GitHub Pages Documentation Deployment
+# =============================================================================
+# Deploys versioned documentation to a dedicated GitHub repository.
+# Triggered on develop branch and version tags.
+# Requires GITHUB_PAGES_TOKEN CI variable with repo write access.
+
+generate_html_docs:
+  stage: build
+  extends: .npm_based_job_base
+  variables:
+    DIST_DIR: "$CI_PROJECT_DIR/dist"
+  script:
+    # BUILT_PACKAGE_VERSION is automatically available from build job's dotenv artifact
+    - ${CI_PROJECT_DIR}/scripts/generate_html_docs.sh "https://github.com/openhive-network/workerbee" "${CI_COMMIT_SHA}" "${CI_PROJECT_DIR}/docs-output/ts" "${BUILT_PACKAGE_VERSION}"
+  needs:
+    - job: build
+      artifacts: true
+  artifacts:
+    paths:
+      - "${CI_PROJECT_DIR}/docs-output/ts"
+    when: always
+    expire_in: 1 week
+  rules:
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+  tags:
+    - public-runner-docker
+
+deploy_to_github_pages:
+  stage: deploy
+  image: node:20
+  variables:
+    DIST_DIR: "$CI_PROJECT_DIR/dist"
+    GITHUB_REPO: "openhive-network/hive-doc"
+  needs:
+    - job: generate_html_docs
+      artifacts: true
+    - job: generate_docs
+      artifacts: true
+  script:
+    - ${CI_PROJECT_DIR}/scripts/deploy_github_pages.sh "${CI_COMMIT_REF_SLUG}" "${CI_PROJECT_DIR}/docs-output/ts" "${DIST_DIR}/docs" "wiki" "${GITHUB_REPO}" "${GITHUB_PAGES_TOKEN}" "workerbee"
+  rules:
+    - if: '$CI_COMMIT_REF_PROTECTED == "true" && $GITHUB_PAGES_TOKEN'
+  tags:
+    - public-runner-docker
