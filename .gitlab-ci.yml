@@ -8,18 +8,13 @@ variables:
   GIT_DEPTH: 0
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
-  # Reference for GitHub Pages scripts from common-ci-configuration
-  COMMON_CI_GITHUB_PAGES_REF: "8668a730c5a9ff78ee9597ba430e7e95088fa9b0"
 
 include:
   - template: Workflows/Branch-Pipelines.gitlab-ci.yml
   - project: 'hive/common-ci-configuration'
-    ref: 296649fb125e2cb3f22686f2c2bd662b19e17c72
+    ref: 13581fecea817f76e96644880f4fb7490c315777
     file:
       - '/templates/npm_projects.gitlab-ci.yml'
-  - project: 'hive/common-ci-configuration'
-    ref: 8668a730c5a9ff78ee9597ba430e7e95088fa9b0
-    file:
       - '/templates/github_pages.gitlab-ci.yml'
 
 default:
