@@ -66,7 +66,7 @@
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.20.0",
     "@hiveio/beekeeper": "1.28.4-rc0",
-    "@hiveio/wax": "1.28.4-rc0-stable.260110090505",
+    "@hiveio/wax": "2.0.1",
     "@playwright/test": "catalog:playwright-toolset",
     "@rollup/plugin-commonjs": "catalog:rollup-toolset",
     "@rollup/plugin-node-resolve": "catalog:rollup-toolset",
@@ -103,7 +103,7 @@
     "typescript": "catalog:typescript-toolset"
   },
   "peerDependencies": {
-    "@hiveio/wax": ">= 1.28.4-rc0 < 1.28.5"
+    "@hiveio/wax": ">= 2.0.0 < 2.1.0"
   },
   "repository": {
     "type": "git",

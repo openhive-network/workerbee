@@ -11,14 +11,14 @@ catalogs:
       version: 9.1.5
   playwright-toolset:
     '@playwright/test':
-      specifier: 1.50.1
-      version: 1.50.1
+      specifier: 1.57.0
+      version: 1.57.0
     http-server:
       specifier: 14.1.1
       version: 14.1.1
     playwright:
-      specifier: 1.50.1
-      version: 1.50.1
+      specifier: 1.57.0
+      version: 1.57.0
   rollup-toolset:
     '@rollup/plugin-commonjs':
       specifier: 27.0.0
@@ -84,11 +84,11 @@ importers:
         specifier: 1.28.4-rc0
         version: 1.28.4-rc0
       '@hiveio/wax':
-        specifier: 1.28.4-rc0-stable.260110090505
-        version: 1.28.4-rc0-stable.260110090505
+        specifier: 2.0.1
+        version: 2.0.1
       '@playwright/test':
         specifier: catalog:playwright-toolset
-        version: 1.50.1
+        version: 1.57.0
       '@rollup/plugin-commonjs':
         specifier: catalog:rollup-toolset
         version: 27.0.0(rollup@4.24.0)
@@ -154,7 +154,7 @@ importers:
         version: 0.9.3
       playwright:
         specifier: catalog:playwright-toolset
-        version: 1.50.1
+        version: 1.57.0
       process:
         specifier: ^0.11.10
         version: 0.11.10
@@ -442,6 +442,10 @@ packages:
     resolution: {integrity: sha1-ULIi9pHMANKm7tWf2wI+cJk3Gxs=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.28.4-rc0-stable.260110090505.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
+  '@hiveio/wax@2.0.1':
+    resolution: {integrity: sha1-xzNjk9sjmr1JhBanfX/NcIsoYDU=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-2.0.1.tgz}
+    engines: {node: ^20.11 || >= 21.2}
+
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
     engines: {node: '>=18.18.0'}
@@ -565,8 +569,8 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@playwright/test@1.50.1':
-    resolution: {integrity: sha512-Jii3aBg+CEDpgnuDxEp/h7BimHcUTDlpEtce89xEumlJ5ef2hqepZ+PWp1DDpYC/VO9fmWVI1IlEaoI5fK9FXQ==}
+  '@playwright/test@1.57.0':
+    resolution: {integrity: sha512-6TyEnHgd6SArQO8UO2OMTxshln3QMWBtPGrOCgs3wVEmQmwyuNtB10IZMfmYDE0riwNR1cu4q+pPcxMVtaG3TA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -2414,13 +2418,13 @@ packages:
     engines: {node: '>=0.10'}
     hasBin: true
 
-  playwright-core@1.50.1:
-    resolution: {integrity: sha512-ra9fsNWayuYumt+NiM069M6OkcRb1FZSK8bgi66AtpFoWkg2+y0bJSNmkFrWhMbEBbVKC/EruAHH3g0zmtwGmQ==}
+  playwright-core@1.57.0:
+    resolution: {integrity: sha512-agTcKlMw/mjBWOnD6kFZttAAGHgi/Nw0CZ2o6JqWSbMlI219lAFLZZCyqByTsvVAJq5XA5H8cA6PrvBRpBWEuQ==}
     engines: {node: '>=18'}
     hasBin: true
 
-  playwright@1.50.1:
-    resolution: {integrity: sha512-G8rwsOQJ63XG6BbKj2w5rHeavFjy5zynBA9zsJMMtBoe/Uf757oG12NXz6e6OirF7RCrTVAKFXbLmn1RbL7Qaw==}
+  playwright@1.57.0:
+    resolution: {integrity: sha512-ilYQj1s8sr2ppEJ2YVadYBN0Mb3mdo9J0wQ+UuDhzYqURwSoW4n1Xs5vs7ORwgDGmyEh33tRMeS8KhdkMoLXQw==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -3251,6 +3255,10 @@ snapshots:
     dependencies:
       events: 3.3.0
 
+  '@hiveio/wax@2.0.1':
+    dependencies:
+      events: 3.3.0
+
   '@humanfs/core@0.19.1': {}
 
   '@humanfs/node@0.16.6':
@@ -3435,9 +3443,9 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@playwright/test@1.50.1':
+  '@playwright/test@1.57.0':
     dependencies:
-      playwright: 1.50.1
+      playwright: 1.57.0
 
   '@rollup/plugin-commonjs@27.0.0(rollup@4.24.0)':
     dependencies:
@@ -5629,11 +5637,11 @@ snapshots:
 
   pidtree@0.6.0: {}
 
-  playwright-core@1.50.1: {}
+  playwright-core@1.57.0: {}
 
-  playwright@1.50.1:
+  playwright@1.57.0:
     dependencies:
-      playwright-core: 1.50.1
+      playwright-core: 1.57.0
     optionalDependencies:
       fsevents: 2.3.2
 
