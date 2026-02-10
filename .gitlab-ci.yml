@@ -9,17 +9,14 @@ variables:
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
   # Reference for GitHub Pages scripts from common-ci-configuration
-  COMMON_CI_GITHUB_PAGES_REF: "8668a730c5a9ff78ee9597ba430e7e95088fa9b0"
+  COMMON_CI_GITHUB_PAGES_REF: "7b42a5584d854c2aee4b7e02cfd3de2bc4e8d77e"
 
 include:
   - template: Workflows/Branch-Pipelines.gitlab-ci.yml
   - project: 'hive/common-ci-configuration'
-    ref: 296649fb125e2cb3f22686f2c2bd662b19e17c72
+    ref: 7b42a5584d854c2aee4b7e02cfd3de2bc4e8d77e
     file:
       - '/templates/npm_projects.gitlab-ci.yml'
-  - project: 'hive/common-ci-configuration'
-    ref: 8668a730c5a9ff78ee9597ba430e7e95088fa9b0
-    file:
       - '/templates/github_pages.gitlab-ci.yml'
 
 default:
@@ -67,9 +64,6 @@ test:
   extends: .npm_test_template
   variables:
     DIST_DIR: "$CI_PROJECT_DIR/dist"
-  before_script:
-    - export PACKAGE_TGZ_PATH="${DIST_DIR}/$(basename ${BUILT_PACKAGE_PATH})"
-    - !reference [.npm_test_template, before_script]
   needs:
     - job: build
       artifacts: true
@@ -80,9 +74,6 @@ push_to_wiki:
   variables:
     WIKI_PUSH_TOKEN: "$WIKI_PUSH_TOKEN"
     DIST_DIR: "$CI_PROJECT_DIR/dist"
-  before_script:
-    - export PACKAGE_TGZ_PATH="${DIST_DIR}/$(basename ${BUILT_PACKAGE_PATH})"
-    - !reference [.npm_push_doc_template, before_script]
   needs:
     - job: build
       artifacts: true
@@ -95,9 +86,6 @@ deploy_dev_package:
   variables:
     NPM_PACKAGE_SCOPE: "@hiveio"
     DIST_DIR: "$CI_PROJECT_DIR/dist"
-  before_script:
-    - export PACKAGE_TGZ_PATH="${DIST_DIR}/$(basename ${BUILT_PACKAGE_PATH})"
-    - !reference [.npm_deploy_package_template, before_script]
   needs:
     - job: test
     - job: push_to_wiki
@@ -115,9 +103,6 @@ deploy_production_public_npm:
     NPM_PACKAGE_NAME: "workerbee"
     NPM_PROVENANCE_ENABLE: "0" # XXX: Temporarly disable as it is not working - we have to find a way to get it working
     DIST_DIR: "$CI_PROJECT_DIR/dist"
-  before_script:
-    - export PACKAGE_TGZ_PATH="${DIST_DIR}/$(basename ${BUILT_PACKAGE_PATH})"
-    - !reference [.registry_npmjs_org_deploy_package_template, before_script]
   needs:
     - job: deploy_dev_package
     - job: test
