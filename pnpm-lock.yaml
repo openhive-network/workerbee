@@ -11,14 +11,14 @@ catalogs:
       version: 9.1.5
   playwright-toolset:
     '@playwright/test':
-      specifier: 1.57.0
-      version: 1.57.0
+      specifier: 1.50.1
+      version: 1.50.1
     http-server:
       specifier: 14.1.1
       version: 14.1.1
     playwright:
-      specifier: 1.57.0
-      version: 1.57.0
+      specifier: 1.50.1
+      version: 1.50.1
   rollup-toolset:
     '@rollup/plugin-commonjs':
       specifier: 27.0.0
@@ -81,14 +81,14 @@ importers:
         specifier: ^9.20.0
         version: 9.20.0
       '@hiveio/beekeeper':
-        specifier: 1.28.4-rc0
-        version: 1.28.4-rc0
+        specifier: 1.28.7-rc0
+        version: 1.28.7-rc0
       '@hiveio/wax':
-        specifier: 2.0.1
-        version: 2.0.1
+        specifier: 2.0.2
+        version: 2.0.2
       '@playwright/test':
         specifier: catalog:playwright-toolset
-        version: 1.57.0
+        version: 1.50.1
       '@rollup/plugin-commonjs':
         specifier: catalog:rollup-toolset
         version: 27.0.0(rollup@4.24.0)
@@ -154,7 +154,7 @@ importers:
         version: 0.9.3
       playwright:
         specifier: catalog:playwright-toolset
-        version: 1.57.0
+        version: 1.50.1
       process:
         specifier: ^0.11.10
         version: 0.11.10
@@ -192,8 +192,8 @@ importers:
   packages/blog-logic:
     dependencies:
       '@hiveio/wax':
-        specifier: 1.28.4-rc0-stable.260110090505
-        version: 1.28.4-rc0-stable.260110090505
+        specifier: 2.0.2
+        version: 2.0.2
       '@hiveio/wax-api-hafbe':
         specifier: 1.28.4
         version: 1.28.4
@@ -428,8 +428,8 @@ packages:
   '@gerrit0/mini-shiki@1.27.2':
     resolution: {integrity: sha512-GeWyHz8ao2gBiUW4OJnQDxXQnFgZQwwQk05t/CVVgNBN7/rK8XZ7xY6YhLVv9tH3VppWWmr9DCl3MwemB/i+Og==}
 
-  '@hiveio/beekeeper@1.28.4-rc0':
-    resolution: {integrity: sha1-qLgaAY/l+gXAdleuIeyaMAo6wxA=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.28.4-rc0.tgz}
+  '@hiveio/beekeeper@1.28.7-rc0':
+    resolution: {integrity: sha1-0pywM0DVGcHO6mrEB0nKZ9BjSDo=, tarball: https://gitlab.syncad.com/api/v4/projects/558/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.28.7-rc0.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
   '@hiveio/wax-api-hafbe@1.28.4':
@@ -438,12 +438,8 @@ packages:
   '@hiveio/wax-api-jsonrpc@1.28.4':
     resolution: {integrity: sha1-FU095wjBfkCpgI2w9qnT0J0hJSU=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/wax-api-jsonrpc/-/@hiveio/wax-api-jsonrpc-1.28.4.tgz}
 
-  '@hiveio/wax@1.28.4-rc0-stable.260110090505':
-    resolution: {integrity: sha1-ULIi9pHMANKm7tWf2wI+cJk3Gxs=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.28.4-rc0-stable.260110090505.tgz}
-    engines: {node: ^20.11 || >= 21.2}
-
-  '@hiveio/wax@2.0.1':
-    resolution: {integrity: sha1-xzNjk9sjmr1JhBanfX/NcIsoYDU=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-2.0.1.tgz}
+  '@hiveio/wax@2.0.2':
+    resolution: {integrity: sha1-3JurSNe7ALUNgewAEnlsgdbPxHw=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-2.0.2.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
   '@humanfs/core@0.19.1':
@@ -569,8 +565,8 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@playwright/test@1.57.0':
-    resolution: {integrity: sha512-6TyEnHgd6SArQO8UO2OMTxshln3QMWBtPGrOCgs3wVEmQmwyuNtB10IZMfmYDE0riwNR1cu4q+pPcxMVtaG3TA==}
+  '@playwright/test@1.50.1':
+    resolution: {integrity: sha512-Jii3aBg+CEDpgnuDxEp/h7BimHcUTDlpEtce89xEumlJ5ef2hqepZ+PWp1DDpYC/VO9fmWVI1IlEaoI5fK9FXQ==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -2418,13 +2414,13 @@ packages:
     engines: {node: '>=0.10'}
     hasBin: true
 
-  playwright-core@1.57.0:
-    resolution: {integrity: sha512-agTcKlMw/mjBWOnD6kFZttAAGHgi/Nw0CZ2o6JqWSbMlI219lAFLZZCyqByTsvVAJq5XA5H8cA6PrvBRpBWEuQ==}
+  playwright-core@1.50.1:
+    resolution: {integrity: sha512-ra9fsNWayuYumt+NiM069M6OkcRb1FZSK8bgi66AtpFoWkg2+y0bJSNmkFrWhMbEBbVKC/EruAHH3g0zmtwGmQ==}
     engines: {node: '>=18'}
     hasBin: true
 
-  playwright@1.57.0:
-    resolution: {integrity: sha512-ilYQj1s8sr2ppEJ2YVadYBN0Mb3mdo9J0wQ+UuDhzYqURwSoW4n1Xs5vs7ORwgDGmyEh33tRMeS8KhdkMoLXQw==}
+  playwright@1.50.1:
+    resolution: {integrity: sha512-G8rwsOQJ63XG6BbKj2w5rHeavFjy5zynBA9zsJMMtBoe/Uf757oG12NXz6e6OirF7RCrTVAKFXbLmn1RbL7Qaw==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -3245,17 +3241,13 @@ snapshots:
       '@shikijs/types': 1.29.2
       '@shikijs/vscode-textmate': 10.0.1
 
-  '@hiveio/beekeeper@1.28.4-rc0': {}
+  '@hiveio/beekeeper@1.28.7-rc0': {}
 
   '@hiveio/wax-api-hafbe@1.28.4': {}
 
   '@hiveio/wax-api-jsonrpc@1.28.4': {}
 
-  '@hiveio/wax@1.28.4-rc0-stable.260110090505':
-    dependencies:
-      events: 3.3.0
-
-  '@hiveio/wax@2.0.1':
+  '@hiveio/wax@2.0.2':
     dependencies:
       events: 3.3.0
 
@@ -3443,9 +3435,9 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@playwright/test@1.57.0':
+  '@playwright/test@1.50.1':
     dependencies:
-      playwright: 1.57.0
+      playwright: 1.50.1
 
   '@rollup/plugin-commonjs@27.0.0(rollup@4.24.0)':
     dependencies:
@@ -5637,11 +5629,11 @@ snapshots:
 
   pidtree@0.6.0: {}
 
-  playwright-core@1.57.0: {}
+  playwright-core@1.50.1: {}
 
-  playwright@1.57.0:
+  playwright@1.50.1:
     dependencies:
-      playwright-core: 1.57.0
+      playwright-core: 1.50.1
     optionalDependencies:
       fsevents: 2.3.2
 

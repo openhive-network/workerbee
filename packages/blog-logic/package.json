@@ -15,7 +15,7 @@
   },
   "contributors": [],
   "dependencies": {
-    "@hiveio/wax": "1.28.4-rc0-stable.260110090505",
+    "@hiveio/wax": "2.0.2",
     "@hiveio/wax-api-hafbe": "1.28.4",
     "@hiveio/wax-api-jsonrpc": "^1.28.4"
   },
