@@ -12,7 +12,7 @@ variables:
 include:
   - template: Workflows/Branch-Pipelines.gitlab-ci.yml
   - project: 'hive/common-ci-configuration'
-    ref: 13581fecea817f76e96644880f4fb7490c315777
+    ref: de95661b1be71e968f623945609dc384aefecfe2
     file:
       - '/templates/npm_projects.gitlab-ci.yml'
       - '/templates/github_pages.gitlab-ci.yml'

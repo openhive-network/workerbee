@@ -11,14 +11,14 @@ catalogs:
       version: 9.1.5
   playwright-toolset:
     '@playwright/test':
-      specifier: 1.57.0
-      version: 1.57.0
+      specifier: 1.58.2
+      version: 1.58.2
     http-server:
       specifier: 14.1.1
       version: 14.1.1
     playwright:
-      specifier: 1.57.0
-      version: 1.57.0
+      specifier: 1.58.2
+      version: 1.58.2
   rollup-toolset:
     '@rollup/plugin-commonjs':
       specifier: 27.0.0
@@ -81,14 +81,14 @@ importers:
         specifier: ^9.20.0
         version: 9.20.0
       '@hiveio/beekeeper':
-        specifier: 1.28.4-rc0
-        version: 1.28.4-rc0
+        specifier: 1.28.7-rc0
+        version: 1.28.7-rc0
       '@hiveio/wax':
-        specifier: 2.0.0
-        version: 2.0.0
+        specifier: 2.0.2-stable.260302212055
+        version: 2.0.2-stable.260302212055
       '@playwright/test':
         specifier: catalog:playwright-toolset
-        version: 1.57.0
+        version: 1.58.2
       '@rollup/plugin-commonjs':
         specifier: catalog:rollup-toolset
         version: 27.0.0(rollup@4.24.0)
@@ -154,7 +154,7 @@ importers:
         version: 0.9.3
       playwright:
         specifier: catalog:playwright-toolset
-        version: 1.57.0
+        version: 1.58.2
       process:
         specifier: ^0.11.10
         version: 0.11.10
@@ -428,8 +428,8 @@ packages:
   '@gerrit0/mini-shiki@1.27.2':
     resolution: {integrity: sha512-GeWyHz8ao2gBiUW4OJnQDxXQnFgZQwwQk05t/CVVgNBN7/rK8XZ7xY6YhLVv9tH3VppWWmr9DCl3MwemB/i+Og==}
 
-  '@hiveio/beekeeper@1.28.4-rc0':
-    resolution: {integrity: sha1-qLgaAY/l+gXAdleuIeyaMAo6wxA=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.28.4-rc0.tgz}
+  '@hiveio/beekeeper@1.28.7-rc0':
+    resolution: {integrity: sha1-0pywM0DVGcHO6mrEB0nKZ9BjSDo=, tarball: https://gitlab.syncad.com/api/v4/projects/558/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.28.7-rc0.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
   '@hiveio/wax-api-hafbe@1.28.4':
@@ -442,8 +442,8 @@ packages:
     resolution: {integrity: sha1-ULIi9pHMANKm7tWf2wI+cJk3Gxs=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.28.4-rc0-stable.260110090505.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
-  '@hiveio/wax@2.0.0':
-    resolution: {integrity: sha1-OFnRwVJPMaO2WsvKrFwmXf+MPcc=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-2.0.0.tgz}
+  '@hiveio/wax@2.0.2-stable.260302212055':
+    resolution: {integrity: sha1-0yvuC2mSfFWx0sZGLD5S0Y6dHCQ=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-2.0.2-stable.260302212055.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
   '@humanfs/core@0.19.1':
@@ -569,8 +569,8 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@playwright/test@1.57.0':
-    resolution: {integrity: sha512-6TyEnHgd6SArQO8UO2OMTxshln3QMWBtPGrOCgs3wVEmQmwyuNtB10IZMfmYDE0riwNR1cu4q+pPcxMVtaG3TA==}
+  '@playwright/test@1.58.2':
+    resolution: {integrity: sha512-akea+6bHYBBfA9uQqSYmlJXn61cTa+jbO87xVLCWbTqbWadRVmhxlXATaOjOgcBaWU4ePo0wB41KMFv3o35IXA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -1618,16 +1618,17 @@ packages:
 
   glob@10.4.5:
     resolution: {integrity: sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Glob versions prior to v9 are no longer supported
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   glob@8.1.0:
     resolution: {integrity: sha512-r8hpEjiQEYlF2QU0df3dS+nxxSIreXQS1qRhMJM0Q5NDdR386C7jb7Hwwod8Fgiuex+k0GFjgft18yvxm5XoCQ==}
     engines: {node: '>=12'}
-    deprecated: Glob versions prior to v9 are no longer supported
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   globals@14.0.0:
     resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
@@ -2418,13 +2419,13 @@ packages:
     engines: {node: '>=0.10'}
     hasBin: true
 
-  playwright-core@1.57.0:
-    resolution: {integrity: sha512-agTcKlMw/mjBWOnD6kFZttAAGHgi/Nw0CZ2o6JqWSbMlI219lAFLZZCyqByTsvVAJq5XA5H8cA6PrvBRpBWEuQ==}
+  playwright-core@1.58.2:
+    resolution: {integrity: sha512-yZkEtftgwS8CsfYo7nm0KE8jsvm6i/PTgVtB8DL726wNf6H2IMsDuxCpJj59KDaxCtSnrWan2AeDqM7JBaultg==}
     engines: {node: '>=18'}
     hasBin: true
 
-  playwright@1.57.0:
-    resolution: {integrity: sha512-ilYQj1s8sr2ppEJ2YVadYBN0Mb3mdo9J0wQ+UuDhzYqURwSoW4n1Xs5vs7ORwgDGmyEh33tRMeS8KhdkMoLXQw==}
+  playwright@1.58.2:
+    resolution: {integrity: sha512-vA30H8Nvkq/cPBnNw4Q8TWz1EJyqgpuinBcHET0YVJVFldr8JDNiU9LaWAE1KqSkRYazuaBhTpB5ZzShOezQ6A==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -2853,6 +2854,7 @@ packages:
   tar@6.2.1:
     resolution: {integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==}
     engines: {node: '>=10'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   terser@5.39.0:
     resolution: {integrity: sha512-LBAhFyLho16harJoWMg/nZsQYgTrg5jXOn2nCYjRUcZZEdE3qa2zb8QEDRUGVZBW4rlazf2fxkg8tztybTaqWw==}
@@ -3245,7 +3247,7 @@ snapshots:
       '@shikijs/types': 1.29.2
       '@shikijs/vscode-textmate': 10.0.1
 
-  '@hiveio/beekeeper@1.28.4-rc0': {}
+  '@hiveio/beekeeper@1.28.7-rc0': {}
 
   '@hiveio/wax-api-hafbe@1.28.4': {}
 
@@ -3255,7 +3257,7 @@ snapshots:
     dependencies:
       events: 3.3.0
 
-  '@hiveio/wax@2.0.0':
+  '@hiveio/wax@2.0.2-stable.260302212055':
     dependencies:
       events: 3.3.0
 
@@ -3443,9 +3445,9 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@playwright/test@1.57.0':
+  '@playwright/test@1.58.2':
     dependencies:
-      playwright: 1.57.0
+      playwright: 1.58.2
 
   '@rollup/plugin-commonjs@27.0.0(rollup@4.24.0)':
     dependencies:
@@ -5637,11 +5639,11 @@ snapshots:
 
   pidtree@0.6.0: {}
 
-  playwright-core@1.57.0: {}
+  playwright-core@1.58.2: {}
 
-  playwright@1.57.0:
+  playwright@1.58.2:
     dependencies:
-      playwright-core: 1.57.0
+      playwright-core: 1.58.2
     optionalDependencies:
       fsevents: 2.3.2
 
