@@ -12,6 +12,17 @@ export { getWax, resetWax, configureEndpoints, withRetry } from "./wax";
 export type { WaxExtendedChain } from "./wax";
 export { WorkerBeeError } from "./errors";
 
+// Re-export signing interfaces and errors
+export type { ITransactionSigner, PermissionLevel } from "./signing";
+export {
+  SigningError,
+  SigningCancelledError,
+  SigningTimeoutError,
+  SessionExpiredError,
+  SignerNotAvailableError,
+  PermissionDeniedError,
+} from "./signing";
+
 // Re-export interfaces
 export type {
   IPagination,
