@@ -7,6 +7,8 @@ import { TCollectorEvaluationContext } from "../../factories/data-evaluation-con
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
 
 const MAX_BLOCK_RANGE_FETCH = 1_000;
+const BLOCK_RETRY_DELAY_MS = 500;
+const BLOCK_MAX_RETRIES = 3;
 
 export class BlockCollector extends CollectorBase<BlockClassifier> {
   private currentHeadBlock = -1;
@@ -39,20 +41,25 @@ export class BlockCollector extends CollectorBase<BlockClassifier> {
 
       // Fetch missing blocks
       const startMultiBlock = Date.now();
-      const { blocks } = await this.worker.chain.api.block_api.get_block_range({
+      const { blocks: fetchedBlocks } = await this.worker.chain.api.block_api.get_block_range({
         starting_block_num: this.currentHeadBlock + 1,
         count: headBlockNumber - this.currentHeadBlock - 1
       });
       data.addTiming("block_api.get_block_range", Date.now() - startMultiBlock);
 
-      if (blocks.length === 0)
+      if (fetchedBlocks.length === 0)
         throw new WorkerBeeError(`Could not fetch missing blocks from ${this.currentHeadBlock + 1} to ${headBlockNumber}`);
 
-
-      blocks.push(...blocks);
+      blocks.push(...fetchedBlocks);
     } else {
       const startBlock = Date.now();
-      const { block } = await this.worker.chain!.api.block_api.get_block({ block_num: headBlockNumber });
+      let { block } = await this.worker.chain!.api.block_api.get_block({ block_num: headBlockNumber });
+
+      for (let retry = 0; block === undefined && retry < BLOCK_MAX_RETRIES; ++retry) {
+        await new Promise(resolve => setTimeout(resolve, BLOCK_RETRY_DELAY_MS));
+        ({ block } = await this.worker.chain!.api.block_api.get_block({ block_num: headBlockNumber }));
+      }
+
       data.addTiming("block_api.get_block", Date.now() - startBlock);
 
       if (block === undefined)
