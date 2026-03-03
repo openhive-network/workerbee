@@ -1,5 +1,6 @@
 // WORK IN PROGRESS
-import type { TAccountName, IOnlineSignatureProvider, NaiAsset } from "@hiveio/wax";
+import type { TAccountName, NaiAsset } from "@hiveio/wax";
+import type { ITransactionSigner } from "./signing";
 
 export type { NaiAsset };
 
@@ -266,48 +267,189 @@ export interface IPost extends IComment {
   getTitleImage(): string;
 }
 
-export interface ILoginSession {
-  readonly authenticatedAccount: TAccountName;
-  readonly sessionId: string;
-
-  logout(): Promise<void>
-}
-
-export interface IAuthenticationProvider {
-  login(account: TAccountName, signatureProvider: IOnlineSignatureProvider, directLogin: boolean, sessionTimeout: number): Promise<ILoginSession>;
-}
-
+/**
+ * Authenticated blogging platform interface.
+ *
+ * All operations use the configured signer for transaction signing.
+ * The signer handles all complexity (Keychain popups, hb-auth dialogs, etc.).
+ *
+ * @example
+ * ```typescript
+ * const signer = new KeychainSigner("username", "posting");
+ * const activePlatform = bloggingPlatform.authorize(signer);
+ * await activePlatform.vote(post, 10000);
+ * ```
+ */
 export interface IActiveBloggingPlatform {
-  readonly session: ILoginSession;
-  // Add callbacks
+  /**
+   * The account performing actions
+   */
+  readonly account: TAccountName;
 
-  post(body: string, tags: string[], title?: string, observer?: Partial<Observer<IPost>>): Promise<boolean>;
-  comment(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, observer?: Partial<Observer<IComment>>): Promise<boolean>;
-  vote(postOrComment: IPostCommentIdentity, upvote: boolean, weight: number, observer?: Partial<Observer<IVote>>): Promise<boolean>;
-  reblog(postOrComment: IPostCommentIdentity): Promise<boolean>;
-  deletePost(postOrComment: IPostCommentIdentity): Promise<boolean>;
-  editPost(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, observer?: Partial<Observer<IPost>>): Promise<boolean>;
-  deleteComment(postOrComment: IPostCommentIdentity): Promise<boolean>;
-  editComment(postOrComment: IPostCommentIdentity, body: string, tags: string[], title?: string, observer?: Partial<Observer<IComment>>): Promise<boolean>;
-  followBlog(authorOrCommunity: IAccountIdentity | ICommunityIdentity): Promise<boolean>;
+  /**
+   * The signer used for all operations
+   */
+  readonly signer: ITransactionSigner;
+
+  /**
+   * Create a new post
+   * @param body - Post body content (markdown)
+   * @param tags - Tags for the post (first tag is primary category)
+   * @param title - Post title
+   * @param observer - Optional observer for optimistic UI updates
+   */
+  post(body: string, tags: string[], title: string, observer?: Partial<Observer<IPost>>): Promise<void>;
+
+  /**
+   * Reply to a post or comment
+   * @param parent - The post or comment to reply to
+   * @param body - Reply body content (markdown)
+   * @param observer - Optional observer for optimistic UI updates
+   */
+  comment(parent: IPostCommentIdentity, body: string, observer?: Partial<Observer<IComment>>): Promise<void>;
+
+  /**
+   * Vote on a post or comment
+   * @param postOrComment - The post or comment to vote on
+   * @param weight - Vote weight from -10000 (full downvote) to 10000 (full upvote), 0 to remove vote
+   * @param observer - Optional observer for optimistic UI updates
+   */
+  vote(postOrComment: IPostCommentIdentity, weight: number, observer?: Partial<Observer<IVote>>): Promise<void>;
+
+  /**
+   * Reblog (resteem) a post to your blog
+   * @param post - The post to reblog
+   */
+  reblog(post: IPostCommentIdentity): Promise<void>;
+
+  /**
+   * Delete a post (only works if no votes/replies)
+   * @param post - The post to delete
+   */
+  deletePost(post: IPostCommentIdentity): Promise<void>;
+
+  /**
+   * Edit an existing post
+   * @param post - The post to edit
+   * @param body - New body content
+   * @param tags - New tags
+   * @param title - New title
+   * @param observer - Optional observer for optimistic UI updates
+   */
+  editPost(post: IPostCommentIdentity, body: string, tags: string[], title: string, observer?: Partial<Observer<IPost>>): Promise<void>;
+
+  /**
+   * Delete a comment (only works if no votes/replies)
+   * @param comment - The comment to delete
+   */
+  deleteComment(comment: IPostCommentIdentity): Promise<void>;
+
+  /**
+   * Edit an existing comment
+   * @param comment - The comment to edit
+   * @param body - New body content
+   * @param observer - Optional observer for optimistic UI updates
+   */
+  editComment(comment: IPostCommentIdentity, body: string, observer?: Partial<Observer<IComment>>): Promise<void>;
+
+  /**
+   * Follow a blog or subscribe to a community
+   * @param target - The account or community to follow
+   */
+  follow(target: IAccountIdentity | ICommunityIdentity): Promise<void>;
+
+  /**
+   * Unfollow a blog or unsubscribe from a community
+   * @param target - The account or community to unfollow
+   */
+  unfollow(target: IAccountIdentity | ICommunityIdentity): Promise<void>;
+
+  /**
+   * Mute an account (hide their content from your feed)
+   * @param account - The account to mute
+   */
+  mute(account: IAccountIdentity): Promise<void>;
+
+  /**
+   * Unmute an account
+   * @param account - The account to unmute
+   */
+  unmute(account: IAccountIdentity): Promise<void>;
+
+  /**
+   * Get account information
+   * @param accountName - Account name to look up
+   */
   getAccount(accountName: string): Promise<IAccount>;
 }
 
+/**
+ * Read-only blogging platform interface for browsing content.
+ *
+ * Use `authorize(signer)` to get an authenticated platform for write operations.
+ */
 export interface IBloggingPlatform {
+  /**
+   * Current viewer context for personalized content (e.g., checking if user voted)
+   */
   viewerContext: IAccountIdentity;
+
+  /**
+   * Get a specific post by author and permlink
+   */
   getPost(postId: IPostCommentIdentity): Promise<IPost>;
+
+  /**
+   * Enumerate posts with filters (trending, hot, created, etc.)
+   */
   enumPosts(filter: IPostFilters, pagination: IPagination): Promise<Iterable<IPost>>;
+
+  /**
+   * Enumerate posts for a specific account (blog, posts, comments, replies, feed)
+   */
   enumAccountPosts(filter: IAccountPostsFilters, pagination: IPagination): Promise<Iterable<IPost>>;
+
+  /**
+   * Set the viewer context for personalized content
+   */
   configureViewContext(accountName: IAccountIdentity): void;
+
+  /**
+   * Enumerate communities with filters
+   */
   enumCommunities(filter: ICommunityFilters, pagination: IPagination): Promise<Iterable<ICommunity>>;
+
+  /**
+   * Get account information
+   */
   getAccount(accountName: string): Promise<IAccount>;
 
-  // To do: add getAccount method later
+  /**
+   * Authorize the platform with a signer to enable write operations.
+   *
+   * The signer handles all transaction signing complexity (Keychain popups,
+   * hb-auth password dialogs, etc.).
+   *
+   * @param signer - Transaction signer configured for the user
+   * @returns Authenticated platform with write capabilities
+   *
+   * @example
+   * ```typescript
+   * // Browser with Keychain
+   * const signer = new KeychainSigner("username", "posting");
+   * const activePlatform = bloggingPlatform.authorize(signer);
+   * await activePlatform.vote(post, 10000);
+   *
+   * // Node.js with Beekeeper
+   * const signer = await BeekeeperSigner.create(wallet, "username", "posting", chain);
+   * const activePlatform = bloggingPlatform.authorize(signer);
+   * await activePlatform.post("Hello world!", ["blog"], "My First Post");
+   * ```
+   */
+  authorize(signer: ITransactionSigner): IActiveBloggingPlatform;
 
   overwrittenGetTitleImage?: () => string;
   overwriteGetTitleImage(callback: () => string): void;
-
-  // Authorize(provider: IAuthenticationProvider): Promise<IActiveBloggingPlatform>;
 }
 
 // UI integration with mock data

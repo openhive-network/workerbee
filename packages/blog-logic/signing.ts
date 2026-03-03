@@ -66,9 +66,11 @@ export interface ITransactionSigner {
   readonly permissionLevel: PermissionLevel;
 }
 
-// ============================================================================
-// Signing Errors
-// ============================================================================
+/*
+ * ============================================================================
+ * Signing Errors
+ * ============================================================================
+ */
 
 /**
  * Base error class for all signing-related errors
@@ -76,7 +78,7 @@ export interface ITransactionSigner {
 export class SigningError extends Error {
   public readonly name = "SigningError";
 
-  constructor(message: string, public readonly cause?: Error | unknown) {
+  public constructor(message: string, public readonly cause?: Error | unknown) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
   }
@@ -89,7 +91,7 @@ export class SigningError extends Error {
 export class SigningCancelledError extends SigningError {
   public readonly name = "SigningCancelledError";
 
-  constructor(message = "User cancelled the signing request") {
+  public constructor(message = "User cancelled the signing request") {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
   }
@@ -102,7 +104,7 @@ export class SigningCancelledError extends SigningError {
 export class SigningTimeoutError extends SigningError {
   public readonly name = "SigningTimeoutError";
 
-  constructor(
+  public constructor(
     message = "Signing request timed out",
     public readonly timeoutMs?: number
   ) {
@@ -121,7 +123,7 @@ export class SigningTimeoutError extends SigningError {
 export class SessionExpiredError extends SigningError {
   public readonly name = "SessionExpiredError";
 
-  constructor(message = "Authentication session expired, please sign in again") {
+  public constructor(message = "Authentication session expired, please sign in again") {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
   }
@@ -134,7 +136,7 @@ export class SessionExpiredError extends SigningError {
 export class SignerNotAvailableError extends SigningError {
   public readonly name = "SignerNotAvailableError";
 
-  constructor(
+  public constructor(
     public readonly signerType: string,
     message?: string
   ) {
@@ -152,7 +154,7 @@ export class SignerNotAvailableError extends SigningError {
 export class PermissionDeniedError extends SigningError {
   public readonly name = "PermissionDeniedError";
 
-  constructor(
+  public constructor(
     public readonly requiredPermission: PermissionLevel,
     public readonly signerType: string,
     message?: string
