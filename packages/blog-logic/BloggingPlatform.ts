@@ -1,10 +1,12 @@
 import { Account } from "./Account";
+import { ActiveBloggingPlatform } from "./ActiveBloggingPlatform";
 import { Community } from "./Community";
 import { DataProvider } from "./DataProvider";
 import type {
   IAccount,
   IAccountIdentity,
   IAccountPostsFilters,
+  IActiveBloggingPlatform,
   IBloggingPlatform,
   ICommunity,
   ICommunityFilters,
@@ -14,6 +16,7 @@ import type {
   IPostFilters
 } from "./interfaces";
 import { Post } from "./Post";
+import type { ITransactionSigner } from "./signing";
 
 export class BloggingPlatform implements IBloggingPlatform {
   private dataProvider: DataProvider;
@@ -86,6 +89,16 @@ export class BloggingPlatform implements IBloggingPlatform {
   public async getAccount(accountName: string): Promise<IAccount> {
     await this.dataProvider.fetchAccount(accountName);
     return new Account(accountName, this.dataProvider);
+  }
+
+  /**
+   * Authorize the platform with a signer to enable write operations.
+   *
+   * @param signer - Transaction signer configured for the user
+   * @returns Authenticated platform with write capabilities
+   */
+  public authorize(signer: ITransactionSigner): IActiveBloggingPlatform {
+    return new ActiveBloggingPlatform(signer, this.dataProvider);
   }
 
   // Section for overwritting methods

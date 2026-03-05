@@ -2,6 +2,7 @@
 
 export { DataProvider } from "./DataProvider";
 export { BloggingPlatform } from "./BloggingPlatform";
+export { ActiveBloggingPlatform } from "./ActiveBloggingPlatform";
 export { Post } from "./Post";
 export { Comment } from "./Comment";
 export { Reply } from "./Reply";
@@ -44,8 +45,6 @@ export type {
   IReply,
   IPost,
   IBloggingPlatform,
-  ILoginSession,
-  IAuthenticationProvider,
   IActiveBloggingPlatform,
   // Profile/account/global data types
   IProfile,
