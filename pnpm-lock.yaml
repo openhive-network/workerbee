@@ -81,11 +81,11 @@ importers:
         specifier: ^9.20.0
         version: 9.20.0
       '@hiveio/beekeeper':
-        specifier: 1.28.7-rc0
-        version: 1.28.7-rc0
+        specifier: 1.28.6-rc10-stable.260313111011
+        version: 1.28.6-rc10-stable.260313111011
       '@hiveio/wax':
-        specifier: 2.0.2-stable.260302212055
-        version: 2.0.2-stable.260302212055
+        specifier: 1.28.6-rc10-stable.260313112809
+        version: 1.28.6-rc10-stable.260313112809
       '@playwright/test':
         specifier: catalog:playwright-toolset
         version: 1.58.2
@@ -155,9 +155,6 @@ importers:
       playwright:
         specifier: catalog:playwright-toolset
         version: 1.58.2
-      process:
-        specifier: ^0.11.10
-        version: 0.11.10
       rollup:
         specifier: catalog:rollup-toolset
         version: 4.24.0
@@ -192,8 +189,8 @@ importers:
   packages/blog-logic:
     dependencies:
       '@hiveio/wax':
-        specifier: 1.28.4-rc0-stable.260110090505
-        version: 1.28.4-rc0-stable.260110090505
+        specifier: 2.0.2
+        version: 2.0.2
       '@hiveio/wax-api-hafbe':
         specifier: 1.28.4
         version: 1.28.4
@@ -428,8 +425,8 @@ packages:
   '@gerrit0/mini-shiki@1.27.2':
     resolution: {integrity: sha512-GeWyHz8ao2gBiUW4OJnQDxXQnFgZQwwQk05t/CVVgNBN7/rK8XZ7xY6YhLVv9tH3VppWWmr9DCl3MwemB/i+Og==}
 
-  '@hiveio/beekeeper@1.28.7-rc0':
-    resolution: {integrity: sha1-0pywM0DVGcHO6mrEB0nKZ9BjSDo=, tarball: https://gitlab.syncad.com/api/v4/projects/558/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.28.7-rc0.tgz}
+  '@hiveio/beekeeper@1.28.6-rc10-stable.260313111011':
+    resolution: {integrity: sha1-0gebRW40+qm1pvhEwQksRM3aNA4=, tarball: https://gitlab.syncad.com/api/v4/projects/558/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.28.6-rc10-stable.260313111011.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
   '@hiveio/wax-api-hafbe@1.28.4':
@@ -438,12 +435,12 @@ packages:
   '@hiveio/wax-api-jsonrpc@1.28.4':
     resolution: {integrity: sha1-FU095wjBfkCpgI2w9qnT0J0hJSU=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/wax-api-jsonrpc/-/@hiveio/wax-api-jsonrpc-1.28.4.tgz}
 
-  '@hiveio/wax@1.28.4-rc0-stable.260110090505':
-    resolution: {integrity: sha1-ULIi9pHMANKm7tWf2wI+cJk3Gxs=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.28.4-rc0-stable.260110090505.tgz}
+  '@hiveio/wax@1.28.6-rc10-stable.260313112809':
+    resolution: {integrity: sha1-kdeI1lSR9uYv3qzoJFiTsf0ty5Y=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.28.6-rc10-stable.260313112809.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
-  '@hiveio/wax@2.0.2-stable.260302212055':
-    resolution: {integrity: sha1-0yvuC2mSfFWx0sZGLD5S0Y6dHCQ=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-2.0.2-stable.260302212055.tgz}
+  '@hiveio/wax@2.0.2':
+    resolution: {integrity: sha1-3JurSNe7ALUNgewAEnlsgdbPxHw=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-2.0.2.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
   '@humanfs/core@0.19.1':
@@ -1618,17 +1615,16 @@ packages:
 
   glob@10.4.5:
     resolution: {integrity: sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==}
-    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+    deprecated: Glob versions prior to v9 are no longer supported
 
   glob@8.1.0:
     resolution: {integrity: sha512-r8hpEjiQEYlF2QU0df3dS+nxxSIreXQS1qRhMJM0Q5NDdR386C7jb7Hwwod8Fgiuex+k0GFjgft18yvxm5XoCQ==}
     engines: {node: '>=12'}
-    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+    deprecated: Glob versions prior to v9 are no longer supported
 
   globals@14.0.0:
     resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
@@ -2449,10 +2445,6 @@ packages:
     resolution: {integrity: sha512-++Vn7NS4Xf9NacaU9Xq3URUuqZETPsf8L4j5/ckhaRYsfPeRyzGw+iDjFhV/Jr3uNmTvvddEJFWh5R1gRgUH8A==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
 
-  process@0.11.10:
-    resolution: {integrity: sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==}
-    engines: {node: '>= 0.6.0'}
-
   promise-all-reject-late@1.0.1:
     resolution: {integrity: sha512-vuf0Lf0lOxyQREH7GDIOUMLS7kz+gs8i6B+Yi8dC68a2sychGrHTJYghMBD6k7eUcH0H5P73EckCA48xijWqXw==}
 
@@ -2854,7 +2846,6 @@ packages:
   tar@6.2.1:
     resolution: {integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==}
     engines: {node: '>=10'}
-    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   terser@5.39.0:
     resolution: {integrity: sha512-LBAhFyLho16harJoWMg/nZsQYgTrg5jXOn2nCYjRUcZZEdE3qa2zb8QEDRUGVZBW4rlazf2fxkg8tztybTaqWw==}
@@ -3247,17 +3238,17 @@ snapshots:
       '@shikijs/types': 1.29.2
       '@shikijs/vscode-textmate': 10.0.1
 
-  '@hiveio/beekeeper@1.28.7-rc0': {}
+  '@hiveio/beekeeper@1.28.6-rc10-stable.260313111011': {}
 
   '@hiveio/wax-api-hafbe@1.28.4': {}
 
   '@hiveio/wax-api-jsonrpc@1.28.4': {}
 
-  '@hiveio/wax@1.28.4-rc0-stable.260110090505':
+  '@hiveio/wax@1.28.6-rc10-stable.260313112809':
     dependencies:
       events: 3.3.0
 
-  '@hiveio/wax@2.0.2-stable.260302212055':
+  '@hiveio/wax@2.0.2':
     dependencies:
       events: 3.3.0
 
@@ -5665,8 +5656,6 @@ snapshots:
   prelude-ls@1.2.1: {}
 
   proc-log@3.0.0: {}
-
-  process@0.11.10: {}
 
   promise-all-reject-late@1.0.1: {}
 
