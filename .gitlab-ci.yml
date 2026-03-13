@@ -8,11 +8,13 @@ variables:
   GIT_DEPTH: 0
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
+  # Reference for GitHub Pages scripts from common-ci-configuration
+  COMMON_CI_GITHUB_PAGES_REF: "c9cb02ea67f9f381f52280be4ca1f708243373a0"
 
 include:
   - template: Workflows/Branch-Pipelines.gitlab-ci.yml
   - project: 'hive/common-ci-configuration'
-    ref: de95661b1be71e968f623945609dc384aefecfe2
+    ref: c9cb02ea67f9f381f52280be4ca1f708243373a0
     file:
       - '/templates/npm_projects.gitlab-ci.yml'
       - '/templates/github_pages.gitlab-ci.yml'
@@ -62,9 +64,6 @@ test:
   extends: .npm_test_template
   variables:
     DIST_DIR: "$CI_PROJECT_DIR/dist"
-  before_script:
-    - export PACKAGE_TGZ_PATH="${DIST_DIR}/$(basename ${BUILT_PACKAGE_PATH})"
-    - !reference [.npm_test_template, before_script]
   needs:
     - job: build
       artifacts: true
@@ -75,9 +74,6 @@ push_to_wiki:
   variables:
     WIKI_PUSH_TOKEN: "$WIKI_PUSH_TOKEN"
     DIST_DIR: "$CI_PROJECT_DIR/dist"
-  before_script:
-    - export PACKAGE_TGZ_PATH="${DIST_DIR}/$(basename ${BUILT_PACKAGE_PATH})"
-    - !reference [.npm_push_doc_template, before_script]
   needs:
     - job: build
       artifacts: true
@@ -90,9 +86,6 @@ deploy_dev_package:
   variables:
     NPM_PACKAGE_SCOPE: "@hiveio"
     DIST_DIR: "$CI_PROJECT_DIR/dist"
-  before_script:
-    - export PACKAGE_TGZ_PATH="${DIST_DIR}/$(basename ${BUILT_PACKAGE_PATH})"
-    - !reference [.npm_deploy_package_template, before_script]
   needs:
     - job: test
     - job: push_to_wiki
@@ -110,9 +103,6 @@ deploy_production_public_npm:
     NPM_PACKAGE_NAME: "workerbee"
     NPM_PROVENANCE_ENABLE: "0" # XXX: Temporarly disable as it is not working - we have to find a way to get it working
     DIST_DIR: "$CI_PROJECT_DIR/dist"
-  before_script:
-    - export PACKAGE_TGZ_PATH="${DIST_DIR}/$(basename ${BUILT_PACKAGE_PATH})"
-    - !reference [.registry_npmjs_org_deploy_package_template, before_script]
   needs:
     - job: deploy_dev_package
     - job: test
