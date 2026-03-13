@@ -41,7 +41,7 @@ test.describe("WorkerBee Bot events test", () => {
 
       /// Intentionally sign using legacy method
       const legacySigDigest = newTx.legacy_sigDigest;
-      const signature = wallet.signDigest(publicKey, legacySigDigest);
+      const signature = await wallet.signDigest(publicKey, legacySigDigest);
       newTx.addSignature(signature);
 
       bot.start();
@@ -374,7 +374,7 @@ test.describe("WorkerBee Bot events test", () => {
       const tx = await bot.chain!.createTransaction();
       const targetTx = tx.transaction;
 
-      const getSignedTx = () => {
+      const getSignedTx = async () => {
         const tx = bot.chain!.createTransactionFromProto(structuredClone(targetTx));
         tx.pushOperation(new wax.ReplyOperation({
           parentAuthor: "thebeedevs",
@@ -383,12 +383,13 @@ test.describe("WorkerBee Bot events test", () => {
           body: "WB tests",
           permlink: `wb-tests-${Date.now()}`
         }));
-        tx.sign(wallet, publicKey);
+        const signature = await wallet.signDigest(publicKey, tx.legacy_sigDigest);
+        tx.addSignature(signature);
         return tx;
       };
 
-      setTimeout(() => { // Broadcaster
-        const tx = getSignedTx();
+      setTimeout(async () => { // Broadcaster
+        const tx = await getSignedTx();
         console.log(`Broadcasting reply transaction #${tx.id}`);
         void bot.chain!.broadcast(tx).catch(console.error);
       }, 2000);
