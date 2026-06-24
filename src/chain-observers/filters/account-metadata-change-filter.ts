@@ -25,8 +25,7 @@ export class AccountMetadataChangeFilter extends FilterBase {
     return classifiers;
   }
 
-  private previousJsonMetadata?: string;
-  private previousPostingJsonMetadata?: string;
+  private previousMetadataByAccount = new Map<TAccountName, { jsonMetadata: string; postingJsonMetadata: string }>();
 
   public async match(data: TFilterEvaluationContext): Promise<boolean> {
     const { accounts } = await data.get(AccountClassifier);
@@ -37,21 +36,26 @@ export class AccountMetadataChangeFilter extends FilterBase {
       if (account === undefined)
         return false;
 
-      if (this.previousJsonMetadata === undefined) {
-        this.previousJsonMetadata = JSON.stringify(account.jsonMetadata);
-        this.previousPostingJsonMetadata = JSON.stringify(account.postingJsonMetadata);
-
-        return false;
-      }
-
       const postingMeta = JSON.stringify(account.postingJsonMetadata);
       const accMeta = JSON.stringify(account.jsonMetadata);
 
-      const changedAccMeta = accMeta !== this.previousJsonMetadata;
-      const changedPosting = postingMeta !== this.previousPostingJsonMetadata;
+      const previous = this.previousMetadataByAccount.get(accountName);
+      if (previous === undefined) {
+        this.previousMetadataByAccount.set(accountName, {
+          jsonMetadata: accMeta,
+          postingJsonMetadata: postingMeta
+        });
 
-      this.previousJsonMetadata = accMeta;
-      this.previousPostingJsonMetadata = postingMeta;
+        continue;
+      }
+
+      const changedAccMeta = accMeta !== previous.jsonMetadata;
+      const changedPosting = postingMeta !== previous.postingJsonMetadata;
+
+      this.previousMetadataByAccount.set(accountName, {
+        jsonMetadata: accMeta,
+        postingJsonMetadata: postingMeta
+      });
 
       if(changedAccMeta || changedPosting)
         return true;

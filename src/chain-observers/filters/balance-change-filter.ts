@@ -31,19 +31,23 @@ export class BalanceChangeFilter extends FilterBase {
     return classifiers;
   }
 
-  private previousBalance?: IAccountBalance;
+  private previousBalanceByAccount = new Map<TAccountName, IAccountBalance>();
 
-  private parseInternalTransfers(balance: IAccountBalance): boolean {
-    for(const asset in this.previousBalance)
-      for(const type in this.previousBalance[asset])
-        if (this.previousBalance[asset][type].amount !== balance[asset][type].amount) {
-          this.previousBalance = balance;
+  private parseInternalTransfers(accountName: TAccountName, balance: IAccountBalance): boolean {
+    const previousBalance = this.previousBalanceByAccount.get(accountName);
+    if (previousBalance === undefined)
+      throw new Error("Cannot parse internal transfers before storing a previous balance");
+
+    for(const asset in previousBalance)
+      for(const type in previousBalance[asset])
+        if (previousBalance[asset][type].amount !== balance[asset][type].amount) {
+          this.previousBalanceByAccount.set(accountName, balance);
 
           return true;
         }
 
 
-    this.previousBalance = balance;
+    this.previousBalanceByAccount.set(accountName, balance);
 
     return false;
   }
@@ -57,20 +61,24 @@ export class BalanceChangeFilter extends FilterBase {
       if (account === undefined)
         return false;
 
-      if (this.previousBalance === undefined) {
-        this.previousBalance = account.balance;
+      const previousBalance = this.previousBalanceByAccount.get(accountName);
+      if (previousBalance === undefined) {
+        this.previousBalanceByAccount.set(accountName, account.balance);
 
-        return false;
+        continue;
       }
 
-      if (this.includeInternalTransfers)
-        return this.parseInternalTransfers(account.balance);
+      if (this.includeInternalTransfers) {
+        if (this.parseInternalTransfers(accountName, account.balance))
+          return true;
+        continue;
+      }
 
-      const changedHP = this.previousBalance.HP.total.amount !== account.balance.HP.total.amount;
-      const changedHIVE = this.previousBalance.HIVE.total.amount !== account.balance.HIVE.total.amount;
-      const changedHBD = this.previousBalance.HBD.total.amount !== account.balance.HBD.total.amount;
+      const changedHP = previousBalance.HP.total.amount !== account.balance.HP.total.amount;
+      const changedHIVE = previousBalance.HIVE.total.amount !== account.balance.HIVE.total.amount;
+      const changedHBD = previousBalance.HBD.total.amount !== account.balance.HBD.total.amount;
 
-      this.previousBalance = account.balance;
+      this.previousBalanceByAccount.set(accountName, account.balance);
 
       if (changedHP || changedHIVE || changedHBD)
         return true;
