@@ -29,10 +29,11 @@ export class BlockCollector extends CollectorBase<BlockClassifier> {
         [BlockClassifier.name as "BlockClassifier"]: this.cachedBlockData as TAvailableClassifiers["BlockClassifier"]
       };
 
-    const blocks: Array<ApiBlock> = [];
+    const apiBlocks: Array<ApiBlock> = [];
 
-    if (this.currentHeadBlock !== -1 && headBlockNumber !== this.currentHeadBlock + 1) {
-      if (headBlockNumber - this.currentHeadBlock - 1 > MAX_BLOCK_RANGE_FETCH)
+    const gap = this.currentHeadBlock !== -1 ? headBlockNumber - this.currentHeadBlock : 0;
+    if (this.currentHeadBlock !== -1 && gap > 1) {
+      if (gap > MAX_BLOCK_RANGE_FETCH)
         throw new WorkerBeeError(`Something went terribly wrong. Cannot catch up block range larger than ${
           MAX_BLOCK_RANGE_FETCH} blocks. Current head: ${this.currentHeadBlock}, requested head: ${headBlockNumber}`);
 
@@ -41,7 +42,7 @@ export class BlockCollector extends CollectorBase<BlockClassifier> {
       const startMultiBlock = Date.now();
       const { blocks } = await this.worker.chain.api.block_api.get_block_range({
         starting_block_num: this.currentHeadBlock + 1,
-        count: headBlockNumber - this.currentHeadBlock - 1
+        count: gap
       });
       data.addTiming("block_api.get_block_range", Date.now() - startMultiBlock);
 
@@ -49,8 +50,10 @@ export class BlockCollector extends CollectorBase<BlockClassifier> {
         throw new WorkerBeeError(`Could not fetch missing blocks from ${this.currentHeadBlock + 1} to ${headBlockNumber}`);
 
 
-      blocks.push(...blocks);
-    } else {
+      apiBlocks.push(...blocks);
+    }
+
+    if (apiBlocks.length === 0) {
       const startBlock = Date.now();
       const { block } = await this.worker.chain!.api.block_api.get_block({ block_num: headBlockNumber });
       data.addTiming("block_api.get_block", Date.now() - startBlock);
@@ -58,15 +61,15 @@ export class BlockCollector extends CollectorBase<BlockClassifier> {
       if (block === undefined)
         throw new BlockNotAvailableError(headBlockNumber);
 
-      blocks.push(block);
+      apiBlocks.push(block);
     }
 
-    this.currentHeadBlock = this.currentHeadBlock === -1 ? headBlockNumber : this.currentHeadBlock + blocks.length;
+    this.currentHeadBlock = headBlockNumber;
 
     const startBlockAnalysis = Date.now();
     const transactions: ITransactionData[] = [];
     const transactionsPerId = new Map<string, transaction>();
-    for(const block of blocks)
+    for(const block of apiBlocks)
       for(let i = 0; i < block.transactions.length; ++i) {
         const transaction = this.worker.chain!.createTransactionFromJson(block.transactions[i]);
         transactions.push({

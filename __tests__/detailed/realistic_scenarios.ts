@@ -27,7 +27,8 @@ test.describe("Bot Realistic Scenarios", () => {
     expect(result).toEqual([
       "brando28 - re-bitcoinman-ovjhawi6",
       "mtyszczak - hi-ve-everyone",
-      "nickdongsik - yay-hb1hao"
+      "nickdongsik - yay-hb1hao",
+      "brando28 - re-carephree-38kjncdis"
     ]);
   });
 
@@ -64,7 +65,8 @@ test.describe("Bot Realistic Scenarios", () => {
       "Vote: e-sport-gamer - city-pingeons",
       "Follow: fwaszkiewicz - thebeedevs",
       "Follow: fwaszkiewicz - thebeedevs",
-      "Reblog: maxinpower - erinnnerungen-an-eine-gute-currywurst-berlin-impressions"
+      "Reblog: maxinpower - erinnnerungen-an-eine-gute-currywurst-berlin-impressions",
+      "Vote: e-sport-gamer - my-school-of-life-eng"
     ]);
   });
 
