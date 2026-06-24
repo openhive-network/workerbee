@@ -1,7 +1,8 @@
 import { WitnessClassifier } from "../../classifiers";
-import { IWitness } from "../../classifiers/witness-classifier";
-import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
-import { CollectorBase, TAvailableClassifiers } from "../collector-base";
+import type { IWitness } from "../../classifiers/witness-classifier";
+import type { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
+import { CollectorBase } from "../collector-base";
+import type { TAvailableClassifiers } from "../collector-base";
 
 const MAX_WITNESS_GET_LIMIT = 1000;
 

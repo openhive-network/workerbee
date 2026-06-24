@@ -1,5 +1,6 @@
 import Beekeeper from "@hiveio/beekeeper";
-import {ITransaction, IOnlineSignatureProvider, FollowOperation, TAccountName} from "@hiveio/wax";
+import { FollowOperation } from "@hiveio/wax";
+import type { ITransaction, IOnlineSignatureProvider, TAccountName } from "@hiveio/wax";
 import BeekeeperProvider from "@hiveio/wax-signers-beekeeper";
 import WorkerBee from "@hiveio/workerbee";
 import type { IWorkerBee, Observer } from "@hiveio/workerbee";

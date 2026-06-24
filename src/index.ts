@@ -1,5 +1,5 @@
 import { WorkerBee } from "./bot";
-import { IWorkerBeeConstructor } from "./interfaces";
+import type { IWorkerBeeConstructor } from "./interfaces";
 
 export * from "./types/iterator";
 export * from "./types/subscribable";

@@ -1,7 +1,8 @@
 import { ChangeRecoveryInProgressClassifier } from "../../classifiers";
-import { IAccountChangingRecovery } from "../../classifiers/change-recovery-in-progress-classifier";
-import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
-import { CollectorBase, TAvailableClassifiers } from "../collector-base";
+import type { IAccountChangingRecovery } from "../../classifiers/change-recovery-in-progress-classifier";
+import type { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
+import { CollectorBase } from "../collector-base";
+import type { TAvailableClassifiers } from "../collector-base";
 
 
 const MAX_CHANGE_RECOVERY_GET_LIMIT = 1000;

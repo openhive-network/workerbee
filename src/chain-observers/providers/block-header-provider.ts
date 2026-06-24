@@ -1,6 +1,7 @@
-import { BlockHeaderClassifier, IBlockHeaderData } from "../classifiers/block-header-classifier";
-import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
+import { BlockHeaderClassifier } from "../classifiers/block-header-classifier";
+import type { IBlockHeaderData } from "../classifiers/block-header-classifier";
+import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
+import type { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export interface IBlockHeaderProviderData {

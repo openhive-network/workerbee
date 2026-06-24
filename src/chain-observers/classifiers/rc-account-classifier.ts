@@ -1,4 +1,4 @@
-import { IMaxManabarData } from "./account-classifier";
+import type { IMaxManabarData } from "./account-classifier";
 import { CollectorClassifierBase } from "./collector-classifier-base";
 
 export interface IRcAccount {

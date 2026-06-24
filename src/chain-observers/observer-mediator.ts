@@ -1,4 +1,4 @@
-import { type Observer } from "../types/subscribable";
+import type { Observer } from "../types/subscribable";
 import { DataEvaluationContext } from "./factories/data-evaluation-context";
 import { EClassifierOrigin, type FactoryBase } from "./factories/factory-base";
 import { FilterBase } from "./filters/filter-base";

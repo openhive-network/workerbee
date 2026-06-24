@@ -1,8 +1,9 @@
-import { comment, TAccountName } from "@hiveio/wax";
+import { comment } from "@hiveio/wax";
+import type { TAccountName } from "@hiveio/wax";
 import { WorkerBeeIterable } from "../../types/iterator";
 import { OperationClassifier } from "../classifiers";
-import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
+import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
+import type { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export type TMentionedAccountProvided<TMentions extends Array<TAccountName>> = {

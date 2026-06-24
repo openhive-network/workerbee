@@ -1,7 +1,8 @@
-import { TAccountName } from "@hiveio/wax";
-import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { IRcAccount, RcAccountClassifier } from "../classifiers/rc-account-classifier";
-import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
+import type { TAccountName } from "@hiveio/wax";
+import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
+import { RcAccountClassifier } from "../classifiers/rc-account-classifier";
+import type { IRcAccount } from "../classifiers/rc-account-classifier";
+import type { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export type TRcAccountProvided<TAccounts extends Array<TAccountName>> = {

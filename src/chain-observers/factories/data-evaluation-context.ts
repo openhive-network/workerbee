@@ -1,9 +1,11 @@
 import { WorkerBeeError } from "../../errors";
 import { createFactoryUnsupportedClassifierErrorMessage } from "../../utils/error-helper";
 import type * as TClassifiers from "../classifiers";
-import { CollectorClassifierBase, IEvaluationContextClass } from "../classifiers/collector-classifier-base";
+import { CollectorClassifierBase } from "../classifiers/collector-classifier-base";
+import type { IEvaluationContextClass } from "../classifiers/collector-classifier-base";
 
-import { CollectorBase, TAvailableClassifiers } from "../collectors/collector-base";
+import { CollectorBase } from "../collectors/collector-base";
+import type { TAvailableClassifiers } from "../collectors/collector-base";
 import { FactoryBase } from "./factory-base";
 
 export type TAvailableCollectorFunctions = {

@@ -1,5 +1,5 @@
-import { IEvaluationContextClass } from "../chain-observers/classifiers/collector-classifier-base";
-import { AnyCollectorClass, EClassifierOrigin } from "../chain-observers/factories/factory-base";
+import type { IEvaluationContextClass } from "../chain-observers/classifiers/collector-classifier-base";
+import type { AnyCollectorClass, EClassifierOrigin } from "../chain-observers/factories/factory-base";
 
 export const createFactoryUnsupportedClassifierErrorMessage = (
   factoryName: string,

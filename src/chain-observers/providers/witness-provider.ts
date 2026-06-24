@@ -1,7 +1,8 @@
-import { TAccountName } from "@hiveio/wax";
-import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { IWitness, WitnessClassifier } from "../classifiers/witness-classifier";
-import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
+import type { TAccountName } from "@hiveio/wax";
+import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
+import { WitnessClassifier } from "../classifiers/witness-classifier";
+import type { IWitness } from "../classifiers/witness-classifier";
+import type { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export type TWitnessProvider<TAccounts extends Array<TAccountName>> = {

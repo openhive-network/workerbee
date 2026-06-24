@@ -1,7 +1,9 @@
-import { TAccountName, EManabarType } from "@hiveio/wax";
-import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { IManabarCollectorOptions, ManabarClassifier, TManabars } from "../classifiers/manabar-classifier";
-import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
+import { EManabarType } from "@hiveio/wax";
+import type { TAccountName } from "@hiveio/wax";
+import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
+import { ManabarClassifier } from "../classifiers/manabar-classifier";
+import type { IManabarCollectorOptions, TManabars } from "../classifiers/manabar-classifier";
+import type { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export type TManabarProvided<TAccounts extends Array<TAccountName>> = {

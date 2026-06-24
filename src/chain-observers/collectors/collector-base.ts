@@ -1,8 +1,9 @@
 import type { WorkerBee } from "../../bot";
 
 import type * as TClassifiers from "../classifiers";
-import { CollectorClassifierBase, TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { TCollectorEvaluationContext } from "../factories/data-evaluation-context";
+import { CollectorClassifierBase } from "../classifiers/collector-classifier-base";
+import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
+import type { TCollectorEvaluationContext } from "../factories/data-evaluation-context";
 
 export type TAvailableClassifiers = {
   [key in keyof typeof TClassifiers]: InstanceType<(typeof TClassifiers)[key]>["getType"];

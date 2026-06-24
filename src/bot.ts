@@ -1,7 +1,8 @@
-import { TWaxExtended, ITransaction, ApiTransaction, dateFromString, IHiveChainInterface } from "@hiveio/wax";
+import { dateFromString } from "@hiveio/wax";
+import type { TWaxExtended, ITransaction, ApiTransaction, IHiveChainInterface } from "@hiveio/wax";
 
-import { IBlockData } from "./chain-observers/classifiers/block-classifier";
-import { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
+import type { IBlockData } from "./chain-observers/classifiers/block-classifier";
+import type { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
 import { JsonRpcFactory } from "./chain-observers/factories/jsonrpc/factory";
 import { ObserverMediator } from "./chain-observers/observer-mediator";
 import { BlockNotAvailableError, WorkerBeeError } from "./errors";
@@ -9,7 +10,7 @@ import type { IWorkerBee, IBroadcastOptions } from "./interfaces";
 import { PastQueen } from "./past-queen";
 import { QueenBee } from "./queen";
 import { calculateRelativeTime } from "./utils/time";
-import { WaxExtendTypes } from "./wax";
+import type { WaxExtendTypes } from "./wax";
 
 const HIVE_BLOCK_INTERVAL = 1000 * 3;
 

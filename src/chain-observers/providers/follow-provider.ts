@@ -1,7 +1,9 @@
-import { EFollowActions, TAccountName } from "@hiveio/wax";
-import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { IOperationTransactionPair, OperationClassifier } from "../classifiers/operation-classifier";
-import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
+import { EFollowActions } from "@hiveio/wax";
+import type { TAccountName } from "@hiveio/wax";
+import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
+import { OperationClassifier } from "../classifiers/operation-classifier";
+import type { IOperationTransactionPair } from "../classifiers/operation-classifier";
+import type { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export interface IFollowOperation {

@@ -1,4 +1,5 @@
-import { asset, price, TAccountName } from "@hiveio/wax";
+import { asset, price } from "@hiveio/wax";
+import type { TAccountName } from "@hiveio/wax";
 
 export type share_type = number | string;
 export type time_point_sec = string; // ISO 8601 date string

@@ -1,8 +1,8 @@
 import { price } from "@hiveio/wax";
 import { WorkerBeeIterable } from "../../types/iterator";
 import { FeedPriceClassifier } from "../classifiers";
-import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
+import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
+import type { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 export interface IFeedPriceData {

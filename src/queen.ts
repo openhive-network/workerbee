@@ -1,8 +1,9 @@
-import { asset, EManabarType, TAccountName } from "@hiveio/wax";
+import { asset, EManabarType } from "@hiveio/wax";
+import type { TAccountName } from "@hiveio/wax";
 
 import { WorkerBee } from "./bot";
 import { CollectorClassifierBase, DataEvaluationContext } from "./chain-observers";
-import { TRegisterEvaluationContext } from "./chain-observers/classifiers/collector-classifier-base";
+import type { TRegisterEvaluationContext } from "./chain-observers/classifiers/collector-classifier-base";
 import { AccountCreatedFilter } from "./chain-observers/filters/account-created-filter";
 import { AccountFullManabarFilter } from "./chain-observers/filters/account-full-manabar-filter";
 import { AccountMetadataChangeFilter } from "./chain-observers/filters/account-metadata-change-filter";
@@ -44,7 +45,8 @@ import { InternalMarketProvider } from "./chain-observers/providers/internal-mar
 import { ManabarProvider } from "./chain-observers/providers/manabar-provider";
 import { MentionedAccountProvider } from "./chain-observers/providers/mention-provider";
 import { NewAccountProvider } from "./chain-observers/providers/new-account-provider";
-import { IProviderBase, ProviderBase } from "./chain-observers/providers/provider-base";
+import { ProviderBase } from "./chain-observers/providers/provider-base";
+import type { IProviderBase } from "./chain-observers/providers/provider-base";
 import { RcAccountProvider } from "./chain-observers/providers/rc-account-provider";
 import { ReblogProvider } from "./chain-observers/providers/reblog-provider";
 import { TransactionByIdProvider } from "./chain-observers/providers/transaction-provider";

@@ -1,8 +1,9 @@
 import { BlockClassifier, OperationClassifier } from "../../classifiers";
-import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
-import { IOperationTransactionPair } from "../../classifiers/operation-classifier";
-import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
-import { CollectorBase, TAvailableClassifiers } from "../collector-base";
+import type { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
+import type { IOperationTransactionPair } from "../../classifiers/operation-classifier";
+import type { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
+import { CollectorBase } from "../collector-base";
+import type { TAvailableClassifiers } from "../collector-base";
 
 export class OperationCollector extends CollectorBase<OperationClassifier> {
   public usedContexts(): Array<TRegisterEvaluationContext> {

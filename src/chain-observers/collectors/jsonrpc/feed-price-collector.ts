@@ -1,8 +1,9 @@
 import { DynamicGlobalPropertiesClassifier, FeedPriceClassifier } from "../../classifiers";
-import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
-import { IFeedPriceData } from "../../classifiers/feed-price-classifier";
-import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
-import { CollectorBase, TAvailableClassifiers } from "../collector-base";
+import type { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
+import type { IFeedPriceData } from "../../classifiers/feed-price-classifier";
+import type { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
+import { CollectorBase } from "../collector-base";
+import type { TAvailableClassifiers } from "../collector-base";
 
 const isDivisibleByInRange = (by: number, start: number, end: number) => {
   // Normalize start to the next multiple of *by*

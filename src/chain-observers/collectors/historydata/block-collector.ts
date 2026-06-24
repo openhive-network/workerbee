@@ -1,11 +1,13 @@
-import { ApiBlock, transaction } from "@hiveio/wax";
+import { transaction } from "@hiveio/wax";
+import type { ApiBlock } from "@hiveio/wax";
 import { WorkerBee } from "../../../bot";
 import { WorkerBeeError } from "../../../errors";
 import { BlockClassifier, BlockHeaderClassifier } from "../../classifiers";
-import { ITransactionData } from "../../classifiers/block-classifier";
-import { IBlockHeaderData } from "../../classifiers/block-header-classifier";
-import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
-import { CollectorBase, TAvailableClassifiers } from "../collector-base";
+import type { ITransactionData } from "../../classifiers/block-classifier";
+import type { IBlockHeaderData } from "../../classifiers/block-header-classifier";
+import type { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
+import { CollectorBase } from "../collector-base";
+import type { TAvailableClassifiers } from "../collector-base";
 
 const MAX_TAKE_BLOCKS = 1000;
 

@@ -1,5 +1,5 @@
-import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
+import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
+import type { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 
 export interface IProviderBase<IOptions extends object = {}> {
   usedContexts?(): Array<TRegisterEvaluationContext>;

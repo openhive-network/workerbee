@@ -1,7 +1,8 @@
 import { RcAccountClassifier } from "../../classifiers";
-import { IRcAccount } from "../../classifiers/rc-account-classifier";
-import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
-import { CollectorBase, TAvailableClassifiers } from "../collector-base";
+import type { IRcAccount } from "../../classifiers/rc-account-classifier";
+import type { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
+import { CollectorBase } from "../collector-base";
+import type { TAvailableClassifiers } from "../collector-base";
 
 const MAX_RC_ACCOUNT_GET_LIMIT = 1000;
 

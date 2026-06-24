@@ -1,11 +1,13 @@
-import { EManabarType, TAccountName } from "@hiveio/wax";
+import { EManabarType } from "@hiveio/wax";
+import type { TAccountName } from "@hiveio/wax";
 import { WorkerBeeError } from "../../../errors";
 import { AccountClassifier, RcAccountClassifier, ManabarClassifier } from "../../classifiers";
-import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
+import type { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
 import { DynamicGlobalPropertiesClassifier } from "../../classifiers/dynamic-global-properties-classifier";
-import { TManabars } from "../../classifiers/manabar-classifier";
-import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
-import { CollectorBase, TAvailableClassifiers } from "../collector-base";
+import type { TManabars } from "../../classifiers/manabar-classifier";
+import type { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
+import { CollectorBase } from "../collector-base";
+import type { TAvailableClassifiers } from "../collector-base";
 
 const PERCENT_VALUE_DOUBLE_PRECISION = 100;
 export const ONE_HUNDRED_PERCENT = 100 * PERCENT_VALUE_DOUBLE_PRECISION;

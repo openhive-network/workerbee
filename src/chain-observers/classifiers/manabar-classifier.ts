@@ -1,6 +1,8 @@
-import { EManabarType, TAccountName } from "@hiveio/wax";
-import { IMaxManabarData } from "./account-classifier";
-import { CollectorClassifierBase, TRegisterEvaluationContext } from "./collector-classifier-base";
+import { EManabarType } from "@hiveio/wax";
+import type { TAccountName } from "@hiveio/wax";
+import type { IMaxManabarData } from "./account-classifier";
+import { CollectorClassifierBase } from "./collector-classifier-base";
+import type { TRegisterEvaluationContext } from "./collector-classifier-base";
 
 export interface IManabarDataPercent extends IMaxManabarData {
   percent: number;

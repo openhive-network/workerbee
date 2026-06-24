@@ -1,4 +1,4 @@
-import { TAccountName } from "@hiveio/wax";
+import type { TAccountName } from "@hiveio/wax";
 import { OperationClassifier } from "../classifiers";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";

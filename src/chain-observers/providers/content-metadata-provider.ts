@@ -1,7 +1,8 @@
-import { TAccountName } from "@hiveio/wax";
-import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { ContentMetadataClassifier, TContentMetadataAuthorData } from "../classifiers/content-metadata-classifier";
-import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
+import type { TAccountName } from "@hiveio/wax";
+import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
+import { ContentMetadataClassifier } from "../classifiers/content-metadata-classifier";
+import type { TContentMetadataAuthorData } from "../classifiers/content-metadata-classifier";
+import type { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ProviderBase } from "./provider-base";
 
 // Common interface for blog content data (posts and comments)

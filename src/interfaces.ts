@@ -1,8 +1,8 @@
 import type { ApiTransaction, IHiveChainInterface, ITransaction, transaction, TWaxExtended } from "@hiveio/wax";
-import { IBlockData } from "./chain-observers/classifiers/block-classifier";
-import { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
+import type { IBlockData } from "./chain-observers/classifiers/block-classifier";
+import type { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
 import { WorkerBeeError } from "./errors";
-import { TPastQueen } from "./past-queen";
+import type { TPastQueen } from "./past-queen";
 import type { QueenBee } from "./queen";
 import type { WaxExtendTypes } from "./wax";
 

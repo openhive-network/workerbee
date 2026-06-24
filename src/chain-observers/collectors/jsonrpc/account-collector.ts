@@ -1,7 +1,8 @@
 import { AccountClassifier } from "../../classifiers";
-import { IAccount } from "../../classifiers/account-classifier";
-import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
-import { CollectorBase, TAvailableClassifiers } from "../collector-base";
+import type { IAccount } from "../../classifiers/account-classifier";
+import type { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
+import { CollectorBase } from "../collector-base";
+import type { TAvailableClassifiers } from "../collector-base";
 
 
 const MAX_ACCOUNT_GET_LIMIT = 1000;

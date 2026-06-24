@@ -1,7 +1,8 @@
 import { BlockHeaderClassifier, DynamicGlobalPropertiesClassifier } from "../../classifiers";
-import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
-import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
-import { CollectorBase, TAvailableClassifiers } from "../collector-base";
+import type { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
+import type { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
+import { CollectorBase } from "../collector-base";
+import type { TAvailableClassifiers } from "../collector-base";
 
 export class DynamicGlobalPropertiesCollector extends CollectorBase<DynamicGlobalPropertiesClassifier> {
   public usedContexts(): Array<TRegisterEvaluationContext> {

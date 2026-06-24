@@ -1,6 +1,6 @@
 import { WorkerBeeUnsatisfiedFilterError } from "../../errors";
-import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { TFilterEvaluationContext } from "../factories/data-evaluation-context";
+import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
+import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "../filters/filter-base";
 
 abstract class CompositeFilter extends FilterBase {

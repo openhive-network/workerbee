@@ -1,8 +1,8 @@
-import { TAccountName } from "@hiveio/wax";
+import type { TAccountName } from "@hiveio/wax";
 import { WorkerBeeIterable } from "../../types/iterator";
 import { AccountClassifier, ChangeRecoveryInProgressClassifier, DeclineVotingRightsClassifier } from "../classifiers";
-import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
+import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
+import type { TProviderEvaluationContext } from "../factories/data-evaluation-context";
 import { ONE_MONTH_MS, STEEM_ACCOUNT_NAME } from "../filters/alarm-filter";
 import { ProviderBase } from "./provider-base";
 

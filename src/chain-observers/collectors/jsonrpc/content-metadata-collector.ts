@@ -1,11 +1,13 @@
-import { TAccountName, dateFromString } from "@hiveio/wax";
+import { dateFromString } from "@hiveio/wax";
+import type { TAccountName } from "@hiveio/wax";
 import { WorkerBeeError } from "../../../errors";
 import { BucketAggregateQueue } from "../../../types/queue";
 import { nullDate } from "../../../utils/time";
 import { ContentMetadataClassifier } from "../../classifiers";
-import { IHiveContentMetadata, TContentMetadataQueryData } from "../../classifiers/content-metadata-classifier";
-import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
-import { CollectorBase, TAvailableClassifiers } from "../collector-base";
+import type { IHiveContentMetadata, TContentMetadataQueryData } from "../../classifiers/content-metadata-classifier";
+import type { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
+import { CollectorBase } from "../collector-base";
+import type { TAvailableClassifiers } from "../collector-base";
 
 export const BUCKET_INTERVAL = 3 * 1000; // 3 seconds (Hive block interval)
 

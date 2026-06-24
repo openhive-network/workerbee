@@ -1,9 +1,11 @@
-import { comment, TAccountName } from "@hiveio/wax";
+import { comment } from "@hiveio/wax";
+import type { TAccountName } from "@hiveio/wax";
 import { WorkerBeeArrayIterable, WorkerBeeIterable } from "../../types/iterator";
-import { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
-import { IOperationTransactionPair, OperationClassifier } from "../classifiers/operation-classifier";
-import { TProviderEvaluationContext } from "../factories/data-evaluation-context";
-import { ICommentData } from "../filters/blog-content-filter";
+import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
+import { OperationClassifier } from "../classifiers/operation-classifier";
+import type { IOperationTransactionPair } from "../classifiers/operation-classifier";
+import type { TProviderEvaluationContext } from "../factories/data-evaluation-context";
+import type { ICommentData } from "../filters/blog-content-filter";
 import { ProviderBase } from "./provider-base";
 
 // Common interface for blog content data (posts and comments)

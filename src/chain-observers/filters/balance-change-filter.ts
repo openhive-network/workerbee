@@ -1,6 +1,6 @@
 import type { TAccountName } from "@hiveio/wax";
 import { AccountClassifier } from "../classifiers";
-import { IAccountBalance } from "../classifiers/account-classifier";
+import type { IAccountBalance } from "../classifiers/account-classifier";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 import { FilterBase } from "./filter-base";

@@ -1,4 +1,4 @@
-import {TAccountName} from "@hiveio/wax";
+import type { TAccountName } from "@hiveio/wax";
 
 export enum TActionState {
   /// Indicates that the action is started and pending

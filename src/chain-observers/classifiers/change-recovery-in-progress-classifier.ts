@@ -1,4 +1,5 @@
-import { CollectorClassifierBase, TRegisterEvaluationContext } from "./collector-classifier-base";
+import { CollectorClassifierBase } from "./collector-classifier-base";
+import type { TRegisterEvaluationContext } from "./collector-classifier-base";
 
 export interface IAccountChangingRecovery {
   accountToRecover: string;
