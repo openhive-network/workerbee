@@ -25,7 +25,7 @@ export class FeedPriceCollector extends CollectorBase<FeedPriceClassifier> {
 
     // Update feed price history every hour (HIVE_FEED_INTERVAL_BLOCKS) or when there is no cached data
     if ( this.cachedFeedHistoryData === undefined
-      || isDivisibleByInRange(Number.parseInt(this.worker.chain!.config["HIVE_FEED_INTERVAL_BLOCKS"]), headBlockNumber, this.previouslyCheckedBlockNumber)
+      || isDivisibleByInRange(Number.parseInt(this.worker.chain!.config["HIVE_FEED_INTERVAL_BLOCKS"]), this.previouslyCheckedBlockNumber, headBlockNumber)
     ) {
       const startGetFeedHistory = Date.now();
       const feedHistoryData = await this.worker.chain!.api.database_api.get_feed_history({});
