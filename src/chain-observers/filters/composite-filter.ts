@@ -24,29 +24,20 @@ abstract class CompositeFilter extends FilterBase {
   }
 
   protected async evaluateOperands(context: TFilterEvaluationContext, forceCancelValue?: boolean, forceResolveValue?: boolean): Promise<void> {
-    let forceResolve = () => {};
-    let forceReject = (_: WorkerBeeUnsatisfiedFilterError) => {};
+    const requiresForceResolve = forceResolveValue !== undefined;
 
-    const forcePromise = new Promise<void>((resolve, reject) => {
-      forceResolve = resolve;
-      forceReject = reject;
-    });
+    for(const filter of this.operands) {
+      const evaluationResult = await filter.match(context);
 
-    /*
-     * Resolve either when all operands resolve or when one of them resolves to forceResolveValue or rejects with forceCancelValue
-     * Internal note: Promise.race is for OR logic, Promise.all is for AND logic
-     */
-    await Promise.race([
-      Promise.all(
-        this.operands.map(filter => filter.match(context).then(evaluationResult => {
-          if(evaluationResult === forceResolveValue)
-            forceResolve();
-          else if (evaluationResult === forceCancelValue)
-            forceReject(new WorkerBeeUnsatisfiedFilterError());
-        }).catch(forceReject))
-      ),
-      forcePromise
-    ]);
+      if(requiresForceResolve && evaluationResult === forceResolveValue)
+        return;
+
+      if(forceCancelValue !== undefined && evaluationResult === forceCancelValue)
+        throw new WorkerBeeUnsatisfiedFilterError();
+    }
+
+    if(requiresForceResolve)
+      throw new WorkerBeeUnsatisfiedFilterError();
   }
 };
 
