@@ -42,8 +42,9 @@ export class ObserverMediator {
       const startFilter = Date.now();
 
       // Start providing parsed, cached data to filters
+      const listenerNotifications: Promise<void>[] = [];
       for(const [listener, { filter, providers }] of this.filters.entries())
-        filter.match(context).then(async(matched) => {
+        listenerNotifications.push(filter.match(context).then(async(matched) => {
           this.factory.addTiming("filters", Date.now() - startFilter);
 
           if(!matched)
@@ -71,7 +72,11 @@ export class ObserverMediator {
           this.factory.addTiming("providers", Date.now() - startProvider);
 
           await (listener.next?.(providedData) as Promise<any> | any);
-        }).catch(error => listener.error?.(error));
+        }).catch(async(error) => {
+          await (listener.error?.(error) as Promise<any> | any);
+        }));
+
+      await Promise.all(listenerNotifications);
 
       await this.factory.postNotify(context, this);
     } catch (error) {
