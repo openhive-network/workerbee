@@ -143,3 +143,40 @@ bot.observe.onPosts({ author: "username" }).subscribe({
   complete: () => { /* cleanup */ }
 });
 ```
+
+## Python Port (`python/`)
+
+Full port of the TypeScript WorkerBee library to Python, maintaining identical architecture and naming.
+
+**Architecture:** 4-layer pipeline (Classifier → Collector → Factory → ObserverMediator)
+
+**Runtime:** Python 3.12+, async/await throughout
+
+**Dependency:** `hiveio-wax>=2.0.2`
+
+**Conventions:**
+- `snake_case` methods/params (Pythonic; TS API translated): `used_contexts`, `push_options`, `has_registered`, `on_block` (TS `onBlock`)
+- `PascalCase` classes: `WorkerBee`, `QueenBee`, `ObserverMediator`
+- `from __future__ import annotations` in every file
+- `TYPE_CHECKING` guard for annotation-only imports
+- Modern typing: `list[str]`, `dict[str, object]`, `X | Y` (no `List`, `Dict`, `Optional`)
+- Zero `Any` — use type aliases for complex structures
+- `Awaitable[X]` not `Coroutine[None, None, X]`
+
+**Toolchain:**
+```bash
+cd python/
+.venv/bin/pre-commit run --all-files --config ../.pre-commit-config.yaml
+.venv/bin/python -m pytest tests/unit -q
+.venv/bin/python -m pytest tests/integration -q -n auto
+.venv/bin/python -m coverage run -m pytest tests/unit && coverage report --include="workerbee/chain_observers/*"
+```
+
+**Testing:**
+- Pure pytest, **NEVER** use `monkeypatch` or `unittest.mock.patch`
+- Fake/Stub classes for mocking (fixture-based)
+- All tests must pass before commit
+- Coverage target: >80%
+
+**Dev Cycle (mandatory for each change):**
+1. Implement → 2. Tests → 3. Static analysis (`pre-commit`) → 4. DRY check → 5. Review → 6. All tests pass → 7. Commit
