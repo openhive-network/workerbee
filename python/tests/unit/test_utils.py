@@ -113,14 +113,14 @@ class TestIsExchange:
 
 
 class TestIsAssetGreaterThan:
-    def test_dict_assets_compare_numeric_amounts_for_same_nai(self) -> None:
+    def test_dict_assets_compare_amount_strings_like_typescript(self) -> None:
         base = {"amount": "1000", "nai": "@@000000021", "precision": 3}
-        other = {"amount": "2000", "nai": "@@000000021", "precision": 3}
+        other = {"amount": "2", "nai": "@@000000021", "precision": 3}
         assert is_asset_greater_than(base, other) is True
 
-    def test_object_assets_compare_numeric_amounts_for_same_nai(self) -> None:
+    def test_object_assets_compare_amount_strings_like_typescript(self) -> None:
         base = SimpleNamespace(amount="1000", nai="@@000000021")
-        other = SimpleNamespace(amount="2000", nai="@@000000021")
+        other = SimpleNamespace(amount="2", nai="@@000000021")
         assert is_asset_greater_than(base, other) is True
 
     def test_rejects_different_nai(self) -> None:

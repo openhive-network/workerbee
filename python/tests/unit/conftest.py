@@ -39,32 +39,6 @@ def make_operation(type_name: str, value_dict: dict[str, Any]) -> Operation:
     return Operation(type=type_name, value=value_dict)
 
 
-def make_transaction(tx_id: str, operations: list[dict[str, Any]]) -> dict[str, Any]:
-    """Build a transaction dict with id and operations list."""
-    return {
-        "id": tx_id,
-        "transaction": {"operations": operations},
-    }
-
-
-def make_block(
-    number: int,
-    witness: str = "witness-a",
-    timestamp: str = "2024-06-15T12:00:00",
-    transactions: list[dict[str, Any]] | None = None,
-) -> dict[str, Any]:
-    """Build a synthetic block matching the block_api.get_block response shape."""
-    txs = transactions or []
-    return {
-        "block": {
-            "witness": witness,
-            "timestamp": timestamp,
-            "transaction_ids": [t["id"] for t in txs],
-            "transactions": [t["transaction"] for t in txs],
-        },
-    }
-
-
 class FixedCollector(CollectorBase):
     """Collector whose get() returns a pre-set classifier result dict."""
 
