@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import inspect
-from collections.abc import Mapping
+from collections.abc import AsyncGenerator, Mapping
 from datetime import timedelta
 from typing import TYPE_CHECKING, cast
 
@@ -315,7 +315,11 @@ class WorkerBee(IWorkerBee):
 
         By default a pipeline error is raised inside the ``async for``. Pass
         ``on_error`` (sync or async) to handle errors with a callback instead;
-        iteration then continues rather than raising. ``max_queue_size=0``
+        iteration then continues rather than raising. ``async for`` over
+        ``bot`` or ``bot.iterate()`` closes the subscription when the loop is
+        broken. If you store ``aiter(bot)`` directly, close it explicitly with
+        ``await iterator.aclose()`` because Python has no TS-style iterator
+        ``return()`` hook for a still-referenced iterator. ``max_queue_size=0``
         keeps the historical unbounded queue; a positive value bounds the
         iterator's queued blocks while the consumer catches up. The mediator
         still schedules listener pipelines fire-and-forget like TypeScript; the
@@ -324,8 +328,8 @@ class WorkerBee(IWorkerBee):
         """
         return _AsyncBlockIterator(self, on_error, max_queue_size=max_queue_size)
 
-    def __aiter__(self) -> _AsyncBlockIterator:
-        return self.iterate()
+    def __aiter__(self) -> AsyncGenerator[BlockData, None]:
+        return self.iterate().__aiter__()
 
     async def __aenter__(self) -> WorkerBee:
         await self.start()
@@ -374,8 +378,15 @@ class _AsyncBlockIterator:
             )
         )
 
-    def __aiter__(self) -> _AsyncBlockIterator:
-        return self
+    def __aiter__(self) -> AsyncGenerator[BlockData, None]:
+        return self._aiter()
+
+    async def _aiter(self) -> AsyncGenerator[BlockData, None]:
+        try:
+            while True:
+                yield await self.__anext__()
+        finally:
+            await self.aclose()
 
     async def __anext__(self) -> BlockData:
         self._ensure_attached()
