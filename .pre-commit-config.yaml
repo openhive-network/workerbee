@@ -1,0 +1,102 @@
+files: ^(python/|\.pre-commit-config\.yaml$)
+
+exclude: |
+  (?x)^(
+    examples/hive/|
+    generated/|
+    python/generated/|
+    python/generated_by_package_fixtures/
+  )
+
+repos:
+  - repo: local
+    hooks:
+      - id: check-added-large-files
+        name: check for added large files
+        entry: check-added-large-files
+        language: system
+      - id: check-merge-conflict
+        name: check for merge conflicts
+        entry: check-merge-conflict
+        language: system
+      - id: check-yaml
+        name: check yaml
+        entry: check-yaml --unsafe
+        language: system
+        types: [yaml]
+      - id: check-json
+        name: check json
+        entry: check-json
+        language: system
+        types: [json]
+      - id: pretty-format-json
+        name: pretty format json
+        entry: pretty-format-json --autofix
+        language: system
+        types: [json]
+      - id: trailing-whitespace
+        name: trim trailing whitespace
+        entry: trailing-whitespace-fixer
+        language: system
+        types: [text]
+      - id: end-of-file-fixer
+        name: fix end of files
+        entry: end-of-file-fixer
+        language: system
+        types: [text]
+
+  - repo: local
+    hooks:
+      - id: poetry-check-lock
+        name: check Python poetry.lock consistency
+        entry: bash -c 'cd python && poetry check --lock'
+        language: system
+        pass_filenames: false
+        files: ^python/(pyproject\.toml|poetry\.lock)$
+      - id: detect-missing-init
+        name: detect missing Python __init__.py files
+        entry: detect-missing-init
+        language: system
+        pass_filenames: false
+        args:
+          - "--create"
+          - "--python-folders"
+          - "python/workerbee,python/tests/unit,python/tests/integration,python/tests/mock"
+        files: ^python/(workerbee|tests/(unit|integration|mock))/(.*\.py|__init__\.py)$
+
+  - repo: local
+    hooks:
+      - id: ruff
+        name: lint Python code with Ruff
+        entry: ruff check --fix
+        language: system
+        files: ^python/(workerbee|tests|examples)/.*\.py$
+        types_or: [python, pyi]
+      - id: ruff-format
+        name: format Python code with Ruff
+        entry: ruff format
+        language: system
+        files: ^python/(workerbee|tests|examples)/.*\.py$
+        types_or: [python, pyi]
+
+  - repo: local
+    hooks:
+      - id: mypy-workerbee
+        name: type check Python WorkerBee with mypy
+        entry: bash -c 'cd python && poetry run mypy workerbee/chain_observers/ examples/'
+        language: system
+        pass_filenames: false
+        files: ^python/(workerbee/chain_observers/|examples/|pyproject\.toml$|poetry\.lock$)
+      - id: coverage-workerbee
+        name: enforce Python WorkerBee coverage threshold
+        entry: bash -c 'cd python && coverage run -m pytest tests/unit -vv --tb=short --showlocals -ra --strict-markers --strict-config --durations=25 && coverage report'
+        language: system
+        pass_filenames: false
+        files: ^python/(workerbee/chain_observers/|tests/|pyproject\.toml$|poetry\.lock$)
+
+  - repo: local
+    hooks:
+      - id: codespell
+        name: codespell
+        entry: codespell --toml python/pyproject.toml
+        language: system
