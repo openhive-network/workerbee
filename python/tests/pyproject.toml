@@ -1,0 +1,32 @@
+# Test environment for the WorkerBee Python port (the "test root").
+#
+# Mirrors hive/clive's split of the root package from its tests: the root
+# python/pyproject.toml ships only the workerbee runtime (+ static-analysis),
+# while THIS project aggregates everything needed to RUN the tests:
+#   - workerbee itself -> editable path dep on ../ (hiveio-workerbee),
+#   - pytest (+ plugins).
+#
+# Convention (deferred): tests carry loose constraints while the main packages
+# pin exact versions in the lock. For development everything is pinned hard here.
+#
+# Run the suite from this directory:  poetry install && poetry run pytest
+# (pytest config lives in the root python/pyproject.toml — intentionally NOT
+#  redefined here, so it does not hijack config discovery for the root gate.)
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.12,<4"
+hiveio-workerbee = { path = "..", develop = true }
+pytest = "8.3.5"
+pytest-asyncio = "0.26.0"
+coverage = "7.6.10"
+pyyaml = "6.0.2"
+
+# Aggregated Hive GitLab PyPI index — provides hiveio-wax/api/beekeepy/schemas
+# pulled in transitively by workerbee (poetry does not inherit
+# sources from path dependencies, so the consuming project must declare them).
+[[tool.poetry.source]]
+name = "gitlab-hive"
+url = "https://gitlab.syncad.com/api/v4/groups/136/-/packages/pypi/simple"
+priority = "primary"

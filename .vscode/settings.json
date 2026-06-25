@@ -1,0 +1,24 @@
+{
+    "python-envs.defaultEnvManager": "ms-python.python:poetry",
+    "python-envs.defaultPackageManager": "ms-python.python:poetry",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/tests",
+        "${workspaceFolder}/tests/python",
+        "${workspaceFolder}/tests/python/functional",
+        "./python/tests/workerbee-local-tools"
+    ],
+
+    // Type checking comes from mypy (the ms-python.mypy-type-checker extension), not from
+    // Pyright/Pylance. Pylance stays on for IntelliSense / completion / navigation, but its
+    // type diagnostics are OFF, so Pyright-only errors that the mypy gate does not flag
+    // (e.g. reportTypedDictNotRequiredAccess) no longer appear.
+    "python.analysis.typeCheckingMode": "off",
+
+    // Run mypy FROM THE ACTIVE VENV (not the bundled copy) and FROM python/, so it discovers
+    // [tool.mypy] in python/pyproject.toml (strict, python_version=3.12) instead of falling
+    // back to mypy's defaults. Requires: the ms-python.mypy-type-checker extension installed,
+    // and an interpreter whose venv has mypy (python/.venv).
+    "mypy-type-checker.importStrategy": "fromEnvironment",
+    "mypy-type-checker.cwd": "${workspaceFolder}/python",
+    "mypy-type-checker.preferDaemon": true
+}
