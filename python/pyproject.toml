@@ -122,6 +122,9 @@ ignore_errors = true
 asyncio_mode = "strict"
 asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
+markers = [
+    "jsonrpc_mock: tests using the TypeScript JSON-RPC mock server; run sequentially",
+]
 
 [tool.coverage.run]
 source = ["workerbee/chain_observers"]

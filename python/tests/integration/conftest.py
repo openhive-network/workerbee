@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import os
-from collections.abc import AsyncIterator, Iterator
+from collections.abc import AsyncIterator
 
 import pytest
 import pytest_asyncio
 from wax.interfaces import IHiveChainInterface
 
-from tests.integration._jsonrpc_mock import RecordedJsonRpcMockServer
 from tests.integration._mirrornet import MirrornetReplay, open_mirrornet_chain
 from workerbee import WorkerBee
 
@@ -39,12 +38,6 @@ def mirrornet_endpoint(pytestconfig: pytest.Config) -> str:
 @pytest.fixture()
 def mirrornet_replay(mirrornet_endpoint: str) -> MirrornetReplay:
     return MirrornetReplay(mirrornet_endpoint)
-
-
-@pytest.fixture()
-def recorded_jsonrpc_server() -> Iterator[RecordedJsonRpcMockServer]:
-    with RecordedJsonRpcMockServer() as server:
-        yield server
 
 
 @pytest_asyncio.fixture()
