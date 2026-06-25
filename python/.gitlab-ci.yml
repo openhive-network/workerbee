@@ -1,0 +1,150 @@
+stages:
+  - .pre
+  - build
+  - test
+  - deploy
+
+variables:
+  PYTHONFAULTHANDLER: "1"
+  PYTHONTRACEMALLOC: "10"
+  PYTHONUNBUFFERED: "1"
+  PYTHONWARNINGS: "default"
+  PYTHON_DIR: "${CI_PROJECT_DIR}/python"
+  PRE_COMMIT_CONFIG: "${CI_PROJECT_DIR}/.pre-commit-config.yaml"
+  PYTHON_VERSION: "3.12"
+  # Full clone so poetry-dynamic-versioning can read git tags for the version.
+  GIT_DEPTH: 0
+  # Ubuntu 24.04 Python image used by the shared Python job template.
+  PYTHON_IMAGE: "registry.gitlab.syncad.com/hive/hive/ci-base-image:ubuntu24.04-3"
+
+default:
+  tags:
+    - public-runner-docker
+
+.python_job:
+  extends: .configuration_template
+  variables:
+    PYPROJECT_DIR: "${PYTHON_DIR}"
+  before_script:
+    - cd "${PYTHON_DIR}"
+    - !reference [.configuration_template, before_script]
+    - poetry -C "${PYPROJECT_DIR}" check --lock --verbose
+    - poetry -C "${PYPROJECT_DIR}" install -vv
+    - pip list
+
+python_precommit:
+  extends: .python_job
+  stage: .pre
+  script:
+    - ruff format --check workerbee tests examples
+    - pre-commit run --all-files --show-diff-on-failure --config "${PRE_COMMIT_CONFIG}"
+
+python_build_wheel:
+  extends: .build_wheel_template
+  stage: build
+  variables:
+    PYPROJECT_DIR: "${PYTHON_DIR}"
+  needs:
+    - job: python_precommit
+
+python_test_unit:
+  extends: .python_job
+  stage: test
+  needs:
+    - job: python_precommit
+  script:
+    - pytest tests/unit -vv --tb=short --showlocals -ra --strict-markers --strict-config -n auto --durations=25 --junitxml=junit-unit.xml
+  artifacts:
+    when: always
+    reports:
+      junit: python/junit-unit.xml
+
+python_test_integration:
+  extends: .python_job
+  stage: test
+  needs:
+    - job: python_precommit
+  variables:
+    WORKERBEE_MIRRORNET_ENDPOINT: "https://api.hive.blog"
+  script:
+    - pytest tests/integration -vv --tb=short --showlocals -ra --strict-markers --strict-config -n auto --durations=25 --junitxml=junit-integration.xml
+  artifacts:
+    when: always
+    reports:
+      junit: python/junit-integration.xml
+
+python_test_mock:
+  extends: .python_job
+  stage: test
+  needs:
+    - job: python_precommit
+  script:
+    - cd "${CI_PROJECT_DIR}"
+    - |
+      if ! command -v node >/dev/null; then
+        NODE_VERSION="${WORKERBEE_CI_NODE_VERSION:-v20.18.3}"
+        case "$(uname -m)" in
+          x86_64) NODE_ARCH="linux-x64" ;;
+          aarch64|arm64) NODE_ARCH="linux-arm64" ;;
+          *) echo "Unsupported Node architecture: $(uname -m)" >&2; exit 1 ;;
+        esac
+        NODE_DIR="${CI_PROJECT_DIR}/.ci-node/${NODE_VERSION}-${NODE_ARCH}"
+        if [ ! -x "${NODE_DIR}/bin/node" ]; then
+          NODE_VERSION="${NODE_VERSION}" NODE_ARCH="${NODE_ARCH}" NODE_DIR="${NODE_DIR}" python3 - <<'PY'
+      import os
+      import shutil
+      import tarfile
+      import tempfile
+      import urllib.request
+      from pathlib import Path
+
+      version = os.environ["NODE_VERSION"]
+      arch = os.environ["NODE_ARCH"]
+      target = Path(os.environ["NODE_DIR"])
+      archive_name = f"node-{version}-{arch}.tar.xz"
+      url = f"https://nodejs.org/dist/{version}/{archive_name}"
+
+      target.parent.mkdir(parents=True, exist_ok=True)
+      with tempfile.TemporaryDirectory() as tmp:
+          tmp_path = Path(tmp)
+          archive = tmp_path / archive_name
+          urllib.request.urlretrieve(url, archive)
+          with tarfile.open(archive) as tar:
+              tar.extractall(tmp_path, filter="data")
+          extracted = tmp_path / f"node-{version}-{arch}"
+          if target.exists():
+              shutil.rmtree(target)
+          shutil.move(str(extracted), target)
+      PY
+        fi
+        export PATH="${NODE_DIR}/bin:${PATH}"
+      fi
+      if ! command -v pnpm >/dev/null; then
+        corepack enable
+        corepack prepare "$(python3 -c 'import json, pathlib; print(json.loads(pathlib.Path("package.json").read_text())["packageManager"].split("+")[0])')" --activate
+      fi
+      node --version
+      pnpm --version
+    - pnpm --recursive install --frozen-lockfile --store-dir "${CI_PROJECT_DIR}/.pnpm-store"
+    - cd "${PYTHON_DIR}"
+    - pytest tests/mock -vv --tb=short --showlocals -ra --strict-markers --strict-config --durations=25 --junitxml=junit-mock.xml
+  artifacts:
+    when: always
+    reports:
+      junit: python/junit-mock.xml
+
+python_deploy_wheel_to_gitlab:
+  extends: .deploy_wheel_to_gitlab_template
+  stage: deploy
+  variables:
+    PYPROJECT_DIR: "${PYTHON_DIR}"
+  rules:
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+      when: on_success
+    - when: manual
+  needs:
+    - job: python_test_unit
+    - job: python_test_integration
+    - job: python_test_mock
+    - job: python_build_wheel
+      artifacts: true
