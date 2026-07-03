@@ -7,15 +7,19 @@ from .collector_classifier_base import CollectorClassifierBase, TRegisterEvaluat
 
 
 class ManabarClassifier(CollectorClassifierBase[ManabarClassifierData]):
-    """IManabarAccountData:
-      manabar_data: dict[str, TManabars]
+    """Collect account manabar data.
 
-    TManabars = dict[ManabarType, IManabarDataPercent]
-    IManabarDataPercent:
-      current_mana: int
-      last_update_time: datetime
-      max: int
-      percent: float
+    Mirrors the TypeScript ``IManabarAccountData`` shape::
+
+        IManabarAccountData:
+            manabar_data: dict[str, TManabars]
+
+        TManabars = dict[ManabarType, IManabarDataPercent]
+        IManabarDataPercent:
+            current_mana: int
+            last_update_time: datetime
+            max: int
+            percent: float
     """
 
     @classmethod

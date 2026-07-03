@@ -32,6 +32,17 @@ default:
     - poetry -C "${PYPROJECT_DIR}" install -vv
     - pip list
 
+.python_docs_job:
+  extends: .configuration_template
+  variables:
+    PYPROJECT_DIR: "${PYTHON_DIR}"
+  before_script:
+    - cd "${PYTHON_DIR}"
+    - !reference [.configuration_template, before_script]
+    - poetry -C "${PYPROJECT_DIR}" check --lock --verbose
+    - poetry -C "${PYPROJECT_DIR}" install --with docs -vv
+    - pip list
+
 python_precommit:
   extends: .python_job
   stage: .pre
@@ -46,6 +57,19 @@ python_build_wheel:
     PYPROJECT_DIR: "${PYTHON_DIR}"
   needs:
     - job: python_precommit
+
+python_generate_docs:
+  extends: .python_docs_job
+  stage: build
+  needs:
+    - job: python_precommit
+  script:
+    - ./scripts/generate_docs.bash "${PYTHON_DIR}/dist/docs"
+  artifacts:
+    paths:
+      - python/dist/docs
+    when: always
+    expire_in: 1 week
 
 python_test_unit:
   extends: .python_job
