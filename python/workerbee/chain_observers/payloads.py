@@ -2,7 +2,7 @@
 
 WorkerBee-side container types (per-account groupings, the operation/transaction
 pair) are declared here as ``PayloadBase``s. Their leaf chain entities reference
-**hiveio_api** models (the canonical Hive model package) rather than raw dicts.
+``hiveio_api`` models (the canonical Hive model package) rather than raw dicts.
 
 hiveio_api models are imported under ``TYPE_CHECKING`` only: the data already
 arrives typed from the API at runtime, so annotating with these models adds zero
