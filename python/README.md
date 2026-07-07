@@ -7,12 +7,20 @@ WorkerBee provides an event-based observer pattern for bots that react to blockc
 ## Requirements
 
 - Python 3.12+
-- [hiveio-wax](https://gitlab.syncad.com/hive/wax) 2.0.2.dev20260622105138 or newer
+- [hiveio-wax](https://gitlab.syncad.com/hive/wax) 2.0.2.dev20260720133734
 
 ## Installation
 
 ```bash
 pip install hiveio-workerbee
+```
+
+Post-release development builds used by this repository are published in the
+Hive GitLab package registry. If `pip` cannot find `hiveio-workerbee` on the
+configured package index, install it with the Hive registry enabled:
+
+```bash
+pip install --extra-index-url https://gitlab.syncad.com/api/v4/groups/136/-/packages/pypi/simple hiveio-workerbee
 ```
 
 ## Quick Start
@@ -112,7 +120,9 @@ async def stream_blocks(chain) -> None:
 
 
 async def broadcast_transaction(bot: WorkerBee, transaction) -> None:
+    transaction_id = str(transaction.id)
     await bot.broadcast(transaction, expire_in=timedelta(seconds=30), verify_signatures=True)
+    print(f"transaction {transaction_id} was seen on chain")
 
 
 async def park_bot(bot: WorkerBee) -> None:
@@ -145,7 +155,7 @@ bot.observe.on_accounts_balance_change(True, "alice").subscribe(on_next=handle_b
 
 bot.observe.on_posts("alice").and_.on_votes("alice").subscribe(on_next=handle)
 
-bot.observe.on_whale_alert({"amount": 100000, "nai": "@@000000021", "precision": 3}).subscribe(on_next=handle)
+bot.observe.on_whale_alert({"amount": "100000", "nai": "@@000000021", "precision": 3}).subscribe(on_next=handle)
 
 bot.observe.on_alarm("alice").subscribe(on_next=handle_alarm)
 
@@ -188,9 +198,33 @@ def handle_event(event: ObserverNotification) -> None:
 
 Payload leaves that come directly from Hive APIs use canonical `hiveio_api`/`wax` models. WorkerBee-specific projections and grouping containers are typed in `workerbee.chain_observers.payloads`.
 
+### Application Boundaries
+
+WorkerBee observes live blocks and bounded historical block ranges. It does not
+replace every Hive API that an application may need. For example, a bot that
+starts with an existing backlog of recent posts plus their `active_votes` should
+query Bridge directly with `bridge.get_account_posts`, then use WorkerBee for
+new live notifications.
+
+WorkerBee also does not manage private keys. Build and sign transactions with
+Wax/Beekeeper, then pass the signed transaction to `await bot.broadcast(tx)`.
+`broadcast()` returns `None` after the transaction has been seen on chain. If an
+application wants to log the transaction id, read `str(tx.id)` from the
+transaction object before or after calling `broadcast()`.
+
+Hive vote operation weights are basis points, not percentages: `10000` is a
+100% vote and `1000` is a 10% vote. Application configuration that stores a
+percentage should convert it before constructing the Wax vote operation, for
+example `weight=vote_weight_percent * 100`.
+
+`on_accounts_full_manabar(...)` mirrors the TypeScript WorkerBee API and means
+`on_accounts_manabar_percent(..., 98, ...)`. Applications that need a stricter
+threshold, such as `99.98`, should call `on_accounts_manabar_percent(...)`
+directly.
+
 ### PastQueen
 
-`PastQueen` processes historical blocks and can transition to live observation after replay.
+`PastQueen` processes historical blocks over a finite or open-ended replay range. Historical subscriptions complete when replay is exhausted. To continue with live observation, close the replay subscription and create a new live subscription from `bot.observe` on the same `WorkerBee`.
 
 ```python
 from workerbee.chain_observers import PastQueen

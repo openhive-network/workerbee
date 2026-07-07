@@ -83,7 +83,7 @@ The shared static-analysis gate is `.pre-commit-config.yaml`. Keep hook versions
 
 - `WorkerBee` supports async context management, async iteration over blocks, `start()`, `stop()`, `aclose()`, and `run_forever()`.
 - `QueenBee` is the fluent observer builder exposed through `bot.observe`.
-- `PastQueen` handles historical replay and can transition from past blocks to live observation.
+- `PastQueen` handles historical replay. Replay-to-live handoff is explicit: complete or close the replay subscription, then create a live subscription from `bot.observe` and start the bot.
 - Subscriptions use typed callbacks: `subscribe(on_next=..., on_error=..., on_complete=...)`.
 - Observer chains are async-iterable; pipeline errors raise out of the async iterator by default.
 - `provide_past_operations(from_block, to_block)` is sync; `provide_past_operations_relative(relative_time)` is async.

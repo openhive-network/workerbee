@@ -123,7 +123,10 @@ class WorkerBee(IWorkerBee):
         ``expire_in`` is how long to wait for the transaction to appear before
         raising (a :class:`datetime.timedelta`, default two block intervals).
         ``verify_signatures`` re-checks the broadcast signatures against the
-        original when set.
+        original when set. The method returns ``None`` after the transaction has
+        been observed. Read ``str(tx.id)`` from the transaction object before or
+        after calling this method when an application needs a transaction id for
+        logs or storage.
         """
         # ``tx`` is a wax transaction object — broadcast it directly (Python
         # ``chain.broadcast`` takes the object, not its api-json; the TS
