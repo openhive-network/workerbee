@@ -172,3 +172,15 @@ python_deploy_wheel_to_gitlab:
     - job: python_test_mock
     - job: python_build_wheel
       artifacts: true
+
+python_deploy_wheel_to_pypi:
+  extends: .deploy_wheel_to_pypi_template
+  stage: deploy
+  variables:
+    PYPROJECT_DIR: "${PYTHON_DIR}"
+  needs:
+    - job: python_test_unit
+    - job: python_test_integration
+    - job: python_test_mock
+    - job: python_build_wheel
+      artifacts: true
