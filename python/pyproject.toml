@@ -34,7 +34,7 @@ poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
 [tool.poetry.dependencies]
 # hiveio-wax requires Python >=3.12, so that is the effective floor.
 python = ">=3.12,<4"
-hiveio-wax = "2.0.2.dev20260622105138"
+hiveio-wax = "2.0.3rc0.dev20260727114341"
 
 
 # hiveio-* post-release builds (from develop) live in the Hive GitLab PyPI registry.
@@ -119,13 +119,8 @@ format-jinja = """
 # so 3.11+ stdlib (asyncio.timeout, typing.Self) is recognised, not false-flagged.
 python_version = "3.12"
 strict = true
-ignore_missing_imports = true
 warn_return_any = true
 warn_unused_configs = true
-
-[[tool.mypy.overrides]]
-module = ["tests.*"]
-ignore_errors = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "strict"

@@ -13,7 +13,7 @@ from ..classifiers.collector_classifier_base import TRegisterEvaluationContext
 from .provider_base import ProviderBase
 
 if TYPE_CHECKING:
-    from hiveio_api.block_api import Transaction3, Transaction4
+    from hiveio_api.block_api import BlockTransaction
 
     from ..factories.data_evaluation_context import DataEvaluationContext
     from ..payloads import TransactionsByIdPayload
@@ -31,7 +31,7 @@ class TransactionByIdProvider(ProviderBase):
         return [BlockClassifier]
 
     async def provide(self, data: DataEvaluationContext) -> TransactionsByIdPayload:
-        transactions: dict[str, Transaction3 | Transaction4] = {}
+        transactions: dict[str, BlockTransaction] = {}
 
         block = await data.get(BlockClassifier)
         transactions_per_id = block["transactions_per_id"]

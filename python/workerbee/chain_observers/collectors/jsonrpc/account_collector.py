@@ -9,6 +9,8 @@ import json
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
+from hiveio_api.common import NaiAsset
+
 from ...classifiers.account_classifier import AccountClassifier
 from ..set_managed_collector import SetManagedCollector
 
@@ -36,8 +38,8 @@ def _amount(asset: object) -> int:
     return int(getattr(asset, "amount", 0) or 0)
 
 
-def _total_asset(base: Any, *parts: object) -> Any:
-    return type(base)(
+def _total_asset(base: NaiAsset, *parts: object) -> NaiAsset:
+    return NaiAsset(
         amount=str(sum(_amount(part) for part in parts)),
         precision=base.precision,
         nai=base.nai,

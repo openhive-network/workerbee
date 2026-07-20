@@ -1018,13 +1018,13 @@ reference = "gitlab-hive"
 
 [[package]]
 name = "hiveio-api"
-version = "1.28.8rc12.dev20260513130649"
+version = "1.28.8rc12.dev20260727090705"
 description = "Hive JSON-RPC API client package with lazy-loaded submodules for all Hive APIs"
 optional = false
 python-versions = ">=3.12,<4"
 groups = ["main"]
 files = [
-    {file = "hiveio_api-1.28.8rc12.dev20260513130649-py3-none-any.whl", hash = "sha256:87c6863f88ac1c5517fb16554df29b33a507342d2a32d61e7940cfd54bb75c3a"},
+    {file = "hiveio_api-1.28.8rc12.dev20260727090705-py3-none-any.whl", hash = "sha256:b99b01df21a78b1c48634a1de1deaf2be7f3764a1077196cb226edac6acba5c0"},
 ]
 
 [package.dependencies]
@@ -1080,18 +1080,18 @@ reference = "gitlab-hive"
 
 [[package]]
 name = "hiveio-wax"
-version = "2.0.2.dev20260622105138"
+version = "2.0.3rc0.dev20260727114341"
 description = ""
 optional = false
 python-versions = ">=3.12,<4"
 groups = ["main"]
 files = [
-    {file = "hiveio_wax-2.0.2.dev20260622105138-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:8d1f9a0ece06629a396844f88e0d7041fac32c785e2a08b8a8457397b62cf0a3"},
-    {file = "hiveio_wax-2.0.2.dev20260622105138-cp314-cp314-manylinux_2_28_x86_64.whl", hash = "sha256:37ec6b703018de9d11818b618e84c940c085559c61c52b94501d10a56df0b79c"},
+    {file = "hiveio_wax-2.0.3rc0.dev20260727114341-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:1bd10d13f08d44925ff8e9e8fdff0f3e5f4e8da7f56d698c455ed473e020a7c9"},
+    {file = "hiveio_wax-2.0.3rc0.dev20260727114341-cp314-cp314-manylinux_2_28_x86_64.whl", hash = "sha256:a2f5ddd83206ac6b48752a10a68404434a10d827f2abacb746fd9d0342cf0852"},
 ]
 
 [package.dependencies]
-hiveio-api = "1.28.8rc12.dev20260513130649"
+hiveio-api = "1.28.8rc12.dev20260727090705"
 httpx = {version = ">=0.28.0,<0.29.0", extras = ["http2"]}
 loguru = ">=0.7.2,<0.8.0"
 protobuf = ">=6.33.0,<7.0.0"
@@ -3125,4 +3125,4 @@ reference = "gitlab-hive"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<4"
-content-hash = "98c4a3abdb9453408d54bad01226e90b134fbf0b54d5a9a69aef1892f43a8965"
+content-hash = "2eafec325d52c0f83607aab5310b63cfe0d4a3edb484810295180a4eff42a535"

@@ -77,8 +77,6 @@ class BlockCollector(CollectorBase):
                     block_num=head_block_number,
                 )
 
-            # wax/hiveio_api leaves an absent block as the msgspec.UNSET sentinel
-            # (not None), so guard against both — mirrors TS `block === undefined`.
             block = block_result.block if hasattr(block_result, "block") else None
             if block is None or block is UNSET:
                 raise BlockNotAvailableError(head_block_number)

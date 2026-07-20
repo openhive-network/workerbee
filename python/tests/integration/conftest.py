@@ -11,6 +11,7 @@ from wax.interfaces import IHiveChainInterface
 
 from tests.integration._mirrornet import MirrornetReplay, open_mirrornet_chain
 from workerbee import WorkerBee
+from workerbee.chain_observers.wax_api import WorkerBeeApiCollection
 
 _MIRRORNET_ENDPOINT_ENV = "WORKERBEE_MIRRORNET_ENDPOINT"
 _MIRRORNET_ENDPOINT_OPTION = "--workerbee-mirrornet-endpoint"
@@ -41,19 +42,19 @@ def mirrornet_replay(mirrornet_endpoint: str) -> MirrornetReplay:
 
 
 @pytest_asyncio.fixture()
-async def mirrornet_chain(mirrornet_endpoint: str) -> AsyncIterator[IHiveChainInterface]:
+async def mirrornet_chain(mirrornet_endpoint: str) -> AsyncIterator[IHiveChainInterface[WorkerBeeApiCollection]]:
     async with open_mirrornet_chain(mirrornet_endpoint) as chain:
         yield chain
 
 
 @pytest_asyncio.fixture()
-async def workerbee(mirrornet_chain: IHiveChainInterface) -> AsyncIterator[WorkerBee]:
+async def workerbee(mirrornet_chain: IHiveChainInterface[WorkerBeeApiCollection]) -> AsyncIterator[WorkerBee]:
     async with WorkerBee(mirrornet_chain) as bot:
         yield bot
 
 
 @pytest_asyncio.fixture()
-async def inactive_workerbee(mirrornet_chain: IHiveChainInterface) -> AsyncIterator[WorkerBee]:
+async def inactive_workerbee(mirrornet_chain: IHiveChainInterface[WorkerBeeApiCollection]) -> AsyncIterator[WorkerBee]:
     bot = WorkerBee(mirrornet_chain)
     try:
         yield bot

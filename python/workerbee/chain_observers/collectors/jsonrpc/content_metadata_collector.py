@@ -11,6 +11,8 @@ import time
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 
+from msgspec import UNSET
+
 from ...classifiers.content_metadata_classifier import ContentMetadataClassifier
 from ..bucket_aggregate_queue import BucketAggregateQueue
 from ..collector_base import CollectorBase
@@ -80,8 +82,7 @@ class ContentMetadataCollector(CollectorBase):
                     category = parent_permlink if parent_author == "" else ""
 
                     cashout_info = info.cashout_info
-
-                    if cashout_info is not None:
+                    if cashout_info is not None and cashout_info is not UNSET:
                         content_data[author][permlink] = _build_metadata_from_cashout(
                             author,
                             permlink,

@@ -24,6 +24,7 @@ from .utils import _validate_max_queue_size, calculate_relative_time, parse_iso_
 from .wax_api import WorkerBeeApiCollection
 
 if TYPE_CHECKING:
+    from wax.api.collection import WaxApiCollection
     from wax.interfaces import IHiveChainInterface, IOnlineTransaction, ITransaction
 
 HIVE_BLOCK_INTERVAL_MS = 3000
@@ -44,7 +45,7 @@ class WorkerBee(IWorkerBee):
     :meth:`aclose` / ``async with``.
     """
 
-    def __init__(self, chain: IHiveChainInterface) -> None:
+    def __init__(self, chain: IHiveChainInterface[WaxApiCollection] | IHiveChainInterface[WorkerBeeApiCollection]) -> None:
         # extends() returns a new chain instance. Reuse a chain that already carries
         # WorkerBee's block_api extension; otherwise WorkerBee owns the wrapper it
         # creates and closes it from aclose().
