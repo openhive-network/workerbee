@@ -2,94 +2,92 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING
 
 import pytest
 
+from tests.integration._asset_assertions import HiveAsset, asset_amount_value, hive_threshold, ts_raw_asset_is_greater_than
 from tests.integration._mirrornet import MirrornetReplay
 
-HIVE_NAI = "@@000000021"
+if TYPE_CHECKING:
+    from workerbee.chain_observers.payloads import ObserverNotification
 
 
-def _hive_threshold(coins: int) -> dict[str, int | str]:
-    return {"amount": coins * 1000, "nai": HIVE_NAI, "precision": 3}
-
-
-def _append_posts(payload: dict[str, Any], content: list[str], *, prefix: str = "") -> None:
+def _append_posts(payload: ObserverNotification, content: list[str], *, prefix: str = "") -> None:
     for entries in payload.get("posts", {}).values():
         for pair in entries:
             operation = pair["operation"]
             content.append(f"{prefix}{operation['author']} - {operation['permlink']}")
 
 
-def _append_comments(payload: dict[str, Any], content: list[str], *, prefix: str = "") -> None:
+def _append_comments(payload: ObserverNotification, content: list[str], *, prefix: str = "") -> None:
     for entries in payload.get("comments", {}).values():
         for pair in entries:
             operation = pair["operation"]
             content.append(f"{prefix}{operation['author']} - {operation['permlink']}")
 
 
-def _append_votes(payload: dict[str, Any], content: list[str], *, prefix: str = "Vote: ") -> None:
+def _append_votes(payload: ObserverNotification, content: list[str], *, prefix: str = "Vote: ") -> None:
     for entries in payload.get("votes", {}).values():
         for pair in entries:
             operation = pair["operation"]
             content.append(f"{prefix}{operation['voter']} - {operation['permlink']}")
 
 
-def _append_follows(payload: dict[str, Any], content: list[str], *, prefix: str = "Follow: ") -> None:
+def _append_follows(payload: ObserverNotification, content: list[str], *, prefix: str = "Follow: ") -> None:
     for entries in payload.get("follows", {}).values():
         for pair in entries:
             operation = pair["operation"]
             content.append(f"{prefix}{operation['follower']} - {operation['following']}")
 
 
-def _append_reblogs(payload: dict[str, Any], content: list[str], *, prefix: str = "Reblog: ") -> None:
+def _append_reblogs(payload: ObserverNotification, content: list[str], *, prefix: str = "Reblog: ") -> None:
     for entries in payload.get("reblogs", {}).values():
         for pair in entries:
             operation = pair["operation"]
             content.append(f"{prefix}{operation['author']} - {operation['permlink']}")
 
 
-def _append_mentions(payload: dict[str, Any], content: list[str]) -> None:
+def _append_mentions(payload: ObserverNotification, content: list[str]) -> None:
     for entries in payload.get("mentioned", {}).values():
         for operation in entries:
             content.append(f"Mention: {operation['author']} - {operation['permlink']}")
 
 
-def _append_custom(payload: dict[str, Any], content: list[str], op_id: str, *, prefix: str) -> None:
+def _append_custom(payload: ObserverNotification, content: list[str], op_id: str, *, prefix: str) -> None:
     for pair in payload.get("custom_operations", {}).get(op_id, []):
         content.append(f"{prefix}{pair['operation']['json']}")
 
 
-def _append_new_accounts(payload: dict[str, Any], content: list[str]) -> None:
+def _append_new_accounts(payload: ObserverNotification, content: list[str]) -> None:
     for operation in payload.get("new_accounts", []):
         content.append(f"New Account: {operation['account_name']}")
 
 
-def _append_posts_and_comments(payload: dict[str, Any], content: list[str]) -> None:
+def _append_posts_and_comments(payload: ObserverNotification, content: list[str]) -> None:
     _append_posts(payload, content)
     _append_comments(payload, content)
 
 
-def _append_votes_follows_reblogs(payload: dict[str, Any], content: list[str]) -> None:
+def _append_votes_follows_reblogs(payload: ObserverNotification, content: list[str]) -> None:
     _append_votes(payload, content)
     _append_follows(payload, content)
     _append_reblogs(payload, content)
 
 
-def _append_content_engagement(payload: dict[str, Any], content: list[str]) -> None:
+def _append_content_engagement(payload: ObserverNotification, content: list[str]) -> None:
     _append_posts(payload, content, prefix="Post: ")
     _append_mentions(payload, content)
     _append_reblogs(payload, content)
 
 
-def _append_cross_platform_activity(payload: dict[str, Any], content: list[str]) -> None:
+def _append_cross_platform_activity(payload: ObserverNotification, content: list[str]) -> None:
     _append_custom(payload, content, "follow", prefix="Follow: ")
     _append_custom(payload, content, "reblog", prefix="Reblog: ")
     _append_new_accounts(payload, content)
 
 
-def _append_creator_dashboard(payload: dict[str, Any], content: list[str]) -> None:
+def _append_creator_dashboard(payload: ObserverNotification, content: list[str]) -> None:
     _append_posts(payload, content, prefix="Post: ")
     _append_comments(payload, content, prefix="Comment: ")
     _append_mentions(payload, content)
@@ -97,24 +95,24 @@ def _append_creator_dashboard(payload: dict[str, Any], content: list[str]) -> No
     _append_votes(payload, content)
 
 
-def _append_votes_and_posts(payload: dict[str, Any], content: list[str]) -> None:
+def _append_votes_and_posts(payload: ObserverNotification, content: list[str]) -> None:
     _append_votes(payload, content)
     _append_posts(payload, content, prefix="Post: ")
 
 
-def _append_community_growth(payload: dict[str, Any], content: list[str]) -> None:
+def _append_community_growth(payload: ObserverNotification, content: list[str]) -> None:
     _append_new_accounts(payload, content)
     _append_follows(payload, content, prefix="Follow: ")
     _append_custom(payload, content, "follow", prefix="Custom Follow: ")
 
 
-def _append_content_performance(payload: dict[str, Any], content: list[str]) -> None:
+def _append_content_performance(payload: ObserverNotification, content: list[str]) -> None:
     _append_posts(payload, content, prefix="Post: ")
     _append_comments(payload, content, prefix="Comment: ")
     _append_votes(payload, content)
 
 
-def _append_account_behavior(payload: dict[str, Any], content: list[str]) -> None:
+def _append_account_behavior(payload: ObserverNotification, content: list[str]) -> None:
     _append_posts(payload, content, prefix="Post: ")
     _append_votes(payload, content)
     _append_follows(payload, content)
@@ -122,12 +120,13 @@ def _append_account_behavior(payload: dict[str, Any], content: list[str]) -> Non
 
 
 def _append_finance(
-    payload: dict[str, Any],
+    payload: ObserverNotification,
     content: list[str],
     *,
     whale_prefix: str,
     market_prefix: str,
     exchange_prefix: str | None = None,
+    whale_threshold: HiveAsset | None = None,
     order: tuple[str, ...] = ("exchange", "market", "whale"),
 ) -> None:
     def append_exchange() -> None:
@@ -135,7 +134,7 @@ def _append_finance(
             return
         for pair in payload.get("exchange_transfer_operations", []):
             operation = pair["operation"]
-            content.append(f"{exchange_prefix}{operation['from']} -> {operation['to']} - {operation['amount']['amount']}")
+            content.append(f"{exchange_prefix}{operation['from']} -> {operation['to']} - {asset_amount_value(operation['amount'])}")
 
     def append_market() -> None:
         for pair in payload.get("internal_market_operations", []):
@@ -145,7 +144,9 @@ def _append_finance(
     def append_whale() -> None:
         for pair in payload.get("whale_operations", []):
             operation = pair["operation"]
-            content.append(f"{whale_prefix}{operation['from']} -> {operation['to']} - {operation['amount']['amount']}")
+            if whale_threshold is not None:
+                assert ts_raw_asset_is_greater_than(whale_threshold, operation["amount"])
+            content.append(f"{whale_prefix}{operation['from']} -> {operation['to']} - {asset_amount_value(operation['amount'])}")
 
     appenders = {
         "exchange": append_exchange,
@@ -158,7 +159,7 @@ def _append_finance(
 
 @pytest.mark.asyncio
 async def test_posts_or_comments_from_multiple_authors_on_mirrornet(mirrornet_replay: MirrornetReplay) -> None:
-    result = await mirrornet_replay(
+    result: list[str] = await mirrornet_replay(
         96549390,
         96549415,
         lambda bot, _chain, content, on_error, on_complete: bot.on_posts("mtyszczak")
@@ -183,7 +184,7 @@ async def test_posts_or_comments_from_multiple_authors_on_mirrornet(mirrornet_re
 
 @pytest.mark.asyncio
 async def test_social_activity_aggregator_on_mirrornet(mirrornet_replay: MirrornetReplay) -> None:
-    result = await mirrornet_replay(
+    result: list[str] = await mirrornet_replay(
         97146285,
         97146300,
         lambda bot, _chain, content, on_error, on_complete: bot.on_votes("e-sport-gamer")
@@ -209,10 +210,11 @@ async def test_social_activity_aggregator_on_mirrornet(mirrornet_replay: Mirrorn
 
 @pytest.mark.asyncio
 async def test_financial_activity_monitor_on_mirrornet(mirrornet_replay: MirrornetReplay) -> None:
-    result = await mirrornet_replay(
+    whale_threshold = hive_threshold(50)
+    result: list[str] = await mirrornet_replay(
         97347575,
         97347585,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_whale_alert(_hive_threshold(50))
+        lambda bot, _chain, content, on_error, on_complete: bot.on_whale_alert(whale_threshold)
         .on_internal_market_operation()
         .on_exchange_transfer()
         .subscribe(
@@ -224,6 +226,7 @@ async def test_financial_activity_monitor_on_mirrornet(mirrornet_replay: Mirrorn
                 whale_prefix="Whale Alert: ",
                 market_prefix="Internal Market Operation: ",
                 exchange_prefix="Exchange Transfer: ",
+                whale_threshold=whale_threshold,
             ),
         ),
     )
@@ -238,7 +241,7 @@ async def test_financial_activity_monitor_on_mirrornet(mirrornet_replay: Mirrorn
 
 @pytest.mark.asyncio
 async def test_content_engagement_tracker_on_mirrornet(mirrornet_replay: MirrornetReplay) -> None:
-    result = await mirrornet_replay(
+    result: list[str] = await mirrornet_replay(
         97639665,
         97639695,
         lambda bot, _chain, content, on_error, on_complete: bot.on_mention("thebeedevs")
@@ -260,7 +263,7 @@ async def test_content_engagement_tracker_on_mirrornet(mirrornet_replay: Mirrorn
 
 @pytest.mark.asyncio
 async def test_cross_platform_activity_monitor_on_mirrornet(mirrornet_replay: MirrornetReplay) -> None:
-    result = await mirrornet_replay(
+    result: list[str] = await mirrornet_replay(
         97664614,
         97664618,
         lambda bot, _chain, content, on_error, on_complete: bot.on_custom_operation("follow")
@@ -283,7 +286,7 @@ async def test_cross_platform_activity_monitor_on_mirrornet(mirrornet_replay: Mi
 
 @pytest.mark.asyncio
 async def test_content_creator_dashboard_on_mirrornet(mirrornet_replay: MirrornetReplay) -> None:
-    result = await mirrornet_replay(
+    result: list[str] = await mirrornet_replay(
         97547200,
         97547250,
         lambda bot, _chain, content, on_error, on_complete: bot.on_posts("thebeedevs")
@@ -310,10 +313,11 @@ async def test_content_creator_dashboard_on_mirrornet(mirrornet_replay: Mirrorne
 
 @pytest.mark.asyncio
 async def test_market_movement_detector_on_mirrornet(mirrornet_replay: MirrornetReplay) -> None:
-    result = await mirrornet_replay(
+    whale_threshold = hive_threshold(10000)
+    result: list[str] = await mirrornet_replay(
         97347545,
         97347555,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_whale_alert(_hive_threshold(10000))
+        lambda bot, _chain, content, on_error, on_complete: bot.on_whale_alert(whale_threshold)
         .on_internal_market_operation()
         .on_exchange_transfer()
         .subscribe(
@@ -325,6 +329,7 @@ async def test_market_movement_detector_on_mirrornet(mirrornet_replay: Mirrornet
                 whale_prefix="Whale Alert: ",
                 market_prefix="Internal Market Operation: ",
                 exchange_prefix="Exchange Transfer: ",
+                whale_threshold=whale_threshold,
                 order=("whale", "market", "exchange"),
             ),
         ),
@@ -340,7 +345,7 @@ async def test_market_movement_detector_on_mirrornet(mirrornet_replay: Mirrornet
 
 @pytest.mark.asyncio
 async def test_pattern_analysis_bot_on_mirrornet(mirrornet_replay: MirrornetReplay) -> None:
-    result = await mirrornet_replay(
+    result: list[str] = await mirrornet_replay(
         97547200,
         97547250,
         lambda bot, _chain, content, on_error, on_complete: bot.on_votes("thebeedevs")
@@ -360,15 +365,22 @@ async def test_pattern_analysis_bot_on_mirrornet(mirrornet_replay: MirrornetRepl
 
 @pytest.mark.asyncio
 async def test_market_trend_analyzer_on_mirrornet(mirrornet_replay: MirrornetReplay) -> None:
-    result = await mirrornet_replay(
+    whale_threshold = hive_threshold(10000)
+    result: list[str] = await mirrornet_replay(
         97347545,
         97347555,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_whale_alert(_hive_threshold(10000))
+        lambda bot, _chain, content, on_error, on_complete: bot.on_whale_alert(whale_threshold)
         .on_internal_market_operation()
         .subscribe(
             on_error=on_error,
             on_complete=on_complete,
-            on_next=lambda payload: _append_finance(payload, content, whale_prefix="Whale Alert: ", market_prefix="Internal Market: "),
+            on_next=lambda payload: _append_finance(
+                payload,
+                content,
+                whale_prefix="Whale Alert: ",
+                market_prefix="Internal Market: ",
+                whale_threshold=whale_threshold,
+            ),
         ),
     )
 
@@ -381,7 +393,7 @@ async def test_market_trend_analyzer_on_mirrornet(mirrornet_replay: MirrornetRep
 
 @pytest.mark.asyncio
 async def test_community_growth_monitor_on_mirrornet(mirrornet_replay: MirrornetReplay) -> None:
-    result = await mirrornet_replay(
+    result: list[str] = await mirrornet_replay(
         97664610,
         97664620,
         lambda bot, _chain, content, on_error, on_complete: bot.on_new_account()
@@ -406,7 +418,7 @@ async def test_community_growth_monitor_on_mirrornet(mirrornet_replay: Mirrornet
 
 @pytest.mark.asyncio
 async def test_content_performance_analyzer_on_mirrornet(mirrornet_replay: MirrornetReplay) -> None:
-    result = await mirrornet_replay(
+    result: list[str] = await mirrornet_replay(
         97547200,
         97547250,
         lambda bot, _chain, content, on_error, on_complete: bot.on_posts("thebeedevs")
@@ -427,10 +439,11 @@ async def test_content_performance_analyzer_on_mirrornet(mirrornet_replay: Mirro
 
 @pytest.mark.asyncio
 async def test_economic_activity_tracker_on_mirrornet(mirrornet_replay: MirrornetReplay) -> None:
-    result = await mirrornet_replay(
+    whale_threshold = hive_threshold(1000)
+    result: list[str] = await mirrornet_replay(
         97347575,
         97347585,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_whale_alert(_hive_threshold(1000))
+        lambda bot, _chain, content, on_error, on_complete: bot.on_whale_alert(whale_threshold)
         .on_exchange_transfer()
         .on_internal_market_operation()
         .subscribe(
@@ -442,6 +455,7 @@ async def test_economic_activity_tracker_on_mirrornet(mirrornet_replay: Mirrorne
                 whale_prefix="Whale: ",
                 market_prefix="Market: ",
                 exchange_prefix="Exchange: ",
+                whale_threshold=whale_threshold,
                 order=("whale", "exchange", "market"),
             ),
         ),
@@ -459,7 +473,7 @@ async def test_economic_activity_tracker_on_mirrornet(mirrornet_replay: Mirrorne
 
 @pytest.mark.asyncio
 async def test_account_behavior_analysis_on_mirrornet(mirrornet_replay: MirrornetReplay) -> None:
-    result = await mirrornet_replay(
+    result: list[str] = await mirrornet_replay(
         97547200,
         97547250,
         lambda bot, _chain, content, on_error, on_complete: bot.on_posts("thebeedevs")
