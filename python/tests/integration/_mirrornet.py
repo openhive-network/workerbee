@@ -60,12 +60,14 @@ class MirrornetReplay:
             completed = True
             replay_exhausted.set()
 
-        async with open_mirrornet_chain(self._endpoint) as chain, WorkerBee(chain) as bot:
-            replay = bot.provide_past_operations(from_block, to_block)
-            subscription = register(replay, bot.chain, results, on_error, on_complete)
+        async with open_mirrornet_chain(self._endpoint) as chain:
+            bot = WorkerBee(chain)
             done_task = asyncio.create_task(replay_exhausted.wait())
             error_task = asyncio.create_task(replay_failed.wait())
+            subscription: Subscription | None = None
             try:
+                replay = bot.provide_past_operations(from_block, to_block)
+                subscription = register(replay, bot.chain, results, on_error, on_complete)
                 async with asyncio.timeout(_REPLAY_TIMEOUT_SECS):
                     await asyncio.wait({done_task, error_task}, return_when=asyncio.FIRST_COMPLETED)
                 if errors:
@@ -73,7 +75,9 @@ class MirrornetReplay:
             finally:
                 done_task.cancel()
                 error_task.cancel()
-                if not completed:
+                await asyncio.gather(done_task, error_task, return_exceptions=True)
+                if subscription is not None and not completed:
                     subscription.close()
+                await bot.aclose()
 
         return results
