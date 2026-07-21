@@ -47,8 +47,7 @@ python_precommit:
   extends: .python_job
   stage: .pre
   script:
-    - ruff format --check workerbee tests examples
-    - pre-commit run --all-files --show-diff-on-failure --config "${PRE_COMMIT_CONFIG}"
+    - SKIP=coverage-workerbee pre-commit run --all-files --show-diff-on-failure --config "${PRE_COMMIT_CONFIG}"
 
 python_build_wheel:
   extends: .build_wheel_template
@@ -77,7 +76,8 @@ python_test_unit:
   needs:
     - job: python_precommit
   script:
-    - pytest tests/unit -vv --tb=short --showlocals -ra --strict-markers --strict-config -n auto --durations=25 --junitxml=junit-unit.xml
+    - coverage run -m pytest tests/unit -vv --tb=short --showlocals -ra --strict-markers --strict-config --durations=25 --junitxml=junit-unit.xml
+    - coverage report
   artifacts:
     when: always
     reports:
