@@ -37,19 +37,28 @@ export class BlockCollector extends CollectorBase<BlockClassifier> {
           MAX_BLOCK_RANGE_FETCH} blocks. Current head: ${this.currentHeadBlock}, requested head: ${headBlockNumber}`);
 
 
-      // Fetch missing blocks
+      /*
+       * Fetch missing blocks.
+       *
+       * Named rather than destructured as `blocks`: that shadowed the accumulator
+       * above, so `blocks.push(...blocks)` appended the fetched array to itself and
+       * left the accumulator empty. Every catch-up then yielded a block with no
+       * transactions, and since `currentHeadBlock` advances by the accumulator's
+       * length, the head never moved on either -- so the collector stayed in this
+       * branch and returned empty blocks for the rest of the process.
+       */
       const startMultiBlock = Date.now();
-      const { blocks } = await this.worker.chain.api.block_api.get_block_range({
+      const { blocks: missingBlocks } = await this.worker.chain.api.block_api.get_block_range({
         starting_block_num: this.currentHeadBlock + 1,
         count: headBlockNumber - this.currentHeadBlock - 1
       });
       data.addTiming("block_api.get_block_range", Date.now() - startMultiBlock);
 
-      if (blocks.length === 0)
+      if (missingBlocks.length === 0)
         throw new WorkerBeeError(`Could not fetch missing blocks from ${this.currentHeadBlock + 1} to ${headBlockNumber}`);
 
 
-      blocks.push(...blocks);
+      blocks.push(...missingBlocks);
     } else {
       const startBlock = Date.now();
       const { block } = await this.worker.chain!.api.block_api.get_block({ block_num: headBlockNumber });
