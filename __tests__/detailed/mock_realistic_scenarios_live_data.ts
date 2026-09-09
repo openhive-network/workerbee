@@ -1259,6 +1259,28 @@ mockTest.describe("Realistic Scenarios with Live Data", () => {
     expect(result).toEqual({ barddev: "Manabar data received: (0/0)", gtg: "Manabar data received: (2944815083303610/2967310839581315)" });
   });
 
+  mockTest("Should be able to observe manabar percentage threshold", async ({ createMockWorkerBeeTest }) => {
+    const result = await createMockWorkerBeeTest<{ percent: number; currentMana: string; max: string }>((bot, resolve, reject) => {
+      (bot as QueenBee).onAccountsManabarPercent(/* RC */ 2, 50, "gtg").subscribe({
+        next(data) {
+          const rc = data.manabarData.gtg?.[2];
+
+          if (rc === undefined)
+            return reject(new Error("Could not retrieve RC manabar data for gtg"));
+
+          resolve({ percent: rc.percent, currentMana: rc.currentMana.toString(), max: rc.max.toString() });
+        },
+        error(err) {
+          console.error(err);
+          reject(err);
+        }
+      });
+    });
+
+    expect(result.percent).toBeGreaterThanOrEqual(50);
+    expect(result.max).toEqual("2935684458790312");
+  });
+
   mockTest("Should detect new vote", async ({ createMockWorkerBeeTest }) => {
     const result = await createMockWorkerBeeTest<string[]>((bot, resolve, reject) => {
       (bot as QueenBee).onVotes("gtg").subscribe({
