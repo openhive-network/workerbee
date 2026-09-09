@@ -180,3 +180,71 @@ cd python/
 
 **Dev Cycle (mandatory for each change):**
 1. Implement → 2. Tests → 3. Static analysis (`pre-commit`) → 4. DRY check → 5. Review → 6. All tests pass → 7. Commit
+
+## n8n Community Node (`n8n/`)
+
+Hive trigger and action nodes for n8n, running WorkerBee **inside the n8n
+process** — no companion service. Standalone npm package, released separately.
+
+**Key idea:** one registry, `n8n/nodes/shared/events.ts`, holds every observer
+as `{tag, summary, fields, apply(chain, params)}`. The dropdowns, the parameter
+validation, the catalog and the JSON Schema are all derived from it, so adding an
+observer is one entry and no form edit.
+
+**Layout:**
+```
+n8n/
+├── nodes/Hive/          # action node: chain reads, catalog, spec preview
+├── nodes/HiveTrigger/   # trigger node: in-process subscription
+├── nodes/shared/        # events, compiler, catalog, schema, normalize, stream, chain
+├── credentials/         # HiveApi (endpoint + chain ID, optional, no secrets)
+│                        # and HivePostingKey (account + private posting key)
+├── tests/               # node --test, no browser
+├── scripts/             # clean / bundle-workerbee / copy-assets
+├── docs/                # design notes (why the UI looks the way it does)
+└── Dockerfile           # n8n image with the nodes preinstalled
+```
+
+**Composing filters:** the Events list is flat and each entry carries
+`joinWithPrevious: or | and`, folded into AND-of-OR-groups by `spec.ts` in the
+same order `QueenBee.applyAnd()` uses. WorkerBee only supports that shape (CNF,
+no nesting), so no boolean tree editor is needed. Constraints and rejected
+alternatives: `n8n/docs/n8n_logic_workerbee_alternatives.md`. Hard rule from
+n8n: **never put `displayOptions` on a child of a `collection`/`fixedCollection`**
+-- it breaks activation and the editor outright.
+
+**Build shape (all three follow from CommonJS nodes + ESM-only wax):**
+- `module: node16`, not `commonjs` — keeps dynamic `import()` from being
+  rewritten to `require()`; that import is how CJS reaches the ESM library.
+- wax types come through `nodes/shared/wax-types.ts`, which carries the
+  `resolution-mode` attribute once instead of at every import site.
+- `../src` is bundled with esbuild into `workerbee/index.mjs`; its extensionless
+  relative imports make a plain `tsc` output unloadable by Node's ESM loader.
+
+**Example with a database:** `workflows/gtg-busy-blocks.json` plus the `postgres`
+service in `docker-compose.yml` (schema in `docker/postgres-init.sql`). Stock n8n
+nodes only — If, If, Split Out, Postgres — no Code node. Note that Split Out spreads
+an object element into the item *only* when `include: noOtherFields`; carrying
+any other field means naming the element with `destinationFieldName`.
+
+**Never** edit `src/` to accommodate this package; the registry adapts instead.
+There are two runtime dependencies, `@hiveio/wax` and `@hiveio/beekeeper` (the
+latter arrived with `Comment: Reply`, which needs a wallet to sign with). Either
+one rules the package out of n8n's *verified* community-node programme — a
+deliberate trade for dropping the separate backend.
+
+**Toolchain:**
+```bash
+cd n8n/
+npm ci --ignore-scripts        # isolated-vm is a type-only transitive
+npm run build                  # declarations from ../src, esbuild bundle, tsc, assets
+npm test                       # build + node --test
+docker compose up -d --build   # n8n at :5678 with the nodes loaded
+docker exec -i <container> node - < dev/smoke.cjs   # live end-to-end
+```
+
+**Testing:**
+- `node --test`, fixture-based fakes, no mocking library
+- The catalog tests compile every entry against a **real** `QueenBee` and assert
+  the registry covers exactly the observers the library offers — a rename in
+  `src/` must fail here, not in production

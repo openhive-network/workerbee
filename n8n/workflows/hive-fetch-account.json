@@ -1,0 +1,51 @@
+{
+  "name": "Hive - fetch account on demand",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "3f1b4a10-0000-4000-8000-000000000021",
+      "name": "When clicking Execute",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        260,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "account",
+        "operation": "get",
+        "accountName": "hiveio"
+      },
+      "id": "3f1b4a10-0000-4000-8000-000000000022",
+      "name": "Get Hive account",
+      "type": "@hiveio/n8n-nodes-hive.hive",
+      "typeVersion": 1,
+      "position": [
+        520,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "When clicking Execute": {
+      "main": [
+        [
+          {
+            "node": "Get Hive account",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "pinData": {},
+  "meta": {
+    "description": "Read-only chain lookup with no credential configured. Switch Resource to Block or Chain for the other lookups, or to Catalog to list every event the trigger can watch."
+  },
+  "id": "hiveFetchAccount01",
+  "active": false
+}
