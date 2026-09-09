@@ -70,6 +70,22 @@ test:
     - job: build
       artifacts: true
 
+# The n8n community-node package is npm-built, CommonJS and released on its own,
+# so it stands outside the pnpm workspace and the library's job templates. It
+# compiles ../src as part of its build, which makes this job the check that the
+# node package still agrees with the library.
+n8n_nodes_test:
+  stage: test
+  image: node:22-alpine
+  needs: []
+  script:
+    # --ignore-scripts: n8n-workflow drags in isolated-vm, which node-gyp would
+    # compile from source for a dependency this package only reads *.d.ts from.
+    - cd n8n
+    - npm ci --no-audit --no-fund --ignore-scripts
+    - npm run build
+    - node --test tests/*.test.mjs
+
 push_to_wiki:
   extends: .npm_push_doc_template
   stage: deploy
