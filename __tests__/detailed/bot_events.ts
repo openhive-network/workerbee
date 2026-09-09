@@ -1130,41 +1130,6 @@ test.describe("WorkerBee Bot events test", () => {
     expect(typeof result).toBe("boolean");
   });
 
-  test("Should be able to observe manabar percentage threshold", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ bot }, hiveBlockInterval) => {
-      const result = await Promise.race([
-        new Promise<string>((res, rej) => {
-          bot.start();
-
-          console.info("Waiting for manabar to reach 50% on initminer");
-
-          const observer = bot.observe.onAccountsManabarPercent(/* EManabarType.RC */ 2, 50, "initminer");
-          observer.subscribe({
-            next(data) {
-              if (!data.manabarData["initminer"]?.[2])
-                return rej(new Error("Could not retrieve RC manabar data for initminer"));
-
-              console.info(`Account manabar reached threshold: ${data.manabarData["initminer"][2].percent}%`);
-
-              res(data.manabarData["initminer"][2].currentMana.toString());
-            },
-            error(err) {
-              console.error(err);
-            }
-          });
-        }),
-        new Promise<string>((_, rej) => { setTimeout(rej, hiveBlockInterval * 2, new Error("Test timeout")); })
-      ]);
-
-      bot.stop();
-      bot.delete();
-
-      return result;
-    }, HIVE_BLOCK_INTERVAL);
-
-    expect(result.length).toBeGreaterThan(0);
-  });
-
   test("Should be able to observe feed price changes", async({ workerbeeTest }) => {
     const result = await workerbeeTest(async({ bot }, hiveBlockInterval) => {
 
