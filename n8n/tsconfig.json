@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "es2022",
+    "lib": ["es2022"],
+    "types": ["node"],
+
+    /* CommonJS, because n8n `require()`s the compiled *.node.js. `node16` (not
+       plain `commonjs`) is what keeps a dynamic `import()` emitted as an
+       `import()` rather than rewritten to `require()`, which is how this package
+       reaches the ESM-only wax and WorkerBee builds -- see nodes/shared/chain.ts. */
+    "module": "node16",
+    "moduleResolution": "node16",
+
+    "rootDir": ".",
+    "outDir": "dist",
+
+    /* @hiveio/wax is ESM-only: its package `exports` map offers an `import`
+       condition and no `require` one, so `node16` resolution from these
+       CommonJS files finds nothing. Every wax import here is `import type`,
+       erased at compile time, so pointing TypeScript straight at the bundled
+       declarations is accurate -- the runtime still loads the real ESM entry
+       through the dynamic import in nodes/shared/chain.ts. */
+    "baseUrl": ".",
+    "paths": {
+      "@hiveio/wax": ["node_modules/@hiveio/wax/wasm/dist/bundle/index.d.ts"]
+    },
+    "declaration": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "useUnknownInCatchVariables": true,
+    /*
+     * The code is already written as if this were on: every optional assignment
+     * is guarded by an explicit `!== undefined` test or a conditional spread. It
+     * costs nothing today and stops a `{ key: undefined }` creeping in later.
+     */
+    "exactOptionalPropertyTypes": true,
+    "skipLibCheck": true
+  },
+  "include": ["credentials/**/*.ts", "nodes/**/*.ts"]
+}
