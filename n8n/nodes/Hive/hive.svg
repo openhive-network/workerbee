@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Hive">
+  <path fill="#E31337" d="M32 2 58 17v30L32 62 6 47V17z"/>
+  <g fill="#fff">
+    <rect x="18" y="20" width="28" height="6" rx="3"/>
+    <rect x="14" y="30" width="36" height="6" rx="3"/>
+    <rect x="18" y="40" width="28" height="6" rx="3"/>
+  </g>
+</svg>
