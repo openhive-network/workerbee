@@ -1,0 +1,64 @@
+{
+  "name": "@hiveio/n8n-nodes-hive",
+  "version": "0.2.0",
+  "description": "Hive blockchain trigger and action nodes for n8n, powered by WorkerBee in-process",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "hive",
+    "blockchain",
+    "workerbee"
+  ],
+  "license": "MIT",
+  "homepage": "https://gitlab.syncad.com/hive/workerbee/-/tree/develop/n8n",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.syncad.com/hive/workerbee.git",
+    "directory": "n8n"
+  },
+  "engines": {
+    "node": ">=20.19 || >=22.12"
+  },
+  "main": "index.js",
+  "files": [
+    "dist",
+    "index.js",
+    "README.md"
+  ],
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "types": "tsc -p tsconfig.workerbee.json",
+    "bundle": "node scripts/bundle-workerbee.mjs",
+    "compile": "tsc -p tsconfig.json",
+    "assets": "node scripts/copy-assets.mjs",
+    "build": "npm run clean && npm run types && npm run bundle && npm run compile && npm run assets",
+    "typecheck": "npm run types && tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "prepublishOnly": "npm run build",
+    "watch": "tsc -p tsconfig.json --watch"
+  },
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/HiveApi.credentials.js",
+      "dist/credentials/HivePostingKey.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Hive/Hive.node.js",
+      "dist/nodes/HiveTrigger/HiveTrigger.node.js"
+    ]
+  },
+  "dependencies": {
+    "@hiveio/wax": "2.0.2",
+    "@hiveio/beekeeper": "1.28.7-rc0"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.6",
+    "esbuild": "0.28.2",
+    "n8n-workflow": "2.36.3",
+    "typescript": "5.7.3"
+  }
+}
