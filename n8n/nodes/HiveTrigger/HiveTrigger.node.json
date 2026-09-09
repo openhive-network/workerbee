@@ -1,0 +1,14 @@
+{
+  "node": "@hiveio/n8n-nodes-hive.hiveTrigger",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": ["Development", "Data & Storage"],
+  "resources": {
+    "primaryDocumentation": [
+      {
+        "url": "https://gitlab.syncad.com/hive/workerbee/-/tree/develop/n8n"
+      }
+    ]
+  },
+  "alias": ["Hive", "Blockchain", "WorkerBee", "Blocks", "Votes", "Posts"]
+}
