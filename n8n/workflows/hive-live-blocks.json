@@ -1,0 +1,61 @@
+{
+  "name": "Hive - live blocks",
+  "nodes": [
+    {
+      "parameters": {
+        "specMode": "builder",
+        "events": {
+          "event": [
+            {
+              "event": "block",
+              "joinWithPrevious": "or",
+              "parameters": {}
+            }
+          ]
+        },
+        "providers": {},
+        "emitMode": "notification",
+        "specOptions": {}
+      },
+      "id": "3f1b4a10-0000-4000-8000-000000000001",
+      "name": "On Hive block",
+      "type": "@hiveio/n8n-nodes-hive.hiveTrigger",
+      "typeVersion": 1,
+      "position": [
+        260,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "3f1b4a10-0000-4000-8000-000000000002",
+      "name": "Do something with the block",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        520,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "On Hive block": {
+      "main": [
+        [
+          {
+            "node": "Do something with the block",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "pinData": {},
+  "meta": {
+    "description": "Fires once per Hive block. The item carries payload.block.number, .id, .timestamp and .witness, plus blockNum and seq on the envelope."
+  },
+  "id": "hiveLiveBlocks01",
+  "active": false
+}
