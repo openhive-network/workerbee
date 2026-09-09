@@ -1,0 +1,30 @@
+# The n8n image builds with `context: ..` (the repo root), so without this the
+# whole checkout is re-sent to the daemon on every `docker compose build` --
+# node_modules, dist, the Python venv, test artefacts, the git history. That is
+# gigabytes for an image that needs the TypeScript sources and package manifests.
+#
+# It also stops the host's build output landing on top of the layer `npm ci`
+# produced: the Dockerfile copies `n8n` after installing, so a populated
+# n8n/node_modules on disk would overwrite the one the image just built.
+
+.git
+.venv
+**/node_modules
+**/dist
+n8n/workerbee
+
+# Python port: not part of the n8n image at all.
+python
+
+# Test and tooling output.
+test-results
+playwright-report
+results.json
+results.xml
+coverage
+*.log
+
+# Editor and agent state.
+.claude
+.vscode
+.idea

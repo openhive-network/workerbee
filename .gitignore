@@ -310,3 +310,19 @@ config/.env*
 
 # VS overrides
 .vs
+
+### WorkerBee: un-ignore paths the venv template above swallows ###
+# The venv block ignores bare [Ss]cripts, [Ll]ib and [Bb]in anywhere in the tree,
+# which silently swallowed n8n/scripts/*.mjs -- the build entry points named by
+# n8n/package.json. Re-include the n8n package's own tooling explicitly.
+!n8n/scripts/
+!n8n/scripts/**
+
+# Screenshots dropped at the repository root while debugging. Two of them have
+# already reached a commit by accident; the root holds no images by design.
+/*.png
+
+# Claude Code's per-checkout directory: local permissions and whatever skills a
+# session happens to install. Machine state, not repository content -- it has
+# reached a commit by accident once already.
+.claude/

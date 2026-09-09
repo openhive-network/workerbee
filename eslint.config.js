@@ -22,7 +22,13 @@ export default [ {
     "**/dist",
     "**/build",
     "npm-common-config",
-    "examples"
+    "examples",
+    /*
+     * Build output of the n8n package: the esbuild bundle of ../src and tsc's
+     * own emit. The sources next to them are linted.
+     */
+    "n8n/dist/**",
+    "n8n/workerbee/**"
   ]
 }, ...compat.extends("eslint:recommended"), {
   plugins: {
@@ -133,5 +139,52 @@ export default [ {
     "@typescript-eslint/no-extra-semi": 0,
     "@typescript-eslint/no-empty-function": 0,
     "@typescript-eslint/no-empty-object-type": 0
+  }
+}, {
+  /*
+   * The n8n community node. Same rules as the library above -- one pass over
+   * both trees -- with only the exceptions its packaging actually forces.
+   */
+  files: [ "n8n/**/*.{ts,mjs,cjs,js}" ],
+  languageOptions: {
+    /*
+     * The build scripts and one test file use top-level await, which the shared
+     * ES2020 setting cannot parse at all: it fails before any rule runs.
+     */
+    ecmaVersion: "latest"
+  },
+  rules: {
+    /*
+     * Helpers sit below the exported entry point they serve and are called from
+     * above it, which is how these files are meant to be read. Twenty-nine of
+     * the declarations here are used before the line that defines them, so
+     * requiring expressions would invert the order of ten files to no benefit.
+     */
+    "func-style": 0,
+    /*
+     * Parameter values are n8n expression strings containing double quotes, as
+     * in '={{$parameter["emitMode"]}}'. Escaping every one of them reads worse
+     * than the single quotes around it.
+     */
+    "quotes": [ 2, "double", {
+      avoidEscape: true
+    } ],
+    /*
+     * The compiled node files are `require()`d by n8n, so this package is
+     * CommonJS by construction rather than by choice.
+     */
+    "import/no-commonjs": 0
+  }
+}, {
+  // Tests, build scripts and the smoke runner.
+  files: [ "n8n/tests/**", "n8n/scripts/**", "n8n/dev/**" ],
+  rules: {
+    /*
+     * A fake standing in for an async library method has nothing to await, and
+     * spelling out Promise.resolve everywhere only obscures that.
+     */
+    "require-await": 0,
+    // The build scripts report what they copied; that is their output.
+    "no-console": 0
   }
 } ];

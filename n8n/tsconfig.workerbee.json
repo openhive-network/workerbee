@@ -1,0 +1,50 @@
+{
+  /* Declarations only, for the WorkerBee library this package embeds.
+     `scripts/bundle-workerbee.mjs` produces the matching runtime file next to
+     them, so `nodes/shared/*.ts` can `import type` from ../../workerbee/index
+     and `await import()` ../../workerbee/index.mjs at the same relative path.
+
+     The options mirror npm-common-config/ts-common/tsconfig.base.json, which is
+     what the library itself is built with -- copied rather than extended so the
+     n8n package stays buildable without the git submodule. */
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+
+    "target": "ES2022",
+    "lib": ["DOM", "ES2022"],
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+
+    "strict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowUnreachableCode": false,
+    "allowSyntheticDefaultImports": true,
+    "allowUnusedLabels": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+
+    "rootDir": "../src",
+    "outDir": "workerbee",
+
+    /* ../src resolves its imports from its own directory upwards, which finds
+       the repository's node_modules in a checkout but nothing at all in the
+       Docker build, where only n8n/node_modules exists. Pin wax to this
+       package's copy so both cases resolve the same declarations. */
+    "baseUrl": ".",
+    "paths": {
+      "@hiveio/wax": ["node_modules/@hiveio/wax"]
+    }
+  },
+  "include": ["../src/**/*.ts"]
+}

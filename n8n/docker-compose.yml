@@ -1,0 +1,99 @@
+# n8n with the Hive nodes built in.
+#
+#   cd n8n
+#   cp .env.example .env      # optional
+#   docker compose up -d --build
+#
+# Then open http://localhost:5678. "Hive" and "Hive Trigger" are in the node
+# panel straight away -- no second service to deploy, no credential to fill in
+# unless you want a Hive node other than the public default.
+#
+# After changing anything under n8n/ or src/:
+#
+#   docker compose up -d --build
+#
+# The dependency layer is cached, so a rebuild is the TypeScript compile plus a
+# copy -- a few seconds.
+
+name: hive-n8n
+
+services:
+  n8n:
+    build:
+      # The repository root: the image compiles the WorkerBee library from ../src
+      # so the nodes and the library always agree.
+      context: ..
+      dockerfile: n8n/Dockerfile
+      args:
+        N8N_VERSION: ${N8N_VERSION:-2.36.5}
+    image: hive-n8n:${HIVE_N8N_TAG:-dev}
+    restart: unless-stopped
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    environment:
+      GENERIC_TIMEZONE: ${TZ:-UTC}
+      TZ: ${TZ:-UTC}
+      N8N_LOG_LEVEL: ${N8N_LOG_LEVEL:-info}
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      # A Hive Trigger holds its subscription in this process, so it needs the
+      # regular (non-queue) execution mode to stay resident.
+      EXECUTIONS_MODE: regular
+      # n8n marks its auth cookie Secure by default, and a browser then refuses
+      # to store it over plain HTTP -- so logging in appears to do nothing. Set
+      # this false in .env when you reach the editor at a LAN address or through
+      # an SSH tunnel. Leave it true for anything served over TLS.
+      N8N_SECURE_COOKIE: ${N8N_SECURE_COOKIE:-true}
+      # The address the editor is reached at, which is what n8n puts in the
+      # webhook URLs it shows you. Worth setting whenever that differs from
+      # localhost, and necessary when the published port differs from 5678.
+      N8N_HOST: ${N8N_HOST:-localhost}
+      N8N_PROTOCOL: ${N8N_PROTOCOL:-http}
+      WEBHOOK_URL: ${WEBHOOK_URL:-http://localhost:${N8N_PORT:-5678}/}
+    volumes:
+      # Data only. The nodes live in the image and are refreshed into this volume
+      # on every start -- see n8n/docker/entrypoint.sh.
+      - n8n_data:/home/node/.n8n
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:5678/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Somewhere for a workflow to write to. Deliberately *not* n8n's own database:
+  # n8n stays on its default SQLite, and this holds workflow data only, so
+  # dropping it cannot lose a workflow. The example under ../workflows writes
+  # here; the schema is created on first start from docker/postgres-init.sql.
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-hive}
+      POSTGRES_USER: ${POSTGRES_USER:-hive}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hive}
+    ports:
+      # Published so you can inspect the table with psql from the host. Drop this
+      # line if you would rather it stayed on the compose network.
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/10-schema.sql:ro
+    healthcheck:
+      # n8n waits on this, so an activated workflow cannot fire at a database
+      # that is still starting up.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hive} -d ${POSTGRES_DB:-hive}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  n8n_data:
+  postgres_data:
