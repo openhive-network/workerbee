@@ -1,0 +1,227 @@
+{
+  "id": "watchedReplies01",
+  "name": "Hive - replies to a watched post, answered by Claude",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "events": {
+          "event": [
+            {
+              "event": "impacted_accounts",
+              "parameters": {
+                "parameter": [
+                  {
+                    "name": "accounts",
+                    "value": "neight.tester1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "emitMode": "operation",
+        "specOptions": {}
+      },
+      "id": "d4e5f6a7-0000-4000-8000-000000000001",
+      "name": "On anything touching the author",
+      "type": "@hiveio/n8n-nodes-hive.hiveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        0
+      ],
+      "credentials": {
+        "hiveApi": {
+          "id": "9WzpiVYhf2YR3HN9",
+          "name": "Hive endpoint"
+        }
+      },
+      "notes": "Hive counts a comment's parent_author among the accounts it impacts, so a reply to this author's post wakes the workflow. Watching blocks instead ran it ~28,800 times a day to find the same few replies. Emit Mode: Operation hands over one already-unpacked operation per item, which is what removes the two Split Out nodes this used to need."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d4e5f6a7-0000-4000-8000-000000000021",
+              "name": "watchPermlink",
+              "value": "neight-test-post-1788870329914",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "d4e5f6a7-0000-4000-8000-000000000002",
+      "name": "Watched post",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -128,
+        0
+      ],
+      "notes": "Only the permlink. The author is already in the trigger and arrives on every item as $json.account -- the account the operation impacted."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d4e5f6a7-0000-4000-8000-000000000011",
+              "leftValue": "={{ $json.operation.comment_operation?.parent_permlink || \"\" }}",
+              "rightValue": "={{ $('Watched post').first().json.watchPermlink }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "d4e5f6a7-0000-4000-8000-000000000012",
+              "leftValue": "={{ $json.operation.comment_operation?.author || \"\" }}",
+              "rightValue": "={{ $json.account }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d4e5f6a7-0000-4000-8000-000000000003",
+      "name": "Replies to that post",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        112,
+        0
+      ],
+      "notes": "Two conditions, doing two different jobs.\n\nThe permlink check narrows impacted_accounts -- which also fires on votes, transfers and replies to the author's other posts -- down to this one post, and doubles as \"is this a comment at all\", since anything else yields an empty string.\n\nThe author check is NOT loop protection: the bot answers the incoming comment, so what it publishes hangs off that comment and its parent_permlink is never the watched post's -- the first condition already excludes it, verified on chain. What this second one stops is the bot answering a comment its own account wrote directly under the post: no loop, but a bot talking to itself in public."
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-opus-5"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are answering replies left under a Hive blockchain post written by {{ $json.account }}.\n\nDecide for yourself whether the reply below is positive, negative or neutral, then write the answer that case calls for:\n\n- positive: thank them warmly, then add one short, gentle joke.\n- negative: apologise sincerely, acknowledge the specific complaint, and promise a concrete improvement. No jokes.\n- neutral: thank them for taking the time to share their view. No jokes.\n\nYour whole answer is published on a public blockchain exactly as you write it and cannot be edited or deleted afterwards. So: output the reply text and nothing else -- no preamble, no explanation of which case you picked, no sentiment label, no quotes around it, no signature, no hashtags. Answer in the language the reply is written in. Two or three sentences. Address the author by name once.\n\nReply author: {{ $json.operation.comment_operation.author }}\nReply text:\n{{ $json.operation.comment_operation.body }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-0000-4000-8000-000000000006",
+      "name": "Write the reply",
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        320,
+        0
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "uPVPV77vsGiqivba",
+          "name": "Anthropic account"
+        }
+      },
+      "notes": "One call classifies and writes. Its output is published verbatim, so the prompt forbids any label or preamble -- a stray \"[positive]\" would end up on-chain, permanently."
+    },
+    {
+      "parameters": {
+        "resource": "comment",
+        "parentAuthor": "={{ $('Replies to that post').item.json.operation.comment_operation.author }}",
+        "parentPermlink": "={{ $('Replies to that post').item.json.operation.comment_operation.permlink }}",
+        "body": "={{ $json.content.filter(b => b.type === \"text\").map(b => b.text).join(\"\\n\").trim() }}",
+        "replyOptions": {}
+      },
+      "id": "c3d4e5f6-0000-4000-8000-000000000007",
+      "name": "Publish the reply",
+      "type": "@hiveio/n8n-nodes-hive.hive",
+      "typeVersion": 1,
+      "position": [
+        544,
+        0
+      ],
+      "credentials": {
+        "hiveApi": {
+          "id": "9WzpiVYhf2YR3HN9",
+          "name": "Hive endpoint"
+        },
+        "hivePostingKey": {
+          "id": "0425Snzzh091BjKK",
+          "name": "Skeleton key"
+        }
+      },
+      "notes": "Replies to the incoming comment, not to the watched post -- the parent is whoever just wrote, and their permlink.\n\nThe body pulls the text blocks out of what Claude returned. The Anthropic node hands back `content` as an ARRAY of blocks, not a string as the Ollama node does, and on a thinking model the first block is a thinking block with no text in it. Passing the array straight through reaches wax as a non-string and fails deep inside WebAssembly: \"Cannot pass non-string to std::string\".\n\nSigns with the Hive Posting Key credential and broadcasts; this writes to the blockchain and cannot be undone. On a testnet set the Chain ID on the Hive API credential too, or the signature is computed for mainnet and the node rejects a perfectly good key."
+    }
+  ],
+  "connections": {
+    "On anything touching the author": {
+      "main": [
+        [
+          {
+            "node": "Watched post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Watched post": {
+      "main": [
+        [
+          {
+            "node": "Replies to that post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write the reply": {
+      "main": [
+        [
+          {
+            "node": "Publish the reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replies to that post": {
+      "main": [
+        [
+          {
+            "node": "Write the reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "all",
+    "binaryMode": "separate"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Hive - account activity",
+  "nodes": [
+    {
+      "parameters": {
+        "specMode": "builder",
+        "events": {
+          "event": [
+            {
+              "event": "impacted_accounts",
+              "joinWithPrevious": "or",
+              "parameters": {
+                "parameter": [
+                  {
+                    "name": "accounts",
+                    "value": "hiveio"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "providers": {},
+        "emitMode": "operation",
+        "specOptions": {}
+      },
+      "id": "3f1b4a10-0000-4000-8000-000000000011",
+      "name": "On Hive account activity",
+      "type": "@hiveio/n8n-nodes-hive.hiveTrigger",
+      "typeVersion": 1,
+      "position": [
+        260,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "3f1b4a10-0000-4000-8000-000000000012",
+      "name": "Handle operation",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        520,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "On Hive account activity": {
+      "main": [
+        [
+          {
+            "node": "Handle operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "pinData": {},
+  "meta": {
+    "description": "One item per operation touching the account. Change the accounts parameter to your own names. Each item carries .account, .operation, .transactionId and .blockNum."
+  },
+  "id": "hiveAccountActivity1",
+  "active": false
+}

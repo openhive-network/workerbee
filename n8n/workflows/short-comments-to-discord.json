@@ -1,0 +1,245 @@
+{
+  "id": "shortComments01",
+  "name": "Hive - short comments summarised by Ollama",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "specMode": "builder",
+        "events": {
+          "event": [
+            {
+              "event": "block",
+              "joinWithPrevious": "or",
+              "parameters": {}
+            }
+          ]
+        },
+        "providers": {
+          "provider": [
+            {
+              "provider": "block_data",
+              "parameters": {}
+            }
+          ]
+        },
+        "emitMode": "notification",
+        "specOptions": {}
+      },
+      "id": "b2c3d4e5-0000-4000-8000-000000000001",
+      "name": "On Hive block",
+      "type": "@hiveio/n8n-nodes-hive.hiveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        0
+      ],
+      "notes": "WorkerBee's comment event is account-scoped and needs a list of authors, so watching *every* comment means taking whole blocks and unpacking them. block_data is what attaches the transactions."
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "payload.block.transactions",
+        "include": "selectedOtherFields",
+        "fieldsToInclude": "blockNum",
+        "options": {
+          "destinationFieldName": "tx"
+        }
+      },
+      "id": "b2c3d4e5-0000-4000-8000-000000000002",
+      "name": "One item per transaction",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -140,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "tx.transaction.operations",
+        "include": "selectedOtherFields",
+        "fieldsToInclude": "blockNum,tx",
+        "options": {
+          "destinationFieldName": "op"
+        }
+      },
+      "id": "b2c3d4e5-0000-4000-8000-000000000003",
+      "name": "One item per operation",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        80,
+        0
+      ],
+      "notes": "A block holds transactions, a transaction holds operations. Split Out names the element because the item also carries blockNum -- it only spreads an object when nothing else travels with it."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b2c3d4e5-0000-4000-8000-000000000011",
+              "leftValue": "={{ $json.op.comment_operation?.parent_author || \"\" }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "b2c3d4e5-0000-4000-8000-000000000012",
+              "leftValue": "={{ $json.op.comment_operation?.body?.length ?? 99999 }}",
+              "rightValue": 500,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-0000-4000-8000-000000000004",
+      "name": "Short comments only",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        300,
+        0
+      ],
+      "notes": "A non-empty parent_author is what separates a reply from a top-level post; the same operation carries both. The optional chaining matters because most operations in a block are not comments at all."
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "llama3.1:8b"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Summarise this Hive comment in one short sentence and end with its tone in brackets: positive, neutral or negative. Answer with that sentence only, no preamble.\n\nAuthor: {{ $json.op.comment_operation.author }}\nReplying to: {{ $json.op.comment_operation.parent_author }}\n\n{{ $json.op.comment_operation.body }}",
+              "role": "user"
+            }
+          ]
+        },
+        "simplify": true,
+        "options": {}
+      },
+      "id": "b2c3d4e5-0000-4000-8000-000000000005",
+      "name": "Summarise with Ollama",
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        520,
+        0
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "N4tPD9ad4OjdciW7",
+          "name": "Ollama account"
+        }
+      },
+      "notes": "modelId is a resource locator: mode \"id\" takes the name as text. Leaving the selector on \"From list\" and typing the name is what produces \"Model is required\" -- the typed text never reaches the value."
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=**{{ $('Short comments only').item.json.op.comment_operation.author }}** \u2192 **{{ $('Short comments only').item.json.op.comment_operation.parent_author }}**  \u00b7  block {{ $('Short comments only').item.json.blockNum }}\n{{ $json.content }}",
+        "options": {},
+        "embeds": {},
+        "files": {}
+      },
+      "id": "b2c3d4e5-0000-4000-8000-000000000006",
+      "name": "Post to Discord",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        740,
+        0
+      ],
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "hiveDiscordHook1",
+          "name": "Hive Discord Webhook"
+        }
+      },
+      "notes": "The Ollama node returns only { content }, so the author and block come back through the paired item on the filter node. The webhook URL lives in the credential, never in this file."
+    }
+  ],
+  "connections": {
+    "On Hive block": {
+      "main": [
+        [
+          {
+            "node": "One item per transaction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One item per transaction": {
+      "main": [
+        [
+          {
+            "node": "One item per operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One item per operation": {
+      "main": [
+        [
+          {
+            "node": "Short comments only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Short comments only": {
+      "main": [
+        [
+          {
+            "node": "Summarise with Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarise with Ollama": {
+      "main": [
+        [
+          {
+            "node": "Post to Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "all"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
