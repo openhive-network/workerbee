@@ -1,0 +1,255 @@
+{
+  "id": "gtgBusyBlocks01",
+  "name": "Hive - gtg's busy blocks to Postgres",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "events": {
+          "event": [
+            {
+              "event": "block"
+            }
+          ]
+        },
+        "providers": {
+          "provider": [
+            {
+              "provider": "block_data"
+            }
+          ]
+        },
+        "specOptions": {}
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000001",
+      "name": "On Hive block",
+      "type": "@hiveio/n8n-nodes-hive.hiveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        0
+      ],
+      "notes": "The block event on its own carries only the header. block_data is what attaches the transactions this workflow counts and stores."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a1b2c3d4-0000-4000-8000-000000000011",
+              "leftValue": "={{ $json.payload.block.witness }}",
+              "rightValue": "gtg",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000002",
+      "name": "Produced by gtg?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        64,
+        0
+      ],
+      "notes": "witness is the account that produced the block."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a1b2c3d4-0000-4000-8000-000000000012",
+              "leftValue": "={{ $json.payload.block.transactions.length }}",
+              "rightValue": 5,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000003",
+      "name": "More than 5 transactions?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        288,
+        -96
+      ],
+      "notes": "Strictly more than 5, so a block with exactly 5 is not stored."
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "payload.block.transactions",
+        "include": "selectedOtherFields",
+        "fieldsToInclude": "blockNum",
+        "options": {
+          "destinationFieldName": "tx"
+        }
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000004",
+      "name": "One item per transaction",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        512,
+        -208
+      ],
+      "notes": "Each element is { transaction, id }. Split Out only spreads an object element into the item when nothing else is carried along, so with blockNum included the element needs a name of its own -- hence destinationFieldName."
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "block_transactions"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "block_num": "={{ $json.blockNum }}",
+            "transaction_id": "={{ $json.tx.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "block_num",
+              "displayName": "block_num",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transaction_id",
+              "displayName": "transaction_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "seen_at",
+              "displayName": "seen_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0000-4000-8000-000000000005",
+      "name": "Store transaction",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        720,
+        -208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "hivePostgresCred01",
+          "name": "Hive Postgres"
+        }
+      },
+      "notes": "seen_at is left to the column default. The primary key is (block_num, transaction_id), so a replayed block conflicts rather than duplicating."
+    }
+  ],
+  "connections": {
+    "On Hive block": {
+      "main": [
+        [
+          {
+            "node": "Produced by gtg?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Produced by gtg?": {
+      "main": [
+        [
+          {
+            "node": "More than 5 transactions?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "More than 5 transactions?": {
+      "main": [
+        [
+          {
+            "node": "One item per transaction",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "One item per transaction": {
+      "main": [
+        [
+          {
+            "node": "Store transaction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "all",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "Europe/Warsaw",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
