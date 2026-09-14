@@ -34,7 +34,7 @@ poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
 [tool.poetry.dependencies]
 # hiveio-wax requires Python >=3.12, so that is the effective floor.
 python = ">=3.12,<4"
-hiveio-wax = "2.0.3rc0.dev20260727114341"
+hiveio-wax = "2.0.3rc0.post20260803065659"
 
 
 # hiveio-* post-release builds (from develop) live in the Hive GitLab PyPI registry.
