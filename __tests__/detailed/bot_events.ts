@@ -383,7 +383,7 @@ test.describe("WorkerBee Bot events test", () => {
           body: "WB tests",
           permlink: `wb-tests-${Date.now()}`
         }));
-        tx.sign(wallet, publicKey);
+        tx.addSignature(wallet.signDigest(publicKey, tx.sigDigest));
         return tx;
       };
 
