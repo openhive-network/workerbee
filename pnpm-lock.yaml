@@ -84,8 +84,8 @@ importers:
         specifier: 1.28.7-rc0
         version: 1.28.7-rc0
       '@hiveio/wax':
-        specifier: 2.0.2
-        version: 2.0.2
+        specifier: 1.28.8-rc3
+        version: 1.28.8-rc3
       '@playwright/test':
         specifier: catalog:playwright-toolset
         version: 1.50.1
@@ -192,8 +192,8 @@ importers:
   packages/blog-logic:
     dependencies:
       '@hiveio/wax':
-        specifier: 2.0.2
-        version: 2.0.2
+        specifier: 1.28.8-rc3
+        version: 1.28.8-rc3
       '@hiveio/wax-api-hafbe':
         specifier: 1.28.4
         version: 1.28.4
@@ -438,8 +438,8 @@ packages:
   '@hiveio/wax-api-jsonrpc@1.28.4':
     resolution: {integrity: sha1-FU095wjBfkCpgI2w9qnT0J0hJSU=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/wax-api-jsonrpc/-/@hiveio/wax-api-jsonrpc-1.28.4.tgz}
 
-  '@hiveio/wax@2.0.2':
-    resolution: {integrity: sha1-3JurSNe7ALUNgewAEnlsgdbPxHw=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-2.0.2.tgz}
+  '@hiveio/wax@1.28.8-rc3':
+    resolution: {integrity: sha1-lhuq9Lp+2jvxIri+eacrHeeMXFM=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.28.8-rc3.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
   '@humanfs/core@0.19.1':
@@ -3247,7 +3247,7 @@ snapshots:
 
   '@hiveio/wax-api-jsonrpc@1.28.4': {}
 
-  '@hiveio/wax@2.0.2':
+  '@hiveio/wax@1.28.8-rc3':
     dependencies:
       events: 3.3.0
 
