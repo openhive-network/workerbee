@@ -17,26 +17,9 @@ from typing import TYPE_CHECKING, Any, TypedDict, TypeGuard
 if TYPE_CHECKING:
     from datetime import datetime
 
-    from hiveio_api.block_api import Operation, Transaction3, Transaction4
-    from hiveio_api.database_api import (
-        Balance,
-        CuratorPayoutValue,
-        CurrentMaxHistory3,
-        CurrentMedianHistory3,
-        CurrentMinHistory3,
-        DelegatedVestingShares,
-        HbdBalance,
-        PriceHistoryItem3,
-        ReceivedVestingShares,
-        RewardHbdBalance,
-        RewardHiveBalance,
-        RewardVestingBalance,
-        SavingsBalance,
-        SavingsHbdBalance,
-        TotalPayoutValue,
-        VestingShares,
-        VestingWithdrawRate,
-    )
+    from hiveio_api.block_api import BlockTransaction, Operation
+    from hiveio_api.common import NaiAsset, PricePair
+    from hiveio_api.database_api import FeedPriceHistoryItem
 
     from .enums import AlarmType, Exchange, ManabarType
 
@@ -83,12 +66,11 @@ def has_payload[PayloadT: PayloadBase](note: object, payload_cls: type[PayloadT]
 class TransactionData(PayloadBase):
     """A block transaction paired with its id (mirrors TS ITransactionData).
 
-    The transaction is a ``Transaction4`` on the live ``get_block`` path
-    (``Block1``) and a structurally identical ``Transaction3`` on the
-    ``get_block_range`` catch-up path — hence the union leaf.
+    ``hiveio_api`` exposes the live ``get_block`` and the ``get_block_range``
+    catch-up paths through the same ``BlockTransaction`` model.
     """
 
-    transaction: Transaction3 | Transaction4
+    transaction: BlockTransaction
     id: str
 
 
@@ -116,11 +98,11 @@ class ImpactedAccountsPayload(PayloadBase, total=False):
 # (src/chain-observers/classifiers/{account,rc-account,witness,manabar}-classifier.ts),
 # snake_cased and shaped to what the Python collectors actually emit.
 #
-# Balance leaves keep their distinct hiveio_api per-field asset structs (each is
-# ``{amount: str | int, nai: str, precision: int}``); TS collapses them to a
-# single wax ``asset``, but the Python collectors pass the source structs through
-# untouched (by direct attribute access), so the precise field class is the honest
-# runtime type. Every one of these account fields is required, so no leaf is optional.
+# Balance leaves are the hiveio_api ``NaiAsset`` struct
+# (``{amount: str | int, nai: str, precision: int}``) shared by all account
+# balance fields; TS collapses them to a single wax ``asset``, but the Python
+# collectors pass the source structs through untouched (by direct attribute
+# access). Every one of these account fields is required, so no leaf is optional.
 #
 # ---------------------------------------------------------------------------
 
@@ -128,30 +110,30 @@ class ImpactedAccountsPayload(PayloadBase, total=False):
 class HbdDetailedBalance(PayloadBase):
     """HBD sub-balance: liquid/savings/unclaimed plus TS-compatible total."""
 
-    liquid: HbdBalance
-    savings: SavingsHbdBalance
-    unclaimed: RewardHbdBalance
-    total: HbdBalance
+    liquid: NaiAsset
+    savings: NaiAsset
+    unclaimed: NaiAsset
+    total: NaiAsset
 
 
 class HiveDetailedBalance(PayloadBase):
     """HIVE sub-balance (same shape as HBD with HIVE-side asset structs)."""
 
-    liquid: Balance
-    savings: SavingsBalance
-    unclaimed: RewardHiveBalance
-    total: Balance
+    liquid: NaiAsset
+    savings: NaiAsset
+    unclaimed: NaiAsset
+    total: NaiAsset
 
 
 class HpDetailedBalance(PayloadBase):
     """HP (vesting) sub-balance — adds delegated/received/powering_down."""
 
-    liquid: VestingShares
-    delegated: DelegatedVestingShares
-    received: ReceivedVestingShares
-    powering_down: VestingWithdrawRate
-    unclaimed: RewardVestingBalance
-    total: VestingShares
+    liquid: NaiAsset
+    delegated: NaiAsset
+    received: NaiAsset
+    powering_down: NaiAsset
+    unclaimed: NaiAsset
+    total: NaiAsset
 
 
 class AccountBalance(PayloadBase):
@@ -387,7 +369,7 @@ class ReblogsPayload(PayloadBase, total=False):
 # Block / transaction (BlockHeader/Block/TransactionById providers). Mirrors TS
 # IBlockHeaderData / IBlockData / ITransactionData. These were previously declared
 # loosely in bot.py; they live here now so the leaf transactions reference the
-# real hiveio_api Transaction structs.
+# real hiveio_api BlockTransaction struct.
 # ---------------------------------------------------------------------------
 
 
@@ -409,7 +391,7 @@ class BlockData(BlockHeaderData):
     """A full block: header fields plus its transactions (mirrors TS IBlockData)."""
 
     transactions: list[TransactionData]
-    transactions_per_id: dict[str, Transaction3 | Transaction4]
+    transactions_per_id: dict[str, BlockTransaction]
 
 
 class BlockHeaderPayload(PayloadBase, total=False):
@@ -427,7 +409,7 @@ class BlockPayload(PayloadBase, total=False):
 class TransactionsByIdPayload(PayloadBase, total=False):
     """Payload from ``provide_transactions(...)``: tracked transactions per id."""
 
-    transactions: dict[str, Transaction3 | Transaction4]
+    transactions: dict[str, BlockTransaction]
 
 
 # ---------------------------------------------------------------------------
@@ -453,12 +435,12 @@ class ContentMetadata(PayloadBase):
     allows_replies: bool
     allows_votes: bool
     author_rewards: int
-    curator_payout_value: CuratorPayoutValue | None
+    curator_payout_value: NaiAsset | None
     net_rshares: int
     net_votes: int
     payout_time: str | None
     is_paid: bool
-    total_payout_value: TotalPayoutValue | None
+    total_payout_value: NaiAsset | None
 
 
 class PostsMetadataPayload(PayloadBase, total=False):
@@ -481,10 +463,10 @@ class FeedPriceData(PayloadBase):
     price struct with ``base``/``quote``.
     """
 
-    current_median_history: CurrentMedianHistory3
-    current_min_history: CurrentMinHistory3
-    current_max_history: CurrentMaxHistory3
-    price_history: list[PriceHistoryItem3]
+    current_median_history: PricePair
+    current_min_history: PricePair
+    current_max_history: PricePair
+    price_history: list[FeedPriceHistoryItem]
 
 
 class FeedPricePayload(PayloadBase, total=False):

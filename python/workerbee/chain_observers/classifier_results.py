@@ -9,8 +9,9 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TypedDict
 
-from hiveio_api.block_api import Transaction3, Transaction4
-from hiveio_api.database_api import CurrentMaxHistory3, CurrentMedianHistory3, CurrentMinHistory3, PriceHistoryItem3
+from hiveio_api.block_api import BlockTransaction
+from hiveio_api.common import PricePair
+from hiveio_api.database_api import FeedPriceHistoryItem
 
 from .payloads import (
     AccountData,
@@ -34,7 +35,7 @@ class DynamicGlobalPropertiesData(TypedDict):
 
 class BlockClassifierData(TypedDict):
     transactions: list[TransactionData]
-    transactions_per_id: dict[str, Transaction3 | Transaction4]
+    transactions_per_id: dict[str, BlockTransaction]
 
 
 class OperationClassifierData(TypedDict):
@@ -91,9 +92,9 @@ class ContentMetadataClassifierData(TypedDict):
 
 
 class FeedPriceClassifierData(TypedDict):
-    current_median_history: CurrentMedianHistory3
-    market_median_history: CurrentMedianHistory3
-    current_min_history: CurrentMinHistory3
-    current_max_history: CurrentMaxHistory3
+    current_median_history: PricePair
+    market_median_history: PricePair
+    current_min_history: PricePair
+    current_max_history: PricePair
     last_feed_price_retrieval_timestamp: datetime
-    price_history: list[PriceHistoryItem3]
+    price_history: list[FeedPriceHistoryItem]
