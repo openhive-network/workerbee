@@ -19,19 +19,24 @@ failure body) and, for the Playwright steps, `test-results/<suite>/playwright-ju
 | `dist-exports` | (after `build`) the files package.json `main`/`types`/`exports` name exist |
 | `docs` | the API reference with typedoc, as CI's `generate_docs` |
 | `test-mock` | Playwright project `workerbee_testsuite_mock`: 31 tests on recorded API data |
+| `test-mock-a`, `-b`, `-c` | the same project split in three by test title (3.x and 6.x; 4.x and 5.x; the rest) |
 | `test`, `test-all` | Playwright project `workerbee_testsuite` (89 tests), or both projects |
 
 | Slot | Steps |
 |---|---|
 | quick, canary | lint, typecheck, build |
-| full | lint, typecheck, build, docs, test-mock |
+| full | suites: `checks` (lint, typecheck, build, docs), `mock_a`, `mock_b`, `mock_c` (build, test-mock-a/b/c) |
+| baseline | suites: `mock_a`, `mock_b`, `mock_c` |
+| coverage | build, test-mock |
 | static | lint, typecheck |
-| baseline, coverage | build, test-mock |
 | system | build, docs |
 
-`test-mock` takes about 6 minutes (one file, run serially, as CI's config has it), so it
-is only in `full`, `baseline` and `coverage`: AIDEV's quick gate and promote canary
-stop a run at 300 s.
+`test-mock` takes about 6 minutes: it is one file, run serially on a fixed mock port
+(28091), as CI's config has it, so neither more workers nor Playwright's `--shard`
+can split it. AIDEV's gates give each non-pytest suite about 300 s (ai/aidev#14667),
+so `full` and `baseline` run it as three suites of about 2 minutes, split by test
+title; `test-mock-c` uses `--grep-invert` of the other two, so a new test always
+runs somewhere. Quick and canary (also 300 s) don't run it.
 
 **Not bound:** the `workerbee_testsuite` project (`test`). Its tests call the live
 `api.hive.blog`, and AIDEV runs suites with `--network none`; offline, 74 of its 89

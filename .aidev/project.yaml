@@ -46,21 +46,54 @@ issues:
 # different things.
 # workerbee_testsuite (Playwright, 89 tests) is not bound: it calls the live
 # api.hive.blog and suites run with --network none. workerbee_testsuite_mock
-# (test-mock, ~6 min, one serial file) is in full/baseline/coverage only: the
-# quick gate and the canary have a 300 s wall. See .aidev/README.md.
+# (31 tests, ~6 min, one serial file) runs in full and baseline as three suites
+# of ~2 min (test-mock-a/b/c, split by test title), because AIDEV gives each
+# non-pytest suite a ~300 s wall; it stays out of quick and canary. See
+# .aidev/README.md.
 verification:
   quick:
     adapter: command
     args: [".aidev/run-checks.sh", "quick", "lint", "typecheck", "build"]
     artifacts: ["test-results/quick/"]
   full:
-    adapter: command
-    args: [".aidev/run-checks.sh", "full", "lint", "typecheck", "build", "docs", "test-mock"]
-    artifacts: ["test-results/full/"]
+    suites:
+      - name: checks
+        adapter: command
+        args: [".aidev/run-checks.sh", "full", "lint", "typecheck", "build", "docs"]
+        artifacts: ["test-results/full/"]
+        stack: false
+      - name: mock_a
+        adapter: command
+        args: [".aidev/run-checks.sh", "full-mock-a", "build", "test-mock-a"]
+        artifacts: ["test-results/full-mock-a/"]
+        stack: false
+      - name: mock_b
+        adapter: command
+        args: [".aidev/run-checks.sh", "full-mock-b", "build", "test-mock-b"]
+        artifacts: ["test-results/full-mock-b/"]
+        stack: false
+      - name: mock_c
+        adapter: command
+        args: [".aidev/run-checks.sh", "full-mock-c", "build", "test-mock-c"]
+        artifacts: ["test-results/full-mock-c/"]
+        stack: false
   baseline:
-    adapter: command
-    args: [".aidev/run-checks.sh", "baseline", "build", "test-mock"]
-    artifacts: ["test-results/baseline/"]
+    suites:
+      - name: mock_a
+        adapter: command
+        args: [".aidev/run-checks.sh", "baseline-mock-a", "build", "test-mock-a"]
+        artifacts: ["test-results/baseline-mock-a/"]
+        stack: false
+      - name: mock_b
+        adapter: command
+        args: [".aidev/run-checks.sh", "baseline-mock-b", "build", "test-mock-b"]
+        artifacts: ["test-results/baseline-mock-b/"]
+        stack: false
+      - name: mock_c
+        adapter: command
+        args: [".aidev/run-checks.sh", "baseline-mock-c", "build", "test-mock-c"]
+        artifacts: ["test-results/baseline-mock-c/"]
+        stack: false
   canary:
     adapter: command
     args: [".aidev/run-checks.sh", "canary", "lint", "typecheck", "build"]
