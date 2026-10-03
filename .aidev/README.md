@@ -23,11 +23,15 @@ failure body) and, for the Playwright steps, `test-results/<suite>/playwright-ju
 
 | Slot | Steps |
 |---|---|
-| quick, canary | lint, typecheck, build, test-mock |
+| quick, canary | lint, typecheck, build |
 | full | lint, typecheck, build, docs, test-mock |
 | static | lint, typecheck |
 | baseline, coverage | build, test-mock |
 | system | build, docs |
+
+`test-mock` takes about 6 minutes (one file, run serially, as CI's config has it), so it
+is only in `full`, `baseline` and `coverage`: AIDEV's quick gate and promote canary
+stop a run at 300 s.
 
 **Not bound:** the `workerbee_testsuite` project (`test`). Its tests call the live
 `api.hive.blog`, and AIDEV runs suites with `--network none`; offline, 74 of its 89

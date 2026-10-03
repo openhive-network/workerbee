@@ -45,11 +45,13 @@ issues:
 # seven gates report on the same evidence while claiming to check seven
 # different things.
 # workerbee_testsuite (Playwright, 89 tests) is not bound: it calls the live
-# api.hive.blog and suites run with --network none. See .aidev/README.md.
+# api.hive.blog and suites run with --network none. workerbee_testsuite_mock
+# (test-mock, ~6 min, one serial file) is in full/baseline/coverage only: the
+# quick gate and the canary have a 300 s wall. See .aidev/README.md.
 verification:
   quick:
     adapter: command
-    args: [".aidev/run-checks.sh", "quick", "lint", "typecheck", "build", "test-mock"]
+    args: [".aidev/run-checks.sh", "quick", "lint", "typecheck", "build"]
     artifacts: ["test-results/quick/"]
   full:
     adapter: command
@@ -61,7 +63,7 @@ verification:
     artifacts: ["test-results/baseline/"]
   canary:
     adapter: command
-    args: [".aidev/run-checks.sh", "canary", "lint", "typecheck", "build", "test-mock"]
+    args: [".aidev/run-checks.sh", "canary", "lint", "typecheck", "build"]
     artifacts: ["test-results/canary/"]
   static:
     adapter: command
