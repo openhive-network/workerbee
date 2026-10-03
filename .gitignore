@@ -310,3 +310,6 @@ config/.env*
 
 # VS overrides
 .vs
+
+# AIDEV writes directory leases into the tree (aidev#14645)
+.aidev-dir-lease/

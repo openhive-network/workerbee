@@ -22,7 +22,8 @@ export default [ {
     "**/dist",
     "**/build",
     "npm-common-config",
-    "examples"
+    "examples",
+    ".aidev-dir-lease"
   ]
 }, ...compat.extends("eslint:recommended"), {
   plugins: {
