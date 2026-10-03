@@ -69,6 +69,9 @@ pnpm lint-ci
 
 # Run tests (requires chromium, auto-installed)
 pnpm test
+
+# Run only the mock suite (offline, recorded API data)
+pnpm test:mock
 ```
 
 ## Key Files
