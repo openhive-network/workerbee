@@ -4,6 +4,15 @@
 
 WorkerBee is a TypeScript library for Hive blockchain automation built on `@hiveio/wax` and `@hiveio/beekeeper`. It provides an event-based observer pattern for building bots that react to blockchain events (posts, votes, transfers, account changes, etc.) with support for both real-time streaming and historical data processing.
 
+## Working in an AIDEV workflow
+When AIDEV runs you on an issue, no one is there to answer questions. GitLab CI doesn't run for AIDEV branches; the checks below are the verification.
+
+- **Check your change:** run `aidev test run --slot quick` once, after your last edit. It runs ESLint (`--max-warnings=0`), `tsc --noEmit` (library and `packages/blog-logic`), the full build (tsc, rollup, terser, size-limit) and the Playwright `workerbee_testsuite_mock` project (recorded API data). `full` adds the typedoc API reference.
+- **Iterate:** `.aidev/run-checks.sh dev lint` (or `typecheck`, `build`, `test-mock`) runs one step. Playwright steps need `build` first.
+- **No network:** suites run with `--network none`. The `workerbee_testsuite` project calls the live `api.hive.blog`, so it isn't bound to any slot; new tests should use the JSON-RPC mock in `__tests__/assets/mock/`.
+- **Size limit:** `size-limit` fails the build when `dist/bundle` passes 181 kB or `dist/blog-logic` 46 kB.
+- **Dependencies:** a change to `pnpm-lock.yaml`, `packageManager` or the `npm-common-config` submodule needs a new test image. Run `.aidev/runtime/build.sh --push` and put the printed reference in `.aidev/project.yaml` `environment.image` in the same commit (see `.aidev/README.md`).
+
 ## Tech Stack
 
 - **Runtime:** Node.js 20.11+ or 21.2+
