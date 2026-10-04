@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-FROM node:21-slim as pure_node
+FROM node:24.21.0-slim as pure_node
 
 FROM pure_node as rootless_node
 

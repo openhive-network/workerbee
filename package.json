@@ -76,7 +76,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/express-http-proxy": "^1.6.6",
-    "@types/node": "^20.11.30",
+    "@types/node": "^24.19.1",
     "@typescript-eslint/eslint-plugin": "^8.24.1",
     "@typescript-eslint/parser": "^8.24.1",
     "buffer": "^6.0.3",
@@ -111,7 +111,7 @@
     "url": "https://gitlab.syncad.com/hive/workerbee.git"
   },
   "engines": {
-    "node": "^20.11 || >= 21.2"
+    "node": ">=24"
   },
   "publishConfig": {
     "registry": "https://RegistryPlaceholder",

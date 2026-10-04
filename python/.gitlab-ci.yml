@@ -106,7 +106,7 @@ python_test_mock:
     - cd "${CI_PROJECT_DIR}"
     - |
       if ! command -v node >/dev/null; then
-        NODE_VERSION="${WORKERBEE_CI_NODE_VERSION:-v20.18.3}"
+        NODE_VERSION="${WORKERBEE_CI_NODE_VERSION:-v24.21.0}"
         case "$(uname -m)" in
           x86_64) NODE_ARCH="linux-x64" ;;
           aarch64|arm64) NODE_ARCH="linux-arm64" ;;
