@@ -9,7 +9,7 @@ variables:
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
   # Reference for GitHub Pages scripts from common-ci-configuration
-  COMMON_CI_GITHUB_PAGES_REF: "1c0dc43e07ed44a5f87fe5d0b6a39ca0795f9ea6"
+  COMMON_CI_GITHUB_PAGES_REF: "7dffa23eb3612b0e2f049e98260028c0134c0156"
 
 # Branch pipelines (what the Workflows/Branch-Pipelines template did), except for
 # AIDEV-driven development: ai/<issue>-..., session/<name> and aidev/integration
@@ -29,7 +29,7 @@ workflow:
 include:
   - local: 'python/.gitlab-ci.yml'
   - project: 'hive/common-ci-configuration'
-    ref: 1c0dc43e07ed44a5f87fe5d0b6a39ca0795f9ea6
+    ref: 7dffa23eb3612b0e2f049e98260028c0134c0156
     file:
       - '/templates/npm_projects.gitlab-ci.yml'
       - '/templates/python_projects.gitlab-ci.yml'
@@ -115,7 +115,6 @@ deploy_production_public_npm:
     SIGSTORE_ID_TOKEN:
       aud: sigstore
   variables:
-    NPM_PUBLISH_TOKEN: "$INTERNAL_HIDDEN_PUBLISH_TOKEN"
     NPM_PACKAGE_NAME: "workerbee"
     NPM_PROVENANCE_ENABLE: "0" # XXX: Temporarly disable as it is not working - we have to find a way to get it working
     DIST_DIR: "$CI_PROJECT_DIR/dist"
