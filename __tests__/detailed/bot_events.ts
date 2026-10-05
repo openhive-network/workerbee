@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 
+import type { ApiTransaction } from "@hiveio/wax";
 import { expect } from "@playwright/test";
 
 import { test } from "../assets/jest-helper";
@@ -14,42 +15,94 @@ test.describe("WorkerBee Bot events test", () => {
     });
   });
 
-  // TODO: This test uses a fake endpoint that doesn't exist. Fix the test to use a mock or real endpoint.
   test("Allow to broadcast to mirronet chain - broadcast on bot should not throw", async({ workerbeeTest }) => {
-    await workerbeeTest(async({ WorkerBee, wax, beekeeperFactory }) => {
-      /*
-       * Prepare helper WorkerBee instance just to provide IHiveChainInterface instance.
-       * It is a problem in PW tests to reference whole wax, since its dependencies need to be declared at importmap in test.html
-       */
-      const customWaxConfig = { apiEndpoint: "https://api.fake.openhive.network", chainId: "42", apiTimeout: 0 };
+    const broadcastResult = await workerbeeTest(async({ WorkerBee, wax, beekeeperFactory }) => {
+      const fakeEndpoint = "https://api.fake.openhive.network";
+      const customWaxConfig = { apiEndpoint: fakeEndpoint, chainId: "42", apiTimeout: 0 };
 
       const chain = await wax.createHiveChain(customWaxConfig);
 
-      const bot = new WorkerBee(chain);
+      /*
+       * Mirrornet-style node replaced by a local JSON-RPC stub: every broadcast transaction is included in the next head block,
+       * so the bot can confirm the broadcast without any network access.
+       */
+      const headBlockId = "04c507a8c7fe5be96be64ce7c86855e1806cbde3";
+      const headBlockTime = "2023-11-09T21:51:27";
+      let headBlockNumber = 80020392;
+      const blockTransactions = new Map<number, Array<ApiTransaction>>();
 
-      const newTx = await chain.createTransaction();
+      const handleJsonRpc = (method: string, params: Record<string, unknown>): unknown => {
+        switch (method) {
+        case "network_broadcast_api.broadcast_transaction":
+          blockTransactions.set(++headBlockNumber, [ params.trx as ApiTransaction ]);
+          return {};
+        case "database_api.get_dynamic_global_properties":
+          return { head_block_number: headBlockNumber, head_block_id: headBlockId, time: headBlockTime, current_witness: "gtg", downvote_pool_percent: 2500 };
+        case "block_api.get_block": {
+          const transactions = blockTransactions.get(params.block_num as number) ?? [];
+          return { block: {
+            previous: headBlockId, timestamp: headBlockTime, witness: "gtg", transaction_merkle_root: "", extensions: [], witness_signature: "",
+            block_id: headBlockId, signing_key: "", transactions, transaction_ids: transactions.map(trx => chain.createTransactionFromJson(trx).id)
+          } };
+        }
+        default:
+          throw new Error(`Unexpected JSON-RPC call to the fake mirrornet node: ${method}`);
+        }
+      };
 
-      newTx.pushOperation(new wax.ReplyOperation({author: "gtg", permlink: `re-${Date.now()}`, parentAuthor: "hbd.funder",
-        parentPermlink: "re-upvote-this-post-to-fund-hbdstabilizer-20250312t045515z", title: "test", body: "Awesome test!",
-        maxAcceptedPayout: chain.hbdCoins(1000000), percentHbd: 9000, allowVotes: true, allowCurationRewards: true}));
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = (input, init) => {
+        if (String(input) !== fakeEndpoint)
+          return originalFetch(input, init);
 
-      const bkInstance = await beekeeperFactory({ inMemory: true, enableLogs: false });
-      const bkSession = bkInstance.createSession("salt and pepper");
+        const { method, params, id } = JSON.parse(init!.body as string);
 
-      const {wallet} = await bkSession.createWallet("temp", "pass", true);
-      const publicKey = await wallet.importKey("5JNHfZYKGaomSFvd4NUdQ9qMcEAC43kujbfjueTHpVapX1Kzq2n");
+        return Promise.resolve(new Response(JSON.stringify({ jsonrpc: "2.0", id, result: handleJsonRpc(method, params) }), {
+          headers: { "content-type": "application/json" }
+        }));
+      };
 
-      /// Intentionally sign using legacy method
-      const legacySigDigest = newTx.legacy_sigDigest;
-      const signature = wallet.signDigest(publicKey, legacySigDigest);
-      newTx.addSignature(signature);
+      try {
+        const bot = new WorkerBee(chain);
 
-      bot.start();
+        const newTx = chain.createTransactionWithTaPoS(headBlockId, "+1m");
 
-      await bot.broadcast(newTx, { verifySignatures: true, expireInMs: 10_000 });
+        newTx.pushOperation(new wax.ReplyOperation({author: "gtg", permlink: `re-${Date.now()}`, parentAuthor: "hbd.funder",
+          parentPermlink: "re-upvote-this-post-to-fund-hbdstabilizer-20250312t045515z", title: "test", body: "Awesome test!",
+          maxAcceptedPayout: chain.hbdCoins(1000000), percentHbd: 9000, allowVotes: true, allowCurationRewards: true}));
 
-      bot.delete();
+        const bkInstance = await beekeeperFactory({ inMemory: true, enableLogs: false });
+        const bkSession = bkInstance.createSession("salt and pepper");
+
+        const {wallet} = await bkSession.createWallet("temp", "pass", true);
+        const publicKey = await wallet.importKey("5JNHfZYKGaomSFvd4NUdQ9qMcEAC43kujbfjueTHpVapX1Kzq2n");
+
+        /// Intentionally sign using legacy method
+        const legacySigDigest = newTx.legacy_sigDigest;
+        const signature = wallet.signDigest(publicKey, legacySigDigest);
+        newTx.addSignature(signature);
+
+        bot.start();
+
+        await bot.broadcast(newTx, { verifySignatures: true, expireInMs: 10_000 });
+
+        bot.delete();
+
+        const broadcasted = [ ...blockTransactions.values() ].flat();
+
+        return {
+          broadcastedCount: broadcasted.length,
+          refBlockNum: broadcasted[0]?.ref_block_num,
+          signaturesMatch: broadcasted[0]?.signatures.length === 1 && broadcasted[0].signatures[0] === signature
+        };
+      } finally {
+        // Tests in one worker run sequentially, so no other test can have replaced fetch meanwhile
+        /* eslint-disable-next-line require-atomic-updates */
+        globalThis.fetch = originalFetch;
+      }
     });
+
+    expect(broadcastResult).toEqual({ broadcastedCount: 1, refBlockNum: 0x07a8, signaturesMatch: true });
   });
 
   test("Allow to pass explicit extended chain", async({ workerbeeTest }) => {
