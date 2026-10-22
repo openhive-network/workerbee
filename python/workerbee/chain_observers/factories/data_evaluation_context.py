@@ -15,13 +15,13 @@ from __future__ import annotations
 import asyncio
 import time
 from contextlib import AbstractContextManager, contextmanager
-from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
+from typing import TYPE_CHECKING, Protocol, TypeVar, cast
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterator, Mapping
 
-    from ..classifiers.collector_classifier_base import CollectorClassifierBase
-    from ..collectors.collector_base import CollectorBase
+    from ..classifiers.collector_classifier_base import CollectorClassifierBase, IEvaluationContextClass
+    from ..collectors.collector_base import CollectorBase, TCollectorResult
     from .factory_base import FactoryBase
 
 ClassifierResultT = TypeVar("ClassifierResultT")
@@ -32,9 +32,9 @@ class DataEvaluationContext:
 
     def __init__(self, factory: FactoryBase) -> None:
         self._factory = factory
-        self._collectors: dict[type[CollectorClassifierBase[Any]], CollectorBase] = {}
-        self._cached_functions: dict[int, asyncio.Task[Any]] = {}
-        self._store_data: dict[type[CollectorClassifierBase[Any]], dict[str, Any]] = {}
+        self._collectors: dict[IEvaluationContextClass, CollectorBase] = {}
+        self._cached_functions: dict[int, asyncio.Task[TCollectorResult]] = {}
+        self._store_data: dict[IEvaluationContextClass, dict[str, object]] = {}
 
     @contextmanager
     def add_timing(self, name: str) -> Iterator[None]:
@@ -51,7 +51,7 @@ class DataEvaluationContext:
         finally:
             self._factory.record_timing(name, (time.monotonic() - start) * 1000)
 
-    def inject(self, classifier: type[CollectorClassifierBase[Any]], collector: CollectorBase) -> None:
+    def inject(self, classifier: IEvaluationContextClass, collector: CollectorBase) -> None:
         """Attach ``collector`` as the data source for ``classifier`` in this cycle."""
         if classifier in self._collectors:
             return
@@ -71,16 +71,19 @@ class DataEvaluationContext:
         cached = self._cached_functions.get(collector_id)
         if cached is None:
 
-            async def collect() -> Any:
+            async def collect() -> TCollectorResult:
                 with self.add_timing(f"{classifier.__name__}#get"):
                     return await collector.get(self)
 
             cached = asyncio.create_task(collect())
             self._cached_functions[collector_id] = cached
+            self._factory.track_collector_task(cached)
         result = await asyncio.shield(cached)
-        return cast("ClassifierResultT", result[classifier.__name__])
+        # The collector keeps the result of each of its classifiers under the classifier class, of the type the
+        # classifier declares (TS: `result[classifier.name] as any`).
+        return cast("ClassifierResultT", result[classifier])
 
-    async def query(self, classifier: type[CollectorClassifierBase[Any]], options: Any) -> Any:
+    async def query(self, classifier: IEvaluationContextClass, options: Mapping[str, object]) -> object:
         """Run an uncached collector query for ``classifier`` with caller-supplied options."""
         collector = self._collectors.get(classifier)
         if collector is None:
@@ -91,7 +94,7 @@ class DataEvaluationContext:
         with self.add_timing(f"{classifier.__name__}#query"):
             return await collector.query(self, options)
 
-    def access_store(self, classifier: type[CollectorClassifierBase[Any]]) -> dict[str, Any]:
+    def access_store(self, classifier: IEvaluationContextClass) -> dict[str, object]:
         """Return mutable per-classifier scratch storage for this evaluation cycle."""
         store = self._store_data.get(classifier)
         if store is None:
@@ -111,25 +114,6 @@ class TCollectorEvaluationContext(Protocol):
         """Return cached data for a classifier dependency."""
         ...
 
-    async def query(self, classifier: type[CollectorClassifierBase[Any]], options: Any) -> Any:
+    async def query(self, classifier: IEvaluationContextClass, options: Mapping[str, object]) -> object:
         """Run an uncached query for a classifier dependency."""
         ...
-
-
-class TFilterEvaluationContext(Protocol):
-    """Subset of :class:`DataEvaluationContext` exposed to filters and providers."""
-
-    async def get(self, classifier: type[CollectorClassifierBase[ClassifierResultT]]) -> ClassifierResultT:
-        """Return cached data for a classifier dependency."""
-        ...
-
-    async def query(self, classifier: type[CollectorClassifierBase[Any]], options: Any) -> Any:
-        """Run an uncached query for a classifier dependency."""
-        ...
-
-    def access_store(self, classifier: type[CollectorClassifierBase[Any]]) -> dict[str, Any]:
-        """Return mutable per-classifier scratch storage."""
-        ...
-
-
-TProviderEvaluationContext = TFilterEvaluationContext

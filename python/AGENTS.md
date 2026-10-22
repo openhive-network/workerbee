@@ -14,10 +14,11 @@ Use this file as the operational guide for future agent work in `python/`.
 
 - WorkerBee uses Hive hf26 APIs (`block_api`, `database_api`, `network_broadcast_api`), so operations are `Operation{type, value}`.
 - `condenser_api`/`wallet_bridge` legacy operation envelopes are not the WorkerBee runtime shape.
-- Runtime chain data comes from `hiveio_api`/`wax` models, usually `msgspec.Struct`.
-- Access chain structs by attribute (`op.type`, `op.value`, `result.accounts`), not dict subscription or `.get()`.
+- Runtime chain data comes from `hiveio_api`/`wax` models - dataclasses. `msgspec` is private to `hiveio_api`; never import it in WorkerBee.
+- Access chain models by attribute (`result.accounts`, `acc.balance`), not dict subscription or `.get()`. Assets are `hiveio_api.Asset` values (arithmetic and comparisons work on them directly).
+- Operation bodies stay JSON objects, as in TS: the collector turns block operations into the local `Operation` envelope (`op.type`, e.g. `vote_operation`, and `op.value`, a `dict`), so filters and providers read `op.value["author"]`.
 - Do not hand-roll dataclasses, pydantic models, or TypedDicts for chain entities. First look for the model in `hiveio_api` or `wax`.
-- WorkerBee-local projections and containers may use local `TypedDict`s in `workerbee/chain_observers/payloads.py`.
+- WorkerBee-local projections and containers (and the `Operation` envelope) live in `workerbee/chain_observers/payloads.py`; projections use local `TypedDict`s.
 - Heavy `hiveio_api` model imports in library code should usually be under `TYPE_CHECKING` to preserve import time.
 
 ## Environment
@@ -96,6 +97,7 @@ The shared static-analysis gate is `.pre-commit-config.yaml`. Keep hook versions
 ## Known TS Bugs Already Fixed In Python
 
 - JSON-RPC `BlockCollector` catch-up finishes on the advertised head after a multi-block gap. The current TS implementation shadows the outer `blocks` variable in the range branch; if that is fixed mechanically while keeping `count = head - current - 1`, it still lands one block behind. Python keeps the intended live behavior: listeners see the advertised head block. When TS is fixed, mirror the fixed TS version.
+- Whale alerts (`on_whale_alert`) compare amounts as numbers. TS `isGreaterThan` (`src/utils/assets.ts`) compares the amount strings of wax assets, so 999.999 HIVE passes a 1000 HIVE threshold there and 1000 HIVE does not pass a 900 HIVE one. The threshold is a `hiveio_api.Asset` or its NAI form.
 
 ## Development Flow
 

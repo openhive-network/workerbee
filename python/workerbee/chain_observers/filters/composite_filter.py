@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from .filter_base import FilterBase
 
@@ -28,7 +28,7 @@ class CompositeFilter(FilterBase):
         self.operands = operands
 
     def used_contexts(self) -> list[TRegisterEvaluationContext]:
-        seen: set[Any] = set()
+        seen: set[object] = set()
         result: list[TRegisterEvaluationContext] = []
         for operand in self.operands:
             for ctx in operand.used_contexts():

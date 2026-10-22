@@ -5,14 +5,18 @@ Mirrors src/chain-observers/factories/factory-base.ts.
 
 from __future__ import annotations
 
+import asyncio
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from ..classifiers.collector_classifier_base import CollectorClassifierBase, TRegisterEvaluationContext
-from ..collectors.collector_base import CollectorBase
+from ..classifiers.dynamic_global_properties_classifier import DynamicGlobalPropertiesClassifier
 from .data_evaluation_context import DataEvaluationContext
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Mapping
+
+    from ..classifiers.collector_classifier_base import IEvaluationContextClass, TRegisterEvaluationContext
+    from ..collectors.collector_base import CollectorBase, TCollectorResult
     from ..interfaces import IWorkerBee
     from ..observer_mediator import ObserverMediator
 
@@ -26,11 +30,12 @@ class EClassifierOrigin:
 class FactoryBase:
     def __init__(self, worker: IWorkerBee) -> None:
         self.worker = worker
-        self._collectors: dict[type[CollectorBase], CollectorBase] = {}
-        self._collectors_per_classifier: dict[type[CollectorClassifierBase[Any]], type[CollectorBase]] = {}
+        self._collectors: dict[Callable[..., CollectorBase], CollectorBase] = {}
+        self._collectors_per_classifier: dict[IEvaluationContextClass, Callable[..., CollectorBase]] = {}
         self._current_block_number: int | None = None
         self._timings: dict[str, float] = {}
         self._last_start: float = time.monotonic()
+        self._collector_tasks: set[asyncio.Task[TCollectorResult]] = set()
 
     def get_timings(self) -> dict[str, float]:
         self._timings["total"] = (time.monotonic() - self._last_start) * 1000
@@ -42,26 +47,29 @@ class FactoryBase:
         manager rather than computing elapsed time by hand."""
         self._timings[name] = self._timings.get(name, 0) + timing
 
-    def register_classifier(
+    def register_classifier[**P](
         self,
-        classifier: type[CollectorClassifierBase[Any]],
-        collector_class: type[CollectorBase],
-        *constructor_args: Any,
+        classifier: IEvaluationContextClass,
+        collector_class: Callable[P, CollectorBase],
+        *constructor_args: P.args,
+        **constructor_kwargs: P.kwargs,
     ) -> bool:
+        """Serve ``classifier`` by ``collector_class``, created from the constructor arguments unless it exists.
+
+        Returns whether it replaced another collector of the classifier (as documented in TS, whose code always
+        returns false).
+        """
         existing = self._collectors_per_classifier.get(classifier)
         if existing is collector_class:
             return False
 
-        instance = self._collectors.get(collector_class)
-        if instance is not None:
-            self._collectors_per_classifier[classifier] = collector_class
-            return False
-
         self._collectors_per_classifier[classifier] = collector_class
-        self._collectors[collector_class] = collector_class(*constructor_args)
-        return existing is collector_class
+        # A collector serving several classifiers (e.g. blocks and their headers) is created once and shared.
+        if collector_class not in self._collectors:
+            self._collectors[collector_class] = collector_class(*constructor_args, **constructor_kwargs)
+        return existing is not None
 
-    def unregister_classifier(self, classifier: type[CollectorClassifierBase[Any]]) -> bool:
+    def unregister_classifier(self, classifier: IEvaluationContextClass) -> bool:
         collector_class = self._collectors_per_classifier.get(classifier)
         if collector_class is None:
             return False
@@ -92,59 +100,30 @@ class FactoryBase:
         self,
         classifier: TRegisterEvaluationContext,
         origin: str,
-        stack: list[type[CollectorClassifierBase[Any]]] | None = None,
+        stack: list[IEvaluationContextClass] | None = None,
     ) -> None:
-        if stack is None:
-            stack = []
-
-        classifier_class: type[CollectorClassifierBase[Any]]
-        options: dict[str, Any] | None = None
-
-        if isinstance(classifier, dict):
-            classifier_class = classifier["class"]
-            options = classifier.get("options")
-        else:
-            classifier_class = classifier
-
-        if classifier_class in stack:
-            raise RuntimeError(
-                f"Circular dependency detected in factory {type(self).__name__} "
-                f"for classifier {classifier_class.__name__} (origin: {origin}, "
-                f"stack: {[c.__name__ for c in stack]})",
-            )
-
-        stack.append(classifier_class)
-
-        collector_class = self._collectors_per_classifier.get(classifier_class)
-        if collector_class is None:
-            raise RuntimeError(
-                f'Factory "{type(self).__name__}" does not support classifier '
-                f'"{classifier_class.__name__}" (origin: {origin}, '
-                f"stack: {[c.__name__ for c in stack]})",
-            )
-
-        instance = self._collectors.get(collector_class)
-        if instance is None:
-            raise RuntimeError(
-                f"Internal error: Collector instance not found for classifier {classifier_class.__name__} in factory {type(self).__name__}",
-            )
-
-        instance.register(options)
-
-        for dependency in instance.used_contexts():
-            self.push_classifier(dependency, origin, list(stack))
+        """Register the collector of ``classifier`` (with its options) and, recursively, of its dependencies."""
+        self._walk_classifier(classifier, origin, [] if stack is None else stack, register=True)
 
     def pop_classifier(
         self,
         classifier: TRegisterEvaluationContext,
         origin: str,
-        stack: list[type[CollectorClassifierBase[Any]]] | None = None,
+        stack: list[IEvaluationContextClass] | None = None,
     ) -> None:
-        if stack is None:
-            stack = []
+        """Unregister what :meth:`push_classifier` registered."""
+        self._walk_classifier(classifier, origin, [] if stack is None else stack, register=False)
 
-        classifier_class: type[CollectorClassifierBase[Any]]
-        options: dict[str, Any] | None = None
+    def _walk_classifier(
+        self,
+        classifier: TRegisterEvaluationContext,
+        origin: str,
+        stack: list[IEvaluationContextClass],
+        *,
+        register: bool,
+    ) -> None:
+        classifier_class: IEvaluationContextClass
+        options: Mapping[str, object] | None = None
 
         if isinstance(classifier, dict):
             classifier_class = classifier["class"]
@@ -175,14 +154,16 @@ class FactoryBase:
                 f"Internal error: Collector instance not found for classifier {classifier_class.__name__} in factory {type(self).__name__}",
             )
 
-        instance.unregister(options)
+        if register:
+            instance.register(options)
+        else:
+            instance.unregister(options)
 
+        # A copy of the stack for each dependency - dependencies on the same level are not circular.
         for dependency in instance.used_contexts():
-            self.pop_classifier(dependency, origin, list(stack))
+            self._walk_classifier(dependency, origin, list(stack), register=register)
 
     async def pre_notify(self, context: DataEvaluationContext, mediator: ObserverMediator) -> bool:
-        from ..classifiers.dynamic_global_properties_classifier import DynamicGlobalPropertiesClassifier
-
         dgp = await context.get(DynamicGlobalPropertiesClassifier)
         head_block_number: int = dgp["head_block_number"]
         has_block_number_changed = self._current_block_number != head_block_number
@@ -211,3 +192,20 @@ class FactoryBase:
 
     def collect(self) -> DataEvaluationContext:
         return self._rebuild_data_evaluation_context()
+
+    def track_collector_task(self, task: asyncio.Task[TCollectorResult]) -> None:
+        """Keep a running collector task of a context of this factory - see :meth:`cancel_collector_tasks`."""
+        self._collector_tasks.add(task)
+        task.add_done_callback(self._collector_tasks.discard)
+
+    async def cancel_collector_tasks(self) -> None:
+        """Cancel the collector tasks still running and wait for them.
+
+        ``DataEvaluationContext.get`` shields a collector task from the cancellation of the pipelines awaiting it (they
+        share it), so cancelling the pipelines leaves it running - at teardown it is cancelled here, before the chain
+        it calls is closed.
+        """
+        tasks = list(self._collector_tasks)
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)

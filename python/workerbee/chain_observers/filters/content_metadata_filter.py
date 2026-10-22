@@ -7,14 +7,18 @@ Uses ContentMetadataClassifier + OperationClassifier + ImpactedAccountClassifier
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from .._ordered_set import OrderedSet
+from ..classifiers.content_metadata_classifier import ContentMetadataClassifier
+from ..classifiers.impacted_account_classifier import ImpactedAccountClassifier
+from ..classifiers.operation_classifier import OperationClassifier
 from .filter_base import FilterBase
 
 if TYPE_CHECKING:
     from ..classifiers.collector_classifier_base import TRegisterEvaluationContext
     from ..factories.data_evaluation_context import DataEvaluationContext
+    from ..payloads import ContentMetadata
 
 
 class BlogContentMetadataFilter(FilterBase):
@@ -33,16 +37,9 @@ class BlogContentMetadataFilter(FilterBase):
         self._queried_posts: list[Any] = []
 
     def used_contexts(self) -> list[TRegisterEvaluationContext]:
-        from ..classifiers.content_metadata_classifier import ContentMetadataClassifier
-        from ..classifiers.impacted_account_classifier import ImpactedAccountClassifier
-        from ..classifiers.operation_classifier import OperationClassifier
-
         return [ContentMetadataClassifier, OperationClassifier, ImpactedAccountClassifier]
 
     async def match(self, data: DataEvaluationContext) -> bool:
-        from ..classifiers.content_metadata_classifier import ContentMetadataClassifier
-        from ..classifiers.operation_classifier import OperationClassifier
-
         result = await data.get(OperationClassifier)
         operations_per_type = result["operations_per_type"]
 
@@ -66,12 +63,16 @@ class BlogContentMetadataFilter(FilterBase):
                 query_comments.append(operation)
 
         if len(query_comments) > 0:
-            comments = await data.query(
-                ContentMetadataClassifier,
-                {
-                    "requested_data": query_comments,
-                    "report_after_ms_before_payout": self._report_after_ms_before_payout,
-                },
+            # ContentMetadataCollector.query gives the metadata per author and permlink (TS `queryType`).
+            comments = cast(
+                "dict[str, dict[str, ContentMetadata]]",
+                await data.query(
+                    ContentMetadataClassifier,
+                    {
+                        "requested_data": query_comments,
+                        "report_after_ms_before_payout": self._report_after_ms_before_payout,
+                    },
+                ),
             )
 
             for operation in query_comments:

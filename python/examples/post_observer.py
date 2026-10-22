@@ -52,6 +52,11 @@ voted: set[str] = set()
 posts: dict[str, PostEntry] = {}
 
 
+def _objects(value: object) -> list[dict[str, object]]:
+    """JSON objects of a JSON array (an empty list for anything else)."""
+    return [item for item in value if isinstance(item, dict)] if isinstance(value, list) else []
+
+
 def get_key(op: OperationValue) -> str:
     author = op.get("account") or op.get("author", "")
     permlink = op.get("permlink", "")
@@ -149,9 +154,14 @@ async def main() -> None:
                         posts[key] = {"added": time.time()}
 
                 elif op_type == "comment_options_operation":
-                    for ext in value.get("extensions", []):
-                        for b in ext.get("comment_payout_beneficiaries", {}).get("beneficiaries", []):
-                            if b.get("account") == beneficiary_name and b.get("weight", 0) >= 10000:
+                    for ext in _objects(value.get("extensions")):
+                        # hf26 extension: {"type": "comment_payout_beneficiaries", "value": {"beneficiaries": [...]}}
+                        ext_value = ext.get("value")
+                        if ext.get("type") != "comment_payout_beneficiaries" or not isinstance(ext_value, dict):
+                            continue
+                        for b in _objects(ext_value.get("beneficiaries")):
+                            weight = b.get("weight")
+                            if b.get("account") == beneficiary_name and isinstance(weight, int) and weight >= 10000:
                                 key = get_key(value)
                                 post = posts.get(key)
                                 if post is not None:

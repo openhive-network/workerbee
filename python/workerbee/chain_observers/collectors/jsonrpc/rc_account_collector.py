@@ -2,23 +2,26 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
+from ...classifier_results import RcAccountClassifierData
 from ...classifiers.rc_account_classifier import RcAccountClassifier
+from ..collector_base import TCollectorResult
 from ..set_managed_collector import SetManagedCollector
 
 if TYPE_CHECKING:
     from ...factories.data_evaluation_context import TCollectorEvaluationContext
+    from ...payloads import RcAccountData
 
 
 class RcAccountCollector(SetManagedCollector):
     _options_key = "rc_account"
 
-    async def get(self, data: TCollectorEvaluationContext) -> dict[str, Any]:
+    async def get(self, data: TCollectorEvaluationContext) -> TCollectorResult:
         if not self._tracked:
-            return {RcAccountClassifier.__name__: {"rc_accounts": {}}}
+            return {RcAccountClassifier: RcAccountClassifierData(rc_accounts={})}
 
-        rc_accounts: dict[str, Any] = {}
+        rc_accounts: dict[str, RcAccountData | None] = {}
         for chunk in self._tracked_chunks():
             with data.add_timing("rc_api.find_rc_accounts"):
                 result = await self.worker.chain.api.rc_api.find_rc_accounts(accounts=chunk)
@@ -36,4 +39,4 @@ class RcAccountCollector(SetManagedCollector):
                     },
                 }
 
-        return {RcAccountClassifier.__name__: {"rc_accounts": rc_accounts}}
+        return {RcAccountClassifier: RcAccountClassifierData(rc_accounts=rc_accounts)}

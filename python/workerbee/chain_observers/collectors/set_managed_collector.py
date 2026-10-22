@@ -6,12 +6,13 @@ RcAccountCollector, ChangeRecoveryInProgressCollector, DeclineVotingRightsCollec
 
 from __future__ import annotations
 
-from collections.abc import Iterator
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from .collector_base import CollectorBase
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator, Mapping
+
     from ..interfaces import IWorkerBee
 
 
@@ -25,14 +26,14 @@ class SetManagedCollector(CollectorBase):
         super().__init__(worker)
         self._tracked: dict[str, int] = {}
 
-    def push_options(self, data: Any) -> None:
-        if isinstance(data, dict) and self._options_key in data:
-            key = data[self._options_key]
+    def push_options(self, data: Mapping[str, object]) -> None:
+        key = data.get(self._options_key)
+        if isinstance(key, str):
             self._tracked[key] = self._tracked.get(key, 0) + 1
 
-    def pop_options(self, data: Any) -> None:
-        if isinstance(data, dict) and self._options_key in data:
-            key = data[self._options_key]
+    def pop_options(self, data: Mapping[str, object]) -> None:
+        key = data.get(self._options_key)
+        if isinstance(key, str):
             count = self._tracked.get(key, 1) - 1
             if count <= 0:
                 self._tracked.pop(key, None)

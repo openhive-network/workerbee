@@ -133,9 +133,12 @@ class ObserverMediator:
         providers: Iterable[ProviderBase],
     ) -> None:
         """Register one listener with its filter and provider set."""
-        listener_id = id(listener)
+        registered = self._filters.get(id(listener))
+        if registered is not None:  # registering the observer again replaces its registration
+            self._detach_entry(registered)
+
         providers_list = list(providers)
-        self._filters[listener_id] = _ListenerEntry(listener, filter, providers_list)
+        self._filters[id(listener)] = _ListenerEntry(listener, filter, providers_list)
 
         for classifier in filter.used_contexts():
             self._factory.push_classifier(classifier, EClassifierOrigin.FILTER)
@@ -182,7 +185,8 @@ class ObserverMediator:
         ``async def complete`` runs to completion instead of being scheduled
         best-effort. By default, pending listener pipelines are cancelled after
         listeners are detached, which makes shutdown bounded even if a callback
-        is blocked on a full iterator queue. Historical replay completion passes
+        is blocked on a full iterator queue - and so are the collectors they
+        started (still running against the chain). Historical replay completion passes
         ``cancel_pending=False`` so notifications already scheduled for the last
         replayed block are delivered before ``complete`` fires.
         """
@@ -192,8 +196,10 @@ class ObserverMediator:
         for entry in list(self._filters.values()):
             self._detach_entry(entry)
             if entry.listener.complete is not None:
-                with contextlib.suppress(Exception):
+                try:
                     await _invoke(entry.listener.complete)
+                except Exception as error:  # noqa: BLE001 - a failing callback must not stop the teardown of the others.
+                    _report_complete_error(error)
 
         if cancel_pending:
             for task in list(self._listener_tasks):
@@ -201,6 +207,7 @@ class ObserverMediator:
                     task.cancel()
 
             await self.drain()
+            await self._factory.cancel_collector_tasks()
 
         if self._detached_complete_tasks:
             await asyncio.gather(*list(self._detached_complete_tasks), return_exceptions=True)
@@ -245,16 +252,39 @@ def _invoke_detached(cb: Callable[..., object], *args: object) -> asyncio.Task[o
     Used for the ``complete`` teardown callback on the synchronous unregister
     path (``Subscription.close()`` -> ``unregister_listener``), which cannot
     await, so an ``async def complete`` is scheduled best-effort. The async
-    teardown path (``aclose_all_listeners``) awaits it instead. Errors are
-    swallowed.
+    teardown path (``aclose_all_listeners``) awaits it instead. Errors go to the
+    exception handler of the event loop.
     """
-    with contextlib.suppress(Exception):
+    try:
         result = cb(*args)
-        if inspect.isawaitable(result):
-            task = asyncio.create_task(_await_detached(result))
-            task.add_done_callback(_consume_task_result)
-            return task
-    return None
+    except Exception as error:  # noqa: BLE001 - reported, the listener is unregistered anyway.
+        _report_complete_error(error)
+        return None
+    if not inspect.isawaitable(result):
+        return None
+    task = asyncio.create_task(_await_detached(result))
+    task.add_done_callback(_report_complete_task_error)
+    return task
+
+
+def _report_complete_error(error: BaseException) -> None:
+    """Pass an error of a ``complete`` callback to the exception handler of the event loop.
+
+    Without a running loop (a synchronous unsubscription outside of asyncio) the error propagates to the caller.
+    """
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        raise error from None
+    loop.call_exception_handler({"message": "Unhandled WorkerBee observer complete callback error", "exception": error})
+
+
+def _report_complete_task_error(task: asyncio.Task[object]) -> None:
+    if task.cancelled():
+        return
+    error = task.exception()
+    if error is not None:
+        _report_complete_error(error)
 
 
 async def _dispatch_error(entry: _ListenerEntry, error: BaseException) -> bool:

@@ -10,6 +10,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from ..classifiers.feed_price_classifier import FeedPriceClassifier
 from .filter_base import FilterBase
 
 if TYPE_CHECKING:
@@ -24,13 +25,9 @@ class FeedPriceChangeFilter(FilterBase):
         self._previous_update_timestamp: datetime | None = None
 
     def used_contexts(self) -> list[TRegisterEvaluationContext]:
-        from ..classifiers.feed_price_classifier import FeedPriceClassifier
-
         return [FeedPriceClassifier]
 
     async def match(self, data: DataEvaluationContext) -> bool:
-        from ..classifiers.feed_price_classifier import FeedPriceClassifier
-
         result = await data.get(FeedPriceClassifier)
         price_history = result["price_history"]
         last_timestamp = result["last_feed_price_retrieval_timestamp"]

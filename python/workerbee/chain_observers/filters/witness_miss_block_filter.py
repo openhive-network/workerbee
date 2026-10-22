@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from .._ordered_set import OrderedSet
+from ..classifiers.witness_classifier import WitnessClassifier
 from .filter_base import FilterBase
 
 if TYPE_CHECKING:
@@ -26,8 +27,6 @@ class WitnessMissedBlocksFilter(FilterBase):
         self._previous_last_block_number: int | None = None
 
     def used_contexts(self) -> list[TRegisterEvaluationContext]:
-        from ..classifiers.witness_classifier import WitnessClassifier
-
         classifiers: list[TRegisterEvaluationContext] = []
         for witness in self._witnesses:
             classifiers.append(WitnessClassifier.for_options({"witness": witness}))
@@ -35,8 +34,6 @@ class WitnessMissedBlocksFilter(FilterBase):
         return classifiers
 
     async def match(self, data: DataEvaluationContext) -> bool:
-        from ..classifiers.witness_classifier import WitnessClassifier
-
         result = await data.get(WitnessClassifier)
         witnesses = result["witnesses"]
 

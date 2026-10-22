@@ -3,6 +3,9 @@
 Mirrors src/queen.ts. Each on*() method pushes a filter operand and
 (usually) a corresponding provider. subscribe() commits the filter
 chain via LogicalAnd/Or composites and registers with the mediator.
+
+The on*()/provide*() methods import their filters and providers, so only the
+ones a bot uses are loaded (``filters``/``providers`` load their modules lazily).
 """
 
 from __future__ import annotations
@@ -11,8 +14,9 @@ import asyncio
 import inspect
 from collections.abc import Mapping
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
+from .classifiers.collector_classifier_base import CollectorClassifierBase
 from .filters.blank_filter import BlankFilter
 from .filters.composite_filter import LogicalAndFilter, LogicalOrFilter
 from .filters.filter_base import FilterBase
@@ -23,6 +27,8 @@ from .utils import _validate_max_queue_size, calculate_relative_time
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Awaitable, Callable
+
+    from hiveio_api import Asset
 
     from .classifiers.collector_classifier_base import TRegisterEvaluationContext
     from .enums import ManabarType
@@ -411,13 +417,21 @@ class QueenBee:
         self._push_operand(FeedPriceNoChangeFilter(last_hours_count))
         return self
 
-    def on_whale_alert(self, asset: Any) -> QueenBee:
-        """Match transfers greater than the supplied asset threshold."""
+    def on_whale_alert(self, asset: Asset | Mapping[str, object]) -> QueenBee:
+        """Match transfers greater than ``asset`` (of its kind, e.g. ``Asset.hive.tokens(1000)`` or its NAI form).
+
+        Amounts are compared as numbers - TS compares their strings (see ``is_asset_greater_than``).
+        """
+        from hiveio_api import Asset
+
         from .filters.whale_alert_filter import WhaleAlertFilter
         from .providers.whale_alert_provider import WhaleAlertProvider
 
-        self._push_operand(WhaleAlertFilter(asset))
-        self._push_provider(WhaleAlertProvider, {"assets": [asset]})
+        threshold = Asset.from_asset_like(asset)
+        if threshold is None:
+            raise TypeError(f"The threshold of whale alerts has to be an asset, not {asset!r}")
+        self._push_operand(WhaleAlertFilter(threshold))
+        self._push_provider(WhaleAlertProvider, {"assets": [threshold]})
         return self
 
     def on_exchange_transfer(self) -> QueenBee:
@@ -610,7 +624,6 @@ class QueenBee:
         filter_fn: Callable[..., bool | Awaitable[bool]],
     ) -> QueenBee:
         """Run ``provider_fn`` before ``filter_fn`` and expose its data if matched."""
-        from .classifiers.collector_classifier_base import CollectorClassifierBase
 
         class _InlineClassifier(CollectorClassifierBase[object]):
             pass
@@ -628,10 +641,9 @@ class QueenBee:
                 return bool(result)
 
         class _PipedProvider(ProviderBase):
-            async def provide(self, data: DataEvaluationContext) -> dict[str, object]:
-                store = data.access_store(_InlineClassifier)
-                result: dict[str, object] = store.get("piped_data", {})
-                return result
+            async def provide(self, data: DataEvaluationContext) -> Mapping[str, object]:
+                piped_data = data.access_store(_InlineClassifier).get("piped_data")
+                return piped_data if isinstance(piped_data, Mapping) else {}
 
         self._push_operand(_PipedFilter())
         self._push_provider(_PipedProvider)

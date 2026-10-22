@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from ..classifiers.operation_classifier import OperationClassifier
 from .filter_base import FilterBase
 
 if TYPE_CHECKING:
@@ -19,13 +20,9 @@ if TYPE_CHECKING:
 
 class InternalMarketFilter(FilterBase):
     def used_contexts(self) -> list[TRegisterEvaluationContext]:
-        from ..classifiers.operation_classifier import OperationClassifier
-
         return [OperationClassifier]
 
     async def match(self, data: DataEvaluationContext) -> bool:
-        from ..classifiers.operation_classifier import OperationClassifier
-
         result = await data.get(OperationClassifier)
         operations_per_type = result["operations_per_type"]
 

@@ -164,7 +164,7 @@ Full port of the TypeScript WorkerBee library to Python, maintaining identical a
 
 **Runtime:** Python 3.12+, async/await throughout
 
-**Dependency:** `hiveio-wax>=2.0.2`
+**Dependency:** `hiveio-wax` - a development build of hive/wax!682, pinned in `python/pyproject.toml`; chain models are dataclasses of `hiveio_api` (assets `Asset`, dates `HiveDateTime`), operation bodies stay JSON objects as in TS
 
 **Conventions:**
 - `snake_case` methods/params (Pythonic; TS API translated): `used_contexts`, `push_options`, `has_registered`, `on_block` (TS `onBlock`)

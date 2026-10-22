@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from ..classifiers.operation_classifier import OperationClassifier
 from ..utils import is_exchange
 from .filter_base import FilterBase
 
@@ -19,13 +20,9 @@ if TYPE_CHECKING:
 
 class ExchangeTransferFilter(FilterBase):
     def used_contexts(self) -> list[TRegisterEvaluationContext]:
-        from ..classifiers.operation_classifier import OperationClassifier
-
         return [OperationClassifier]
 
     async def match(self, data: DataEvaluationContext) -> bool:
-        from ..classifiers.operation_classifier import OperationClassifier
-
         operations = await data.get(OperationClassifier)
         ops = operations["operations_per_type"]
 

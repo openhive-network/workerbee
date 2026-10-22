@@ -9,25 +9,24 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+from ...classifier_results import ManabarClassifierData
 from ...classifiers.account_classifier import AccountClassifier
 from ...classifiers.collector_classifier_base import TRegisterEvaluationContext
 from ...classifiers.dynamic_global_properties_classifier import DynamicGlobalPropertiesClassifier
 from ...classifiers.manabar_classifier import ManabarClassifier
 from ...classifiers.rc_account_classifier import RcAccountClassifier
 from ...enums import ManabarType
-from ..collector_base import CollectorBase
+from ..collector_base import CollectorBase, TCollectorResult
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from ...factories.data_evaluation_context import TCollectorEvaluationContext
     from ...interfaces import IWorkerBee
+    from ...payloads import ManabarValue
 
 PERCENT_VALUE_DOUBLE_PRECISION = 100
 ONE_HUNDRED_PERCENT = 100 * PERCENT_VALUE_DOUBLE_PRECISION
-
-ManabarOptions = dict[str, str | int]
-ManabarEntry = dict[str, int | float | datetime]
-ManabarPerAccount = dict[int, ManabarEntry]
-ManabarResult = dict[str, ManabarPerAccount]
 
 
 class ManabarCollector(CollectorBase):
@@ -46,17 +45,15 @@ class ManabarCollector(CollectorBase):
             return self._rc_accounts
         raise ValueError(f"Unsupported manabar type: {manabar_type}")
 
-    def push_options(self, data: ManabarOptions) -> None:
-        account = str(data.get("account", ""))
-        manabar_type = int(data.get("manabar_type", -1))
+    def push_options(self, data: Mapping[str, object]) -> None:
+        account, manabar_type = _account_and_manabar_type(data)
         if not account:
             raise ValueError("account must not be empty")
         container = self._select_container(manabar_type)
         container[account] = container.get(account, 0) + 1
 
-    def pop_options(self, data: ManabarOptions) -> None:
-        account = str(data.get("account", ""))
-        manabar_type = int(data.get("manabar_type", -1))
+    def pop_options(self, data: Mapping[str, object]) -> None:
+        account, manabar_type = _account_and_manabar_type(data)
         if not account:
             return
         container = self._select_container(manabar_type)
@@ -76,12 +73,12 @@ class ManabarCollector(CollectorBase):
             classifiers.append(RcAccountClassifier.for_options({"rc_account": rc_account}))
         return classifiers
 
-    async def get(self, data: TCollectorEvaluationContext) -> dict[str, object]:
+    async def get(self, data: TCollectorEvaluationContext) -> TCollectorResult:
         dgp = await data.get(DynamicGlobalPropertiesClassifier)
         head_block_time: datetime = dgp["head_block_time"]
-        downvote_pool_percent: int = dgp.get("downvote_pool_percent", 0)
+        downvote_pool_percent = dgp["downvote_pool_percent"]
 
-        manabar_data: ManabarResult = {}
+        manabar_data: dict[str, dict[int, ManabarValue]] = {}
 
         if self._rc_accounts:
             rc_data = await data.get(RcAccountClassifier)
@@ -100,9 +97,9 @@ class ManabarCollector(CollectorBase):
                 manabar_data[account][ManabarType.RC] = self._calculate(
                     data,
                     head_block_time,
-                    max_mana=_get_int(rc_manabar, "max_rc", "max_mana"),
-                    current_mana=_get_int(rc_manabar, "current_mana"),
-                    last_update_time=_get_int(rc_manabar, "last_update_time"),
+                    max_mana=int(rc_manabar["max_rc"]),
+                    current_mana=int(rc_manabar["current_mana"]),
+                    last_update_time=rc_manabar["last_update_time"],
                 )
 
         if self._upvote_accounts or self._downvote_accounts:
@@ -122,9 +119,9 @@ class ManabarCollector(CollectorBase):
                 manabar_data[account][ManabarType.UPVOTE] = self._calculate(
                     data,
                     head_block_time,
-                    max_mana=_get_int(upvote_manabar, "max_mana", "max"),
-                    current_mana=_get_int(upvote_manabar, "current_mana"),
-                    last_update_time=_get_int(upvote_manabar, "last_update_time"),
+                    max_mana=int(upvote_manabar["max"]),
+                    current_mana=int(upvote_manabar["current_mana"]),
+                    last_update_time=upvote_manabar["last_update_time"],
                 )
 
             for account in self._downvote_accounts:
@@ -139,7 +136,7 @@ class ManabarCollector(CollectorBase):
                 upvote_manabar = acc_info["upvote_manabar"]
                 downvote_manabar = acc_info["downvote_manabar"]
 
-                upvote_max = _get_int(upvote_manabar, "max_mana", "max")
+                upvote_max = int(upvote_manabar["max"])
                 if upvote_max // ONE_HUNDRED_PERCENT > ONE_HUNDRED_PERCENT:
                     effective_max = (upvote_max // ONE_HUNDRED_PERCENT) * downvote_pool_percent
                 else:
@@ -149,11 +146,11 @@ class ManabarCollector(CollectorBase):
                     data,
                     head_block_time,
                     max_mana=effective_max,
-                    current_mana=_get_int(downvote_manabar, "current_mana"),
-                    last_update_time=_get_int(downvote_manabar, "last_update_time"),
+                    current_mana=int(downvote_manabar["current_mana"]),
+                    last_update_time=downvote_manabar["last_update_time"],
                 )
 
-        return {ManabarClassifier.__name__: {"manabar_data": manabar_data}}
+        return {ManabarClassifier: ManabarClassifierData(manabar_data=manabar_data)}
 
     def _calculate(
         self,
@@ -162,7 +159,7 @@ class ManabarCollector(CollectorBase):
         max_mana: int,
         current_mana: int,
         last_update_time: int,
-    ) -> ManabarEntry:
+    ) -> ManabarValue:
         with data.add_timing("calculate_current_manabar_value"):
             result = self.worker.chain.calculate_current_manabar_value(
                 head_block_time,
@@ -175,35 +172,22 @@ class ManabarCollector(CollectorBase):
             "current_mana": result.current_mana,
             "max": result.max_mana,
             "percent": float(result.percent),
-            "last_update_time": _source_last_update_time(head_block_time, last_update_time),
+            "last_update_time": datetime.fromtimestamp(last_update_time, UTC),
         }
 
 
-def _zero_entry(head_block_time: datetime) -> ManabarEntry:
+def _account_and_manabar_type(data: Mapping[str, object]) -> tuple[str, int]:
+    account = data.get("account", "")
+    manabar_type = data.get("manabar_type", -1)
+    if not isinstance(account, str) or not isinstance(manabar_type, int):
+        raise TypeError(f"Manabar options need an account name and a manabar type, not: {dict(data)}")
+    return account, manabar_type
+
+
+def _zero_entry(head_block_time: datetime) -> ManabarValue:
     return {
         "current_mana": 0,
         "max": 0,
         "percent": 0.0,
         "last_update_time": head_block_time,
     }
-
-
-def _source_last_update_time(head_block_time: datetime, last_update_time: int) -> datetime:
-    source_time = datetime.fromtimestamp(last_update_time, UTC)
-    if head_block_time.tzinfo is None:
-        return source_time.replace(tzinfo=None)
-    return source_time.astimezone(head_block_time.tzinfo)
-
-
-def _get_int(obj: object, *keys: str) -> int:
-    if not isinstance(obj, dict):
-        for key in keys:
-            val = getattr(obj, key, None)
-            if val is not None:
-                return int(val)
-        return 0
-    for key in keys:
-        val = obj.get(key)
-        if val is not None:
-            return int(val)
-    return 0

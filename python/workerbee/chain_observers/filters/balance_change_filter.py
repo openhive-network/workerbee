@@ -7,14 +7,16 @@ Uses AccountClassifier.for_options.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from .._ordered_set import OrderedSet
+from ..classifiers.account_classifier import AccountClassifier
 from .filter_base import FilterBase
 
 if TYPE_CHECKING:
     from ..classifiers.collector_classifier_base import TRegisterEvaluationContext
     from ..factories.data_evaluation_context import DataEvaluationContext
+    from ..payloads import AccountBalance
 
 
 class BalanceChangeFilter(FilterBase):
@@ -26,33 +28,24 @@ class BalanceChangeFilter(FilterBase):
         super().__init__()
         self._include_internal_transfers = include_internal_transfers
         self._accounts: OrderedSet[str] = OrderedSet(accounts)
-        self._previous_balance_by_account: dict[str, Any] = {}
+        self._previous_balance_by_account: dict[str, AccountBalance] = {}
 
     def used_contexts(self) -> list[TRegisterEvaluationContext]:
-        from ..classifiers.account_classifier import AccountClassifier
-
         classifiers: list[TRegisterEvaluationContext] = []
         for account in self._accounts:
             classifiers.append(AccountClassifier.for_options({"account": account}))
 
         return classifiers
 
-    def _parse_internal_transfers(self, account_name: str, balance: Any) -> bool:
+    def _parse_internal_transfers(self, account_name: str, balance: AccountBalance) -> bool:
         prev = self._previous_balance_by_account.get(account_name)
         if prev is None:
             raise RuntimeError("Cannot parse internal transfers before storing a previous balance")
-        for asset_key in prev:
-            for type_key in prev[asset_key]:
-                if prev[asset_key][type_key].amount != balance[asset_key][type_key].amount:
-                    self._previous_balance_by_account[account_name] = balance
-                    return True
-
         self._previous_balance_by_account[account_name] = balance
-        return False
+        # Any asset of any bucket (liquid, savings, unclaimed, ...) changed.
+        return _assets(prev) != _assets(balance)
 
     async def match(self, data: DataEvaluationContext) -> bool:
-        from ..classifiers.account_classifier import AccountClassifier
-
         result = await data.get(AccountClassifier)
         accounts = result["accounts"]
 
@@ -82,3 +75,7 @@ class BalanceChangeFilter(FilterBase):
                 return True
 
         return False
+
+
+def _assets(balance: AccountBalance) -> list[object]:
+    return [asset for detailed_balance in (balance["HBD"], balance["HIVE"], balance["HP"]) for asset in detailed_balance.values()]
