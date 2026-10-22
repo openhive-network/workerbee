@@ -330,10 +330,9 @@ async def test_market_movement_detector_on_mirrornet(mirrornet_replay: Mirrornet
         ),
     )
 
+    # Unlike TS (which compares the amount strings), no transfer of these blocks is a whale above the threshold.
     assert result == [
-        "Whale Alert: huobi-pro -> huobi-withdrawal - 1598290",
         "Exchange Transfer: huobi-pro -> huobi-withdrawal - 1598290",
-        "Whale Alert: aerrilee -> checkyzk - 2",
         "Internal Market Operation: daverick - 1751626472",
     ]
 
@@ -372,9 +371,8 @@ async def test_market_trend_analyzer_on_mirrornet(mirrornet_replay: MirrornetRep
         ),
     )
 
+    # Unlike TS (which compares the amount strings), no transfer of these blocks is a whale above the threshold.
     assert result == [
-        "Whale Alert: huobi-pro -> huobi-withdrawal - 1598290",
-        "Whale Alert: aerrilee -> checkyzk - 2",
         "Internal Market: daverick - 1751626472",
     ]
 
@@ -447,12 +445,10 @@ async def test_economic_activity_tracker_on_mirrornet(mirrornet_replay: Mirrorne
         ),
     )
 
+    # Unlike TS (which compares the amount strings), no transfer of these blocks is a whale above the threshold.
     assert result == [
-        "Whale: honey-swap -> hive-engine - 403",
-        "Whale: honey-swap -> luluwinda - 53308",
         "Market: honeybot - 243293707",
         "Market: honeybot - 1485200410",
-        "Whale: mxchive -> inhivepool - 23890",
         "Exchange: mxchive -> inhivepool - 23890",
     ]
 

@@ -11,6 +11,7 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, cast
 
 import pytest
+from wax import WaxChainOptions, create_hive_chain
 
 from workerbee.chain_observers.bot import WorkerBee, _AsyncBlockIterator
 from workerbee.chain_observers.errors import WorkerBeeError
@@ -215,28 +216,15 @@ class TestAclose:
 
     @pytest.mark.asyncio
     async def test_aclose_does_not_close_already_extended_external_chain(self) -> None:
-        class ExtendedChain:
-            def __init__(self) -> None:
-                self.api = SimpleNamespace(block_api=object())
-                self.extends_calls = 0
-                self.close_calls = 0
+        # Constructing the chain does not open a connection.
+        chain = create_hive_chain(WaxChainOptions(endpoint_url="http://localhost:8090")).extends(WorkerBeeApiCollection)
+        bot = WorkerBee(chain)
 
-            def extends(self, api_collection: object) -> object:
-                self.extends_calls += 1
-                raise AssertionError("already-extended chains must not be extended again")
-
-            async def aclose(self) -> None:
-                self.close_calls += 1
-
-        chain = ExtendedChain()
-        bot = WorkerBee(cast("IHiveChainInterface", chain))
-
-        assert cast("object", bot.chain) is chain
-        assert chain.extends_calls == 0
+        assert bot.chain is chain
+        assert bot._owned_chain is None
 
         await bot.aclose()
-
-        assert chain.close_calls == 0
+        await chain.aclose()
 
 
 # ---------------------------------------------------------------------------

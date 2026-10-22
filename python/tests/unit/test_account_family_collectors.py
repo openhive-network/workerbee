@@ -10,9 +10,11 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from contextlib import contextmanager
+from datetime import UTC, datetime
 from typing import Any
 
 import pytest
+from hiveio_api import Asset, HiveDateTime
 
 from workerbee.chain_observers.classifiers.account_classifier import AccountClassifier
 from workerbee.chain_observers.classifiers.collector_classifier_base import TRegisterEvaluationContext
@@ -66,7 +68,7 @@ class TestAccountCollector:
         collector.register({"account": "alice"})
 
         result = await collector.get(_TimingCtx())
-        accounts = result[AccountClassifier.__name__]["accounts"]
+        accounts = result[AccountClassifier]["accounts"]
 
         assert "alice" in accounts
         acc = accounts["alice"]
@@ -85,20 +87,19 @@ class TestAccountCollector:
 
     @pytest.mark.asyncio
     async def test_total_balances_sum_the_same_components_as_typescript(self, mock_worker: FakeWorker) -> None:
-        base = build_account("alice")
         account = build_account(
             "alice",
-            hbd_balance=type(base.hbd_balance)(amount="100", precision=3, nai="@@000000013"),
-            reward_hbd_balance=type(base.reward_hbd_balance)(amount="7", precision=3, nai="@@000000013"),
-            savings_hbd_balance=type(base.savings_hbd_balance)(amount="11", precision=3, nai="@@000000013"),
-            balance=type(base.balance)(amount="200", precision=3, nai="@@000000021"),
-            reward_hive_balance=type(base.reward_hive_balance)(amount="8", precision=3, nai="@@000000021"),
-            savings_balance=type(base.savings_balance)(amount="9", precision=3, nai="@@000000021"),
-            vesting_shares=type(base.vesting_shares)(amount="300", precision=6, nai="@@000000037"),
-            reward_vesting_balance=type(base.reward_vesting_balance)(amount="10", precision=6, nai="@@000000037"),
-            delegated_vesting_shares=type(base.delegated_vesting_shares)(amount="11", precision=6, nai="@@000000037"),
-            received_vesting_shares=type(base.received_vesting_shares)(amount="12", precision=6, nai="@@000000037"),
-            vesting_withdraw_rate=type(base.vesting_withdraw_rate)(amount="13", precision=6, nai="@@000000037"),
+            hbd_balance=Asset.hbd.satoshi(100),
+            reward_hbd_balance=Asset.hbd.satoshi(7),
+            savings_hbd_balance=Asset.hbd.satoshi(11),
+            balance=Asset.hive.satoshi(200),
+            reward_hive_balance=Asset.hive.satoshi(8),
+            savings_balance=Asset.hive.satoshi(9),
+            vesting_shares=Asset.vests.satoshi(300),
+            reward_vesting_balance=Asset.vests.satoshi(10),
+            delegated_vesting_shares=Asset.vests.satoshi(11),
+            received_vesting_shares=Asset.vests.satoshi(12),
+            vesting_withdraw_rate=Asset.vests.satoshi(13),
         )
 
         async def find_accounts(**kwargs: object) -> object:
@@ -109,12 +110,12 @@ class TestAccountCollector:
         collector.register({"account": "alice"})
 
         result = await collector.get(_TimingCtx())
-        balance = result[AccountClassifier.__name__]["accounts"]["alice"]["balance"]
+        balance = result[AccountClassifier]["accounts"]["alice"]["balance"]
 
-        assert balance["HBD"]["savings"].amount == "11"
-        assert balance["HBD"]["total"].amount == "107"
-        assert balance["HIVE"]["total"].amount == "217"
-        assert balance["HP"]["total"].amount == "346"
+        assert balance["HBD"]["savings"] == Asset.hbd.satoshi(11)
+        assert balance["HBD"]["total"] == Asset.hbd.satoshi(107)
+        assert balance["HIVE"]["total"] == Asset.hive.satoshi(217)
+        assert balance["HP"]["total"] == Asset.vests.satoshi(346)
 
     @pytest.mark.asyncio
     async def test_account_metadata_is_parsed_like_typescript_with_empty_object_fallback(self, mock_worker: FakeWorker) -> None:
@@ -132,16 +133,40 @@ class TestAccountCollector:
         collector.register({"account": "alice"})
 
         result = await collector.get(_TimingCtx())
-        account_data = result[AccountClassifier.__name__]["accounts"]["alice"]
+        account_data = result[AccountClassifier]["accounts"]["alice"]
 
         assert account_data["json_metadata"] == {"profile": {"name": "Alice"}}
         assert account_data["posting_json_metadata"] == {}
 
     @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("expiration", "expected"),
+        [
+            pytest.param(HiveDateTime.fromtimestamp(0), None, id="epoch-no-governance-vote"),
+            pytest.param(HiveDateTime("2099-01-01T00:00:00"), datetime(2099, 1, 1, tzinfo=UTC), id="date"),
+        ],
+    )
+    async def test_governance_vote_expiration_of_epoch_is_none_like_typescript(
+        self, mock_worker: FakeWorker, expiration: HiveDateTime, expected: datetime | None
+    ) -> None:
+        account = build_account("alice", governance_vote_expiration_ts=expiration)
+
+        async def find_accounts(**kwargs: object) -> object:
+            return find_accounts_response(account)
+
+        mock_worker.chain.api.database_api.find_accounts = find_accounts
+        collector = AccountCollector(worker=mock_worker)
+        collector.register({"account": "alice"})
+
+        result = await collector.get(_TimingCtx())
+
+        assert result[AccountClassifier]["accounts"]["alice"]["governance_vote_expiration"] == expected
+
+    @pytest.mark.asyncio
     async def test_empty_when_untracked(self, mock_worker: FakeWorker) -> None:
         collector = AccountCollector(worker=mock_worker)
         result = await collector.get(_TimingCtx())
-        assert result[AccountClassifier.__name__]["accounts"] == {}
+        assert result[AccountClassifier]["accounts"] == {}
 
     @pytest.mark.asyncio
     async def test_provider_selects_tracked_account(self, mock_worker: FakeWorker) -> None:
@@ -151,7 +176,7 @@ class TestAccountCollector:
 
         provider = AccountProvider()
         provider.push_options({"accounts": ["alice"]})
-        out = await provider.provide(_ClassifierCtx(AccountClassifier, collected[AccountClassifier.__name__]))
+        out = await provider.provide(_ClassifierCtx(AccountClassifier, collected[AccountClassifier]))
 
         assert out["accounts"]["alice"]["name"] == "alice"
 
@@ -200,7 +225,7 @@ class TestWitnessCollector:
         collector.register({"witness": "witness-a"})
 
         result = await collector.get(_TimingCtx())
-        witnesses = result[WitnessClassifier.__name__]["witnesses"]
+        witnesses = result[WitnessClassifier]["witnesses"]
 
         assert "witness-a" in witnesses
         w = witnesses["witness-a"]
@@ -216,7 +241,7 @@ class TestWitnessCollector:
 
         provider = WitnessProvider()
         provider.push_options({"accounts": ["witness-a"]})
-        out = await provider.provide(_ClassifierCtx(WitnessClassifier, collected[WitnessClassifier.__name__]))
+        out = await provider.provide(_ClassifierCtx(WitnessClassifier, collected[WitnessClassifier]))
 
         assert out["witnesses"]["witness-a"]["owner"] == "witness-a"
 
@@ -249,7 +274,7 @@ class TestRcAccountCollector:
         collector.register({"rc_account": "alice"})
 
         result = await collector.get(_TimingCtx())
-        rc_accounts = result[RcAccountClassifier.__name__]["rc_accounts"]
+        rc_accounts = result[RcAccountClassifier]["rc_accounts"]
 
         assert "alice" in rc_accounts
         rc = rc_accounts["alice"]
@@ -265,7 +290,7 @@ class TestRcAccountCollector:
 
         provider = RcAccountProvider()
         provider.push_options({"accounts": ["alice"]})
-        out = await provider.provide(_ClassifierCtx(RcAccountClassifier, collected[RcAccountClassifier.__name__]))
+        out = await provider.provide(_ClassifierCtx(RcAccountClassifier, collected[RcAccountClassifier]))
 
         assert out["rc_accounts"]["alice"]["name"] == "alice"
 

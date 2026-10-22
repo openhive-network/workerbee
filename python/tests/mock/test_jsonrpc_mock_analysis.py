@@ -85,15 +85,15 @@ async def test_complete_account_analysis(js_jsonrpc_mock_chain: IHiveChainInterf
     assert account is not None
     assert rc_account is not None
     assert account["name"] == "gtg"
-    assert account["balance"]["HBD"]["savings"].amount == "3468"
+    assert account["balance"]["HBD"]["savings"].amount == 3468
     assert rc_account["rc_manabar"]["current_mana"] == 2152098568737624
     rc_manabar = note["manabar_data"]["gtg"][ManabarType.RC]
     assert rc_manabar["current_mana"] == rc_account["rc_manabar"]["current_mana"]
     assert 0 <= rc_manabar["percent"] <= 100
     assert note["manabar_data"]["gtg"][ManabarType.UPVOTE]["current_mana"] == 18469160006473
     assert note["block"]["number"] == 97477291
-    assert note["feed_price"]["price_history"][0].base.amount == "280"
-    assert note["feed_price"]["price_history"][0].quote.amount == "1000"
+    assert note["feed_price"]["price_history"][0].base.amount == 280
+    assert note["feed_price"]["price_history"][0].quote.amount == 1000
 
 
 @pytest.mark.asyncio

@@ -83,9 +83,9 @@ class FakeDataEvaluationContext:
             self.timings.append((name, 0.0))
 
 
-HEAD_TIME = datetime(2024, 6, 15, 12, 0, 0)
+HEAD_TIME = datetime(2024, 6, 15, 12, 0, 0, tzinfo=UTC)
 SOURCE_LAST_UPDATE = 1_700_000_000
-SOURCE_LAST_UPDATE_TIME = datetime.fromtimestamp(SOURCE_LAST_UPDATE, UTC).replace(tzinfo=None)
+SOURCE_LAST_UPDATE_TIME = datetime.fromtimestamp(SOURCE_LAST_UPDATE, UTC)
 
 
 def dynamic_global_properties_data(downvote_pool_percent: int = 25) -> dict[str, object]:
@@ -108,7 +108,7 @@ def account_manabar_data(
         "name": name,
         "upvote_manabar": {
             "current_mana": upvote_current,
-            "max_mana": upvote_max,
+            "max": upvote_max,
             "last_update_time": upvote_last_update,
         },
         "downvote_manabar": {
@@ -160,7 +160,7 @@ def manabar_context(
 
 def _manabar_data(result: dict[str, object]) -> dict[str, object]:
     """Extract the manabar_data sub-dict from a collector get() result."""
-    return result[ManabarClassifier.__name__]["manabar_data"]
+    return result[ManabarClassifier]["manabar_data"]
 
 
 def _manabar_entry(result: dict[str, object], account: str, manabar_type: ManabarType) -> dict[str, object]:
@@ -485,8 +485,8 @@ class TestManabarCollectorResultShape:
 
         result = await collector.get(ctx)
 
-        assert ManabarClassifier.__name__ in result
-        assert "manabar_data" in result[ManabarClassifier.__name__]
+        assert ManabarClassifier in result
+        assert "manabar_data" in result[ManabarClassifier]
 
         entry = _manabar_entry(result, "alice", ManabarType.UPVOTE)
         assert "percent" in entry

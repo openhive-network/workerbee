@@ -11,6 +11,7 @@ import pytest
 from workerbee.chain_observers.classifiers.dynamic_global_properties_classifier import (
     DynamicGlobalPropertiesClassifier,
 )
+from workerbee.chain_observers.classifiers.feed_price_classifier import FeedPriceClassifier
 from workerbee.chain_observers.collectors.jsonrpc.feed_price_collector import (
     FeedPriceCollector,
     _is_divisible_by_in_range,
@@ -100,7 +101,7 @@ class TestFeedPriceCollectorCaching:
 
         result = await collector.get(dec)
         assert worker.chain.call_count == 1
-        assert "FeedPriceClassifier" in result
+        assert FeedPriceClassifier in result
 
     @pytest.mark.asyncio
     async def test_same_block_returns_cached(self) -> None:
@@ -198,8 +199,8 @@ class TestFeedPriceCollectorCaching:
         second = await collector.get(dec)
 
         assert worker.chain.call_count == 1
-        feed_first = first["FeedPriceClassifier"]
-        feed_second = second["FeedPriceClassifier"]
+        feed_first = first[FeedPriceClassifier]
+        feed_second = second[FeedPriceClassifier]
         assert feed_first["current_median_history"] == feed_second["current_median_history"]
         assert feed_first["price_history"] == feed_second["price_history"]
 

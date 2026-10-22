@@ -11,6 +11,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 import pytest
+from hiveio_api import Asset
 
 from workerbee.chain_observers.classifiers.block_classifier import BlockClassifier
 from workerbee.chain_observers.classifiers.block_header_classifier import BlockHeaderClassifier
@@ -46,7 +47,7 @@ def _block_header_data(
 ) -> dict[str, Any]:
     """Return the dict that BlockHeaderCollector normally produces."""
     return {
-        BlockHeaderClassifier.__name__: {
+        BlockHeaderClassifier: {
             "number": number,
             "witness": witness,
             "timestamp": timestamp,
@@ -61,7 +62,7 @@ def _block_data(
 ) -> dict[str, Any]:
     """Return the dict that BlockCollector normally produces."""
     return {
-        BlockClassifier.__name__: {
+        BlockClassifier: {
             "transactions": transactions or [],
             "transactions_per_id": transactions_per_id or {},
         },
@@ -74,7 +75,7 @@ def _operation_data(ops_per_type: OperationsPerType) -> dict[str, Any]:
     for _type_name, entries in ops_per_type.items():
         all_ops.extend(entries)
     return {
-        OperationClassifier.__name__: {
+        OperationClassifier: {
             "operations": all_ops,
             "operations_per_type": ops_per_type,
         },
@@ -126,8 +127,9 @@ def _custom_json_op(*, json_id: str, posting_auth: str = "alice", tx_id: str = "
     }
 
 
-def _asset(amount: int, nai: str = "@@000000021") -> dict[str, int | str]:
-    return {"amount": amount, "nai": nai, "precision": 3}
+def _asset(amount: int, nai: str = "@@000000021") -> dict[str, object]:
+    """An asset of an operation body as the API gives it (JSON) - in the NAI form."""
+    return {"amount": str(amount), "precision": 3, "nai": nai}
 
 
 # ---------------------------------------------------------------------------
@@ -617,7 +619,7 @@ class TestWhaleAlertProvider:
                 {"operation": {"from": "whale", "to": "user", "amount": _asset(2000)}, "transaction": {"id": "tx1"}},
             ],
         }
-        result = await _provide_operations(WhaleAlertProvider(), ops, {"assets": [_asset(1000)]})
+        result = await _provide_operations(WhaleAlertProvider(), ops, {"assets": [Asset.hive.satoshi(1000)]})
 
         assert result["whale_operations"] == [
             {
@@ -633,7 +635,7 @@ class TestWhaleAlertProvider:
                 {"operation": {"from": "small", "to": "user", "amount": _asset(100)}, "transaction": {"id": "tx1"}},
             ],
         }
-        result = await _provide_operations(WhaleAlertProvider(), ops, {"assets": [_asset(1000)]})
+        result = await _provide_operations(WhaleAlertProvider(), ops, {"assets": [Asset.hive.satoshi(1000)]})
 
         assert result == {"whale_operations": []}
 
@@ -644,9 +646,29 @@ class TestWhaleAlertProvider:
                 {"operation": {"from": "whale", "to": "user", "amount": _asset(2000, "@@000000013")}, "transaction": {"id": "tx1"}},
             ],
         }
-        result = await _provide_operations(WhaleAlertProvider(), ops, {"assets": [_asset(1000)]})
+        result = await _provide_operations(WhaleAlertProvider(), ops, {"assets": [Asset.hive.satoshi(1000)]})
 
         assert result == {"whale_operations": []}
+
+    @pytest.mark.asyncio
+    async def test_compares_amounts_as_numbers(self) -> None:
+        ops = {
+            "transfer_operation": [
+                {"operation": {"from": "small", "to": "user", "amount": _asset(999_999)}, "transaction": {"id": "tx1"}},
+                {"operation": {"from": "whale", "to": "user", "amount": _asset(1_000_001)}, "transaction": {"id": "tx2"}},
+            ],
+        }
+        result = await _provide_operations(WhaleAlertProvider(), ops, {"assets": [Asset.hive.tokens(1000)]})
+
+        assert [pair["operation"]["from"] for pair in result["whale_operations"]] == ["whale"]
+
+    @pytest.mark.asyncio
+    async def test_reports_escrow_by_hbd_else_by_hive_amount(self) -> None:
+        body = {"from": "alice", "to": "bob", "hbd_amount": _asset(5000, "@@000000013"), "hive_amount": _asset(5000)}
+        ops = {"escrow_transfer_operation": [{"operation": body, "transaction": {"id": "tx3"}}]}
+        result = await _provide_operations(WhaleAlertProvider(), ops, {"assets": [Asset.hbd.tokens(1), Asset.hive.tokens(1)]})
+
+        assert [pair["operation"]["amount"] for pair in result["whale_operations"]] == [_asset(5000, "@@000000013"), _asset(5000)]
 
     @pytest.mark.asyncio
     async def test_reports_recurrent_transfer_above_threshold(self) -> None:
@@ -655,7 +677,7 @@ class TestWhaleAlertProvider:
                 {"operation": {"from": "whale", "to": "user", "amount": _asset(5000)}, "transaction": {"id": "tx2"}},
             ],
         }
-        result = await _provide_operations(WhaleAlertProvider(), ops, {"assets": [_asset(1000)]})
+        result = await _provide_operations(WhaleAlertProvider(), ops, {"assets": [Asset.hive.satoshi(1000)]})
 
         assert result["whale_operations"][0]["transaction"] == {"id": "tx2"}
         assert result["whale_operations"][0]["operation"]["amount"] == _asset(5000)

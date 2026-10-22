@@ -46,7 +46,7 @@ async def test_recorded_jsonrpc_mock_supports_account_health_monitor(js_jsonrpc_
             account = received[-1]["accounts"].get("gtg")
             if account is None:
                 return False
-            return bool(account["json_metadata"]) and account["balance"]["HBD"]["savings"].amount == "3468"
+            return bool(account["json_metadata"]) and account["balance"]["HBD"]["savings"].amount == 3468
 
         return await collect_until(
             bot,
@@ -75,7 +75,7 @@ async def test_recorded_jsonrpc_mock_supports_account_health_monitor(js_jsonrpc_
             "witness_description": "Gandalf the Grey, building Hive, improving Hive infrastructure.",
         },
     }
-    assert account["balance"]["HBD"]["savings"].amount == "3468"
+    assert account["balance"]["HBD"]["savings"].amount == 3468
 
 
 @pytest.mark.asyncio

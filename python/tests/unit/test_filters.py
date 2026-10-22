@@ -9,10 +9,11 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime, timedelta
-from types import SimpleNamespace
 from typing import Any
 
 import pytest
+from hiveio_api import Asset
+from hiveio_api.operations import Price
 
 from workerbee.chain_observers.classifiers.account_classifier import AccountClassifier
 from workerbee.chain_observers.classifiers.block_header_classifier import BlockHeaderClassifier
@@ -45,7 +46,10 @@ from workerbee.chain_observers.filters.vote_filter import VoteFilter
 from workerbee.chain_observers.filters.whale_alert_filter import WhaleAlertFilter
 from workerbee.chain_observers.filters.witness_miss_block_filter import WitnessMissedBlocksFilter
 from workerbee.chain_observers.payloads import OperationsPerType
+from workerbee.chain_observers.providers.follow_provider import FollowProvider
+from workerbee.chain_observers.providers.reblog_provider import ReblogProvider
 
+from ._builders import build_price
 from .conftest import make_data_context
 
 # ---------------------------------------------------------------------------
@@ -56,7 +60,7 @@ from .conftest import make_data_context
 def _block_header_data(number: int = 100, witness: str = "witness-a") -> dict[str, Any]:
     """Return the dict the BlockHeaderCollector normally produces."""
     return {
-        BlockHeaderClassifier.__name__: {
+        BlockHeaderClassifier: {
             "number": number,
             "witness": witness,
             "timestamp": "2024-06-15T12:00:00",
@@ -71,7 +75,7 @@ def _operation_data(ops_per_type: OperationsPerType) -> dict[str, Any]:
     for _type_name, entries in ops_per_type.items():
         all_ops.extend(entries)
     return {
-        OperationClassifier.__name__: {
+        OperationClassifier: {
             "operations": all_ops,
             "operations_per_type": ops_per_type,
         },
@@ -447,7 +451,7 @@ def _alarm_account_data(
     governance_vote_expiration: datetime | None = datetime(2099, 1, 1, tzinfo=UTC),
 ) -> dict[str, Any]:
     return {
-        AccountClassifier.__name__: {
+        AccountClassifier: {
             "accounts": {
                 name: {
                     "name": name,
@@ -461,7 +465,7 @@ def _alarm_account_data(
 
 def _change_recovery_data(*accounts: str) -> dict[str, Any]:
     return {
-        ChangeRecoveryInProgressClassifier.__name__: {
+        ChangeRecoveryInProgressClassifier: {
             "recovering_accounts": dict.fromkeys(accounts, True),
         },
     }
@@ -469,7 +473,7 @@ def _change_recovery_data(*accounts: str) -> dict[str, Any]:
 
 def _decline_voting_rights_data(*accounts: str) -> dict[str, Any]:
     return {
-        DeclineVotingRightsClassifier.__name__: {
+        DeclineVotingRightsClassifier: {
             "decline_voting_rights_accounts": dict.fromkeys(accounts, True),
         },
     }
@@ -530,7 +534,7 @@ class TestAlarmFilter:
             (
                 AccountClassifier,
                 {
-                    AccountClassifier.__name__: {
+                    AccountClassifier: {
                         "accounts": {},
                     },
                 },
@@ -722,7 +726,7 @@ def _witness_data(
     last_confirmed_block_num: int = 100,
 ) -> dict[str, Any]:
     return {
-        WitnessClassifier.__name__: {
+        WitnessClassifier: {
             "witnesses": {
                 name: {
                     "owner": name,
@@ -771,7 +775,7 @@ class TestWitnessMissedBlocksFilter:
             (
                 WitnessClassifier,
                 {
-                    WitnessClassifier.__name__: {
+                    WitnessClassifier: {
                         "witnesses": {},
                     },
                 },
@@ -806,23 +810,15 @@ def _account_data(
     hp_total: str = "2000",
 ) -> dict[str, Any]:
     """Build the dict that AccountCollector returns, keyed by AccountClassifier name."""
+    hive, hbd, hp = Asset.hive.satoshi(int(hive_total)), Asset.hbd.satoshi(int(hbd_total)), Asset.vests.satoshi(int(hp_total))
     balance = {
-        "HIVE": {
-            "liquid": SimpleNamespace(amount=hive_total, precision=3, nai="@@000000021"),
-            "total": SimpleNamespace(amount=hive_total, precision=3, nai="@@000000021"),
-        },
-        "HBD": {
-            "liquid": SimpleNamespace(amount=hbd_total, precision=3, nai="@@000000013"),
-            "total": SimpleNamespace(amount=hbd_total, precision=3, nai="@@000000013"),
-        },
-        "HP": {
-            "liquid": SimpleNamespace(amount=hp_total, precision=3, nai="@@000000037"),
-            "total": SimpleNamespace(amount=hp_total, precision=3, nai="@@000000037"),
-        },
+        "HIVE": {"liquid": hive, "total": hive},
+        "HBD": {"liquid": hbd, "total": hbd},
+        "HP": {"liquid": hp, "total": hp},
     }
     account = {"name": name, "balance": balance}
     return {
-        AccountClassifier.__name__: {
+        AccountClassifier: {
             "accounts": {name: account},
         },
     }
@@ -831,8 +827,8 @@ def _account_data(
 def _multi_account_data(*account_payloads: dict[str, Any]) -> dict[str, Any]:
     accounts: dict[str, Any] = {}
     for payload in account_payloads:
-        accounts.update(payload[AccountClassifier.__name__]["accounts"])
-    return {AccountClassifier.__name__: {"accounts": accounts}}
+        accounts.update(payload[AccountClassifier]["accounts"])
+    return {AccountClassifier: {"accounts": accounts}}
 
 
 def _account_metadata_data(
@@ -841,7 +837,7 @@ def _account_metadata_data(
     posting_json_metadata: dict[str, Any],
 ) -> dict[str, Any]:
     return {
-        AccountClassifier.__name__: {
+        AccountClassifier: {
             "accounts": {
                 name: {
                     "name": name,
@@ -908,7 +904,7 @@ class TestBalanceChangeFilter:
     async def test_account_not_found_returns_false(self) -> None:
         """When the account is not in the data, match returns False."""
         data = {
-            AccountClassifier.__name__: {
+            AccountClassifier: {
                 "accounts": {},
             },
         }
@@ -925,6 +921,17 @@ class TestBalanceChangeFilter:
 
         ctx2 = make_data_context((AccountClassifier, _account_data("alice", "1000", "500", "2000")))
         assert await filt.match(ctx2) is False
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(("include_internal_transfers", "expected"), [(True, True), (False, False)])
+    async def test_internal_transfer_changes_a_bucket_but_not_the_total(self, include_internal_transfers: bool, expected: bool) -> None:
+        filt = BalanceChangeFilter(["alice"], include_internal_transfers=include_internal_transfers)
+        await filt.match(make_data_context((AccountClassifier, _account_data("alice", "1000", "500", "2000"))))
+
+        after = _account_data("alice", "1000", "500", "2000")
+        after[AccountClassifier]["accounts"]["alice"]["balance"]["HIVE"]["liquid"] = Asset.hive.satoshi(400)  # 600 to savings
+
+        assert await filt.match(make_data_context((AccountClassifier, after))) is expected
 
     @pytest.mark.asyncio
     async def test_include_internal_transfers_changed(self) -> None:
@@ -1021,7 +1028,7 @@ def _manabar_data(
     """Build ManabarClassifier data."""
     manabar = {"current_mana": current_mana, "max": max_mana, "percent": percent, "last_update_time": 0}
     return {
-        ManabarClassifier.__name__: {
+        ManabarClassifier: {
             "manabar_data": {
                 account: {
                     manabar_type: manabar,
@@ -1061,7 +1068,7 @@ class TestAccountFullManabarFilter:
     @pytest.mark.asyncio
     async def test_account_not_found_returns_false(self) -> None:
         data = {
-            ManabarClassifier.__name__: {
+            ManabarClassifier: {
                 "manabar_data": {},
             },
         }
@@ -1073,7 +1080,7 @@ class TestAccountFullManabarFilter:
     async def test_manabar_type_not_found_returns_false(self) -> None:
         """Account exists but the specific manabar type is missing."""
         data = {
-            ManabarClassifier.__name__: {
+            ManabarClassifier: {
                 "manabar_data": {
                     "alice": {},
                 },
@@ -1089,11 +1096,8 @@ class TestAccountFullManabarFilter:
 # ---------------------------------------------------------------------------
 
 
-def _feed_price_entry(base_amount: str = "330", quote_amount: str = "1000") -> SimpleNamespace:
-    return SimpleNamespace(
-        base=SimpleNamespace(amount=base_amount, precision=3, nai="@@000000013"),
-        quote=SimpleNamespace(amount=quote_amount, precision=3, nai="@@000000021"),
-    )
+def _feed_price_entry(base_amount: str = "330", quote_amount: str = "1000") -> Price:
+    return build_price(int(base_amount), int(quote_amount))
 
 
 def _feed_price_data(
@@ -1105,7 +1109,7 @@ def _feed_price_data(
     if timestamp is None:
         timestamp = datetime(2024, 6, 15, 12, 0, 0)
     return {
-        FeedPriceClassifier.__name__: {
+        FeedPriceClassifier: {
             "price_history": price_history,
             "current_median_history": price_history[0] if price_history else None,
             "last_feed_price_retrieval_timestamp": timestamp,
@@ -1240,6 +1244,12 @@ class TestFeedPriceNoChangeFilter:
 # ---------------------------------------------------------------------------
 
 
+def _custom_json_ops(json_payload: str) -> dict[str, Any]:
+    """Operations per type with one ``custom_json`` of the follow plugin."""
+    body = {"id": "follow", "json": json_payload, "required_auths": [], "required_posting_auths": ["alice"]}
+    return {"custom_json_operation": [{"operation": body, "transaction": {}}]}
+
+
 class TestFollowFilter:
     @pytest.mark.asyncio
     async def test_matches_follow_operation(self) -> None:
@@ -1316,6 +1326,17 @@ class TestFollowFilter:
         filt = FollowFilter(["alice"])
         assert await filt.match(ctx) is False
 
+    @pytest.mark.asyncio
+    async def test_matches_exactly_when_the_provider_delivers_the_follow(self) -> None:
+        """A follow the provider cannot project (``following`` not an account name) does not notify an empty payload."""
+        ops = _custom_json_ops('["follow", {"follower": "alice", "following": 123, "what": ["blog"]}]')
+        ctx = make_data_context((OperationClassifier, _operation_data(ops)))
+        provider = FollowProvider()
+        provider.push_options({"accounts": ["alice"]})
+
+        assert await provider.provide(ctx) == {"follows": {}}
+        assert await FollowFilter(["alice"]).match(ctx) is False
+
 
 # ---------------------------------------------------------------------------
 # ReblogFilter
@@ -1386,6 +1407,17 @@ class TestReblogFilter:
         ctx = make_data_context((OperationClassifier, _operation_data({})))
         filt = ReblogFilter(["alice"])
         assert await filt.match(ctx) is False
+
+    @pytest.mark.asyncio
+    async def test_matches_exactly_when_the_provider_delivers_the_reblog(self) -> None:
+        """A reblog the provider cannot project (``permlink`` not a string) does not notify an empty payload."""
+        ops = _custom_json_ops('["reblog", {"account": "alice", "author": "bob", "permlink": 7}]')
+        ctx = make_data_context((OperationClassifier, _operation_data(ops)))
+        provider = ReblogProvider()
+        provider.push_options({"accounts": ["alice"]})
+
+        assert await provider.provide(ctx) == {"reblogs": {}}
+        assert await ReblogFilter(["alice"]).match(ctx) is False
 
 
 # ---------------------------------------------------------------------------
@@ -1492,124 +1524,54 @@ class TestPostMentionFilter:
 
 class TestWhaleAlertFilter:
     @pytest.mark.asyncio
-    async def test_transfer_above_threshold_returns_true(self) -> None:
-        threshold = SimpleNamespace(amount="10000", nai="@@000000021")
-        ops = {
-            "transfer_operation": [
-                {
-                    "operation": {"from": "alice", "to": "bob", "amount": SimpleNamespace(amount="50000", nai="@@000000021")},
-                    "transaction": {},
-                },
-            ],
-        }
+    @pytest.mark.parametrize(
+        ("threshold", "amount", "expected"),
+        [
+            pytest.param(Asset.hive.tokens(10), Asset.hive.tokens(50), True, id="above"),
+            pytest.param(Asset.hive.tokens(50), Asset.hive.tokens("0.403"), False, id="below"),
+            pytest.param(Asset.hive.tokens(10), Asset.hbd.tokens(50), False, id="different-nai"),
+            # amounts of different lengths - compared as numbers, not as strings like in TS
+            pytest.param(Asset.hive.tokens(1000), Asset.hive.tokens("999.999"), False, id="below-shorter-amount"),
+            pytest.param(Asset.hive.tokens(900), Asset.hive.tokens(1000), True, id="above-longer-amount"),
+        ],
+    )
+    async def test_transfer_compared_with_threshold(self, threshold: Asset, amount: Asset, expected: bool) -> None:
+        ops = {"transfer_operation": [{"operation": _transfer_body(amount=amount), "transaction": {}}]}
         ctx = make_data_context((OperationClassifier, _operation_data(ops)))
         filt = WhaleAlertFilter(threshold)
-        assert await filt.match(ctx) is True
+        assert await filt.match(ctx) is expected
 
     @pytest.mark.asyncio
-    async def test_transfer_below_threshold_returns_false(self) -> None:
-        threshold = SimpleNamespace(amount="50000", nai="@@000000021")
-        ops = {
-            "transfer_operation": [
-                {
-                    "operation": {"from": "alice", "to": "bob", "amount": SimpleNamespace(amount="403", nai="@@000000021")},
-                    "transaction": {},
-                },
-            ],
-        }
+    @pytest.mark.parametrize(
+        ("threshold", "expected"),
+        [
+            pytest.param(Asset.hbd.tokens(10), True, id="hbd-amount"),
+            pytest.param(Asset.hive.tokens(10), True, id="hive-amount"),
+            pytest.param(Asset.hive.tokens(100), False, id="below"),
+        ],
+    )
+    async def test_escrow_amounts_compared_with_threshold(self, threshold: Asset, expected: bool) -> None:
+        body = {"from": "alice", "to": "bob", "hbd_amount": Asset.hbd.tokens(50).as_nai(), "hive_amount": Asset.hive.tokens(50).as_nai()}
+        ops = {"escrow_transfer_operation": [{"operation": body, "transaction": {}}]}
         ctx = make_data_context((OperationClassifier, _operation_data(ops)))
         filt = WhaleAlertFilter(threshold)
-        assert await filt.match(ctx) is False
-
-    @pytest.mark.asyncio
-    async def test_different_nai_returns_false(self) -> None:
-        """Threshold is HIVE but transfer is HBD."""
-        threshold = SimpleNamespace(amount="10000", nai="@@000000021")
-        ops = {
-            "transfer_operation": [
-                {
-                    "operation": {"from": "alice", "to": "bob", "amount": SimpleNamespace(amount="50000", nai="@@000000013")},
-                    "transaction": {},
-                },
-            ],
-        }
-        ctx = make_data_context((OperationClassifier, _operation_data(ops)))
-        filt = WhaleAlertFilter(threshold)
-        assert await filt.match(ctx) is False
-
-    @pytest.mark.asyncio
-    async def test_escrow_hbd_amount_matches(self) -> None:
-        threshold = SimpleNamespace(amount="10000", nai="@@000000013")
-        ops = {
-            "escrow_transfer_operation": [
-                {
-                    "operation": {
-                        "from": "alice",
-                        "to": "bob",
-                        "hbd_amount": SimpleNamespace(amount="50000", nai="@@000000013"),
-                        "hive_amount": SimpleNamespace(amount="0", nai="@@000000021"),
-                    },
-                    "transaction": {},
-                },
-            ],
-        }
-        ctx = make_data_context((OperationClassifier, _operation_data(ops)))
-        filt = WhaleAlertFilter(threshold)
-        assert await filt.match(ctx) is True
-
-    @pytest.mark.asyncio
-    async def test_escrow_hive_amount_matches(self) -> None:
-        threshold = SimpleNamespace(amount="10000", nai="@@000000021")
-        ops = {
-            "escrow_transfer_operation": [
-                {
-                    "operation": {
-                        "from": "alice",
-                        "to": "bob",
-                        "hbd_amount": SimpleNamespace(amount="0", nai="@@000000013"),
-                        "hive_amount": SimpleNamespace(amount="50000", nai="@@000000021"),
-                    },
-                    "transaction": {},
-                },
-            ],
-        }
-        ctx = make_data_context((OperationClassifier, _operation_data(ops)))
-        filt = WhaleAlertFilter(threshold)
-        assert await filt.match(ctx) is True
+        assert await filt.match(ctx) is expected
 
     @pytest.mark.asyncio
     async def test_no_transfers_returns_false(self) -> None:
-        threshold = SimpleNamespace(amount="10000", nai="@@000000021")
         ctx = make_data_context((OperationClassifier, _operation_data({})))
-        filt = WhaleAlertFilter(threshold)
+        filt = WhaleAlertFilter(Asset.hive.tokens(10))
         assert await filt.match(ctx) is False
 
     @pytest.mark.asyncio
-    async def test_transfer_from_savings_matches(self) -> None:
-        threshold = SimpleNamespace(amount="10000", nai="@@000000021")
-        ops = {
-            "transfer_from_savings_operation": [
-                {
-                    "operation": {"from": "alice", "to": "bob", "amount": SimpleNamespace(amount="20000", nai="@@000000021")},
-                    "transaction": {},
-                },
-            ],
-        }
+    @pytest.mark.parametrize("op_type", ["transfer_from_savings_operation", "recurrent_transfer_operation"])
+    async def test_other_transfers_match(self, op_type: str) -> None:
+        ops = {op_type: [{"operation": _transfer_body(amount=Asset.hive.tokens(20)), "transaction": {}}]}
         ctx = make_data_context((OperationClassifier, _operation_data(ops)))
-        filt = WhaleAlertFilter(threshold)
+        filt = WhaleAlertFilter(Asset.hive.tokens(10))
         assert await filt.match(ctx) is True
 
-    @pytest.mark.asyncio
-    async def test_recurrent_transfer_matches(self) -> None:
-        threshold = SimpleNamespace(amount="10000", nai="@@000000021")
-        ops = {
-            "recurrent_transfer_operation": [
-                {
-                    "operation": {"from": "alice", "to": "bob", "amount": SimpleNamespace(amount="20000", nai="@@000000021")},
-                    "transaction": {},
-                },
-            ],
-        }
-        ctx = make_data_context((OperationClassifier, _operation_data(ops)))
-        filt = WhaleAlertFilter(threshold)
-        assert await filt.match(ctx) is True
+
+def _transfer_body(*, amount: Asset) -> dict[str, object]:
+    """Body of a transfer as the API gives it (JSON) - the amount in the NAI form."""
+    return {"from": "alice", "to": "bob", "amount": amount.as_nai(), "memo": ""}

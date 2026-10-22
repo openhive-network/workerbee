@@ -4,8 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from contextlib import contextmanager
+from datetime import UTC, datetime
 
 import pytest
+from hiveio_api import Asset, HiveDateTime
+from hiveio_api.database_api import CommentPendingPayoutType, GetCommentPendingPayoutsResponse
 
 from workerbee.chain_observers.classifiers.content_metadata_classifier import ContentMetadataClassifier
 from workerbee.chain_observers.classifiers.operation_classifier import OperationClassifier
@@ -20,84 +23,55 @@ from workerbee.chain_observers.providers.content_metadata_provider import (
     PostMetadataProvider,
 )
 
+from ._builders import build_cashout_info, build_comment_pending_payout, get_comment_pending_payouts_response
+
 # ═══════════════════════════════════════════════════════════════════
 # Fakes
 # ═══════════════════════════════════════════════════════════════════
 
 
-class FakeCashoutInfo:
-    def __init__(
-        self,
-        author: str = "alice",
-        permlink: str = "my-post",
-        cashout_time: str = "2026-07-01T00:00:00",
-        net_rshares: int = 100000,
-        net_votes: int = 10,
-        allow_curation_rewards: bool = True,
-        allow_replies: bool = True,
-        allow_votes: bool = True,
-        author_rewards: int = 0,
-        total_payout_value: str = "0.000 HBD",
-        curator_payout_value: str = "0.000 HBD",
-        has_cashout: bool = True,
-    ) -> None:
-        self.author = author
-        self.permlink = permlink
-        if has_cashout:
-            self.cashout_info = _FakeCashout(
-                cashout_time,
-                net_rshares,
-                net_votes,
-                allow_curation_rewards,
-                allow_replies,
-                allow_votes,
-                author_rewards,
-                total_payout_value,
-                curator_payout_value,
-            )
-        else:
-            self.cashout_info = None
-
-
-class _FakeCashout:
-    def __init__(
-        self,
-        cashout_time: str,
-        net_rshares: int,
-        net_votes: int,
-        allow_curation_rewards: bool,
-        allow_replies: bool,
-        allow_votes: bool,
-        author_rewards: int,
-        total_payout_value: str,
-        curator_payout_value: str,
-    ) -> None:
-        self.cashout_time = cashout_time
-        self.net_rshares = net_rshares
-        self.net_votes = net_votes
-        self.allow_curation_rewards = allow_curation_rewards
-        self.allow_replies = allow_replies
-        self.allow_votes = allow_votes
-        self.author_rewards = author_rewards
-        self.total_payout_value = total_payout_value
-        self.curator_payout_value = curator_payout_value
-
-
-class FakeApiResponse:
-    def __init__(self, cashout_infos: list[FakeCashoutInfo]) -> None:
-        self.cashout_infos = cashout_infos
+def FakeCashoutInfo(
+    author: str = "alice",
+    permlink: str = "my-post",
+    cashout_time: str = "2026-07-01T00:00:00",
+    net_rshares: int | str = 100000,
+    net_votes: int = 10,
+    allow_curation_rewards: bool = True,
+    allow_replies: bool = True,
+    allow_votes: bool = True,
+    author_rewards: int = 0,
+    total_payout_value: Asset | None = None,
+    curator_payout_value: Asset | None = None,
+    has_cashout: bool = True,
+) -> CommentPendingPayoutType:
+    cashout_info = (
+        build_cashout_info(
+            cashout_time=HiveDateTime(cashout_time),
+            net_rshares=net_rshares,
+            net_votes=net_votes,
+            allow_curation_rewards=allow_curation_rewards,
+            allow_replies=allow_replies,
+            allow_votes=allow_votes,
+            author_rewards=author_rewards,
+            total_payout_value=Asset.hbd.satoshi(0) if total_payout_value is None else total_payout_value,
+            curator_payout_value=Asset.hbd.satoshi(0) if curator_payout_value is None else curator_payout_value,
+        )
+        if has_cashout
+        else None
+    )
+    return build_comment_pending_payout(author, permlink, cashout_info)
 
 
 class FakeDatabaseApi:
-    def __init__(self, cashout_infos: list[FakeCashoutInfo] | None = None) -> None:
+    def __init__(self, cashout_infos: list[CommentPendingPayoutType] | None = None) -> None:
         self._cashout_infos = cashout_infos or []
         self.call_count = 0
         self.last_comments_arg: list[list[str]] | None = None
 
-    async def get_comment_pending_payouts(self, comments: list[list[str]]) -> FakeApiResponse:
+    async def get_comment_pending_payouts(self, comments: list[list[str]]) -> GetCommentPendingPayoutsResponse:
         self.call_count += 1
         self.last_comments_arg = comments
-        return FakeApiResponse(self._cashout_infos)
+        return get_comment_pending_payouts_response(*self._cashout_infos)
 
 
 class FakeApi:
@@ -263,8 +237,8 @@ class TestContentMetadataCollectorGet:
         ctx = FakeDataContext()
 
         result = await collector.get(ctx)
-        assert "ContentMetadataClassifier" in result
-        assert result["ContentMetadataClassifier"]["content_data"] == {}
+        assert ContentMetadataClassifier in result
+        assert result[ContentMetadataClassifier]["content_data"] == {}
         assert db_api.call_count == 0
 
     @pytest.mark.asyncio
@@ -289,7 +263,7 @@ class TestContentMetadataCollectorGet:
         collector._content_cached.add("alice/my-post")
 
         result = await collector.get(ctx)
-        content = result["ContentMetadataClassifier"]["content_data"]
+        content = result[ContentMetadataClassifier]["content_data"]
         assert "alice" in content
         assert "my-post" in content["alice"]
         assert content["alice"]["my-post"]["author"] == "alice"
@@ -471,7 +445,7 @@ class TestContentMetadataCollectorResultShape:
         cashout = FakeCashoutInfo(
             author="alice",
             permlink="post1",
-            net_rshares=12345,
+            net_rshares="12345",  # int64 of the API (a string in the JSON)
             net_votes=5,
             author_rewards=100,
             allow_curation_rewards=True,
@@ -512,6 +486,7 @@ class TestContentMetadataCollectorResultShape:
         assert metadata["allows_replies"] is True
         assert metadata["allows_votes"] is False
         assert metadata["is_paid"] is False
+        assert metadata["payout_time"] == datetime(2026, 7, 1, tzinfo=UTC)
 
     @pytest.mark.asyncio
     async def test_paid_metadata_shape(self) -> None:

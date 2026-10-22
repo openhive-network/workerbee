@@ -8,6 +8,7 @@ from collections.abc import Awaitable, Callable
 from typing import Any, cast
 
 import pytest
+from hiveio_api import Asset
 
 from workerbee.chain_observers.classifiers.account_classifier import AccountClassifier
 from workerbee.chain_observers.classifiers.change_recovery_in_progress_classifier import ChangeRecoveryInProgressClassifier
@@ -51,7 +52,7 @@ class _CustomCollector(CollectorBase):
         super().__init__(worker=None)
 
     async def get(self, data: Any) -> dict[str, dict[str, object]]:
-        return {_CustomClassifier.__name__: {"allowed": True, "value": 7}}
+        return {_CustomClassifier: {"allowed": True, "value": 7}}
 
 
 class _ContentMetadataCollector(CollectorBase):
@@ -61,7 +62,7 @@ class _ContentMetadataCollector(CollectorBase):
         self.query_options: list[object] = []
 
     async def get(self, data: Any) -> dict[str, dict[str, dict[str, dict[str, object]]]]:
-        return {ContentMetadataClassifier.__name__: {"content_data": self.content_data}}
+        return {ContentMetadataClassifier: {"content_data": self.content_data}}
 
     async def query(self, data: Any, options: object) -> dict[str, dict[str, dict[str, object]]]:
         self.query_options.append(options)
@@ -463,13 +464,38 @@ class TestFilterPiped:
 
 class TestQueenLevelProviderWiring:
     @pytest.mark.asyncio
+    async def test_whale_alert_takes_asset_threshold(self, queen: QueenBee) -> None:
+        subscription = queen.on_whale_alert(Asset.hive.tokens(1000)).subscribe(_noop_next)
+        transfer = {"from": "whale", "to": "user", "amount": Asset.hive.tokens("1000.001").as_nai(), "memo": ""}
+        context = _data_context(
+            (
+                OperationClassifier,
+                {
+                    OperationClassifier: {
+                        "operations": [],
+                        "operations_per_type": {"transfer_operation": [{"operation": transfer, "transaction": {}}]},
+                    },
+                },
+            )
+        )
+
+        try:
+            entry = next(iter(queen.mediator._filters.values()))
+            assert await entry.filter.match(context) is True
+            assert await entry.providers[0].provide(context) == {
+                "whale_operations": [{"operation": {"from": "whale", "to": "user", "amount": transfer["amount"]}, "transaction": {}}],
+            }
+        finally:
+            subscription.close()
+
+    @pytest.mark.asyncio
     async def test_accounts_full_manabar_matches_and_provides_selected_manabar(self, queen: QueenBee) -> None:
         subscription = queen.on_accounts_full_manabar(ManabarType.UPVOTE, "alice").subscribe(_noop_next)
         context = _data_context(
             (
                 ManabarClassifier,
                 {
-                    ManabarClassifier.__name__: {
+                    ManabarClassifier: {
                         "manabar_data": {
                             "alice": {
                                 ManabarType.UPVOTE: {
@@ -510,7 +536,7 @@ class TestQueenLevelProviderWiring:
             (
                 AccountClassifier,
                 {
-                    AccountClassifier.__name__: {
+                    AccountClassifier: {
                         "accounts": {
                             "alice": {
                                 "recovery_account": "steem",
@@ -523,7 +549,7 @@ class TestQueenLevelProviderWiring:
             (
                 ChangeRecoveryInProgressClassifier,
                 {
-                    ChangeRecoveryInProgressClassifier.__name__: {
+                    ChangeRecoveryInProgressClassifier: {
                         "recovering_accounts": {},
                     },
                 },
@@ -531,7 +557,7 @@ class TestQueenLevelProviderWiring:
             (
                 DeclineVotingRightsClassifier,
                 {
-                    DeclineVotingRightsClassifier.__name__: {
+                    DeclineVotingRightsClassifier: {
                         "decline_voting_rights_accounts": {},
                     },
                 },
@@ -598,7 +624,7 @@ class TestQueenLevelProviderWiring:
             (
                 OperationClassifier,
                 {
-                    OperationClassifier.__name__: {
+                    OperationClassifier: {
                         "operations": [{"operation": metadata, "transaction": {}}],
                         "operations_per_type": {
                             "comment_operation": [
@@ -642,7 +668,7 @@ class TestOnContentMetadata:
             (
                 OperationClassifier,
                 {
-                    OperationClassifier.__name__: {
+                    OperationClassifier: {
                         "operations": [{"operation": metadata, "transaction": {}}],
                         "operations_per_type": {
                             "comment_operation": [

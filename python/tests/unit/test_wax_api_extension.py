@@ -16,8 +16,6 @@ constructing the chain and reading ``.api`` does not open a connection).
 
 from __future__ import annotations
 
-import inspect
-
 from hiveio_api.block_api import BlockApi
 from hiveio_api.database_api import DatabaseApi
 from wax import WaxChainOptions, create_hive_chain
@@ -41,7 +39,7 @@ def test_extends_binds_block_api_to_instance() -> None:
     # block_api must be a bound instance, NOT the bare class.
     assert isinstance(api.block_api, BlockApi)
     assert api.block_api is not BlockApi
-    assert inspect.ismethod(api.block_api.get_block)
+    assert api.block_api.get_block.__self__ is api.block_api
 
     # The standard apis from the base collection must still be bound.
     assert isinstance(api.database_api, DatabaseApi)

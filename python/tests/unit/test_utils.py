@@ -3,43 +3,15 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
-from types import SimpleNamespace
 
 import pytest
+from hiveio_api import Asset
 
 from workerbee.chain_observers.utils import (
     calculate_relative_time,
     is_asset_greater_than,
     is_exchange,
-    parse_iso_timestamp,
 )
-
-# ---------------------------------------------------------------------------
-# parse_iso_timestamp
-# ---------------------------------------------------------------------------
-
-
-class TestParseIsoTimestamp:
-    @pytest.mark.parametrize(
-        ("timestamp", "expected"),
-        [
-            pytest.param("2024-01-15T12:00:00", datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC), id="without-z"),
-            pytest.param("2024-01-15T12:00:00Z", datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC), id="with-z"),
-            pytest.param("2024-06-01T00:00:00", datetime(2024, 6, 1, 0, 0, 0, tzinfo=UTC), id="utc-aware"),
-        ],
-    )
-    def test_parses_as_utc_aware_datetime(self, timestamp: str, expected: datetime) -> None:
-        result = parse_iso_timestamp(timestamp)
-        assert result == expected
-        assert result.utcoffset() == timedelta(0)
-
-    def test_round_trip_idempotent(self) -> None:
-        ts_str = "2024-03-20T18:30:45"
-        parsed = parse_iso_timestamp(ts_str)
-        # Re-serialise and re-parse
-        iso = parsed.isoformat().replace("+00:00", "Z")
-        assert parse_iso_timestamp(iso) == parsed
-
 
 # ---------------------------------------------------------------------------
 # calculate_relative_time
@@ -113,22 +85,16 @@ class TestIsExchange:
 
 
 class TestIsAssetGreaterThan:
-    def test_dict_assets_compare_amount_strings_like_typescript(self) -> None:
-        base = {"amount": "1000", "nai": "@@000000021", "precision": 3}
-        other = {"amount": "2", "nai": "@@000000021", "precision": 3}
-        assert is_asset_greater_than(base, other) is True
-
-    def test_object_assets_compare_amount_strings_like_typescript(self) -> None:
-        base = SimpleNamespace(amount="1000", nai="@@000000021")
-        other = SimpleNamespace(amount="2", nai="@@000000021")
-        assert is_asset_greater_than(base, other) is True
-
-    def test_rejects_different_nai(self) -> None:
-        base = {"amount": "1000", "nai": "@@000000021", "precision": 3}
-        other = {"amount": "2000", "nai": "@@000000013", "precision": 3}
-        assert is_asset_greater_than(base, other) is False
-
-    def test_rejects_missing_amount(self) -> None:
-        base = {"amount": "1000", "nai": "@@000000021", "precision": 3}
-        other = {"nai": "@@000000021", "precision": 3}
-        assert is_asset_greater_than(base, other) is False
+    @pytest.mark.parametrize(
+        ("base", "other", "expected"),
+        [
+            pytest.param(Asset.hive.tokens(1000), Asset.hive.tokens("1000.001"), True, id="greater"),
+            pytest.param(Asset.hive.tokens(1000), Asset.hive.tokens(1000), False, id="equal"),
+            # amounts of different lengths - TS compares their strings: "999999" > "1000000"
+            pytest.param(Asset.hive.tokens(1000), Asset.hive.tokens("999.999"), False, id="smaller-shorter-amount"),
+            pytest.param(Asset.hive.tokens(900), Asset.hive.tokens(1000), True, id="greater-longer-amount"),
+            pytest.param(Asset.hive.tokens(1000), Asset.hbd.tokens(2000), False, id="different-nai"),
+        ],
+    )
+    def test_compares_amounts_of_the_same_nai_as_numbers(self, base: Asset, other: Asset, expected: bool) -> None:
+        assert is_asset_greater_than(base, other) is expected
