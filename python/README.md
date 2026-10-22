@@ -7,7 +7,7 @@ WorkerBee provides an event-based observer pattern for bots that react to blockc
 ## Requirements
 
 - Python 3.12+
-- [hiveio-wax](https://gitlab.syncad.com/hive/wax) 2.0.2.dev20260622105138 or newer
+- [hiveio-wax](https://gitlab.syncad.com/hive/wax) - a development build of hive/wax!682 (dataclass models of `hiveio_api`), pinned in `pyproject.toml`
 
 ## Installation
 
@@ -186,7 +186,7 @@ def handle_event(event: ObserverNotification) -> None:
         print(accounts.keys())
 ```
 
-Payload leaves that come directly from Hive APIs use canonical `hiveio_api`/`wax` models. WorkerBee-specific projections and grouping containers are typed in `workerbee.chain_observers.payloads`.
+Payload leaves that come directly from Hive APIs use canonical `hiveio_api`/`wax` models. Operation bodies are JSON objects (`operation.value` is a `dict`), as in the TypeScript library. WorkerBee-specific projections and grouping containers are typed in `workerbee.chain_observers.payloads`.
 
 ### PastQueen
 

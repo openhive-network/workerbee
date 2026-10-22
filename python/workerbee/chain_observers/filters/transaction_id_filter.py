@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from .._ordered_set import OrderedSet
+from ..classifiers.block_classifier import BlockClassifier
 from .filter_base import FilterBase
 
 if TYPE_CHECKING:
@@ -23,13 +24,9 @@ class TransactionIdFilter(FilterBase):
         self._transaction_ids: OrderedSet[str] = OrderedSet(transaction_ids)
 
     def used_contexts(self) -> list[TRegisterEvaluationContext]:
-        from ..classifiers.block_classifier import BlockClassifier
-
         return [BlockClassifier]
 
     async def match(self, data: DataEvaluationContext) -> bool:
-        from ..classifiers.block_classifier import BlockClassifier
-
         block = await data.get(BlockClassifier)
 
         return any(transaction_id in block["transactions_per_id"] for transaction_id in self._transaction_ids)

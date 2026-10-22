@@ -8,24 +8,27 @@ Supports both get() (dequeue scheduled items) and query() (immediate fetch + enq
 from __future__ import annotations
 
 import time
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 
+from ...classifier_results import ContentMetadataClassifierData
 from ...classifiers.content_metadata_classifier import ContentMetadataClassifier
 from ..bucket_aggregate_queue import BucketAggregateQueue
-from ..collector_base import CollectorBase
+from ..collector_base import CollectorBase, TCollectorResult
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+    from hiveio_api.database_api import CashoutInfo
+
     from ...factories.data_evaluation_context import TCollectorEvaluationContext
     from ...interfaces import IWorkerBee
+    from ...payloads import ContentMetadata
 
 BUCKET_INTERVAL = 3 * 1000  # 3 seconds (Hive block interval) in ms
 MAX_CONTENT_GET_LIMIT = 1000
 
 ContentQueryItem = dict[str, str]
-ContentMetadata = dict[str, object]
-ContentDataByAuthor = dict[str, dict[str, ContentMetadata]]
-ContentQueryOptions = dict[str, object]
+type ContentDataByAuthor = dict[str, dict[str, ContentMetadata]]
 
 
 class ContentMetadataCollector(CollectorBase):
@@ -103,7 +106,7 @@ class ContentMetadataCollector(CollectorBase):
 
         return content_data
 
-    async def query(self, data: TCollectorEvaluationContext, options: ContentQueryOptions) -> ContentDataByAuthor:
+    async def query(self, data: TCollectorEvaluationContext, options: Mapping[str, object]) -> ContentDataByAuthor:
         requested_data = cast("list[ContentQueryItem]", options.get("requested_data", []))
         report_after_ms = cast("int | None", options.get("report_after_ms_before_payout"))
 
@@ -113,35 +116,31 @@ class ContentMetadataCollector(CollectorBase):
             for author in content_data:
                 for permlink in content_data[author]:
                     post_metadata = content_data[author][permlink]
-                    if post_metadata.get("is_paid"):
+                    payout_time = post_metadata["payout_time"]
+                    if payout_time is None:  # already paid
                         continue
 
                     cache_key = f"{author}/{permlink}"
                     if cache_key in self._content_cached:
                         continue
 
-                    payout_time = post_metadata.get("payout_time")
-                    if payout_time is None:
-                        continue
-
-                    payout_ms = _to_epoch_ms(payout_time)
-                    rollback_after = payout_ms - report_after_ms
+                    rollback_after = int(payout_time.timestamp() * 1000) - report_after_ms
 
                     self._contract_timestamps.enqueue(
                         rollback_after,
                         {
                             "author": author,
                             "permlink": permlink,
-                            "parent_author": str(post_metadata.get("parent_author", "")),
-                            "parent_permlink": str(post_metadata.get("parent_permlink", "")),
-                            "title": str(post_metadata.get("title", "")),
+                            "parent_author": post_metadata["parent_author"],
+                            "parent_permlink": post_metadata["parent_permlink"],
+                            "title": post_metadata["title"],
                         },
                     )
                     self._content_cached.add(cache_key)
 
         return content_data
 
-    async def get(self, data: TCollectorEvaluationContext) -> dict[str, object]:
+    async def get(self, data: TCollectorEvaluationContext) -> TCollectorResult:
         all_data: list[ContentQueryItem] = []
 
         current_time = int(time.time() * 1000)
@@ -152,41 +151,11 @@ class ContentMetadataCollector(CollectorBase):
             self._content_cached.discard(f"{author}/{permlink}")
 
         if not all_data:
-            return {ContentMetadataClassifier.__name__: {"content_data": {}}}
+            return {ContentMetadataClassifier: ContentMetadataClassifierData(content_data={})}
 
         content_data = await self._retrieve_data(data, all_data)
 
-        return {ContentMetadataClassifier.__name__: {"content_data": content_data}}
-
-
-def _to_epoch_ms(value: object) -> int:
-    if isinstance(value, datetime):
-        return int(value.timestamp() * 1000)
-    if isinstance(value, int | float):
-        return int(value)
-    # ISO string
-    s = str(value)
-    dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=UTC)
-    return int(dt.timestamp() * 1000)
-
-
-def _get_attr_or_key(obj: object, key: str, default: object = None) -> object:
-    if hasattr(obj, key):
-        return getattr(obj, key)
-    if isinstance(obj, dict):
-        return obj.get(key, default)
-    return default
-
-
-def _get_int_from(obj: object, key: str, default: int = 0) -> int:
-    val = _get_attr_or_key(obj, key, default)
-    if val is None:
-        return default
-    if isinstance(val, int):
-        return val
-    return int(str(val))
+        return {ContentMetadataClassifier: ContentMetadataClassifierData(content_data=content_data)}
 
 
 def _build_metadata_from_cashout(
@@ -196,7 +165,7 @@ def _build_metadata_from_cashout(
     parent_permlink: str,
     category: str,
     title: str,
-    cashout_info: object,
+    cashout_info: CashoutInfo,
 ) -> ContentMetadata:
     return {
         "author": author,
@@ -205,16 +174,16 @@ def _build_metadata_from_cashout(
         "parent_permlink": parent_permlink,
         "category": category,
         "title": title,
-        "allows_curation_rewards": _get_attr_or_key(cashout_info, "allow_curation_rewards", False),
-        "allows_replies": _get_attr_or_key(cashout_info, "allow_replies", True),
-        "allows_votes": _get_attr_or_key(cashout_info, "allow_votes", True),
-        "author_rewards": _get_int_from(cashout_info, "author_rewards"),
-        "curator_payout_value": _get_attr_or_key(cashout_info, "curator_payout_value"),
-        "net_rshares": _get_int_from(cashout_info, "net_rshares"),
-        "net_votes": _get_int_from(cashout_info, "net_votes"),
-        "payout_time": _get_attr_or_key(cashout_info, "cashout_time"),
+        "allows_curation_rewards": cashout_info.allow_curation_rewards,
+        "allows_replies": cashout_info.allow_replies,
+        "allows_votes": cashout_info.allow_votes,
+        "author_rewards": int(cashout_info.author_rewards),
+        "curator_payout_value": cashout_info.curator_payout_value,
+        "net_rshares": int(cashout_info.net_rshares),
+        "net_votes": cashout_info.net_votes,
+        "payout_time": cashout_info.cashout_time,
         "is_paid": False,
-        "total_payout_value": _get_attr_or_key(cashout_info, "total_payout_value"),
+        "total_payout_value": cashout_info.total_payout_value,
     }
 
 

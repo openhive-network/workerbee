@@ -11,6 +11,9 @@ import time
 from typing import TYPE_CHECKING
 
 from .._ordered_set import OrderedSet
+from ..classifiers.account_classifier import AccountClassifier
+from ..classifiers.change_recovery_in_progress_classifier import ChangeRecoveryInProgressClassifier
+from ..classifiers.decline_voting_rights_classifier import DeclineVotingRightsClassifier
 from .filter_base import FilterBase
 
 if TYPE_CHECKING:
@@ -27,12 +30,6 @@ class AlarmFilter(FilterBase):
         self._accounts: OrderedSet[str] = OrderedSet(accounts)
 
     def used_contexts(self) -> list[TRegisterEvaluationContext]:
-        from ..classifiers.account_classifier import AccountClassifier
-        from ..classifiers.change_recovery_in_progress_classifier import (
-            ChangeRecoveryInProgressClassifier,
-        )
-        from ..classifiers.decline_voting_rights_classifier import DeclineVotingRightsClassifier
-
         classifiers: list[TRegisterEvaluationContext] = []
         for account in self._accounts:
             classifiers.append(AccountClassifier.for_options({"account": account}))
@@ -50,12 +47,6 @@ class AlarmFilter(FilterBase):
         return classifiers
 
     async def match(self, data: DataEvaluationContext) -> bool:
-        from ..classifiers.account_classifier import AccountClassifier
-        from ..classifiers.change_recovery_in_progress_classifier import (
-            ChangeRecoveryInProgressClassifier,
-        )
-        from ..classifiers.decline_voting_rights_classifier import DeclineVotingRightsClassifier
-
         account_result = await data.get(AccountClassifier)
         accounts = account_result["accounts"]
 

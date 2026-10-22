@@ -6,17 +6,21 @@ Uses batched get_block_range via wax block_api for performance.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
+from ...classifier_results import BlockClassifierData
 from ...classifiers.block_classifier import BlockClassifier
 from ...classifiers.block_header_classifier import BlockHeaderClassifier
 from ...errors import WorkerBeeError
-from ...utils import parse_iso_timestamp
-from ..collector_base import CollectorBase
+from ..collector_base import CollectorBase, TCollectorResult
+from ..common.block_transactions import collect_block_transactions
 
 if TYPE_CHECKING:
+    from hiveio_api.block_api import Block
+
     from ...factories.data_evaluation_context import TCollectorEvaluationContext
     from ...interfaces import IWorkerBee
+    from ...payloads import BlockHeaderData
 
 MAX_TAKE_BLOCKS = 1_000
 
@@ -28,13 +32,13 @@ class HistoryDataBlockCollector(CollectorBase):
         self._to_block = to_block
         self._current_block_index = from_block
         self._current_container_index = -1
-        self._cached_blocks: list[Any] = []
-        self._previous_header: dict[str, Any] | None = None
+        self._cached_blocks: list[Block] = []
+        self._previous_header: BlockHeaderData | None = None
 
         if to_block is not None and from_block > to_block:
             raise WorkerBeeError(f"Invalid block range in history data BlockCollector: {from_block} > {to_block}")
 
-    async def get(self, data: TCollectorEvaluationContext) -> dict[str, Any]:
+    async def get(self, data: TCollectorEvaluationContext) -> TCollectorResult:
         if self._current_block_index < 1:
             raise WorkerBeeError(
                 f"BlockCollector: No blocks returned from get_block_range starting from block #{self._from_block}",
@@ -59,53 +63,36 @@ class HistoryDataBlockCollector(CollectorBase):
                     count=count,
                 )
 
-            blocks = result.blocks if hasattr(result, "blocks") else []
+            blocks = result.blocks
             if not blocks:
                 if self._current_block_index == self._from_block:
                     raise WorkerBeeError(
                         f"BlockCollector: No blocks returned from get_block_range starting from block #{self._from_block}",
                     )
                 return {
-                    BlockClassifier.__name__: {"transactions": [], "transactions_per_id": {}},
-                    BlockHeaderClassifier.__name__: self._previous_header,
+                    BlockClassifier: BlockClassifierData(transactions=[], transactions_per_id={}),
+                    BlockHeaderClassifier: self._previous_header,
                 }
 
-            self._cached_blocks = list(blocks)
+            self._cached_blocks = blocks
 
         with data.add_timing("block_analysis"):
             block = self._cached_blocks[self._current_container_index]
 
-            block_txs = block.transactions if hasattr(block, "transactions") else block.get("transactions", [])
-            block_ids = block.transaction_ids if hasattr(block, "transaction_ids") else block.get("transaction_ids", [])
-
-            transactions: list[dict[str, Any]] = []
-            transactions_per_id: dict[str, Any] = {}
-
-            for i, tx_raw in enumerate(block_txs):
-                tx_id = block_ids[i] if i < len(block_ids) else ""
-                transactions.append({"transaction": tx_raw, "id": tx_id})
-                transactions_per_id[tx_id] = tx_raw
-
+            block_data = collect_block_transactions([block])
             block_num = self._current_block_index
-            timestamp_str = block.timestamp if hasattr(block, "timestamp") else block.get("timestamp", "")
-            witness = block.witness if hasattr(block, "witness") else block.get("witness", "")
-            block_id = block.block_id if hasattr(block, "block_id") else block.get("block_id", "")
-            parsed_ts = parse_iso_timestamp(timestamp_str) if timestamp_str else None
 
             self._current_container_index += 1
             self._current_block_index += 1
 
         self._previous_header = {
             "number": block_num,
-            "timestamp": parsed_ts,
-            "witness": witness,
-            "id": block_id,
+            "timestamp": block.timestamp,
+            "witness": block.witness,
+            "id": block.block_id,
         }
 
         return {
-            BlockClassifier.__name__: {
-                "transactions": transactions,
-                "transactions_per_id": transactions_per_id,
-            },
-            BlockHeaderClassifier.__name__: self._previous_header,
+            BlockClassifier: block_data,
+            BlockHeaderClassifier: self._previous_header,
         }

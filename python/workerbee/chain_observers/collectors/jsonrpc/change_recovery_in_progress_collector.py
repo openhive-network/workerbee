@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
+from ...classifier_results import AccountRecoveryChangeData, ChangeRecoveryInProgressData
 from ...classifiers.change_recovery_in_progress_classifier import ChangeRecoveryInProgressClassifier
+from ..collector_base import TCollectorResult
 from ..set_managed_collector import SetManagedCollector
 
 if TYPE_CHECKING:
@@ -14,11 +16,11 @@ if TYPE_CHECKING:
 class ChangeRecoveryInProgressCollector(SetManagedCollector):
     _options_key = "change_recovery_account"
 
-    async def get(self, data: TCollectorEvaluationContext) -> dict[str, Any]:
+    async def get(self, data: TCollectorEvaluationContext) -> TCollectorResult:
         if not self._tracked:
-            return {ChangeRecoveryInProgressClassifier.__name__: {"recovering_accounts": {}}}
+            return {ChangeRecoveryInProgressClassifier: ChangeRecoveryInProgressData(recovering_accounts={})}
 
-        recovering: dict[str, Any] = {}
+        recovering: dict[str, AccountRecoveryChangeData] = {}
         for chunk in self._tracked_chunks():
             with data.add_timing("database_api.find_change_recovery_account_requests"):
                 result = await self.worker.chain.api.database_api.find_change_recovery_account_requests(
@@ -32,4 +34,4 @@ class ChangeRecoveryInProgressCollector(SetManagedCollector):
                     "effective_on": req.effective_on,
                 }
 
-        return {ChangeRecoveryInProgressClassifier.__name__: {"recovering_accounts": recovering}}
+        return {ChangeRecoveryInProgressClassifier: ChangeRecoveryInProgressData(recovering_accounts=recovering)}

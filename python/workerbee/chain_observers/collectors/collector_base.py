@@ -6,12 +6,21 @@ Provides reference counting via register/unregister and optional get/query metho
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..classifiers.collector_classifier_base import TRegisterEvaluationContext
+    from collections.abc import Mapping
+
+    from ..classifiers.collector_classifier_base import IEvaluationContextClass, TRegisterEvaluationContext
     from ..factories.data_evaluation_context import TCollectorEvaluationContext
     from ..interfaces import IWorkerBee
+
+type TCollectorResult = dict[IEvaluationContextClass, object]
+"""Result of :meth:`CollectorBase.get` - the data of each classifier the collector serves, keyed by the classifier class.
+
+TS keys it by ``Classifier.name``. The value of a classifier is its result type (the type parameter of the classifier,
+e.g. ``OperationClassifierData`` of ``OperationClassifier``), which :meth:`DataEvaluationContext.get` returns.
+"""
 
 
 class CollectorBase:
@@ -33,28 +42,28 @@ class CollectorBase:
     def used_contexts(self) -> list[TRegisterEvaluationContext]:
         return []
 
-    async def get(self, data: TCollectorEvaluationContext) -> dict[str, Any]:
+    async def get(self, data: TCollectorEvaluationContext) -> TCollectorResult:
         raise NotImplementedError(
             f"Collector {type(self).__name__} does not implement the requested 'get' method",
         )
 
-    async def query(self, data: TCollectorEvaluationContext, options: Any) -> Any:
+    async def query(self, data: TCollectorEvaluationContext, options: Mapping[str, object]) -> object:
         raise NotImplementedError(
             f"Collector {type(self).__name__} does not implement the requested 'query' method",
         )
 
-    def push_options(self, data: Any) -> None:
+    def push_options(self, data: Mapping[str, object]) -> None:
         pass
 
-    def pop_options(self, data: Any) -> None:
+    def pop_options(self, data: Mapping[str, object]) -> None:
         pass
 
-    def register(self, data: Any = None) -> None:
+    def register(self, data: Mapping[str, object] | None = None) -> None:
         self._registers_count += 1
         if data is not None:
             self.push_options(data)
 
-    def unregister(self, data: Any = None) -> None:
+    def unregister(self, data: Mapping[str, object] | None = None) -> None:
         self._registers_count -= 1
         if data is not None:
             self.pop_options(data)

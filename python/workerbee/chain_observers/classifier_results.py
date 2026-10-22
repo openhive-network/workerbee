@@ -6,22 +6,24 @@ notification payloads remain in :mod:`workerbee.chain_observers.payloads`.
 
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TypedDict
+from typing import TYPE_CHECKING, TypedDict
 
-from hiveio_api.block_api import Transaction3, Transaction4
-from hiveio_api.database_api import CurrentMaxHistory3, CurrentMedianHistory3, CurrentMinHistory3, PriceHistoryItem3
+from .payloads import BlockTransactionsData, FeedPriceData
 
-from .payloads import (
-    AccountData,
-    ContentMetadata,
-    ManabarValue,
-    OperationsPerType,
-    OperationTransactionPair,
-    RcAccountData,
-    TransactionData,
-    WitnessData,
-)
+if TYPE_CHECKING:
+    from datetime import datetime
+
+    from hiveio_api.operations import Price
+
+    from .payloads import (
+        AccountData,
+        ContentMetadata,
+        ManabarValue,
+        OperationsPerType,
+        OperationTransactionPair,
+        RcAccountData,
+        WitnessData,
+    )
 
 
 class DynamicGlobalPropertiesData(TypedDict):
@@ -32,9 +34,8 @@ class DynamicGlobalPropertiesData(TypedDict):
     head_block_id: str
 
 
-class BlockClassifierData(TypedDict):
-    transactions: list[TransactionData]
-    transactions_per_id: dict[str, Transaction3 | Transaction4]
+BlockClassifierData = BlockTransactionsData
+"""The transactions of the block (the payload of ``provide_block_data()`` holds them with the header)."""
 
 
 class OperationClassifierData(TypedDict):
@@ -90,10 +91,8 @@ class ContentMetadataClassifierData(TypedDict):
     content_data: dict[str, dict[str, ContentMetadata]]
 
 
-class FeedPriceClassifierData(TypedDict):
-    current_median_history: CurrentMedianHistory3
-    market_median_history: CurrentMedianHistory3
-    current_min_history: CurrentMinHistory3
-    current_max_history: CurrentMaxHistory3
+class FeedPriceClassifierData(FeedPriceData):
+    """The feed price data of the provider (``FeedPriceData``) and the data only filters use."""
+
+    market_median_history: Price
     last_feed_price_retrieval_timestamp: datetime
-    price_history: list[PriceHistoryItem3]

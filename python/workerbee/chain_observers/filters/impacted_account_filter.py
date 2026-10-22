@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from .._ordered_set import OrderedSet
+from ..classifiers.impacted_account_classifier import ImpactedAccountClassifier
 from .filter_base import FilterBase
 
 if TYPE_CHECKING:
@@ -23,13 +24,9 @@ class ImpactedAccountFilter(FilterBase):
         self._accounts: OrderedSet[str] = OrderedSet(accounts)
 
     def used_contexts(self) -> list[TRegisterEvaluationContext]:
-        from ..classifiers.impacted_account_classifier import ImpactedAccountClassifier
-
         return [ImpactedAccountClassifier]
 
     async def match(self, data: DataEvaluationContext) -> bool:
-        from ..classifiers.impacted_account_classifier import ImpactedAccountClassifier
-
         result = await data.get(ImpactedAccountClassifier)
 
         return any(result["impacted_accounts"].get(account) is not None for account in self._accounts)

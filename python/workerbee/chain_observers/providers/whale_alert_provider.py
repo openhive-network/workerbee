@@ -5,29 +5,32 @@ Mirrors src/chain-observers/providers/whale-alert-provider.ts.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
+
+from hiveio_api import Asset
 
 from ..classifiers.collector_classifier_base import TRegisterEvaluationContext
 from ..classifiers.operation_classifier import OperationClassifier
 from ..utils import is_asset_greater_than
-from ._transfer_helpers import TRANSFER_OP_TYPES, get_transfer_amount
+from ._transfer_helpers import TRANSFER_AMOUNT_FIELDS
 from .provider_base import ProviderBase
 
 if TYPE_CHECKING:
-    from ..factories.data_evaluation_context import DataEvaluationContext
-    from ..payloads import WhaleAlertPair, WhaleAlertPayload
+    from collections.abc import Mapping
 
-AssetThreshold = dict[str, int | str]
-WhaleAlertOptions = dict[str, list[AssetThreshold]]
+    from ..factories.data_evaluation_context import DataEvaluationContext
+    from ..payloads import OpBodyTransactionPair, WhaleAlertPair, WhaleAlertPayload
+
+WhaleAlertOptions = dict[str, list[Asset]]
 
 
 class WhaleAlertProvider(ProviderBase):
     def __init__(self) -> None:
-        self.assets: dict[str, AssetThreshold] = {}
+        self.assets: dict[str, Asset] = {}
 
     def push_options(self, options: WhaleAlertOptions) -> None:
         for asset in options.get("assets", []):
-            self.assets[str(asset["nai"])] = asset
+            self.assets[asset.nai] = asset
 
     def used_contexts(self) -> list[TRegisterEvaluationContext]:
         return [OperationClassifier]
@@ -39,44 +42,24 @@ class WhaleAlertProvider(ProviderBase):
         whale_operations: list[WhaleAlertPair] = []
 
         for asset in self.assets.values():
-            for op_type in TRANSFER_OP_TYPES:
-                ops = ops_per_type.get(op_type)
-                if not ops:
-                    continue
-
-                for op in ops:
-                    amount = get_transfer_amount(op, op_type)
-                    if amount and is_asset_greater_than(asset, amount):
-                        operation = op["operation"]
-                        whale_operations.append(
-                            cast(
-                                "WhaleAlertPair",
-                                {
-                                    "operation": {
-                                        "from": operation["from"],
-                                        "to": operation["to"],
-                                        "amount": amount,
-                                    },
-                                    "transaction": op["transaction"],
-                                },
-                            )
-                        )
-                    if op_type == "escrow_transfer_operation":
-                        esc_op = op["operation"]
-                        hive_amount = esc_op.get("hive_amount")
-                        if hive_amount and hive_amount != amount and is_asset_greater_than(asset, hive_amount):
-                            whale_operations.append(
-                                cast(
-                                    "WhaleAlertPair",
-                                    {
-                                        "operation": {
-                                            "from": esc_op["from"],
-                                            "to": esc_op["to"],
-                                            "amount": hive_amount,
-                                        },
-                                        "transaction": op["transaction"],
-                                    },
-                                )
-                            )
+            for op_type, amount_fields in TRANSFER_AMOUNT_FIELDS.items():
+                for op in ops_per_type.get(op_type, []):
+                    whale_operation = _whale_operation(asset, op, amount_fields)
+                    if whale_operation is not None:
+                        whale_operations.append(whale_operation)
 
         return {"whale_operations": whale_operations}
+
+
+def _whale_operation(threshold: Asset, op: OpBodyTransactionPair, amount_fields: tuple[str, ...]) -> WhaleAlertPair | None:
+    """The whale alert of a transfer by its first amount (of ``amount_fields``) greater than ``threshold`` - else None."""
+    operation: Mapping[str, object] = op["operation"]
+    for field in amount_fields:
+        # Operation bodies are JSON (as in TS) - the amount is an asset in the NAI form, delivered as it is.
+        amount = operation[field]
+        if is_asset_greater_than(threshold, amount):
+            return {
+                "operation": {"from": str(operation["from"]), "to": str(operation["to"]), "amount": amount},
+                "transaction": op["transaction"],
+            }
+    return None

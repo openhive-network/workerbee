@@ -5,9 +5,9 @@ Mirrors src/chain-observers/providers/follow-provider.ts.
 
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING
 
+from .._follow_plugin import parse_follow_operation
 from .._ordered_set import OrderedSet
 from ..classifiers.collector_classifier_base import TRegisterEvaluationContext
 from ..classifiers.operation_classifier import OperationClassifier
@@ -38,47 +38,10 @@ class FollowProvider(ProviderBase):
         result: dict[str, list[FollowOperationPair]] = {}
 
         operations = await data.get(OperationClassifier)
-        custom_json_ops = operations["operations_per_type"].get("custom_json_operation")
-        if custom_json_ops:
-            for operation in custom_json_ops:
-                if operation["operation"]["id"] != "follow":
-                    continue
-
-                json_payload = operation["operation"].get("json")
-                if not isinstance(json_payload, str):
-                    continue
-
-                try:
-                    parsed = json.loads(json_payload)
-                except (json.JSONDecodeError, TypeError):
-                    continue
-
-                if not isinstance(parsed, list) or len(parsed) < 2 or not isinstance(parsed[1], dict):
-                    continue
-
-                payload = parsed[1]
-                follower = payload.get("follower")
-                following = payload.get("following")
-                what = payload.get("what")
-
-                if parsed[0] != "follow" or not isinstance(follower, str) or follower not in self.accounts:
-                    continue
-
-                if not isinstance(following, str) or not isinstance(what, list):
-                    continue
-
-                if follower not in result:
-                    result[follower] = []
-
-                result[follower].append(
-                    {
-                        "operation": {
-                            "follower": follower,
-                            "following": following,
-                            "what": what,
-                        },
-                        "transaction": operation["transaction"],
-                    }
-                )
+        for entry in operations["operations_per_type"].get("custom_json_operation", []):
+            follow = parse_follow_operation(entry["operation"])
+            if follow is None or follow["follower"] not in self.accounts:
+                continue
+            result.setdefault(follow["follower"], []).append({"operation": follow, "transaction": entry["transaction"]})
 
         return {"follows": result}

@@ -8,17 +8,19 @@ behind the head, while Python must not skip or strand the tail block.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from msgspec import UNSET
-
+from ...classifier_results import BlockClassifierData
 from ...classifiers.block_classifier import BlockClassifier
 from ...classifiers.collector_classifier_base import TRegisterEvaluationContext
 from ...classifiers.dynamic_global_properties_classifier import DynamicGlobalPropertiesClassifier
 from ...errors import BlockNotAvailableError, WorkerBeeError
-from ..collector_base import CollectorBase
+from ..collector_base import CollectorBase, TCollectorResult
+from ..common.block_transactions import collect_block_transactions
 
 if TYPE_CHECKING:
+    from hiveio_api.block_api import Block
+
     from ...factories.data_evaluation_context import TCollectorEvaluationContext
     from ...interfaces import IWorkerBee
 
@@ -29,19 +31,19 @@ class BlockCollector(CollectorBase):
     def __init__(self, worker: IWorkerBee) -> None:
         super().__init__(worker)
         self._current_head_block = -1
-        self._cached_block_data: dict[str, Any] | None = None
+        self._cached_block_data: BlockClassifierData | None = None
 
     def used_contexts(self) -> list[TRegisterEvaluationContext]:
         return [DynamicGlobalPropertiesClassifier]
 
-    async def get(self, data: TCollectorEvaluationContext) -> dict[str, Any]:
+    async def get(self, data: TCollectorEvaluationContext) -> TCollectorResult:
         dgp = await data.get(DynamicGlobalPropertiesClassifier)
         head_block_number: int = dgp["head_block_number"]
 
         if self._current_head_block == head_block_number and self._cached_block_data is not None:
-            return {BlockClassifier.__name__: self._cached_block_data}
+            return {BlockClassifier: self._cached_block_data}
 
-        api_blocks: list[Any] = []
+        api_blocks: list[Block] = []
 
         target_head_block = head_block_number
 
@@ -63,7 +65,7 @@ class BlockCollector(CollectorBase):
                     count=gap,
                 )
 
-            fetched = range_result.blocks if hasattr(range_result, "blocks") else []
+            fetched = range_result.blocks
             if not fetched:
                 raise WorkerBeeError(
                     f"Could not fetch missing blocks from {self._current_head_block + 1} to {head_block_number}",
@@ -77,30 +79,15 @@ class BlockCollector(CollectorBase):
                     block_num=head_block_number,
                 )
 
-            # wax/hiveio_api leaves an absent block as the msgspec.UNSET sentinel
-            # (not None), so guard against both — mirrors TS `block === undefined`.
-            block = block_result.block if hasattr(block_result, "block") else None
-            if block is None or block is UNSET:
+            # an absent block is None - mirrors TS `block === undefined`.
+            block = block_result.block
+            if block is None:
                 raise BlockNotAvailableError(head_block_number)
             api_blocks.append(block)
 
         self._current_head_block = target_head_block
 
         with data.add_timing("block_analysis"):
-            transactions: list[dict[str, Any]] = []
-            transactions_per_id: dict[str, Any] = {}
+            self._cached_block_data = collect_block_transactions(api_blocks)
 
-            for block in api_blocks:
-                block_txs = block.transactions if hasattr(block, "transactions") else block.get("transactions", [])
-                block_ids = block.transaction_ids if hasattr(block, "transaction_ids") else block.get("transaction_ids", [])
-                for i, tx_raw in enumerate(block_txs):
-                    tx_id = block_ids[i] if i < len(block_ids) else ""
-                    transactions.append({"transaction": tx_raw, "id": tx_id})
-                    transactions_per_id[tx_id] = tx_raw
-
-        self._cached_block_data = {
-            "transactions": transactions,
-            "transactions_per_id": transactions_per_id,
-        }
-
-        return {BlockClassifier.__name__: self._cached_block_data}
+        return {BlockClassifier: self._cached_block_data}

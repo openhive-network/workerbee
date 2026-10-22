@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from .._ordered_set import OrderedSet
+from ..classifiers.manabar_classifier import ManabarClassifier
 from .filter_base import FilterBase
 
 if TYPE_CHECKING:
@@ -30,8 +31,6 @@ class AccountFullManabarFilter(FilterBase):
         self.accounts: OrderedSet[str] = OrderedSet(accounts)
 
     def used_contexts(self) -> list[TRegisterEvaluationContext]:
-        from ..classifiers.manabar_classifier import ManabarClassifier
-
         context: list[TRegisterEvaluationContext] = []
 
         for account in self.accounts:
@@ -44,8 +43,6 @@ class AccountFullManabarFilter(FilterBase):
         return context
 
     async def match(self, data: DataEvaluationContext) -> bool:
-        from ..classifiers.manabar_classifier import ManabarClassifier
-
         result = await data.get(ManabarClassifier)
         manabar_data = result["manabar_data"]
 

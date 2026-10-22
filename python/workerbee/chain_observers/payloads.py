@@ -12,31 +12,14 @@ import-time cost (the ``*_description`` modules are large - see
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, TypedDict, TypeGuard
 
 if TYPE_CHECKING:
     from datetime import datetime
 
-    from hiveio_api.block_api import Operation, Transaction3, Transaction4
-    from hiveio_api.database_api import (
-        Balance,
-        CuratorPayoutValue,
-        CurrentMaxHistory3,
-        CurrentMedianHistory3,
-        CurrentMinHistory3,
-        DelegatedVestingShares,
-        HbdBalance,
-        PriceHistoryItem3,
-        ReceivedVestingShares,
-        RewardHbdBalance,
-        RewardHiveBalance,
-        RewardVestingBalance,
-        SavingsBalance,
-        SavingsHbdBalance,
-        TotalPayoutValue,
-        VestingShares,
-        VestingWithdrawRate,
-    )
+    from hiveio_api import Asset
+    from hiveio_api.operations import Price, Transaction
 
     from .enums import AlarmType, Exchange, ManabarType
 
@@ -81,23 +64,30 @@ def has_payload[PayloadT: PayloadBase](note: object, payload_cls: type[PayloadT]
 
 
 class TransactionData(PayloadBase):
-    """A block transaction paired with its id (mirrors TS ITransactionData).
+    """A block transaction paired with its id (mirrors TS ITransactionData)."""
 
-    The transaction is a ``Transaction4`` on the live ``get_block`` path
-    (``Block1``) and a structurally identical ``Transaction3`` on the
-    ``get_block_range`` catch-up path — hence the union leaf.
+    transaction: Transaction
+    id: str
+
+
+@dataclass(frozen=True)
+class Operation:
+    """A block operation in the HF26 envelope - its ``type`` (e.g. ``vote_operation``) and body.
+
+    ``value`` is the operation body as the API gives it (a JSON object), the shape the
+    providers and filters read - as TS reads the bodies of wax operations.
     """
 
-    transaction: Transaction3 | Transaction4
-    id: str
+    type: str
+    value: dict[str, object]
 
 
 class OperationTransactionPair(PayloadBase):
     """An operation together with the transaction that carried it.
 
-    Mirrors TS ``IOperationTransactionPair``. ``operation`` is the hiveio_api
-    block operation envelope — ``operation.type`` (str) and ``operation.value``
-    (the operation body as ``dict[str, Any]``, the shape block_api exposes).
+    Mirrors TS ``IOperationTransactionPair``. ``operation`` is the block operation
+    envelope — ``operation.type`` (str) and ``operation.value`` (the operation body
+    as a JSON object, the shape the API gives).
     """
 
     operation: Operation
@@ -116,42 +106,44 @@ class ImpactedAccountsPayload(PayloadBase, total=False):
 # (src/chain-observers/classifiers/{account,rc-account,witness,manabar}-classifier.ts),
 # snake_cased and shaped to what the Python collectors actually emit.
 #
-# Balance leaves keep their distinct hiveio_api per-field asset structs (each is
-# ``{amount: str | int, nai: str, precision: int}``); TS collapses them to a
-# single wax ``asset``, but the Python collectors pass the source structs through
-# untouched (by direct attribute access), so the precise field class is the honest
-# runtime type. Every one of these account fields is required, so no leaf is optional.
+# Balance leaves are the ``Asset`` of hiveio_api (``amount``, ``precision``, ``nai``,
+# arithmetic and comparisons) - as TS uses a single wax ``asset``. Every one of these
+# account fields is required, so no leaf is optional.
 #
 # ---------------------------------------------------------------------------
 
 
 class HbdDetailedBalance(PayloadBase):
-    """HBD sub-balance: liquid/savings/unclaimed plus TS-compatible total."""
+    """HBD sub-balance: liquid/savings/unclaimed plus TS-compatible total.
 
-    liquid: HbdBalance
-    savings: SavingsHbdBalance
-    unclaimed: RewardHbdBalance
-    total: HbdBalance
+    As in TS (``account-collector.ts``), ``total`` is ``liquid + unclaimed`` - without ``savings``, unlike
+    ``HiveDetailedBalance.total``, which includes the HIVE savings.
+    """
+
+    liquid: Asset
+    savings: Asset
+    unclaimed: Asset
+    total: Asset
 
 
 class HiveDetailedBalance(PayloadBase):
     """HIVE sub-balance (same shape as HBD with HIVE-side asset structs)."""
 
-    liquid: Balance
-    savings: SavingsBalance
-    unclaimed: RewardHiveBalance
-    total: Balance
+    liquid: Asset
+    savings: Asset
+    unclaimed: Asset
+    total: Asset
 
 
 class HpDetailedBalance(PayloadBase):
     """HP (vesting) sub-balance — adds delegated/received/powering_down."""
 
-    liquid: VestingShares
-    delegated: DelegatedVestingShares
-    received: ReceivedVestingShares
-    powering_down: VestingWithdrawRate
-    unclaimed: RewardVestingBalance
-    total: VestingShares
+    liquid: Asset
+    delegated: Asset
+    received: Asset
+    powering_down: Asset
+    unclaimed: Asset
+    total: Asset
 
 
 class AccountBalance(PayloadBase):
@@ -394,9 +386,9 @@ class ReblogsPayload(PayloadBase, total=False):
 class BlockHeaderData(PayloadBase):
     """Block header fields (mirrors TS IBlockHeaderData).
 
-    ``timestamp`` is the head-block time as a ``datetime`` — the DGP collector
-    parses it via ``parse_iso_timestamp`` and the header collector passes it
-    through (the old bot.py contract mistyped it as ``str``).
+    ``timestamp`` is the head-block time as a ``datetime`` in UTC — the DGP
+    collector takes the date of the model (``HiveDateTime``) and the header
+    collector passes it through (the old bot.py contract mistyped it as ``str``).
     """
 
     number: int
@@ -405,11 +397,15 @@ class BlockHeaderData(PayloadBase):
     witness: str
 
 
-class BlockData(BlockHeaderData):
-    """A full block: header fields plus its transactions (mirrors TS IBlockData)."""
+class BlockTransactionsData(PayloadBase):
+    """Transactions of a block with their ids (mirrors TS IBlockData) - the data of ``BlockClassifier``."""
 
     transactions: list[TransactionData]
-    transactions_per_id: dict[str, Transaction3 | Transaction4]
+    transactions_per_id: dict[str, Transaction]
+
+
+class BlockData(BlockHeaderData, BlockTransactionsData):
+    """A full block: header fields plus its transactions (mirrors TS IBlockHeaderData & IBlockData)."""
 
 
 class BlockHeaderPayload(PayloadBase, total=False):
@@ -427,7 +423,7 @@ class BlockPayload(PayloadBase, total=False):
 class TransactionsByIdPayload(PayloadBase, total=False):
     """Payload from ``provide_transactions(...)``: tracked transactions per id."""
 
-    transactions: dict[str, Transaction3 | Transaction4]
+    transactions: dict[str, Transaction]
 
 
 # ---------------------------------------------------------------------------
@@ -453,12 +449,12 @@ class ContentMetadata(PayloadBase):
     allows_replies: bool
     allows_votes: bool
     author_rewards: int
-    curator_payout_value: CuratorPayoutValue | None
+    curator_payout_value: Asset | None
     net_rshares: int
     net_votes: int
-    payout_time: str | None
+    payout_time: datetime | None
     is_paid: bool
-    total_payout_value: TotalPayoutValue | None
+    total_payout_value: Asset | None
 
 
 class PostsMetadataPayload(PayloadBase, total=False):
@@ -481,10 +477,10 @@ class FeedPriceData(PayloadBase):
     price struct with ``base``/``quote``.
     """
 
-    current_median_history: CurrentMedianHistory3
-    current_min_history: CurrentMinHistory3
-    current_max_history: CurrentMaxHistory3
-    price_history: list[PriceHistoryItem3]
+    current_median_history: Price
+    current_min_history: Price
+    current_max_history: Price
+    price_history: list[Price]
 
 
 class FeedPricePayload(PayloadBase, total=False):
@@ -534,7 +530,7 @@ class AlarmsPayload(PayloadBase, total=False):
 
 
 # ``from`` is a Python keyword → functional PayloadBase syntax. ``amount`` is the
-# raw op.value amount (a NaiAsset dict on hf26, or a legacy string), hence ``object``.
+# raw op.value amount (a NAI asset object on hf26, or a legacy string), hence ``object``.
 ExchangeTransferMetadata = TypedDict(
     "ExchangeTransferMetadata",
     {"from": str, "to": str, "amount": object, "exchange": "Exchange"},

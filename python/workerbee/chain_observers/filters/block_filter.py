@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from ..classifiers.block_header_classifier import BlockHeaderClassifier
 from .filter_base import FilterBase
 
 if TYPE_CHECKING:
@@ -20,13 +21,9 @@ class BlockNumberFilter(FilterBase):
         self._number = number
 
     def used_contexts(self) -> list[TRegisterEvaluationContext]:
-        from ..classifiers.block_header_classifier import BlockHeaderClassifier
-
         return [BlockHeaderClassifier]
 
     async def match(self, data: DataEvaluationContext) -> bool:
-        from ..classifiers.block_header_classifier import BlockHeaderClassifier
-
         block = await data.get(BlockHeaderClassifier)
 
         return bool(block["number"] == self._number)

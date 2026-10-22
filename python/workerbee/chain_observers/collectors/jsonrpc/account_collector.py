@@ -6,42 +6,35 @@ Mirrors src/chain-observers/collectors/jsonrpc/account-collector.ts.
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
+from ...classifier_results import AccountClassifierData
 from ...classifiers.account_classifier import AccountClassifier
+from ..collector_base import TCollectorResult
 from ..set_managed_collector import SetManagedCollector
 
 if TYPE_CHECKING:
+    from hiveio_api import Asset
+
     from ...factories.data_evaluation_context import TCollectorEvaluationContext
-
-MAX_ACCOUNT_GET_LIMIT = 1000
-
-
-def _parse_governance_expiration(raw: object) -> datetime | None:
-    # Mirrors src/chain-observers/collectors/jsonrpc/account-collector.ts: parse as
-    # UTC (`new Date(`${ts}Z`)`) and treat a null/epoch/invalid time (getTime() <= 0)
-    # as None. The wire value is an ISO string despite the model's HiveDateTime
-    # annotation (and is the epoch sentinel for accounts with no governance vote).
-    try:
-        parsed = datetime.fromisoformat(str(raw))
-    except ValueError:
-        return None
-    if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=UTC)
-    return parsed if parsed.timestamp() > 0 else None
+    from ...payloads import AccountData
 
 
-def _amount(asset: object) -> int:
-    return int(getattr(asset, "amount", 0) or 0)
+def _governance_expiration(expiration: datetime) -> datetime | None:
+    """The governance vote expiration of an account - None of the epoch time (the sentinel of no governance vote).
+
+    Mirrors src/chain-observers/collectors/jsonrpc/account-collector.ts (``getTime() <= 0`` is None).
+    """
+    return expiration if expiration.timestamp() > 0 else None
 
 
-def _total_asset(base: Any, *parts: object) -> Any:
-    return type(base)(
-        amount=str(sum(_amount(part) for part in parts)),
-        precision=base.precision,
-        nai=base.nai,
-    )
+def _total_asset(base: Asset, *parts: Asset) -> Asset:
+    """Sum of the parts - an asset of the kind of `base`."""
+    total = base * 0
+    for part in parts:
+        total += part
+    return total
 
 
 def _parse_json_metadata(raw: object) -> dict[str, Any]:
@@ -55,15 +48,13 @@ def _parse_json_metadata(raw: object) -> dict[str, Any]:
 class AccountCollector(SetManagedCollector):
     _options_key = "account"
 
-    async def get(self, data: TCollectorEvaluationContext) -> dict[str, Any]:
+    async def get(self, data: TCollectorEvaluationContext) -> TCollectorResult:
         if not self._tracked:
-            return {AccountClassifier.__name__: {"accounts": {}}}
+            return {AccountClassifier: AccountClassifierData(accounts={})}
 
-        accounts_list = list(self._tracked)
-        accounts: dict[str, Any] = {}
+        accounts: dict[str, AccountData | None] = {}
 
-        for i in range(0, len(accounts_list), MAX_ACCOUNT_GET_LIMIT):
-            chunk = accounts_list[i : i + MAX_ACCOUNT_GET_LIMIT]
+        for chunk in self._tracked_chunks():
             # wax binds chain.api.<api> at runtime; mypy sees the unbound class method.
             with data.add_timing("database_api.find_accounts"):
                 result = await self.worker.chain.api.database_api.find_accounts(accounts=chunk)
@@ -116,7 +107,7 @@ class AccountCollector(SetManagedCollector):
                     "json_metadata": _parse_json_metadata(acc.json_metadata),
                     "posting_json_metadata": _parse_json_metadata(acc.posting_json_metadata),
                     "recovery_account": acc.recovery_account,
-                    "governance_vote_expiration": _parse_governance_expiration(acc.governance_vote_expiration_ts),
+                    "governance_vote_expiration": _governance_expiration(acc.governance_vote_expiration_ts),
                 }
 
-        return {AccountClassifier.__name__: {"accounts": accounts}}
+        return {AccountClassifier: AccountClassifierData(accounts=accounts)}

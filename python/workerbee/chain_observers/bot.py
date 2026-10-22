@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import inspect
-from collections.abc import AsyncGenerator, Mapping
+from collections.abc import AsyncGenerator
 from datetime import timedelta
 from typing import TYPE_CHECKING, cast
 
@@ -20,7 +20,7 @@ from .observer_mediator import ObserverMediator
 from .past_queen import PastQueen
 from .payloads import BlockData, BlockPayload, has_payload
 from .queen import QueenBee, Subscription
-from .utils import _validate_max_queue_size, calculate_relative_time, parse_iso_timestamp
+from .utils import _validate_max_queue_size, calculate_relative_time
 from .wax_api import WorkerBeeApiCollection
 
 if TYPE_CHECKING:
@@ -48,20 +48,12 @@ class WorkerBee(IWorkerBee):
         # extends() returns a new chain instance. Reuse a chain that already carries
         # WorkerBee's block_api extension; otherwise WorkerBee owns the wrapper it
         # creates and closes it from aclose().
-        if hasattr(getattr(chain, "api", None), "block_api"):
-            extended = chain
-            self._owned_chain: IHiveChainInterface[WorkerBeeApiCollection] | None = None
-        elif hasattr(chain, "extends"):
-            extended = chain.extends(WorkerBeeApiCollection)
-            self._owned_chain = cast("IHiveChainInterface[WorkerBeeApiCollection]", extended)
+        self._owned_chain: IHiveChainInterface[WorkerBeeApiCollection] | None = None
+        if isinstance(chain.api, WorkerBeeApiCollection):
+            self.chain = cast("IHiveChainInterface[WorkerBeeApiCollection]", chain)
         else:
-            extended = chain
-            self._owned_chain = None
-
-        self.chain: IHiveChainInterface[WorkerBeeApiCollection] = cast(
-            "IHiveChainInterface[WorkerBeeApiCollection]",
-            extended,
-        )
+            self._owned_chain = cast("IHiveChainInterface[WorkerBeeApiCollection]", chain.extends(WorkerBeeApiCollection))
+            self.chain = self._owned_chain
         self.mediator = ObserverMediator(JsonRpcFactory(self))
         self._interval_task: asyncio.Task[None] | None = None
 
@@ -101,10 +93,10 @@ class WorkerBee(IWorkerBee):
         """
         dgp = await self.chain.api.database_api.get_dynamic_global_properties()
         head: int = dgp.head_block_number
-        head_time = parse_iso_timestamp(str(dgp.time))
+        head_time = dgp.time
 
         actual_time = calculate_relative_time(relative_time, head_time)
-        blocks_between = int((head_time.timestamp() - actual_time.timestamp()) / 3)
+        blocks_between = int((head_time - actual_time).total_seconds() * 1000 / HIVE_BLOCK_INTERVAL_MS)
 
         if blocks_between <= 0:
             raise WorkerBeeError(f"Invalid time range: {relative_time} is in the future")
@@ -161,11 +153,7 @@ class WorkerBee(IWorkerBee):
                     last_blockchain_time.clear()
                     last_blockchain_time.append(str(block_ts))
 
-            txs_raw = val.get("transactions", {})
-            if not isinstance(txs_raw, dict):
-                return
-            # Read-only view; Mapping is covariant so the typed transactions dict fits.
-            txs: Mapping[str, object] = txs_raw
+            txs = val.get("transactions", {})
             transaction = txs.get(tx_id)
             if transaction is None and legacy_tx_id is not None:
                 transaction = txs.get(legacy_tx_id)
@@ -174,7 +162,7 @@ class WorkerBee(IWorkerBee):
 
             if verify_signatures:
                 orig_sigs: list[str] = original_signatures
-                tx_sigs: list[str] = transaction.get("signatures", []) if isinstance(transaction, dict) else getattr(transaction, "signatures", [])
+                tx_sigs = transaction.signatures
                 if len(tx_sigs) != len(orig_sigs):
                     error_holder.append(WorkerBeeError("Transaction broadcast error: Signatures length mismatch"))
                     done.set()
@@ -208,7 +196,7 @@ class WorkerBee(IWorkerBee):
             try:
                 await asyncio.wait_for(done.wait(), timeout=expire_in.total_seconds())
             except TimeoutError:
-                tx_expiration = getattr(tx.transaction, "expiration", "unknown")
+                tx_expiration = tx.transaction.expiration
                 blocks_str = "(none)"
                 if last_block:
                     blocks_str = str(first_block[0]) if first_block == last_block else f"{first_block[0]} - {last_block[0]}"

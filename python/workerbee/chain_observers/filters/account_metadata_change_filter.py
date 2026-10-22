@@ -11,6 +11,7 @@ import json
 from typing import TYPE_CHECKING
 
 from .._ordered_set import OrderedSet
+from ..classifiers.account_classifier import AccountClassifier
 from .filter_base import FilterBase
 
 if TYPE_CHECKING:
@@ -25,8 +26,6 @@ class AccountMetadataChangeFilter(FilterBase):
         self._previous_metadata_by_account: dict[str, tuple[str, str]] = {}
 
     def used_contexts(self) -> list[TRegisterEvaluationContext]:
-        from ..classifiers.account_classifier import AccountClassifier
-
         classifiers: list[TRegisterEvaluationContext] = []
         for account in self._accounts:
             classifiers.append(AccountClassifier.for_options({"account": account}))
@@ -34,8 +33,6 @@ class AccountMetadataChangeFilter(FilterBase):
         return classifiers
 
     async def match(self, data: DataEvaluationContext) -> bool:
-        from ..classifiers.account_classifier import AccountClassifier
-
         result = await data.get(AccountClassifier)
         accounts = result["accounts"]
 
