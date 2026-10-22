@@ -8,6 +8,7 @@ from datetime import timedelta
 from types import SimpleNamespace
 
 import pytest
+from hiveio_api import HiveDateTime
 
 from workerbee.chain_observers.bot import WorkerBee
 from workerbee.chain_observers.errors import BlockNotAvailableError, WorkerBeeError
@@ -47,7 +48,7 @@ class _FakeBlock:
 @dataclass
 class _FakeDgp:
     head_block_number: int
-    time: str = "2026-01-01T00:00:00"
+    time: HiveDateTime
     current_witness: str = "witness-a"
     downvote_pool_percent: int = 2500
     head_block_id: str = "0000000000000000000000000000000000000000"
@@ -92,10 +93,16 @@ class _FakeBroadcastChain:
         self.broadcast_called = False
         self.broadcast_arg: object | None = None
         self.head_block_number = 1000
-        self.block_time = "2026-01-01T00:00:00"
+        self.block_time = HiveDateTime("2026-01-01T00:00:00")
         self.blocks: dict[int, _FakeBlock | _RaisingBlock | None] = {}
         self.api = _FakeApi(self)
         self.on_broadcast: Callable[[], Awaitable[None]] | None = None
+
+    def extends(self, *args: object) -> _FakeBroadcastChain:
+        return self
+
+    async def aclose(self) -> None:
+        pass
 
     async def broadcast(self, tx: object) -> None:
         self.broadcast_called = True

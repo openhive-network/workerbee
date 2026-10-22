@@ -161,7 +161,7 @@ async def test_massive_account_monitoring_single_account(js_jsonrpc_mock_chain: 
     account = received[-1]["accounts"]["gtg"]
     assert account is not None
     assert account["name"] == "gtg"
-    assert account["balance"]["HIVE"]["liquid"].amount == "0"
+    assert account["balance"]["HIVE"]["liquid"].amount == 0
     profile = account["json_metadata"].get("profile")
     assert isinstance(profile, dict)
     assert profile["witness_description"] == "Gandalf the Grey, changed metadata."
@@ -243,15 +243,16 @@ async def test_economic_research_platform(js_jsonrpc_mock_chain: IHiveChainInter
 
     result = await with_js_mock_bot(js_jsonrpc_mock_chain, scenario)
 
+    # Unlike TS (which compares the amount strings), 23.890 HIVE is not a whale above 10000 HIVE.
     assert result == [
         "Economic price change: 134.31%",
         "Economic price change: 134.31%",
         "Economic price change: 134.31%",
-        "Economic whale alert: mxchive -> inhivepool (23890)",
         "Economic price change: 134.31%",
         "Economic market operation: honeybot - order 1485200410",
         "Economic exchange transfer: mxchive -> inhivepool (23890)",
         "Economic exchange transfer: bdhivesteem -> gtg (1000)",
+        "Economic price change: 134.31%",
     ]
 
 
@@ -509,7 +510,7 @@ async def test_complex_nested_filter_combinations(js_jsonrpc_mock_chain: IHiveCh
         "Complex reblog: gtg -> fwaszkiewicz/hi-to-hive",
         "Complex mention: mtyszczak -> write-on-hive-read-everywhere",
         "Complex mention: fwaszkiewicz -> hi-to-hive",
-        "Complex whale: mxchive -> inhivepool (23890)",
+        # Unlike TS (which compares the amount strings), 23.890 HIVE is not a whale above 1000 HIVE.
         "Complex whale: blocktrades -> gtg (10000000)",
         "Complex market: honeybot - 1485200410",
         "Complex exchange: mxchive -> inhivepool (23890)",
@@ -518,6 +519,7 @@ async def test_complex_nested_filter_combinations(js_jsonrpc_mock_chain: IHiveCh
         "Complex custom: follow",
         "Complex custom: follow",
         "Complex custom: follow",
+        "Complex post: gtg - SkyTeam Airline Alliance - Official partner of HiveFest",
     ]
 
 
@@ -602,5 +604,5 @@ async def test_detects_account_balance_change(js_jsonrpc_mock_chain: IHiveChainI
 
     account = received[-1]["accounts"]["gtg"]
     assert account is not None
-    assert account["balance"]["HBD"]["savings"].amount == "3468"
-    assert account["balance"]["HBD"]["total"].amount == "3662"
+    assert account["balance"]["HBD"]["savings"].amount == 3468
+    assert account["balance"]["HBD"]["total"].amount == 3662

@@ -11,6 +11,7 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, cast
 
 import pytest
+from wax import WaxChainOptions, create_hive_chain
 
 from workerbee.chain_observers.bot import WorkerBee, _AsyncBlockIterator
 from workerbee.chain_observers.errors import WorkerBeeError
@@ -215,28 +216,30 @@ class TestAclose:
 
     @pytest.mark.asyncio
     async def test_aclose_does_not_close_already_extended_external_chain(self) -> None:
-        class ExtendedChain:
-            def __init__(self) -> None:
-                self.api = SimpleNamespace(block_api=object())
-                self.extends_calls = 0
+        class CloseCountingChain:
+            # Carries the api of a real extended chain (so WorkerBee recognises it
+            # as already extended) and counts aclose() calls. It has no extends(),
+            # so extending it again would fail.
+            def __init__(self, chain: IHiveChainInterface[WorkerBeeApiCollection]) -> None:
+                self.api = chain.api
                 self.close_calls = 0
-
-            def extends(self, api_collection: object) -> object:
-                self.extends_calls += 1
-                raise AssertionError("already-extended chains must not be extended again")
 
             async def aclose(self) -> None:
                 self.close_calls += 1
 
-        chain = ExtendedChain()
-        bot = WorkerBee(cast("IHiveChainInterface", chain))
+        # Constructing the chain does not open a connection.
+        real_chain = create_hive_chain(WaxChainOptions(endpoint_url="http://localhost:8090")).extends(WorkerBeeApiCollection)
+        try:
+            chain = CloseCountingChain(real_chain)
+            bot = WorkerBee(cast("IHiveChainInterface", chain))
 
-        assert cast("object", bot.chain) is chain
-        assert chain.extends_calls == 0
+            assert cast("object", bot.chain) is chain
 
-        await bot.aclose()
+            await bot.aclose()
 
-        assert chain.close_calls == 0
+            assert chain.close_calls == 0
+        finally:
+            await real_chain.aclose()
 
 
 # ---------------------------------------------------------------------------

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 import pytest
+from hiveio_api import Asset
 
 from tests.integration._mirrornet import MirrornetReplay
 from workerbee.chain_observers.enums import Exchange
@@ -93,8 +94,7 @@ async def test_on_whale_alert_large_transfers_on_mirrornet(mirrornet_replay: Mir
 
     operations = _whale_operations(notes)
     assert [f"Whale alert: {operation['from']} -> {operation['to']} - {_amount_value(operation['amount'])}" for operation in operations] == [
-        "Whale alert: reward.app -> tarazkp - 8",
-        "Whale alert: reward.app -> jkramer - 7",
+        # Unlike TS (which compares the amount strings), 0.008 and 0.007 HIVE are not whales above 50 HIVE.
         "Whale alert: honey-swap -> luluwinda - 53308",
     ]
-    assert all(str(_amount_value(operation["amount"])) > str(threshold["amount"]) for operation in operations)
+    assert all(Asset.from_builtins(operation["amount"]) > threshold for operation in operations)

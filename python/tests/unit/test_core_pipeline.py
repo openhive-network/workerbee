@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable, Callable, Mapping
 from types import MappingProxyType
 from typing import Any
 
@@ -12,7 +13,7 @@ from workerbee.chain_observers.classifiers.account_classifier import AccountClas
 from workerbee.chain_observers.classifiers.block_classifier import BlockClassifier
 from workerbee.chain_observers.classifiers.block_header_classifier import BlockHeaderClassifier
 from workerbee.chain_observers.classifiers.change_recovery_in_progress_classifier import ChangeRecoveryInProgressClassifier
-from workerbee.chain_observers.classifiers.collector_classifier_base import CollectorClassifierBase
+from workerbee.chain_observers.classifiers.collector_classifier_base import CollectorClassifierBase, TRegisterEvaluationContext
 from workerbee.chain_observers.classifiers.content_metadata_classifier import ContentMetadataClassifier
 from workerbee.chain_observers.classifiers.decline_voting_rights_classifier import DeclineVotingRightsClassifier
 from workerbee.chain_observers.classifiers.dynamic_global_properties_classifier import DynamicGlobalPropertiesClassifier
@@ -57,6 +58,34 @@ class _StubClassifier(CollectorClassifierBase):
 
 class _StubClassifier2(CollectorClassifierBase):
     pass
+
+
+class _OptionsRecordingCollector(CollectorBase):
+    def __init__(self) -> None:
+        super().__init__(worker=None)
+        self.options: list[tuple[str, object]] = []
+
+    def push_options(self, data: Mapping[str, object]) -> None:
+        self.options.append(("push", dict(data)))
+
+    def pop_options(self, data: Mapping[str, object]) -> None:
+        self.options.append(("pop", dict(data)))
+
+
+class _DependentCollector(CollectorBase):
+    def __init__(self) -> None:
+        super().__init__(worker=None)
+
+    def used_contexts(self) -> list[TRegisterEvaluationContext]:
+        return [{"class": _StubClassifier2, "options": {"account": "alice"}}]
+
+
+class _CircularCollector(CollectorBase):
+    def __init__(self) -> None:
+        super().__init__(worker=None)
+
+    def used_contexts(self) -> list[TRegisterEvaluationContext]:
+        return [_StubClassifier]
 
 
 class _AlwaysTrueFilter(FilterBase):
@@ -111,7 +140,7 @@ class _PostNotifyRaisingFactory(_AlwaysNotifyFactory):
 @pytest.fixture
 def stub_factory() -> FactoryBase:
     factory = FactoryBase(worker=None)
-    factory.register_classifier(_StubClassifier, _StubCollector, {_StubClassifier.__name__: {}})
+    factory.register_classifier(_StubClassifier, _StubCollector, {_StubClassifier: {}})
     return factory
 
 
@@ -174,7 +203,7 @@ class TestDataEvaluationContext:
             async def get(self, data: Any) -> dict[str, Any]:
                 nonlocal call_count
                 call_count += 1
-                return {_StubClassifier.__name__: {"value": 42}}
+                return {_StubClassifier: {"value": 42}}
 
         collector = _CountingCollector(worker=None)
         ctx.inject(_StubClassifier, collector)
@@ -199,7 +228,7 @@ class TestDataEvaluationContext:
                 nonlocal call_count
                 call_count += 1
                 await asyncio.sleep(0.01)
-                return {_StubClassifier.__name__: {"value": 42}}
+                return {_StubClassifier: {"value": 42}}
 
         ctx.inject(_StubClassifier, _SlowCountingCollector(worker=None))
 
@@ -224,7 +253,7 @@ class TestDataEvaluationContext:
                 call_count += 1
                 started.set()
                 await release.wait()
-                return {_StubClassifier.__name__: {"value": 42}}
+                return {_StubClassifier: {"value": 42}}
 
         ctx.inject(_StubClassifier, _SlowCountingCollector(worker=None))
 
@@ -244,7 +273,7 @@ class TestDataEvaluationContext:
     def test_access_store_returns_mutable_dict(self) -> None:
         factory = FactoryBase(worker=None)
         ctx = DataEvaluationContext(factory)
-        collector = _StubCollector({_StubClassifier.__name__: {}})
+        collector = _StubCollector({_StubClassifier: {}})
         ctx.inject(_StubClassifier, collector)
 
         store = ctx.access_store(_StubClassifier)
@@ -272,7 +301,7 @@ class TestDataEvaluationContext:
     async def test_get_raises_when_collector_omits_classifier_key(self) -> None:
         factory = FactoryBase(worker=None)
         ctx = DataEvaluationContext(factory)
-        ctx.inject(_StubClassifier, _StubCollector({"WrongClassifier": {"value": 42}}))
+        ctx.inject(_StubClassifier, _StubCollector({_StubClassifier2: {"value": 42}}))
 
         with pytest.raises(KeyError, match=_StubClassifier.__name__):
             await ctx.get(_StubClassifier)
@@ -309,6 +338,45 @@ class TestFactoryPushPop:
         with pytest.raises(RuntimeError, match="does not support classifier"):
             factory.push_classifier(_StubClassifier, EClassifierOrigin.FILTER)
 
+    def test_push_and_pop_walk_dependencies_with_options(self) -> None:
+        factory = FactoryBase(worker=None)
+        factory.register_classifier(_StubClassifier, _DependentCollector)
+        factory.register_classifier(_StubClassifier2, _OptionsRecordingCollector)
+        dependent = factory._collectors[_DependentCollector]
+        dependency = factory._collectors[_OptionsRecordingCollector]
+
+        factory.push_classifier(_StubClassifier, EClassifierOrigin.FILTER)
+        assert (dependent._registers_count, dependency._registers_count) == (1, 1)
+        assert dependency.options == [("push", {"account": "alice"})]
+
+        factory.pop_classifier(_StubClassifier, EClassifierOrigin.FILTER)
+        assert (dependent._registers_count, dependency._registers_count) == (0, 0)
+        assert dependency.options == [("push", {"account": "alice"}), ("pop", {"account": "alice"})]
+
+    @pytest.mark.parametrize("walk", [FactoryBase.push_classifier, FactoryBase.pop_classifier])
+    def test_circular_dependency_raises(self, walk: Any) -> None:
+        factory = FactoryBase(worker=None)
+        factory.register_classifier(_StubClassifier, _CircularCollector)
+
+        with pytest.raises(RuntimeError, match="Circular dependency"):
+            walk(factory, _StubClassifier, EClassifierOrigin.FILTER)
+
+    def test_register_classifier_reports_replaced_collector(self) -> None:
+        factory = FactoryBase(worker=None)
+
+        assert factory.register_classifier(_StubClassifier, _StubCollector, {}) is False
+        assert factory.register_classifier(_StubClassifier, _StubCollector, {}) is False
+        assert factory.register_classifier(_StubClassifier, _OptionsRecordingCollector) is True
+        assert factory._collectors_per_classifier[_StubClassifier] is _OptionsRecordingCollector
+
+    def test_register_classifier_shares_collector_between_classifiers(self) -> None:
+        factory = FactoryBase(worker=None)
+        factory.register_classifier(_StubClassifier, _OptionsRecordingCollector)
+        shared = factory._collectors[_OptionsRecordingCollector]
+
+        assert factory.register_classifier(_StubClassifier2, _OptionsRecordingCollector) is False
+        assert factory._collectors[_OptionsRecordingCollector] is shared
+
     def test_collect_only_includes_registered_classifiers(self, stub_factory: FactoryBase) -> None:
         # Not pushed yet -> has_registered is False -> collect skips it
         ctx = stub_factory.collect()
@@ -322,6 +390,34 @@ class TestFactoryPushPop:
 # ---------------------------------------------------------------------------
 # ObserverMediator register/unregister lifecycle
 # ---------------------------------------------------------------------------
+
+
+async def _unregister_twice(mediator: ObserverMediator, complete: Callable[[], object]) -> None:
+    """Unregister observers with the ``complete`` callback - on the synchronous and on the asynchronous path."""
+    closed = Observer(complete=complete)
+    mediator.register_listener(closed, _AlwaysTrueFilter(), [])
+    mediator.unregister_listener(closed)
+    mediator.register_listener(Observer(complete=complete), _AlwaysTrueFilter(), [])
+    await mediator.aclose_all_listeners()
+
+
+async def _exceptions_reported_by_loop(action: Callable[[], Awaitable[None]]) -> list[BaseException]:
+    loop = asyncio.get_running_loop()
+    previous_handler = loop.get_exception_handler()
+    reported: list[BaseException] = []
+
+    def capture(_loop: asyncio.AbstractEventLoop, context: dict[str, object]) -> None:
+        exception = context.get("exception")
+        assert isinstance(exception, BaseException)
+        reported.append(exception)
+
+    loop.set_exception_handler(capture)
+    try:
+        await action()
+        await asyncio.sleep(0)
+    finally:
+        loop.set_exception_handler(previous_handler)
+    return reported
 
 
 class TestObserverMediator:
@@ -354,6 +450,71 @@ class TestObserverMediator:
         stub_mediator.register_listener(listener, _AlwaysTrueFilter(), [])
         stub_mediator.unregister_listener(listener)
         assert complete_called
+
+    def test_complete_error_propagates_without_a_running_loop(self, stub_mediator: ObserverMediator) -> None:
+        def _complete() -> None:
+            raise ValueError("complete boom")
+
+        listener = Observer(next=lambda data: None, complete=_complete)
+        stub_mediator.register_listener(listener, _AlwaysTrueFilter(), [])
+
+        with pytest.raises(ValueError, match="complete boom"):
+            stub_mediator.unregister_listener(listener)
+        assert len(stub_mediator._filters) == 0
+
+    def test_registering_observer_again_replaces_its_registration(self, stub_mediator: ObserverMediator) -> None:
+        listener = Observer(next=lambda data: None)
+        collector = stub_mediator._factory._collectors[_StubCollector]
+
+        stub_mediator.register_listener(listener, _NeedsStubClassifierFilter(), [])
+        stub_mediator.register_listener(listener, _NeedsStubClassifierFilter(), [])
+        assert collector._registers_count == 1
+
+        stub_mediator.unregister_listener(listener)
+        assert collector.has_registered is False
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("asynchronous", [False, True], ids=["sync-complete", "async-complete"])
+    async def test_complete_errors_go_to_the_loop_exception_handler(self, stub_mediator: ObserverMediator, asynchronous: bool) -> None:
+        def complete() -> None:
+            raise ValueError("sync complete boom")
+
+        async def async_complete() -> None:
+            raise ValueError("async complete boom")
+
+        reported = await _exceptions_reported_by_loop(
+            lambda: _unregister_twice(stub_mediator, async_complete if asynchronous else complete),
+        )
+
+        boom = "async complete boom" if asynchronous else "sync complete boom"
+        assert [str(error) for error in reported] == [boom, boom]
+
+    @pytest.mark.asyncio
+    async def test_aclose_cancels_collectors_of_cancelled_pipelines(self) -> None:
+        started = asyncio.Event()
+        cancelled: list[bool] = []
+
+        class _SlowCollector(CollectorBase):
+            async def get(self, data: object) -> dict[object, object]:
+                started.set()
+                try:
+                    await asyncio.sleep(10)  # e.g. a call of the chain - closed after the teardown
+                except asyncio.CancelledError:
+                    cancelled.append(True)
+                    raise
+                return {_StubClassifier: {}}
+
+        factory = _AlwaysNotifyFactory(worker=None)
+        factory.register_classifier(_StubClassifier, _SlowCollector, None)
+        mediator = ObserverMediator(factory)
+        mediator.register_listener(Observer(next=lambda data: None), _NeedsStubClassifierFilter(), [])
+
+        await mediator.notify()
+        await started.wait()
+        await mediator.aclose_all_listeners()
+
+        assert cancelled == [True]
+        assert not factory._collector_tasks
 
     def test_unregister_all_listeners(self, stub_mediator: ObserverMediator) -> None:
         for _ in range(3):
@@ -558,7 +719,7 @@ class TestObserverMediator:
         class RegisteringFactory(_AlwaysNotifyFactory):
             def __init__(self) -> None:
                 super().__init__(worker=None)
-                self.register_classifier(_StubClassifier, _StubCollector, {_StubClassifier.__name__: {}})
+                self.register_classifier(_StubClassifier, _StubCollector, {_StubClassifier: {}})
                 self._registered = False
 
             async def pre_notify(self, context: DataEvaluationContext, mediator: ObserverMediator) -> bool:

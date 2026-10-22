@@ -11,7 +11,6 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, cast
 
 import pytest
-from msgspec import UNSET
 
 from workerbee.chain_observers.classifiers.dynamic_global_properties_classifier import (
     DynamicGlobalPropertiesClassifier,
@@ -58,7 +57,7 @@ class _FakeBlockApi:
     async def get_block(self, *, block_num: int) -> SimpleNamespace:
         self.block_calls.append(block_num)
         if block_num == self._missing_block:
-            return SimpleNamespace(block=UNSET)
+            return SimpleNamespace(block=None)
         return SimpleNamespace(
             block=SimpleNamespace(
                 transactions=[],

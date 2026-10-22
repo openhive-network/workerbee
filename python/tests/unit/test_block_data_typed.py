@@ -6,9 +6,11 @@ import asyncio
 import contextlib
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Protocol, cast
 
 import pytest
+from hiveio_api import HiveDateTime
 
 from workerbee.chain_observers.bot import WorkerBee
 from workerbee.chain_observers.payloads import BlockData
@@ -26,7 +28,7 @@ class _ClosableBlockIterator(Protocol):
 @dataclass(slots=True)
 class _Dgp:
     head_block_number: int
-    time: str
+    time: HiveDateTime
     head_block_id: str
     current_witness: str = "witness-a"
     downvote_pool_percent: int = 25
@@ -58,7 +60,7 @@ class _FakeDatabaseApi:
     async def get_dynamic_global_properties(self) -> _Dgp:
         return _Dgp(
             head_block_number=self._chain.head_block_number,
-            time="2026-01-01T00:00:00",
+            time=HiveDateTime("2026-01-01T00:00:00"),
             head_block_id=f"{self._chain.head_block_number:08x}00000000000000000000000000000000",
         )
 
@@ -96,8 +98,14 @@ class _FakeChain:
     def extends(self, *args: object) -> _FakeChain:
         return self
 
+    async def aclose(self) -> None:
+        pass
+
     def advance(self) -> None:
         self.head_block_number += 1
+
+
+_HANG_TIMEOUT_SECS = 1
 
 
 def _bot(chain: _FakeChain) -> WorkerBee:
@@ -139,6 +147,7 @@ class TestIterate:
         assert block["number"] == 1
         assert block["id"] == "0000000100000000000000000000000000000000"
         assert block["witness"] == "witness-a"
+        assert block["timestamp"] == datetime(2026, 1, 1, tzinfo=UTC)  # the date of the head block (of DGP)
         assert block["transactions"] == []
         assert block["transactions_per_id"] == {}
         assert chain.api.block_api.requested_blocks == [1]
@@ -229,13 +238,15 @@ class TestIterate:
         with contextlib.suppress(asyncio.CancelledError):
             await pending
 
-        await bot.mediator.notify()
+        # A failing pipeline blocks notify() on the full queue - fail instead of hanging.
+        async with asyncio.timeout(_HANG_TIMEOUT_SECS):
+            await bot.mediator.notify()
 
-        chain.advance()
-        await bot.mediator.notify()
+            chain.advance()
+            await bot.mediator.notify()
 
-        assert (await iterator.__anext__())["number"] == 1
-        assert (await iterator.__anext__())["number"] == 2
+            assert (await iterator.__anext__())["number"] == 1
+            assert (await iterator.__anext__())["number"] == 2
 
         await iterator.aclose()
 
@@ -250,10 +261,12 @@ class TestIterate:
         with contextlib.suppress(asyncio.CancelledError):
             await pending
 
-        await bot.mediator.notify()
-        chain.advance()
-        await bot.mediator.notify()
+        # A failing pipeline blocks notify() on the full queue - fail instead of hanging.
+        async with asyncio.timeout(_HANG_TIMEOUT_SECS):
+            await bot.mediator.notify()
+            chain.advance()
+            await bot.mediator.notify()
 
-        await asyncio.wait_for(bot.aclose(), timeout=1)
+        await asyncio.wait_for(bot.aclose(), timeout=_HANG_TIMEOUT_SECS)
 
         assert len(bot.mediator._filters) == 0

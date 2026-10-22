@@ -8,24 +8,37 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
+from datetime import UTC, datetime
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, cast
 
 import pytest
+from hiveio_api import HiveDateTime
+from hiveio_api.operations import Transaction
+from wax import WaxChainOptions, create_hive_chain
 
 from workerbee.chain_observers.classifiers.block_classifier import BlockClassifier
 from workerbee.chain_observers.classifiers.block_header_classifier import BlockHeaderClassifier
 from workerbee.chain_observers.classifiers.dynamic_global_properties_classifier import DynamicGlobalPropertiesClassifier
+from workerbee.chain_observers.classifiers.impacted_account_classifier import ImpactedAccountClassifier
 from workerbee.chain_observers.classifiers.operation_classifier import OperationClassifier
 from workerbee.chain_observers.collectors.collector_base import CollectorBase
 from workerbee.chain_observers.collectors.common.block_header_collector import BlockHeaderCollector
+from workerbee.chain_observers.collectors.common.block_transactions import collect_block_transactions
+from workerbee.chain_observers.collectors.common.impacted_account_collector import ImpactedAccountCollector
 from workerbee.chain_observers.collectors.common.operation_collector import OperationCollector
 from workerbee.chain_observers.collectors.jsonrpc.block_collector import BlockCollector
+from workerbee.chain_observers.enums import Exchange
 from workerbee.chain_observers.factories.data_evaluation_context import DataEvaluationContext
+from workerbee.chain_observers.filters.exchange_transfer_filter import ExchangeTransferFilter
+from workerbee.chain_observers.payloads import Operation
+from workerbee.chain_observers.providers.exchange_transfer_provider import ExchangeTransferProvider
 
-from .conftest import make_data_context, make_operation
+from ._builders import build_block
+from .conftest import make_data_context, make_operation, make_transaction
 
 if TYPE_CHECKING:
+    from workerbee.chain_observers.classifier_results import OperationClassifierData
     from workerbee.chain_observers.factories.data_evaluation_context import TCollectorEvaluationContext
     from workerbee.chain_observers.interfaces import IWorkerBee
 
@@ -36,7 +49,7 @@ type BlockTransaction = dict[str, object]
 def block_context() -> Callable[[list[BlockTransaction]], DataEvaluationContext]:
     def build(transactions: list[BlockTransaction]) -> DataEvaluationContext:
         block_data = {
-            BlockClassifier.__name__: {
+            BlockClassifier: {
                 "transactions": transactions,
                 "transactions_per_id": {str(tx["id"]): tx["transaction"] for tx in transactions},
             },
@@ -60,10 +73,10 @@ class TestBlockHeaderCollector:
     async def test_extracts_header_from_dgp(self) -> None:
         """BlockHeaderCollector reads DynamicGlobalPropertiesClassifier and produces BlockHeaderClassifier data."""
         dgp_data = {
-            DynamicGlobalPropertiesClassifier.__name__: {
+            DynamicGlobalPropertiesClassifier: {
                 "head_block_number": 42,
                 "current_witness": "witness-x",
-                "head_block_time": "2024-08-01T06:00:00",
+                "head_block_time": HiveDateTime("2024-08-01T06:00:00"),
                 "head_block_id": "block-id-42",
                 "downvote_pool_percent": 25,
             },
@@ -76,11 +89,11 @@ class TestBlockHeaderCollector:
 
         result = await collector.get(ctx)
 
-        assert BlockHeaderClassifier.__name__ in result
-        header = result[BlockHeaderClassifier.__name__]
+        assert BlockHeaderClassifier in result
+        header = result[BlockHeaderClassifier]
         assert header["number"] == 42
         assert header["witness"] == "witness-x"
-        assert header["timestamp"] == "2024-08-01T06:00:00"
+        assert header["timestamp"] == datetime(2024, 8, 1, 6, tzinfo=UTC)
         assert header["id"] == "block-id-42"
 
     @pytest.mark.asyncio
@@ -100,20 +113,16 @@ class TestOperationCollector:
     async def test_extracts_operations_and_groups_by_type(self, block_context: Callable[[list[BlockTransaction]], DataEvaluationContext]) -> None:
         transactions = [
             {
-                "transaction": {
-                    "operations": [
-                        make_operation("vote_operation", {"voter": "alice", "author": "bob", "permlink": "p1", "weight": 10000}),
-                        make_operation("transfer_operation", {"from": "alice", "to": "bob", "amount": "1.000 HIVE"}),
-                    ],
-                },
+                "transaction": make_transaction(
+                    make_operation("vote_operation", {"voter": "alice", "author": "bob", "permlink": "p1", "weight": 10000}),
+                    make_operation("transfer_operation", {"from": "alice", "to": "bob", "amount": "1.000 HIVE"}),
+                ),
                 "id": "tx1",
             },
             {
-                "transaction": {
-                    "operations": [
-                        make_operation("vote_operation", {"voter": "carol", "author": "dave", "permlink": "p2", "weight": 5000}),
-                    ],
-                },
+                "transaction": make_transaction(
+                    make_operation("vote_operation", {"voter": "carol", "author": "dave", "permlink": "p2", "weight": 5000}),
+                ),
                 "id": "tx2",
             },
         ]
@@ -122,8 +131,8 @@ class TestOperationCollector:
 
         result = await collector.get(ctx)
 
-        assert OperationClassifier.__name__ in result
-        op_data = result[OperationClassifier.__name__]
+        assert OperationClassifier in result
+        op_data = result[OperationClassifier]
 
         # All operations collected
         assert len(op_data["operations"]) == 3
@@ -141,7 +150,7 @@ class TestOperationCollector:
 
         result = await collector.get(ctx)
 
-        op_data = result[OperationClassifier.__name__]
+        op_data = result[OperationClassifier]
         assert op_data["operations"] == []
         assert op_data["operations_per_type"] == {}
 
@@ -150,11 +159,9 @@ class TestOperationCollector:
         """Each entry in operations_per_type should have 'operation' and 'transaction' keys."""
         transactions = [
             {
-                "transaction": {
-                    "operations": [
-                        make_operation("vote_operation", {"voter": "alice", "author": "bob", "permlink": "p1", "weight": 10000}),
-                    ],
-                },
+                "transaction": make_transaction(
+                    make_operation("vote_operation", {"voter": "alice", "author": "bob", "permlink": "p1", "weight": 10000}),
+                ),
                 "id": "tx1",
             },
         ]
@@ -162,7 +169,7 @@ class TestOperationCollector:
         collector = OperationCollector(worker=None)
 
         result = await collector.get(ctx)
-        op_data = result[OperationClassifier.__name__]
+        op_data = result[OperationClassifier]
 
         vote_entry = op_data["operations_per_type"]["vote_operation"][0]
         assert "operation" in vote_entry
@@ -175,11 +182,9 @@ class TestOperationCollector:
         """Each hf26 operation is grouped by its op.type."""
         transactions = [
             {
-                "transaction": {
-                    "operations": [
-                        make_operation("comment_operation", {"author": "alice", "body": "hi"}),
-                    ],
-                },
+                "transaction": make_transaction(
+                    make_operation("comment_operation", {"author": "alice", "body": "hi"}),
+                ),
                 "id": "tx1",
             },
         ]
@@ -187,7 +192,7 @@ class TestOperationCollector:
         collector = OperationCollector(worker=None)
 
         result = await collector.get(ctx)
-        op_data = result[OperationClassifier.__name__]
+        op_data = result[OperationClassifier]
 
         assert "comment_operation" in op_data["operations_per_type"]
         assert len(op_data["operations_per_type"]["comment_operation"]) == 1
@@ -203,12 +208,10 @@ class TestOperationCollector:
         """Multiple operations of the same type in the same transaction."""
         transactions = [
             {
-                "transaction": {
-                    "operations": [
-                        make_operation("vote_operation", {"voter": "alice", "author": "bob", "permlink": "p1", "weight": 10000}),
-                        make_operation("vote_operation", {"voter": "alice", "author": "carol", "permlink": "p2", "weight": 5000}),
-                    ],
-                },
+                "transaction": make_transaction(
+                    make_operation("vote_operation", {"voter": "alice", "author": "bob", "permlink": "p1", "weight": 10000}),
+                    make_operation("vote_operation", {"voter": "alice", "author": "carol", "permlink": "p2", "weight": 5000}),
+                ),
                 "id": "tx1",
             },
         ]
@@ -216,10 +219,72 @@ class TestOperationCollector:
         collector = OperationCollector(worker=None)
 
         result = await collector.get(ctx)
-        op_data = result[OperationClassifier.__name__]
+        op_data = result[OperationClassifier]
 
         assert len(op_data["operations_per_type"]["vote_operation"]) == 2
         assert len(op_data["operations"]) == 2
+
+
+class TestOperationBodiesAreApiJson:
+    """Bodies of operations are JSON of the API (as TS reads bodies of wax operations), not models of hiveio_api."""
+
+    @pytest.mark.asyncio
+    async def test_body_of_known_operation_has_keys_and_assets_of_the_api(self) -> None:
+        body = {"from": "mxchive", "to": "bob", "amount": {"amount": "1000", "precision": 3, "nai": "@@000000021"}, "memo": "m"}
+        operations = await _collect_operations(make_transaction(make_operation("transfer_operation", body)))
+
+        assert operations["operations"][0]["operation"] == Operation(type="transfer_operation", value=body)
+        assert operations["operations_per_type"]["transfer_operation"][0]["operation"] == body
+
+    @pytest.mark.asyncio
+    async def test_operation_unknown_to_hiveio_api_is_kept(self) -> None:
+        unknown = {"type": "future_operation", "value": {"who": "alice"}}
+        transaction = Transaction.from_builtins({"operations": [unknown]}, warn=False)
+
+        operations = await _collect_operations(transaction)
+
+        assert operations["operations_per_type"] == {
+            "future_operation": [{"operation": {"who": "alice"}, "transaction": {"transaction": transaction, "id": "tx1"}}]
+        }
+
+    @pytest.mark.asyncio
+    async def test_filter_and_provider_read_collected_bodies(self) -> None:
+        body = {"from": "mxchive", "to": "bob", "amount": {"amount": "1000", "precision": 3, "nai": "@@000000021"}, "memo": ""}
+        context = _operation_collector_context(make_transaction(make_operation("transfer_operation", body)))
+
+        assert await ExchangeTransferFilter().match(context) is True
+        provided = await ExchangeTransferProvider().provide(context)
+        assert [pair["operation"] for pair in provided["exchange_transfer_operations"]] == [
+            {"from": "mxchive", "to": "bob", "amount": body["amount"], "exchange": Exchange.MEXC},
+        ]
+
+
+class TestImpactedAccountCollector:
+    @pytest.mark.asyncio
+    async def test_groups_operations_by_accounts_wax_reports_as_impacted(self) -> None:
+        vote = make_operation("vote_operation", {"voter": "bob", "author": "alice", "permlink": "p1", "weight": 100})
+        context = _operation_collector_context(make_transaction(vote))
+        chain = create_hive_chain(WaxChainOptions(endpoint_url="http://localhost:8090"))  # offline - no request is made
+        try:
+            context.inject(ImpactedAccountClassifier, ImpactedAccountCollector(cast("IWorkerBee", SimpleNamespace(chain=chain))))
+            impacted = (await context.get(ImpactedAccountClassifier))["impacted_accounts"]
+        finally:
+            await chain.aclose()
+
+        assert set(impacted) == {"alice", "bob"}
+        assert [pair["operation"].type for pair in impacted["alice"]["operations"]] == ["vote_operation"]
+
+
+def _operation_collector_context(transaction: Transaction) -> DataEvaluationContext:
+    """A context with the real OperationCollector over a block of one transaction."""
+    block = {BlockClassifier: {"transactions": [{"transaction": transaction, "id": "tx1"}], "transactions_per_id": {"tx1": transaction}}}
+    context = make_data_context((BlockClassifier, block))
+    context.inject(OperationClassifier, OperationCollector(worker=None))
+    return context
+
+
+async def _collect_operations(transaction: Transaction) -> OperationClassifierData:
+    return await _operation_collector_context(transaction).get(OperationClassifier)
 
 
 # ---------------------------------------------------------------------------
@@ -286,11 +351,11 @@ class TestJsonRpcBlockCollector:
         first = await collector.get(ctx)
         second = await collector.get(ctx)
 
-        assert [tx["id"] for tx in first[BlockClassifier.__name__]["transactions"]] == ["tx-10"]
+        assert [tx["id"] for tx in first[BlockClassifier]["transactions"]] == ["tx-10"]
         assert block_api.block_calls == [10]
         assert block_api.range_calls == [(11, 2)]
 
-        block_data = second[BlockClassifier.__name__]
+        block_data = second[BlockClassifier]
         assert [tx["id"] for tx in block_data["transactions"]] == ["tx-11", "tx-12"]
         assert block_data["transactions_per_id"] == {
             "tx-11": {"height": 11},
@@ -311,11 +376,22 @@ class TestJsonRpcBlockCollector:
 
         recovered = await collector.get(ctx)
 
-        assert [tx["id"] for tx in partial[BlockClassifier.__name__]["transactions"]] == ["tx-11"]
+        assert [tx["id"] for tx in partial[BlockClassifier]["transactions"]] == ["tx-11"]
         assert collector._current_head_block == 12
-        assert [tx["id"] for tx in recovered[BlockClassifier.__name__]["transactions"]] == ["tx-12"]
+        assert [tx["id"] for tx in recovered[BlockClassifier]["transactions"]] == ["tx-12"]
         assert block_api.block_calls == [10, 12]
         assert block_api.range_calls == [(11, 2)]
+
+
+class TestCollectBlockTransactions:
+    def test_keeps_transactions_of_a_block_missing_ids_like_typescript(self) -> None:
+        """TS reads ``transaction_ids[i]`` - the recorded mock data of the TS suite has a block with fewer ids."""
+        first, second = make_transaction(), make_transaction()
+        block = build_block(transactions=[first, second], transaction_ids=["tx-1"])
+
+        data = collect_block_transactions([block])
+
+        assert data["transactions"] == [{"transaction": first, "id": "tx-1"}, {"transaction": second, "id": ""}]
 
 
 # ---------------------------------------------------------------------------

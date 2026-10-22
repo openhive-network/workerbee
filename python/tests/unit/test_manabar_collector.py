@@ -26,6 +26,7 @@ from workerbee.chain_observers.collectors.common.manabar_collector import (
     ManabarCollector,
 )
 from workerbee.chain_observers.enums import ManabarType
+from workerbee.chain_observers.payloads import ManabarValue
 
 # ---------------------------------------------------------------------------
 # Fakes — no monkeypatch, constructor injection
@@ -83,9 +84,9 @@ class FakeDataEvaluationContext:
             self.timings.append((name, 0.0))
 
 
-HEAD_TIME = datetime(2024, 6, 15, 12, 0, 0)
+HEAD_TIME = datetime(2024, 6, 15, 12, 0, 0, tzinfo=UTC)
 SOURCE_LAST_UPDATE = 1_700_000_000
-SOURCE_LAST_UPDATE_TIME = datetime.fromtimestamp(SOURCE_LAST_UPDATE, UTC).replace(tzinfo=None)
+SOURCE_LAST_UPDATE_TIME = datetime.fromtimestamp(SOURCE_LAST_UPDATE, UTC)
 
 
 def dynamic_global_properties_data(downvote_pool_percent: int = 25) -> dict[str, object]:
@@ -108,7 +109,7 @@ def account_manabar_data(
         "name": name,
         "upvote_manabar": {
             "current_mana": upvote_current,
-            "max_mana": upvote_max,
+            "max": upvote_max,
             "last_update_time": upvote_last_update,
         },
         "downvote_manabar": {
@@ -160,7 +161,7 @@ def manabar_context(
 
 def _manabar_data(result: dict[str, object]) -> dict[str, object]:
     """Extract the manabar_data sub-dict from a collector get() result."""
-    return result[ManabarClassifier.__name__]["manabar_data"]
+    return result[ManabarClassifier]["manabar_data"]
 
 
 def _manabar_entry(result: dict[str, object], account: str, manabar_type: ManabarType) -> dict[str, object]:
@@ -187,6 +188,19 @@ async def _collect_entry(
 
 
 class TestManabarCollectorOptions:
+    @pytest.mark.parametrize(
+        "options",
+        [{"account": 1, "manabar_type": ManabarType.UPVOTE}, {"account": "alice", "manabar_type": "upvote"}],
+        ids=["account-not-a-name", "manabar-type-not-an-int"],
+    )
+    def test_push_and_pop_options_reject_wrong_options(self, options: dict[str, object]) -> None:
+        collector = collector_with_chain()
+
+        with pytest.raises(TypeError, match="Manabar options need an account name and a manabar type"):
+            collector.push_options(options)
+        with pytest.raises(TypeError, match="Manabar options need an account name and a manabar type"):
+            collector.pop_options(options)
+
     def test_push_options_adds_to_upvote(self) -> None:
         collector = collector_with_chain()
 
@@ -485,24 +499,24 @@ class TestManabarCollectorResultShape:
 
         result = await collector.get(ctx)
 
-        assert ManabarClassifier.__name__ in result
-        assert "manabar_data" in result[ManabarClassifier.__name__]
+        assert ManabarClassifier in result
+        assert "manabar_data" in result[ManabarClassifier]
 
-        entry = _manabar_entry(result, "alice", ManabarType.UPVOTE)
-        assert "percent" in entry
-        assert "current_mana" in entry
-        assert "max" in entry
-        assert "last_update_time" in entry
+        assert result[ManabarClassifier]["manabar_data"] == {
+            "alice": {ManabarType.UPVOTE: ManabarValue(current_mana=5000, max=10000, percent=50.0, last_update_time=datetime.fromtimestamp(0, UTC))}
+        }
 
     @pytest.mark.asyncio
     async def test_result_types_correct(self) -> None:
         ctx = manabar_context(accounts={"alice": account_manabar_data("alice")})
         entry = await _collect_entry(account="alice", manabar_type=ManabarType.UPVOTE, ctx=ctx)
 
-        assert isinstance(entry["percent"], float)
-        assert isinstance(entry["current_mana"], int)
-        assert isinstance(entry["max"], int)
-        assert isinstance(entry["last_update_time"], datetime)
+        assert {key: type(value) for key, value in entry.items()} == {
+            "current_mana": int,
+            "max": int,
+            "percent": float,
+            "last_update_time": datetime,
+        }
 
     @pytest.mark.asyncio
     async def test_percent_in_range_0_100(self) -> None:

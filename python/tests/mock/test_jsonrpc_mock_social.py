@@ -110,16 +110,16 @@ async def test_mock_investment_portfolio_monitor(js_jsonrpc_mock_chain: IHiveCha
                 .provide_accounts("gtg", "blocktrades")
                 .subscribe(on_next=on_next)
             ),
-            lambda _received: len(rows) >= 4,
+            lambda _received: len(rows) >= 3,
         )
         return rows
 
     result = await with_js_mock_bot(js_jsonrpc_mock_chain, scenario)
 
+    # Unlike TS (which compares the amount strings), 23.890 HIVE is not a whale above 1000 HIVE.
     assert result == [
         "Exchange transfer: mxchive -> inhivepool (23890)",
         "Exchange transfer: bdhivesteem -> gtg (1000)",
-        "Whale alert: mxchive -> inhivepool (23890)",
         "Whale alert: blocktrades -> gtg (10000000)",
     ]
 

@@ -127,7 +127,7 @@ class TestJsonRpcCollectorChunking:
         _register_all(collector, "account", names)
 
         result = await collector.get(_TimingCtx())
-        accounts = result[AccountClassifier.__name__]["accounts"]
+        accounts = result[AccountClassifier]["accounts"]
 
         assert _chunk_sizes(api.account_calls) == [1000, 1]
         assert len(accounts) == len(names)
@@ -147,7 +147,7 @@ class TestJsonRpcCollectorChunking:
         result = await collector.get(_TimingCtx())
 
         assert _chunk_sizes(api.rc_calls) == [1000, 1]
-        assert len(result[RcAccountClassifier.__name__]["rc_accounts"]) == len(names)
+        assert len(result[RcAccountClassifier]["rc_accounts"]) == len(names)
 
     @pytest.mark.asyncio
     async def test_witnesses_are_chunked_like_typescript(self) -> None:
@@ -159,7 +159,7 @@ class TestJsonRpcCollectorChunking:
         result = await collector.get(_TimingCtx())
 
         assert _chunk_sizes(api.witness_calls) == [1000, 1]
-        assert len(result[WitnessClassifier.__name__]["witnesses"]) == len(names)
+        assert len(result[WitnessClassifier]["witnesses"]) == len(names)
 
     @pytest.mark.asyncio
     async def test_recovery_requests_are_chunked_like_typescript(self) -> None:
@@ -171,7 +171,7 @@ class TestJsonRpcCollectorChunking:
         result = await collector.get(_TimingCtx())
 
         assert _chunk_sizes(api.recovery_calls) == [1000, 1]
-        assert len(result[ChangeRecoveryInProgressClassifier.__name__]["recovering_accounts"]) == len(names)
+        assert len(result[ChangeRecoveryInProgressClassifier]["recovering_accounts"]) == len(names)
 
     @pytest.mark.asyncio
     async def test_decline_voting_rights_requests_are_chunked_like_typescript(self) -> None:
@@ -183,4 +183,4 @@ class TestJsonRpcCollectorChunking:
         result = await collector.get(_TimingCtx())
 
         assert _chunk_sizes(api.decline_calls) == [1000, 1]
-        assert len(result[DeclineVotingRightsClassifier.__name__]["decline_voting_rights_accounts"]) == len(names)
+        assert len(result[DeclineVotingRightsClassifier]["decline_voting_rights_accounts"]) == len(names)
