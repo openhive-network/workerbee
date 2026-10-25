@@ -143,7 +143,7 @@ async def test_mock_content_aggregation_service(js_jsonrpc_mock_chain: IHiveChai
 
         await collect_until(
             bot,
-            lambda _received: (bot.observe.on_posts("mtyszczak").or_.on_posts("fwaszkiewicz").or_.on_reblog("thebeedevs").subscribe(on_next=on_next)),
+            lambda _received: bot.observe.on_posts("mtyszczak").or_.on_posts("fwaszkiewicz").or_.on_reblog("thebeedevs").subscribe(on_next=on_next),
             lambda _received: len(rows) == 3,
         )
         return rows

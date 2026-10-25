@@ -17,7 +17,7 @@ When AIDEV runs you on an issue, no one is there to answer questions. GitLab CI 
 
 - **Runtime:** Node.js 24+ (24.21.0 LTS in CI and the AIDEV test image)
 - **Language:** TypeScript (ESM only)
-- **Package Manager:** pnpm 10.0.0+
+- **Package Manager:** pnpm 10.33.0+
 - **Build:** Rollup + Terser + size-limit (181 kB max)
 - **Testing:** Playwright
 - **Linting:** ESLint 9 (flat config)

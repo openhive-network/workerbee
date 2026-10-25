@@ -259,12 +259,14 @@ async def test_combines_block_data_with_feed_price_on_mirrornet(workerbee: Worke
 async def test_combines_all_available_providers_on_mirrornet(workerbee: WorkerBee) -> None:
     note = await _collect_provider_note(
         workerbee,
-        lambda queen: queen.provide_witnesses(_ACCOUNT)
-        .provide_accounts(_ACCOUNT)
-        .provide_rc_accounts(_ACCOUNT)
-        .provide_manabar_data(ManabarType.RC, _ACCOUNT)
-        .provide_block_data()
-        .provide_feed_price_data(),
+        lambda queen: (
+            queen.provide_witnesses(_ACCOUNT)
+            .provide_accounts(_ACCOUNT)
+            .provide_rc_accounts(_ACCOUNT)
+            .provide_manabar_data(ManabarType.RC, _ACCOUNT)
+            .provide_block_data()
+            .provide_feed_price_data()
+        ),
         _has_keys(WitnessesPayload, AccountsPayload, RcAccountsPayload, ManabarPayload, BlockPayload, FeedPricePayload),
     )
 
@@ -286,9 +288,11 @@ async def test_combines_all_available_providers_on_mirrornet(workerbee: WorkerBe
 async def test_combines_multiple_accounts_for_different_providers_on_mirrornet(workerbee: WorkerBee) -> None:
     note = await _collect_provider_note(
         workerbee,
-        lambda queen: queen.provide_witnesses(_ACCOUNT, _SECOND_ACCOUNT)
-        .provide_accounts(_ACCOUNT, _SECOND_ACCOUNT, _THIRD_ACCOUNT)
-        .provide_rc_accounts(_ACCOUNT, _THIRD_ACCOUNT),
+        lambda queen: (
+            queen.provide_witnesses(_ACCOUNT, _SECOND_ACCOUNT)
+            .provide_accounts(_ACCOUNT, _SECOND_ACCOUNT, _THIRD_ACCOUNT)
+            .provide_rc_accounts(_ACCOUNT, _THIRD_ACCOUNT)
+        ),
         _has_keys(WitnessesPayload, AccountsPayload, RcAccountsPayload),
     )
 

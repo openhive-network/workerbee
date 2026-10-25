@@ -401,7 +401,7 @@ async def test_multiple_or_chaining(js_jsonrpc_mock_chain: IHiveChainInterface) 
 async def test_repeated_or_operations(js_jsonrpc_mock_chain: IHiveChainInterface) -> None:
     received = await _collect_mock_notifications(
         js_jsonrpc_mock_chain,
-        lambda bot, got: (bot.observe.on_block().or_.or_.or_.or_.on_posts("gtg").provide_block_data().subscribe(on_next=got.append)),
+        lambda bot, got: bot.observe.on_block().or_.or_.or_.or_.on_posts("gtg").provide_block_data().subscribe(on_next=got.append),
         lambda got: len(got) >= 2,
     )
 
