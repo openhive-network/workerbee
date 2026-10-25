@@ -45,19 +45,19 @@ priority = "primary"
 
 
 [tool.poetry.group.static-analysis.dependencies]
-mypy = ">=1.10"
-ruff = "0.12.9"
-pre-commit = "4.2.0"
-pre-commit-hooks = "4.3.0"
-codespell = "2.2.4"
+mypy = ">=2.4.0"
+ruff = ">=0.17.2"
+pre-commit = ">=4.2.0"
+pre-commit-hooks = ">=4.3.0"
+codespell = ">=2.2.4"
 detect-missing-init-files = {url = "https://github.com/lk16/detect-missing-init/archive/refs/tags/v0.1.6.zip"}
 
 [tool.poetry.group.dev.dependencies]
-pytest = ">=8.0"
+pytest = ">=9.1.1"
 pytest-asyncio = ">=0.23"
 coverage = ">=7.0"
 pyyaml = ">=6.0"
-pytest-xdist = "^3.8.0"
+pytest-xdist = ">=3.8.0"
 
 [tool.poetry.group.docs]
 optional = true
