@@ -23,6 +23,10 @@ gitlab:
 # requests, so `stable` is omitted and `aidev release` never moves main.
 branches:
   integration: "aidev/integration"
+  # main is protected and fast-forward only: hand off by merge request, as a
+  # linear one-commit-per-change copy (aidev docs/operations/project-handoff.md).
+  handoff: "main"
+  handoff_history: "linear"
 
 # How this project's suites execute (#13892): one kind, stated once.
 environment:
