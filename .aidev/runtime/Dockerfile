@@ -1,7 +1,7 @@
 # The image AIDEV runs this project's suites in (`environment.image` in
 # .aidev/project.yaml). It is the image CI's npm jobs use (common-ci-configuration
-# npm_projects template, EMSCRIPTEN_IMAGE_TAG 5.0.2-4): Node 24.21.0 through nvm,
-# pnpm 10.0.0. Suites run with `--network none`, so everything an install and the
+# npm_projects template, EMSCRIPTEN_IMAGE_TAG 5.0.2-6): Node 24.21.0 through nvm,
+# pnpm 10.33.0. Suites run with `--network none`, so everything an install and the
 # Playwright suite need is in the image:
 #   - a pnpm store filled from pnpm-lock.yaml (`pnpm fetch`);
 #   - the Chromium build of the locked Playwright version, in /opt (the base image
@@ -11,7 +11,7 @@
 #     .aidev/pnpm-deps.sh copies into a checkout whose submodule isn't initialised
 #     (.npmrc, pnpm-workspace.yaml and the tsconfig base are symlinks into it).
 # Build and pin it with .aidev/runtime/build.sh; see .aidev/README.md.
-FROM registry.gitlab.syncad.com/hive/common-ci-configuration/emsdk:5.0.2-4@sha256:966dd9e9da494d184fcc7f622bb24d93c41b8d58c814156aa79cd1d70f31d9ab
+FROM registry.gitlab.syncad.com/hive/common-ci-configuration/emsdk:5.0.2-6@sha256:9aec859476a9508693dba0d55c8637a2fcc572ec51dfcf87adaba21d6f64d67f
 
 USER root
 # CI's `nvm use $NODEJS_VERSION`, as PATH: the emsdk entrypoint would put emsdk's own

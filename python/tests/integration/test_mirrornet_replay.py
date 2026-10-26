@@ -161,13 +161,15 @@ async def test_posts_or_comments_from_multiple_authors_on_mirrornet(mirrornet_re
     result = await mirrornet_replay(
         96549390,
         96549415,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_posts("mtyszczak")
-        .on_posts("nickdongsik")
-        .on_comments("brando28")
-        .subscribe(
-            on_error=on_error,
-            on_complete=on_complete,
-            on_next=lambda payload: _append_posts_and_comments(payload, content),
+        lambda bot, _chain, content, on_error, on_complete: (
+            bot.on_posts("mtyszczak")
+            .on_posts("nickdongsik")
+            .on_comments("brando28")
+            .subscribe(
+                on_error=on_error,
+                on_complete=on_complete,
+                on_next=lambda payload: _append_posts_and_comments(payload, content),
+            )
         ),
     )
 
@@ -186,13 +188,15 @@ async def test_social_activity_aggregator_on_mirrornet(mirrornet_replay: Mirrorn
     result = await mirrornet_replay(
         97146285,
         97146300,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_votes("e-sport-gamer")
-        .on_follow("fwaszkiewicz")
-        .on_reblog("maxinpower")
-        .subscribe(
-            on_error=on_error,
-            on_complete=on_complete,
-            on_next=lambda payload: _append_votes_follows_reblogs(payload, content),
+        lambda bot, _chain, content, on_error, on_complete: (
+            bot.on_votes("e-sport-gamer")
+            .on_follow("fwaszkiewicz")
+            .on_reblog("maxinpower")
+            .subscribe(
+                on_error=on_error,
+                on_complete=on_complete,
+                on_next=lambda payload: _append_votes_follows_reblogs(payload, content),
+            )
         ),
     )
 
@@ -212,19 +216,21 @@ async def test_financial_activity_monitor_on_mirrornet(mirrornet_replay: Mirrorn
     result = await mirrornet_replay(
         97347575,
         97347585,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_whale_alert(_hive_threshold(50))
-        .on_internal_market_operation()
-        .on_exchange_transfer()
-        .subscribe(
-            on_error=on_error,
-            on_complete=on_complete,
-            on_next=lambda payload: _append_finance(
-                payload,
-                content,
-                whale_prefix="Whale Alert: ",
-                market_prefix="Internal Market Operation: ",
-                exchange_prefix="Exchange Transfer: ",
-            ),
+        lambda bot, _chain, content, on_error, on_complete: (
+            bot.on_whale_alert(_hive_threshold(50))
+            .on_internal_market_operation()
+            .on_exchange_transfer()
+            .subscribe(
+                on_error=on_error,
+                on_complete=on_complete,
+                on_next=lambda payload: _append_finance(
+                    payload,
+                    content,
+                    whale_prefix="Whale Alert: ",
+                    market_prefix="Internal Market Operation: ",
+                    exchange_prefix="Exchange Transfer: ",
+                ),
+            )
         ),
     )
 
@@ -241,13 +247,15 @@ async def test_content_engagement_tracker_on_mirrornet(mirrornet_replay: Mirrorn
     result = await mirrornet_replay(
         97639665,
         97639695,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_mention("thebeedevs")
-        .on_posts("thebeedevs")
-        .on_reblog("thebeedevs")
-        .subscribe(
-            on_error=on_error,
-            on_complete=on_complete,
-            on_next=lambda payload: _append_content_engagement(payload, content),
+        lambda bot, _chain, content, on_error, on_complete: (
+            bot.on_mention("thebeedevs")
+            .on_posts("thebeedevs")
+            .on_reblog("thebeedevs")
+            .subscribe(
+                on_error=on_error,
+                on_complete=on_complete,
+                on_next=lambda payload: _append_content_engagement(payload, content),
+            )
         ),
     )
 
@@ -263,13 +271,15 @@ async def test_cross_platform_activity_monitor_on_mirrornet(mirrornet_replay: Mi
     result = await mirrornet_replay(
         97664614,
         97664618,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_custom_operation("follow")
-        .on_custom_operation("reblog")
-        .on_new_account()
-        .subscribe(
-            on_error=on_error,
-            on_complete=on_complete,
-            on_next=lambda payload: _append_cross_platform_activity(payload, content),
+        lambda bot, _chain, content, on_error, on_complete: (
+            bot.on_custom_operation("follow")
+            .on_custom_operation("reblog")
+            .on_new_account()
+            .subscribe(
+                on_error=on_error,
+                on_complete=on_complete,
+                on_next=lambda payload: _append_cross_platform_activity(payload, content),
+            )
         ),
     )
 
@@ -286,17 +296,19 @@ async def test_content_creator_dashboard_on_mirrornet(mirrornet_replay: Mirrorne
     result = await mirrornet_replay(
         97547200,
         97547250,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_posts("thebeedevs")
-        .on_comments("thebeedevs")
-        .on_mention("thebeedevs")
-        .on_reblog("thebeedevs")
-        .on_votes(
-            "thebeedevs",
-        )
-        .subscribe(
-            on_error=on_error,
-            on_complete=on_complete,
-            on_next=lambda payload: _append_creator_dashboard(payload, content),
+        lambda bot, _chain, content, on_error, on_complete: (
+            bot.on_posts("thebeedevs")
+            .on_comments("thebeedevs")
+            .on_mention("thebeedevs")
+            .on_reblog("thebeedevs")
+            .on_votes(
+                "thebeedevs",
+            )
+            .subscribe(
+                on_error=on_error,
+                on_complete=on_complete,
+                on_next=lambda payload: _append_creator_dashboard(payload, content),
+            )
         ),
     )
 
@@ -313,20 +325,22 @@ async def test_market_movement_detector_on_mirrornet(mirrornet_replay: Mirrornet
     result = await mirrornet_replay(
         97347545,
         97347555,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_whale_alert(_hive_threshold(10000))
-        .on_internal_market_operation()
-        .on_exchange_transfer()
-        .subscribe(
-            on_error=on_error,
-            on_complete=on_complete,
-            on_next=lambda payload: _append_finance(
-                payload,
-                content,
-                whale_prefix="Whale Alert: ",
-                market_prefix="Internal Market Operation: ",
-                exchange_prefix="Exchange Transfer: ",
-                order=("whale", "market", "exchange"),
-            ),
+        lambda bot, _chain, content, on_error, on_complete: (
+            bot.on_whale_alert(_hive_threshold(10000))
+            .on_internal_market_operation()
+            .on_exchange_transfer()
+            .subscribe(
+                on_error=on_error,
+                on_complete=on_complete,
+                on_next=lambda payload: _append_finance(
+                    payload,
+                    content,
+                    whale_prefix="Whale Alert: ",
+                    market_prefix="Internal Market Operation: ",
+                    exchange_prefix="Exchange Transfer: ",
+                    order=("whale", "market", "exchange"),
+                ),
+            )
         ),
     )
 
@@ -343,12 +357,14 @@ async def test_pattern_analysis_bot_on_mirrornet(mirrornet_replay: MirrornetRepl
     result = await mirrornet_replay(
         97547200,
         97547250,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_votes("thebeedevs")
-        .on_posts("thebeedevs")
-        .subscribe(
-            on_error=on_error,
-            on_complete=on_complete,
-            on_next=lambda payload: _append_votes_and_posts(payload, content),
+        lambda bot, _chain, content, on_error, on_complete: (
+            bot.on_votes("thebeedevs")
+            .on_posts("thebeedevs")
+            .subscribe(
+                on_error=on_error,
+                on_complete=on_complete,
+                on_next=lambda payload: _append_votes_and_posts(payload, content),
+            )
         ),
     )
 
@@ -363,12 +379,14 @@ async def test_market_trend_analyzer_on_mirrornet(mirrornet_replay: MirrornetRep
     result = await mirrornet_replay(
         97347545,
         97347555,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_whale_alert(_hive_threshold(10000))
-        .on_internal_market_operation()
-        .subscribe(
-            on_error=on_error,
-            on_complete=on_complete,
-            on_next=lambda payload: _append_finance(payload, content, whale_prefix="Whale Alert: ", market_prefix="Internal Market: "),
+        lambda bot, _chain, content, on_error, on_complete: (
+            bot.on_whale_alert(_hive_threshold(10000))
+            .on_internal_market_operation()
+            .subscribe(
+                on_error=on_error,
+                on_complete=on_complete,
+                on_next=lambda payload: _append_finance(payload, content, whale_prefix="Whale Alert: ", market_prefix="Internal Market: "),
+            )
         ),
     )
 
@@ -384,13 +402,15 @@ async def test_community_growth_monitor_on_mirrornet(mirrornet_replay: Mirrornet
     result = await mirrornet_replay(
         97664610,
         97664620,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_new_account()
-        .on_follow("thebeedevs")
-        .on_custom_operation("follow")
-        .subscribe(
-            on_error=on_error,
-            on_complete=on_complete,
-            on_next=lambda payload: _append_community_growth(payload, content),
+        lambda bot, _chain, content, on_error, on_complete: (
+            bot.on_new_account()
+            .on_follow("thebeedevs")
+            .on_custom_operation("follow")
+            .subscribe(
+                on_error=on_error,
+                on_complete=on_complete,
+                on_next=lambda payload: _append_community_growth(payload, content),
+            )
         ),
     )
 
@@ -409,13 +429,15 @@ async def test_content_performance_analyzer_on_mirrornet(mirrornet_replay: Mirro
     result = await mirrornet_replay(
         97547200,
         97547250,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_posts("thebeedevs")
-        .on_comments("thebeedevs")
-        .on_votes("thebeedevs")
-        .subscribe(
-            on_error=on_error,
-            on_complete=on_complete,
-            on_next=lambda payload: _append_content_performance(payload, content),
+        lambda bot, _chain, content, on_error, on_complete: (
+            bot.on_posts("thebeedevs")
+            .on_comments("thebeedevs")
+            .on_votes("thebeedevs")
+            .subscribe(
+                on_error=on_error,
+                on_complete=on_complete,
+                on_next=lambda payload: _append_content_performance(payload, content),
+            )
         ),
     )
 
@@ -430,20 +452,22 @@ async def test_economic_activity_tracker_on_mirrornet(mirrornet_replay: Mirrorne
     result = await mirrornet_replay(
         97347575,
         97347585,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_whale_alert(_hive_threshold(1000))
-        .on_exchange_transfer()
-        .on_internal_market_operation()
-        .subscribe(
-            on_error=on_error,
-            on_complete=on_complete,
-            on_next=lambda payload: _append_finance(
-                payload,
-                content,
-                whale_prefix="Whale: ",
-                market_prefix="Market: ",
-                exchange_prefix="Exchange: ",
-                order=("whale", "exchange", "market"),
-            ),
+        lambda bot, _chain, content, on_error, on_complete: (
+            bot.on_whale_alert(_hive_threshold(1000))
+            .on_exchange_transfer()
+            .on_internal_market_operation()
+            .subscribe(
+                on_error=on_error,
+                on_complete=on_complete,
+                on_next=lambda payload: _append_finance(
+                    payload,
+                    content,
+                    whale_prefix="Whale: ",
+                    market_prefix="Market: ",
+                    exchange_prefix="Exchange: ",
+                    order=("whale", "exchange", "market"),
+                ),
+            )
         ),
     )
 
@@ -462,14 +486,16 @@ async def test_account_behavior_analysis_on_mirrornet(mirrornet_replay: Mirrorne
     result = await mirrornet_replay(
         97547200,
         97547250,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_posts("thebeedevs")
-        .on_votes("thebeedevs")
-        .on_follow("thebeedevs")
-        .on_reblog("thebeedevs")
-        .subscribe(
-            on_error=on_error,
-            on_complete=on_complete,
-            on_next=lambda payload: _append_account_behavior(payload, content),
+        lambda bot, _chain, content, on_error, on_complete: (
+            bot.on_posts("thebeedevs")
+            .on_votes("thebeedevs")
+            .on_follow("thebeedevs")
+            .on_reblog("thebeedevs")
+            .subscribe(
+                on_error=on_error,
+                on_complete=on_complete,
+                on_next=lambda payload: _append_account_behavior(payload, content),
+            )
         ),
     )
 

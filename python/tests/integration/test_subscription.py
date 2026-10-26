@@ -78,13 +78,15 @@ async def test_and_emits_only_when_both_match_on_mirrornet_replay(mirrornet_repl
     result = await mirrornet_replay(
         96549390,
         96549415,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_posts("mtyszczak")
-        .and_.on_votes("jacor")
-        .provide_block_data()
-        .subscribe(
-            on_error=on_error,
-            on_complete=on_complete,
-            on_next=lambda payload: append_content(payload, content),
+        lambda bot, _chain, content, on_error, on_complete: (
+            bot.on_posts("mtyszczak")
+            .and_.on_votes("jacor")
+            .provide_block_data()
+            .subscribe(
+                on_error=on_error,
+                on_complete=on_complete,
+                on_next=lambda payload: append_content(payload, content),
+            )
         ),
     )
 
@@ -106,12 +108,14 @@ async def test_or_emits_for_either_branch_on_mirrornet_replay(mirrornet_replay: 
     result = await mirrornet_replay(
         96549390,
         96549415,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_posts("mtyszczak")
-        .OR.on_posts("nickdongsik")
-        .subscribe(
-            on_error=on_error,
-            on_complete=on_complete,
-            on_next=lambda payload: append_post_authors(payload, content),
+        lambda bot, _chain, content, on_error, on_complete: (
+            bot.on_posts("mtyszczak")
+            .OR.on_posts("nickdongsik")
+            .subscribe(
+                on_error=on_error,
+                on_complete=on_complete,
+                on_next=lambda payload: append_post_authors(payload, content),
+            )
         ),
     )
 

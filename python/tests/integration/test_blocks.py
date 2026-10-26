@@ -35,9 +35,9 @@ async def test_on_block_number(mirrornet_replay: MirrornetReplay) -> None:
     got = await mirrornet_replay(
         SAMPLE_BLOCK,
         SAMPLE_BLOCK,
-        lambda replay, _chain, received, on_error, on_complete: replay.on_block_number(SAMPLE_BLOCK)
-        .provide_block_header_data()
-        .subscribe(on_next=received.append, on_error=on_error, on_complete=on_complete),
+        lambda replay, _chain, received, on_error, on_complete: (
+            replay.on_block_number(SAMPLE_BLOCK).provide_block_header_data().subscribe(on_next=received.append, on_error=on_error, on_complete=on_complete)
+        ),
     )
 
     assert got[0]["block"]["number"] == SAMPLE_BLOCK

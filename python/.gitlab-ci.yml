@@ -11,11 +11,8 @@ variables:
   PYTHONWARNINGS: "default"
   PYTHON_DIR: "${CI_PROJECT_DIR}/python"
   PRE_COMMIT_CONFIG: "${CI_PROJECT_DIR}/.pre-commit-config.yaml"
-  PYTHON_VERSION: "3.12"
   # Full clone so poetry-dynamic-versioning can read git tags for the version.
   GIT_DEPTH: 0
-  # Ubuntu 24.04 Python image used by the shared Python job template.
-  PYTHON_IMAGE: "registry.gitlab.syncad.com/hive/hive/ci-base-image:ubuntu24.04-3"
 
 default:
   tags:
@@ -23,6 +20,7 @@ default:
 
 .python_job:
   extends: .configuration_template
+  image: "${PYTHON_TEST_TOOLS_IMAGE}"
   variables:
     PYPROJECT_DIR: "${PYTHON_DIR}"
   before_script:
@@ -34,6 +32,7 @@ default:
 
 .python_docs_job:
   extends: .configuration_template
+  image: "${PYTHON_TEST_TOOLS_IMAGE}"
   variables:
     PYPROJECT_DIR: "${PYTHON_DIR}"
   before_script:
@@ -106,7 +105,9 @@ python_test_mock:
     - cd "${CI_PROJECT_DIR}"
     - |
       if ! command -v node >/dev/null; then
-        NODE_VERSION="${WORKERBEE_CI_NODE_VERSION:-v24.21.0}"
+        # The Node version node-test-tools ships: common-ci-configuration's docker-bake.hcl.
+        NODE_VERSION="${WORKERBEE_CI_NODE_VERSION:-$(curl -fsSL "${CI_SERVER_URL}/hive/common-ci-configuration/-/raw/develop/docker-bake.hcl" | sed -n '/^variable "NODE_VERSION"/,/^}/s/.*default = "\(.*\)".*/\1/p')}"
+        if [ -z "${NODE_VERSION}" ]; then echo "Could not read NODE_VERSION from common-ci-configuration's docker-bake.hcl" >&2; exit 1; fi
         case "$(uname -m)" in
           x86_64) NODE_ARCH="linux-x64" ;;
           aarch64|arm64) NODE_ARCH="linux-arm64" ;;

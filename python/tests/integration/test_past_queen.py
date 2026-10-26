@@ -39,12 +39,14 @@ async def test_provide_past_operations_replays_historical_range(mirrornet_replay
     result = await mirrornet_replay(
         96549390,
         96549415,
-        lambda bot, _chain, content, on_error, on_complete: bot.on_posts("mtyszczak")
-        .on_posts("nickdongsik")
-        .subscribe(
-            on_error=on_error,
-            on_complete=on_complete,
-            on_next=lambda payload: append_posts(payload, content),
+        lambda bot, _chain, content, on_error, on_complete: (
+            bot.on_posts("mtyszczak")
+            .on_posts("nickdongsik")
+            .subscribe(
+                on_error=on_error,
+                on_complete=on_complete,
+                on_next=lambda payload: append_posts(payload, content),
+            )
         ),
     )
 
@@ -90,12 +92,14 @@ async def test_provide_past_operations_replays_exact_inclusive_block_count(mirro
     block_numbers = await mirrornet_replay(
         _SAMPLE_BLOCK,
         _SAMPLE_BLOCK + 3,
-        lambda replay, _chain, received, on_error, on_complete: replay.on_block()
-        .provide_block_header_data()
-        .subscribe(
-            on_next=lambda payload: _append_block_number(payload, received),
-            on_error=on_error,
-            on_complete=on_complete,
+        lambda replay, _chain, received, on_error, on_complete: (
+            replay.on_block()
+            .provide_block_header_data()
+            .subscribe(
+                on_next=lambda payload: _append_block_number(payload, received),
+                on_error=on_error,
+                on_complete=on_complete,
+            )
         ),
     )
 
@@ -108,9 +112,11 @@ async def test_provide_past_operations_replays_transaction_id(mirrornet_replay: 
     got = await mirrornet_replay(
         _SAMPLE_BLOCK,
         _SAMPLE_BLOCK,
-        lambda replay, _chain, received, on_error, on_complete: replay.on_transaction_ids(_SAMPLE_TRANSACTION_ID)
-        .provide_block_header_data()
-        .subscribe(on_next=received.append, on_error=on_error, on_complete=on_complete),
+        lambda replay, _chain, received, on_error, on_complete: (
+            replay.on_transaction_ids(_SAMPLE_TRANSACTION_ID)
+            .provide_block_header_data()
+            .subscribe(on_next=received.append, on_error=on_error, on_complete=on_complete)
+        ),
     )
 
     assert len(got) == 1
