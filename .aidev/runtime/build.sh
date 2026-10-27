@@ -3,10 +3,12 @@
 # and print the digest-pinned reference to put in .aidev/project.yaml's
 # `environment.image`. See .aidev/README.md.
 #
-# The tag is `aidev-<hash>`, the hash of the image inputs (the Dockerfile,
-# `packageManager` from package.json, pnpm-lock.yaml, the workspace's package.json
-# files, and the npm-common-config submodule commit, which provides .npmrc and
-# pnpm-workspace.yaml); the registry cleanup policy keeps `aidev-*` tags. When
+# The tag is `aidev-<hash>`, the hash of the image inputs (the Dockerfile, the
+# current digest of its moving `FROM` image, `packageManager` from package.json,
+# pnpm-lock.yaml, the workspace's package.json files, and the npm-common-config
+# submodule commit, which provides .npmrc and pnpm-workspace.yaml); the registry
+# cleanup policy keeps `aidev-*` tags. A new ccc node-test-tools (a Node release)
+# therefore gives a new tag. When
 # <repository>:aidev-<hash> is already in the registry nothing is built: the script
 # prints that image's digest.
 #
@@ -24,9 +26,25 @@ REPOSITORY="${AIDEV_RUNTIME_REPOSITORY:-registry.gitlab.syncad.com/hive/workerbe
 
 submodule_commit() { git ls-tree HEAD npm-common-config | awk '{print $3}'; }
 
+# Digest of <image> in the registry, empty when it doesn't exist.
+image_digest() {
+    docker buildx imagetools inspect "$1" --format '{{json .Manifest}}' 2>/dev/null \
+        | grep -o '"digest": *"sha256:[0-9a-f]*"' | head -1 | grep -o 'sha256:[0-9a-f]*' || true
+}
+
+base_image() { awk '$1 == "FROM" {print $2; exit}' .aidev/runtime/Dockerfile; }
+
 input_hash() {
+    local base base_digest
+    base="$(base_image)"
+    base_digest="$(image_digest "$base")"
+    if [ -z "$base_digest" ]; then
+        echo "cannot resolve $base in the registry" >&2
+        return 1
+    fi
     {
         sha256sum .aidev/runtime/Dockerfile pnpm-lock.yaml packages/blog-logic/package.json
+        echo "$base $base_digest"
         grep '"packageManager"' package.json
         echo "npm-common-config $(submodule_commit)"
     } | sha256sum | cut -c1-16
@@ -39,13 +57,7 @@ case "${1:-}" in
     *) echo "usage: $0 [--push|--tag]" >&2; exit 2 ;;
 esac
 
-# Digest of <repository>:<tag> in the registry, empty when the tag doesn't exist.
-registry_digest() {
-    docker buildx imagetools inspect "$REPOSITORY:$TAG" --format '{{json .Manifest}}' 2>/dev/null \
-        | grep -o '"digest": *"sha256:[0-9a-f]*"' | head -1 | grep -o 'sha256:[0-9a-f]*' || true
-}
-
-digest="$(registry_digest)"
+digest="$(image_digest "$REPOSITORY:$TAG")"
 if [ -n "$digest" ]; then
     echo "$REPOSITORY:$TAG exists in the registry; not building" >&2
     echo "$REPOSITORY@$digest"
