@@ -15,7 +15,7 @@ When AIDEV runs you on an issue, no one is there to answer questions. GitLab CI 
 
 ## Tech Stack
 
-- **Runtime:** Node.js 24+ (24.21.0 LTS in CI and the AIDEV test image)
+- **Runtime:** Node.js 24+ (CI and the AIDEV test image take the exact version from common-ci-configuration)
 - **Language:** TypeScript (ESM only)
 - **Package Manager:** pnpm 10.33.0+
 - **Build:** Rollup + Terser + size-limit (181 kB max)

@@ -8,6 +8,7 @@ services:
       dockerfile: examples/Dockerfile.npm
       args:
         USER_NAME: user
+        NODE_VERSION: ${NODE_VERSION:?set by start.sh from common-ci-configuration's docker-bake.hcl}
       tags:
         - hive/workerbee:npm
 
