@@ -1,24 +1,19 @@
 # The image AIDEV runs this project's suites in (`environment.image` in
-# .aidev/project.yaml). It is the image CI's npm jobs use (common-ci-configuration
-# npm_projects template, EMSCRIPTEN_IMAGE_TAG 5.0.2-6): Node 24.21.0 through nvm,
-# pnpm 10.33.0. Suites run with `--network none`, so everything an install and the
-# Playwright suite need is in the image:
+# .aidev/project.yaml). It builds on common-ci-configuration's node-test-tools at its
+# moving `develop` tag, so Node and pnpm are the versions ccc's docker-bake.hcl
+# defines; this repository pins neither. Suites run with `--network none`, so
+# everything an install and the Playwright suite need is in the image:
 #   - a pnpm store filled from pnpm-lock.yaml (`pnpm fetch`);
 #   - the Chromium build of the locked Playwright version, in /opt (the base image
-#     preinstalls the same build in its own PLAYWRIGHT_BROWSERS_PATH; CI's `pretest`
-#     runs `playwright install chromium` against that);
+#     has its system dependencies; CI's `pretest` runs `playwright install chromium`);
 #   - the npm-common-config submodule at its pinned commit, in /opt, which
 #     .aidev/pnpm-deps.sh copies into a checkout whose submodule isn't initialised
 #     (.npmrc, pnpm-workspace.yaml and the tsconfig base are symlinks into it).
 # Build and pin it with .aidev/runtime/build.sh; see .aidev/README.md.
-FROM registry.gitlab.syncad.com/hive/common-ci-configuration/emsdk:5.0.2-6@sha256:9aec859476a9508693dba0d55c8637a2fcc572ec51dfcf87adaba21d6f64d67f
+FROM registry.gitlab.syncad.com/hive/common-ci-configuration/node-test-tools:develop
 
 USER root
-# CI's `nvm use $NODEJS_VERSION`, as PATH: the emsdk entrypoint would put emsdk's own
-# Node first, so it is dropped.
-ENTRYPOINT []
-ENV PATH=/home/emscripten/.nvm/versions/node/v24.21.0/bin:/home/emscripten/.local/share/pnpm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    HOME=/tmp \
+ENV HOME=/tmp \
     npm_config_store_dir=/opt/pnpm-store \
     PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers \
     HUSKY=0 \
@@ -27,10 +22,20 @@ ENV PATH=/home/emscripten/.nvm/versions/node/v24.21.0/bin:/home/emscripten/.loca
 
 COPY npm-common-config/ /opt/npm-common-config/
 COPY fetch/ /tmp/pnpm-fetch/
+# Three layers (the pnpm store, Chromium's headless shell, Chromium): as one layer it
+# is too big to push before a registry upload times out. Each later layer installs a
+# throwaway node_modules by copying, as hardlinks would bring the store files into it.
 RUN cd /tmp/pnpm-fetch \
     && node --version && pnpm --version \
     && pnpm fetch \
-    && pnpm install --offline --frozen-lockfile --ignore-scripts \
-    && node_modules/.bin/playwright install chromium \
+    && chmod -R a+rwX /opt/pnpm-store /opt/npm-common-config
+RUN cd /tmp/pnpm-fetch \
+    && pnpm install --offline --frozen-lockfile --ignore-scripts --package-import-method=copy \
+    && node_modules/.bin/playwright install --only-shell chromium \
+    && rm -rf node_modules \
+    && chmod -R a+rwX /opt/pw-browsers
+RUN cd /tmp/pnpm-fetch \
+    && pnpm install --offline --frozen-lockfile --ignore-scripts --package-import-method=copy \
+    && node_modules/.bin/playwright install --no-shell chromium \
     && cd / && rm -rf /tmp/pnpm-fetch \
-    && chmod -R a+rwX /opt/pnpm-store /opt/pw-browsers /opt/npm-common-config
+    && find /opt/pw-browsers ! -perm -a+rw -exec chmod a+rwX {} +

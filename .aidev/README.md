@@ -47,17 +47,20 @@ yet. The Python package in `python/` (poetry, its own CI jobs) isn't bound eithe
 
 ## The test runtime image (`runtime/`)
 
-The suites run in a container with `--network none` and your uid. The image is the
-one CI's npm jobs use (`common-ci-configuration` `emsdk:5.0.2-6`: Node 24.21.0,
-pnpm 10.33.0), plus a pnpm store filled with `pnpm fetch`, the Chromium build the
-locked Playwright needs, and a copy of the `npm-common-config` submodule.
+The suites run in a container with `--network none` and your uid. The image is
+`common-ci-configuration`'s `node-test-tools:develop` (Node and pnpm at the versions
+ccc's `docker-bake.hcl` defines; this repository pins neither), plus a pnpm store
+filled with `pnpm fetch`, the Chromium build the locked Playwright needs, and a copy
+of the `npm-common-config` submodule.
 `pnpm-deps.sh` installs `node_modules` offline from the store, and copies the
 submodule in when the checkout hasn't initialised it (`.npmrc`, `pnpm-workspace.yaml`
 and the tsconfig base are symlinks into it).
 
 When `pnpm-lock.yaml`, `packages/blog-logic/package.json`, `packageManager`, the
 `npm-common-config` submodule commit or `runtime/Dockerfile` change, rebuild and
-re-pin **in the same commit**:
+re-pin **in the same commit**. The input hash also covers the current digest of
+`node-test-tools:develop`, so after ccc publishes a new Node, `build.sh --push`
+builds a new image to re-pin:
 
 ```bash
 git submodule update --init npm-common-config
