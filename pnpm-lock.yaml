@@ -5,6 +5,13 @@ settings:
   excludeLinksFromLockfile: false
 
 catalogs:
+  hiveio-toolset:
+    '@hiveio/beekeeper':
+      specifier: 1.28.8-stable.261010174216
+      version: 1.28.8-stable.261010174216
+    '@hiveio/wax':
+      specifier: 1.28.8-stable.261028191145
+      version: 1.28.8-stable.261028191145
   husky:
     husky:
       specifier: 9.1.5
@@ -64,8 +71,8 @@ catalogs:
       specifier: 4.19.3
       version: 4.19.3
     typescript:
-      specifier: 5.7.3
-      version: 5.7.3
+      specifier: 5.9.3
+      version: 5.9.3
 
 importers:
 
@@ -81,11 +88,11 @@ importers:
         specifier: ^9.20.0
         version: 9.20.0
       '@hiveio/beekeeper':
-        specifier: 1.28.7-rc0
-        version: 1.28.7-rc0
+        specifier: catalog:hiveio-toolset
+        version: 1.28.8-stable.261010174216
       '@hiveio/wax':
-        specifier: 2.0.2
-        version: 2.0.2
+        specifier: catalog:hiveio-toolset
+        version: 1.28.8-stable.261028191145
       '@playwright/test':
         specifier: catalog:playwright-toolset
         version: 1.64.1
@@ -115,10 +122,10 @@ importers:
         version: 24.19.1
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.24.1
-        version: 8.24.1(@typescript-eslint/parser@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
+        version: 8.24.1(@typescript-eslint/parser@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3))(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3)
       '@typescript-eslint/parser':
         specifier: ^8.24.1
-        version: 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
+        version: 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3)
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
@@ -130,7 +137,7 @@ importers:
         version: 9.20.1(jiti@2.4.2)
       eslint-plugin-import:
         specifier: ^2.31.0
-        version: 2.31.0(@typescript-eslint/parser@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2))
+        version: 2.31.0(@typescript-eslint/parser@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3))(eslint@9.20.1(jiti@2.4.2))
       express:
         specifier: ^5.1.0
         version: 5.1.0
@@ -163,7 +170,7 @@ importers:
         version: 4.24.0
       rollup-plugin-dts:
         specifier: catalog:rollup-toolset
-        version: 6.1.1(rollup@4.24.0)(typescript@5.7.3)
+        version: 6.1.1(rollup@4.24.0)(typescript@5.9.3)
       size-limit:
         specifier: catalog:size-limit-toolset
         version: 11.1.6
@@ -178,22 +185,22 @@ importers:
         version: 4.19.3
       typedoc:
         specifier: catalog:typedoc-toolset
-        version: 0.27.3(typescript@5.7.3)
+        version: 0.27.3(typescript@5.9.3)
       typedoc-gitlab-wiki-theme:
         specifier: catalog:typedoc-toolset
-        version: 2.1.0(typedoc-plugin-markdown@4.3.1(typedoc@0.27.3(typescript@5.7.3)))
+        version: 2.1.0(typedoc-plugin-markdown@4.3.1(typedoc@0.27.3(typescript@5.9.3)))
       typedoc-plugin-markdown:
         specifier: catalog:typedoc-toolset
-        version: 4.3.1(typedoc@0.27.3(typescript@5.7.3))
+        version: 4.3.1(typedoc@0.27.3(typescript@5.9.3))
       typescript:
         specifier: catalog:typescript-toolset
-        version: 5.7.3
+        version: 5.9.3
 
   packages/blog-logic:
     dependencies:
       '@hiveio/wax':
-        specifier: 2.0.2
-        version: 2.0.2
+        specifier: catalog:hiveio-toolset
+        version: 1.28.8-stable.261028191145
       '@hiveio/wax-api-hafbe':
         specifier: 1.28.4
         version: 1.28.4
@@ -428,9 +435,9 @@ packages:
   '@gerrit0/mini-shiki@1.27.2':
     resolution: {integrity: sha512-GeWyHz8ao2gBiUW4OJnQDxXQnFgZQwwQk05t/CVVgNBN7/rK8XZ7xY6YhLVv9tH3VppWWmr9DCl3MwemB/i+Og==}
 
-  '@hiveio/beekeeper@1.28.7-rc0':
-    resolution: {integrity: sha1-0pywM0DVGcHO6mrEB0nKZ9BjSDo=, tarball: https://gitlab.syncad.com/api/v4/projects/558/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.28.7-rc0.tgz}
-    engines: {node: ^20.11 || >= 21.2}
+  '@hiveio/beekeeper@1.28.8-stable.261010174216':
+    resolution: {integrity: sha1-mTT7Kpwm4u6hQzhUNP80nn1ASP4=, tarball: https://gitlab.syncad.com/api/v4/projects/558/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.28.8-stable.261010174216.tgz}
+    engines: {node: '>=24'}
 
   '@hiveio/wax-api-hafbe@1.28.4':
     resolution: {integrity: sha1-pVCg7PFHORraD3D/00VnzNYVkIY=, tarball: https://gitlab.syncad.com/api/v4/projects/358/packages/npm/@hiveio/wax-api-hafbe/-/@hiveio/wax-api-hafbe-1.28.4.tgz}
@@ -438,9 +445,9 @@ packages:
   '@hiveio/wax-api-jsonrpc@1.28.4':
     resolution: {integrity: sha1-FU095wjBfkCpgI2w9qnT0J0hJSU=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/wax-api-jsonrpc/-/@hiveio/wax-api-jsonrpc-1.28.4.tgz}
 
-  '@hiveio/wax@2.0.2':
-    resolution: {integrity: sha1-3JurSNe7ALUNgewAEnlsgdbPxHw=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-2.0.2.tgz}
-    engines: {node: ^20.11 || >= 21.2}
+  '@hiveio/wax@1.28.8-stable.261028191145':
+    resolution: {integrity: sha1-FT9OHciWwgkExNyutr7xtQRs9Oo=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.28.8-stable.261028191145.tgz}
+    engines: {node: '>=24'}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -2961,8 +2968,8 @@ packages:
     peerDependencies:
       typescript: 5.0.x || 5.1.x || 5.2.x || 5.3.x || 5.4.x || 5.5.x || 5.6.x || 5.7.x
 
-  typescript@5.7.3:
-    resolution: {integrity: sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==}
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -3248,13 +3255,13 @@ snapshots:
       '@shikijs/types': 1.29.2
       '@shikijs/vscode-textmate': 10.0.1
 
-  '@hiveio/beekeeper@1.28.7-rc0': {}
+  '@hiveio/beekeeper@1.28.8-stable.261010174216': {}
 
   '@hiveio/wax-api-hafbe@1.28.4': {}
 
   '@hiveio/wax-api-jsonrpc@1.28.4': {}
 
-  '@hiveio/wax@2.0.2':
+  '@hiveio/wax@1.28.8-stable.261028191145':
     dependencies:
       events: 3.3.0
 
@@ -3645,32 +3652,32 @@ snapshots:
 
   '@types/unist@3.0.3': {}
 
-  '@typescript-eslint/eslint-plugin@8.24.1(@typescript-eslint/parser@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)':
+  '@typescript-eslint/eslint-plugin@8.24.1(@typescript-eslint/parser@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3))(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3)':
     dependencies:
       '@eslint-community/regexpp': 4.12.1
-      '@typescript-eslint/parser': 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
+      '@typescript-eslint/parser': 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3)
       '@typescript-eslint/scope-manager': 8.24.1
-      '@typescript-eslint/type-utils': 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
-      '@typescript-eslint/utils': 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
+      '@typescript-eslint/type-utils': 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3)
+      '@typescript-eslint/utils': 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3)
       '@typescript-eslint/visitor-keys': 8.24.1
       eslint: 9.20.1(jiti@2.4.2)
       graphemer: 1.4.0
       ignore: 5.3.2
       natural-compare: 1.4.0
-      ts-api-utils: 2.0.1(typescript@5.7.3)
-      typescript: 5.7.3
+      ts-api-utils: 2.0.1(typescript@5.9.3)
+      typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/parser@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)':
+  '@typescript-eslint/parser@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3)':
     dependencies:
       '@typescript-eslint/scope-manager': 8.24.1
       '@typescript-eslint/types': 8.24.1
-      '@typescript-eslint/typescript-estree': 8.24.1(typescript@5.7.3)
+      '@typescript-eslint/typescript-estree': 8.24.1(typescript@5.9.3)
       '@typescript-eslint/visitor-keys': 8.24.1
       debug: 4.3.4
       eslint: 9.20.1(jiti@2.4.2)
-      typescript: 5.7.3
+      typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
@@ -3679,20 +3686,20 @@ snapshots:
       '@typescript-eslint/types': 8.24.1
       '@typescript-eslint/visitor-keys': 8.24.1
 
-  '@typescript-eslint/type-utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)':
+  '@typescript-eslint/type-utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3)':
     dependencies:
-      '@typescript-eslint/typescript-estree': 8.24.1(typescript@5.7.3)
-      '@typescript-eslint/utils': 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
+      '@typescript-eslint/typescript-estree': 8.24.1(typescript@5.9.3)
+      '@typescript-eslint/utils': 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3)
       debug: 4.3.4
       eslint: 9.20.1(jiti@2.4.2)
-      ts-api-utils: 2.0.1(typescript@5.7.3)
-      typescript: 5.7.3
+      ts-api-utils: 2.0.1(typescript@5.9.3)
+      typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
   '@typescript-eslint/types@8.24.1': {}
 
-  '@typescript-eslint/typescript-estree@8.24.1(typescript@5.7.3)':
+  '@typescript-eslint/typescript-estree@8.24.1(typescript@5.9.3)':
     dependencies:
       '@typescript-eslint/types': 8.24.1
       '@typescript-eslint/visitor-keys': 8.24.1
@@ -3701,19 +3708,19 @@ snapshots:
       is-glob: 4.0.3
       minimatch: 9.0.5
       semver: 7.6.3
-      ts-api-utils: 2.0.1(typescript@5.7.3)
-      typescript: 5.7.3
+      ts-api-utils: 2.0.1(typescript@5.9.3)
+      typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)':
+  '@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3)':
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@9.20.1(jiti@2.4.2))
       '@typescript-eslint/scope-manager': 8.24.1
       '@typescript-eslint/types': 8.24.1
-      '@typescript-eslint/typescript-estree': 8.24.1(typescript@5.7.3)
+      '@typescript-eslint/typescript-estree': 8.24.1(typescript@5.9.3)
       eslint: 9.20.1(jiti@2.4.2)
-      typescript: 5.7.3
+      typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
@@ -4376,17 +4383,17 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint@9.20.1(jiti@2.4.2)):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint@9.20.1(jiti@2.4.2)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
-      '@typescript-eslint/parser': 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
+      '@typescript-eslint/parser': 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3)
       eslint: 9.20.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)):
+  eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3))(eslint@9.20.1(jiti@2.4.2)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.8
@@ -4397,7 +4404,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.20.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint@9.20.1(jiti@2.4.2))
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint@9.20.1(jiti@2.4.2))
       hasown: 2.0.2
       is-core-module: 2.15.1
       is-glob: 4.0.3
@@ -4409,7 +4416,7 @@ snapshots:
       string.prototype.trimend: 1.0.8
       tsconfig-paths: 3.15.0
     optionalDependencies:
-      '@typescript-eslint/parser': 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
+      '@typescript-eslint/parser': 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.9.3)
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
       - eslint-import-resolver-webpack
@@ -5790,11 +5797,11 @@ snapshots:
     dependencies:
       glob: 7.2.3
 
-  rollup-plugin-dts@6.1.1(rollup@4.24.0)(typescript@5.7.3):
+  rollup-plugin-dts@6.1.1(rollup@4.24.0)(typescript@5.9.3):
     dependencies:
       magic-string: 0.30.12
       rollup: 4.24.0
-      typescript: 5.7.3
+      typescript: 5.9.3
     optionalDependencies:
       '@babel/code-frame': 7.26.2
 
@@ -6180,9 +6187,9 @@ snapshots:
 
   treeverse@3.0.0: {}
 
-  ts-api-utils@2.0.1(typescript@5.7.3):
+  ts-api-utils@2.0.1(typescript@5.9.3):
     dependencies:
-      typescript: 5.7.3
+      typescript: 5.9.3
 
   tsconfig-paths@3.15.0:
     dependencies:
@@ -6284,24 +6291,24 @@ snapshots:
       is-typed-array: 1.1.13
       possible-typed-array-names: 1.0.0
 
-  typedoc-gitlab-wiki-theme@2.1.0(typedoc-plugin-markdown@4.3.1(typedoc@0.27.3(typescript@5.7.3))):
+  typedoc-gitlab-wiki-theme@2.1.0(typedoc-plugin-markdown@4.3.1(typedoc@0.27.3(typescript@5.9.3))):
     dependencies:
-      typedoc-plugin-markdown: 4.3.1(typedoc@0.27.3(typescript@5.7.3))
+      typedoc-plugin-markdown: 4.3.1(typedoc@0.27.3(typescript@5.9.3))
 
-  typedoc-plugin-markdown@4.3.1(typedoc@0.27.3(typescript@5.7.3)):
+  typedoc-plugin-markdown@4.3.1(typedoc@0.27.3(typescript@5.9.3)):
     dependencies:
-      typedoc: 0.27.3(typescript@5.7.3)
+      typedoc: 0.27.3(typescript@5.9.3)
 
-  typedoc@0.27.3(typescript@5.7.3):
+  typedoc@0.27.3(typescript@5.9.3):
     dependencies:
       '@gerrit0/mini-shiki': 1.27.2
       lunr: 2.3.9
       markdown-it: 14.1.0
       minimatch: 9.0.5
-      typescript: 5.7.3
+      typescript: 5.9.3
       yaml: 2.7.0
 
-  typescript@5.7.3: {}
+  typescript@5.9.3: {}
 
   uc.micro@2.1.0: {}
 
