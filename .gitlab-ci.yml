@@ -8,6 +8,9 @@ variables:
   GIT_DEPTH: 0
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
+  # npm-common-config follows ccc's develop (.gitmodules `branch`), so a catalog
+  # bump there reaches the next pipeline
+  GIT_SUBMODULE_UPDATE_FLAGS: --remote
   # Reference for GitHub Pages scripts from common-ci-configuration
   COMMON_CI_GITHUB_PAGES_REF: "develop"
 
