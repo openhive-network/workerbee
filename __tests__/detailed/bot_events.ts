@@ -6,8 +6,9 @@ import { expect } from "@playwright/test";
 import { test } from "../assets/jest-helper";
 
 const HIVE_BLOCK_INTERVAL = 3000;
+const PENDING_PAYOUT_RSHARES = 123456789;
 
-// Needs no network: .aidev/run-checks.sh `test-offline` runs these tests where the live API is unreachable
+// Makes no chain calls, or only to its own local stub node: needs no API recording
 const OFFLINE = "@offline";
 
 test.describe("WorkerBee Bot events test", () => {
@@ -408,79 +409,135 @@ test.describe("WorkerBee Bot events test", () => {
     expect(result.length).toBeGreaterThan(0);
   });
 
-  // TODO: This test uses a fake endpoint that doesn't exist. Fix the test to use a mock or real endpoint.
-  test("Should be able to use incoming payout observer", async({ workerbeeTest }) => {
-    const result = await workerbeeTest(async({ WorkerBee, wax, beekeeperFactory }) => {
+  test("Should be able to use incoming payout observer", { tag: OFFLINE }, async({ workerbeeTest }) => {
+    const result = await workerbeeTest(async({ WorkerBee, wax, beekeeperFactory }, pendingRshares) => {
+      const fakeEndpoint = "https://api.fake.openhive.network";
       const chain = await wax.createHiveChain({
         apiTimeout: 0,
-        apiEndpoint: "https://api.fake.openhive.network",
+        apiEndpoint: fakeEndpoint,
         chainId: "42"
       });
 
-      const bot = new WorkerBee(chain);
+      /*
+       * Node replaced by a local JSON-RPC stub: every broadcast transaction is included in the next head block,
+       * and each comment is due for payout right away with pendingRshares net rshares.
+       */
+      const headBlockId = "04c507a8c7fe5be96be64ce7c86855e1806cbde3";
+      const headBlockTime = "2023-11-09T21:51:27";
+      let headBlockNumber = 80020392;
+      const blockTransactions = new Map<number, Array<ApiTransaction>>();
 
-      const bkInstance = await beekeeperFactory({ inMemory: true });
-      const bkSession = bkInstance.createSession("salt and pepper");
-
-      const { wallet } = await bkSession.createWallet("temp", "pass", true);
-      const publicKey = await wallet.importKey("5JNHfZYKGaomSFvd4NUdQ9qMcEAC43kujbfjueTHpVapX1Kzq2n");
-
-      bot.start();
-
-      const tx = await bot.chain!.createTransaction();
-      const targetTx = tx.transaction;
-
-      const getSignedTx = async() => {
-        const tx = bot.chain!.createTransactionFromProto(structuredClone(targetTx));
-        tx.pushOperation(new wax.ReplyOperation({
-          parentAuthor: "thebeedevs",
-          parentPermlink: "further-integration-of-metamask-and-hive-wallet",
-          author: "gtg",
-          body: "WB tests",
-          permlink: `wb-tests-${Date.now()}`
-        }));
-        tx.addSignature(await wallet.signDigest(publicKey, tx.sigDigest));
-        return tx;
+      const handleJsonRpc = (method: string, params: Record<string, unknown>): unknown => {
+        switch (method) {
+        case "network_broadcast_api.broadcast_transaction":
+          blockTransactions.set(++headBlockNumber, [ params.trx as ApiTransaction ]);
+          return {};
+        case "database_api.get_dynamic_global_properties":
+          return { head_block_number: headBlockNumber, head_block_id: headBlockId, time: headBlockTime, current_witness: "gtg", downvote_pool_percent: 2500 };
+        case "block_api.get_block": {
+          const transactions = blockTransactions.get(params.block_num as number) ?? [];
+          return { block: {
+            previous: headBlockId, timestamp: headBlockTime, witness: "gtg", transaction_merkle_root: "", extensions: [], witness_signature: "",
+            block_id: headBlockId, signing_key: "", transactions, transaction_ids: transactions.map(trx => chain.createTransactionFromJson(trx).id)
+          } };
+        }
+        case "database_api.get_comment_pending_payouts": {
+          const now = new Date().toISOString().slice(0, 19);
+          const noHbd = { amount: "0", precision: 3, nai: "@@000000013" };
+          return { cashout_infos: (params.comments as Array<[string, string]>).map(([author, permlink]) => ({ author, permlink, cashout_info: {
+            total_payout_value: noHbd, total_vote_weight: 0, curator_payout_value: noHbd, max_accepted_payout: noHbd, author_rewards: 0,
+            children_abs_rshares: 0, net_rshares: pendingRshares, abs_rshares: pendingRshares, vote_rshares: pendingRshares, net_votes: 1,
+            last_payout: "1970-01-01T00:00:00", cashout_time: now, max_cashout_time: now, percent_hbd: 10000, reward_weight: 10000,
+            allow_replies: true, allow_votes: true, allow_curation_rewards: true, was_voted_on: true
+          } })) };
+        }
+        default:
+          throw new Error(`Unexpected JSON-RPC call to the fake node: ${method}`);
+        }
       };
 
-      setTimeout(async() => { // Broadcaster
-        const tx = await getSignedTx();
-        console.log(`Broadcasting reply transaction #${tx.id}`);
-        void bot.chain!.broadcast(tx).catch(console.error);
-      }, 2000);
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = (input, init) => {
+        if (String(input) !== fakeEndpoint)
+          return originalFetch(input, init);
 
-      const result = await new Promise<number>((res, rej) => { // Listener
-        const observer = bot.observe.onCommentsIncomingPayout("-7d", "gtg");
-        observer.subscribe({
-          next(data) {
-            let rshares: number | undefined;
+        const { method, params, id } = JSON.parse(init!.body as string);
 
-            for(const account in data.commentsMetadata)
-              for(const permlink in data.commentsMetadata[account as "gtg"]) {
-                rshares = Number(data.commentsMetadata[account as "gtg"]![permlink].netRshares);
-                console.info(`Retrieved comment payout of @${account}: ${rshares} rshares for ${permlink}`);
-              }
+        return Promise.resolve(new Response(JSON.stringify({ jsonrpc: "2.0", id, result: handleJsonRpc(method, params) }), {
+          headers: { "content-type": "application/json" }
+        }));
+      };
 
-            if (rshares === undefined)
-              return rej(new Error("Could not retrieve rshares for publisher1"));
+      try {
+        const bot = new WorkerBee(chain);
 
-            res(rshares);
-          },
-          error(err) {
-            console.error(err);
-          }
+        const bkInstance = await beekeeperFactory({ inMemory: true });
+        const bkSession = bkInstance.createSession("salt and pepper");
+
+        const { wallet } = await bkSession.createWallet("temp", "pass", true);
+        const publicKey = await wallet.importKey("5JNHfZYKGaomSFvd4NUdQ9qMcEAC43kujbfjueTHpVapX1Kzq2n");
+
+        bot.start();
+
+        const tx = await bot.chain!.createTransaction();
+        const targetTx = tx.transaction;
+
+        const getSignedTx = async() => {
+          const tx = bot.chain!.createTransactionFromProto(structuredClone(targetTx));
+          tx.pushOperation(new wax.ReplyOperation({
+            parentAuthor: "thebeedevs",
+            parentPermlink: "further-integration-of-metamask-and-hive-wallet",
+            author: "gtg",
+            body: "WB tests",
+            permlink: `wb-tests-${Date.now()}`
+          }));
+          tx.addSignature(await wallet.signDigest(publicKey, tx.sigDigest));
+          return tx;
+        };
+
+        setTimeout(async() => { // Broadcaster
+          const tx = await getSignedTx();
+          console.log(`Broadcasting reply transaction #${tx.id}`);
+          void bot.chain!.broadcast(tx).catch(console.error);
+        }, 2000);
+
+        const result = await new Promise<number>((res, rej) => { // Listener
+          const observer = bot.observe.onCommentsIncomingPayout("-7d", "gtg");
+          observer.subscribe({
+            next(data) {
+              let rshares: number | undefined;
+
+              for(const account in data.commentsMetadata)
+                for(const permlink in data.commentsMetadata[account as "gtg"]) {
+                  rshares = Number(data.commentsMetadata[account as "gtg"]![permlink].netRshares);
+                  console.info(`Retrieved comment payout of @${account}: ${rshares} rshares for ${permlink}`);
+                }
+
+              if (rshares === undefined)
+                return rej(new Error("Could not retrieve rshares for publisher1"));
+
+              res(rshares);
+            },
+            error(err) {
+              console.error(err);
+            }
+          });
         });
-      });
 
-      bot.stop();
-      bot.delete();
+        bot.stop();
+        bot.delete();
 
-      console.log(`Result: ${result}`);
+        console.log(`Result: ${result}`);
 
-      return result;
-    });
+        return result;
+      } finally {
+        // Tests in one worker run sequentially, so no other test can have replaced fetch meanwhile
+        /* eslint-disable-next-line require-atomic-updates */
+        globalThis.fetch = originalFetch;
+      }
+    }, PENDING_PAYOUT_RSHARES);
 
-    expect(result).toBeDefined();
+    expect(result).toBe(PENDING_PAYOUT_RSHARES);
   });
 
   test("Should be able to evaluate or condition in first statement", async({ workerbeeTest }) => {

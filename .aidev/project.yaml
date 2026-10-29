@@ -48,9 +48,9 @@ issues:
 # that slot — never one selection repeated under seven names, which makes
 # seven gates report on the same evidence while claiming to check seven
 # different things.
-# workerbee_testsuite (Playwright, 89 tests) is bound only as test-offline, its
-# tests tagged @offline (6): the rest call the live api.hive.blog and suites run
-# with --network none. typecheck covers all of __tests__. workerbee_testsuite_mock
+# workerbee_testsuite (Playwright, 89 tests, ~1 min) is bound as test: its tests
+# replay recorded API calls (__tests__/assets/api-recordings), so they run with
+# --network none. typecheck covers all of __tests__. workerbee_testsuite_mock
 # (31 tests, ~6 min, one serial file) runs in full and baseline as three suites
 # of ~2 min (test-mock-a/b/c, split by test title), because AIDEV gives each
 # non-pytest suite a ~300 s wall; it stays out of quick and canary. See
@@ -58,13 +58,13 @@ issues:
 verification:
   quick:
     adapter: command
-    args: [".aidev/run-checks.sh", "quick", "lint", "typecheck", "build", "test-offline"]
+    args: [".aidev/run-checks.sh", "quick", "lint", "typecheck", "build", "test"]
     artifacts: ["test-results/quick/"]
   full:
     suites:
       - name: checks
         adapter: command
-        args: [".aidev/run-checks.sh", "full", "lint", "typecheck", "build", "docs", "test-offline"]
+        args: [".aidev/run-checks.sh", "full", "lint", "typecheck", "build", "docs", "test"]
         artifacts: ["test-results/full/"]
         stack: false
       - name: mock_a
@@ -101,7 +101,7 @@ verification:
         stack: false
   canary:
     adapter: command
-    args: [".aidev/run-checks.sh", "canary", "lint", "typecheck", "build", "test-offline"]
+    args: [".aidev/run-checks.sh", "canary", "lint", "typecheck", "build", "test"]
     artifacts: ["test-results/canary/"]
   static:
     adapter: command
