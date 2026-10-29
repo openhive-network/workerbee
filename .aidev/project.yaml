@@ -31,7 +31,7 @@ branches:
 # How this project's suites execute (#13892): one kind, stated once.
 environment:
   kind: "container"
-  image: "registry.gitlab.syncad.com/hive/workerbee/aidev-tests@sha256:2b5d23fae0025676946ad5dee36b458b7fdd887b625115edf148374200b53ba8"
+  image: "registry.gitlab.syncad.com/hive/workerbee/aidev-tests@sha256:9fd8a63ad5b65420caa270459d8be114475781fc3d1afc1e9dd57345813aa136"
   inputs: ["pnpm-lock.yaml", ".aidev/runtime/Dockerfile"]
 
 issues:
@@ -48,8 +48,9 @@ issues:
 # that slot — never one selection repeated under seven names, which makes
 # seven gates report on the same evidence while claiming to check seven
 # different things.
-# workerbee_testsuite (Playwright, 89 tests) is not bound: it calls the live
-# api.hive.blog and suites run with --network none. workerbee_testsuite_mock
+# workerbee_testsuite (Playwright, 89 tests) is bound only as test-offline, its
+# tests tagged @offline (6): the rest call the live api.hive.blog and suites run
+# with --network none. typecheck covers all of __tests__. workerbee_testsuite_mock
 # (31 tests, ~6 min, one serial file) runs in full and baseline as three suites
 # of ~2 min (test-mock-a/b/c, split by test title), because AIDEV gives each
 # non-pytest suite a ~300 s wall; it stays out of quick and canary. See
@@ -57,13 +58,13 @@ issues:
 verification:
   quick:
     adapter: command
-    args: [".aidev/run-checks.sh", "quick", "lint", "typecheck", "build"]
+    args: [".aidev/run-checks.sh", "quick", "lint", "typecheck", "build", "test-offline"]
     artifacts: ["test-results/quick/"]
   full:
     suites:
       - name: checks
         adapter: command
-        args: [".aidev/run-checks.sh", "full", "lint", "typecheck", "build", "docs"]
+        args: [".aidev/run-checks.sh", "full", "lint", "typecheck", "build", "docs", "test-offline"]
         artifacts: ["test-results/full/"]
         stack: false
       - name: mock_a
@@ -100,7 +101,7 @@ verification:
         stack: false
   canary:
     adapter: command
-    args: [".aidev/run-checks.sh", "canary", "lint", "typecheck", "build"]
+    args: [".aidev/run-checks.sh", "canary", "lint", "typecheck", "build", "test-offline"]
     artifacts: ["test-results/canary/"]
   static:
     adapter: command

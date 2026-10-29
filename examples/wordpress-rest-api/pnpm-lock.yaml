@@ -14,6 +14,9 @@ catalogs:
       specifier: 4.19.3
       version: 4.19.3
 
+overrides:
+  '@hiveio/beekeeper': 1.28.9-rc0-stable.261028200530
+
 importers:
 
   .:

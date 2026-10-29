@@ -7,15 +7,18 @@ import { test } from "../assets/jest-helper";
 
 const HIVE_BLOCK_INTERVAL = 3000;
 
+// Needs no network: .aidev/run-checks.sh `test-offline` runs these tests where the live API is unreachable
+const OFFLINE = "@offline";
+
 test.describe("WorkerBee Bot events test", () => {
-  test("Should have a destroyable global module", async({ workerbeeTest }) => {
+  test("Should have a destroyable global module", { tag: OFFLINE }, async({ workerbeeTest }) => {
     await workerbeeTest(({ bot }) => {
 
       bot.delete();
     });
   });
 
-  test("Allow to broadcast to mirronet chain - broadcast on bot should not throw", async({ workerbeeTest }) => {
+  test("Allow to broadcast to mirronet chain - broadcast on bot should not throw", { tag: OFFLINE }, async({ workerbeeTest }) => {
     const broadcastResult = await workerbeeTest(async({ WorkerBee, wax, beekeeperFactory }) => {
       const fakeEndpoint = "https://api.fake.openhive.network";
       const customWaxConfig = { apiEndpoint: fakeEndpoint, chainId: "42", apiTimeout: 0 };
@@ -71,7 +74,7 @@ test.describe("WorkerBee Bot events test", () => {
           parentPermlink: "re-upvote-this-post-to-fund-hbdstabilizer-20250312t045515z", title: "test", body: "Awesome test!",
           maxAcceptedPayout: chain.hbdCoins(1000000), percentHbd: 9000, allowVotes: true, allowCurationRewards: true}));
 
-        const bkInstance = await beekeeperFactory({ inMemory: true, enableLogs: false });
+        const bkInstance = await beekeeperFactory({ inMemory: true });
         const bkSession = bkInstance.createSession("salt and pepper");
 
         const {wallet} = await bkSession.createWallet("temp", "pass", true);
@@ -79,7 +82,7 @@ test.describe("WorkerBee Bot events test", () => {
 
         /// Intentionally sign using legacy method
         const legacySigDigest = newTx.legacy_sigDigest;
-        const signature = wallet.signDigest(publicKey, legacySigDigest);
+        const signature = await wallet.signDigest(publicKey, legacySigDigest);
         newTx.addSignature(signature);
 
         bot.start();
@@ -105,7 +108,7 @@ test.describe("WorkerBee Bot events test", () => {
     expect(broadcastResult).toEqual({ broadcastedCount: 1, refBlockNum: 0x07a8, signaturesMatch: true });
   });
 
-  test("Allow to pass explicit extended chain", async({ workerbeeTest }) => {
+  test("Allow to pass explicit extended chain", { tag: OFFLINE }, async({ workerbeeTest }) => {
     const explicitChainTest = await workerbeeTest(async({ WorkerBee, wax }) => {
       /*
        * Prepare helper WorkerBee instance just to provide IHiveChainInterface instance.
@@ -173,7 +176,7 @@ test.describe("WorkerBee Bot events test", () => {
     expect(result).toBeGreaterThanOrEqual(1);
   });
 
-  test("Should not allow double subscription to observers", async({ workerbeeTest }) => {
+  test("Should not allow double subscription to observers", { tag: OFFLINE }, async({ workerbeeTest }) => {
     const result = await workerbeeTest.dynamic(({ bot }) => {
       const observer = bot.observe.onBlock();
 
@@ -206,7 +209,7 @@ test.describe("WorkerBee Bot events test", () => {
     expect(result).toBe(true);
   });
 
-  test("Should not allow subscription after unsubscribe", async({ workerbeeTest }) => {
+  test("Should not allow subscription after unsubscribe", { tag: OFFLINE }, async({ workerbeeTest }) => {
     const result = await workerbeeTest.dynamic(({ bot }) => {
       const observer = bot.observe.onBlock();
 
@@ -242,7 +245,7 @@ test.describe("WorkerBee Bot events test", () => {
     expect(result).toBe(true);
   });
 
-  test("Should allow subscription to other observes", async({ workerbeeTest }) => {
+  test("Should allow subscription to other observes", { tag: OFFLINE }, async({ workerbeeTest }) => {
     const result = await workerbeeTest.dynamic(({ bot }) => {
       const observer1 = bot.observe.onBlock();
 
@@ -416,7 +419,7 @@ test.describe("WorkerBee Bot events test", () => {
 
       const bot = new WorkerBee(chain);
 
-      const bkInstance = await beekeeperFactory({ inMemory: true, enableLogs: false });
+      const bkInstance = await beekeeperFactory({ inMemory: true });
       const bkSession = bkInstance.createSession("salt and pepper");
 
       const { wallet } = await bkSession.createWallet("temp", "pass", true);
@@ -427,7 +430,7 @@ test.describe("WorkerBee Bot events test", () => {
       const tx = await bot.chain!.createTransaction();
       const targetTx = tx.transaction;
 
-      const getSignedTx = () => {
+      const getSignedTx = async() => {
         const tx = bot.chain!.createTransactionFromProto(structuredClone(targetTx));
         tx.pushOperation(new wax.ReplyOperation({
           parentAuthor: "thebeedevs",
@@ -436,12 +439,12 @@ test.describe("WorkerBee Bot events test", () => {
           body: "WB tests",
           permlink: `wb-tests-${Date.now()}`
         }));
-        tx.sign(wallet, publicKey);
+        tx.addSignature(await wallet.signDigest(publicKey, tx.sigDigest));
         return tx;
       };
 
-      setTimeout(() => { // Broadcaster
-        const tx = getSignedTx();
+      setTimeout(async() => { // Broadcaster
+        const tx = await getSignedTx();
         console.log(`Broadcasting reply transaction #${tx.id}`);
         void bot.chain!.broadcast(tx).catch(console.error);
       }, 2000);
