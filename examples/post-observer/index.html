@@ -102,22 +102,14 @@
           }
         });
 
-        transaction.sign(wallet, publicKey);
-
-        // Broadcast our transaction with custom internal expiration time
-        const observer = await bot.broadcast(transaction);
+        transaction.addSignature(await wallet.signDigest(publicKey, transaction.sigDigest));
 
         voted.add(getKey(op));
 
-        // Observe if our transaction has been applied
-        observer.subscribe({
-          next: ({ block: { number: appliedBlockNumber } }) => {
-            log(`Vote on post ("${getKey(op)}") applied on block #${appliedBlockNumber}`);
-          },
-          error: (error) => {
-            log(`Transaction observation time for post vote "${getKey(op)}" expired`, true);
-          }
-        });
+        // Broadcast our transaction and wait until it is applied
+        await bot.broadcast(transaction);
+
+        log(`Vote on post ("${getKey(op)}") applied`);
       } catch (error) {
         log(error, true);
       }
@@ -229,8 +221,8 @@
         const beekeeper = await beekeeperFactory();
         const session = await beekeeper.createSession("my.salt");
         const lockedWallet = await session.openWallet(document.getElementById('wallet').value);
-        wallet = lockedWallet.unlock(document.getElementById('password').value);
-        await bot.start(wallet);
+        wallet = await lockedWallet.unlock(document.getElementById('password').value);
+        bot.start();
 
         publicKey = document.getElementById('key').value;
 
