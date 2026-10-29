@@ -6,9 +6,6 @@ settings:
 
 catalogs:
   hiveio-toolset:
-    '@hiveio/beekeeper':
-      specifier: 1.28.8-stable.261010174216
-      version: 1.28.8-stable.261010174216
     '@hiveio/wax':
       specifier: 1.28.8-stable.261028191145
       version: 1.28.8-stable.261028191145
@@ -74,6 +71,9 @@ catalogs:
       specifier: 5.9.3
       version: 5.9.3
 
+overrides:
+  '@hiveio/beekeeper': 1.28.9-rc0-stable.261028200530
+
 importers:
 
   .:
@@ -88,8 +88,8 @@ importers:
         specifier: ^9.20.0
         version: 9.20.0
       '@hiveio/beekeeper':
-        specifier: catalog:hiveio-toolset
-        version: 1.28.8-stable.261010174216
+        specifier: 1.28.9-rc0-stable.261028200530
+        version: 1.28.9-rc0-stable.261028200530
       '@hiveio/wax':
         specifier: catalog:hiveio-toolset
         version: 1.28.8-stable.261028191145
@@ -435,8 +435,8 @@ packages:
   '@gerrit0/mini-shiki@1.27.2':
     resolution: {integrity: sha512-GeWyHz8ao2gBiUW4OJnQDxXQnFgZQwwQk05t/CVVgNBN7/rK8XZ7xY6YhLVv9tH3VppWWmr9DCl3MwemB/i+Og==}
 
-  '@hiveio/beekeeper@1.28.8-stable.261010174216':
-    resolution: {integrity: sha1-mTT7Kpwm4u6hQzhUNP80nn1ASP4=, tarball: https://gitlab.syncad.com/api/v4/projects/558/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.28.8-stable.261010174216.tgz}
+  '@hiveio/beekeeper@1.28.9-rc0-stable.261028200530':
+    resolution: {integrity: sha1-nzTNga2OqN6212HzkKyHGZoMuAk=, tarball: https://gitlab.syncad.com/api/v4/projects/558/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.28.9-rc0-stable.261028200530.tgz}
     engines: {node: '>=24'}
 
   '@hiveio/wax-api-hafbe@1.28.4':
@@ -3255,7 +3255,7 @@ snapshots:
       '@shikijs/types': 1.29.2
       '@shikijs/vscode-textmate': 10.0.1
 
-  '@hiveio/beekeeper@1.28.8-stable.261010174216': {}
+  '@hiveio/beekeeper@1.28.9-rc0-stable.261028200530': {}
 
   '@hiveio/wax-api-hafbe@1.28.4': {}
 

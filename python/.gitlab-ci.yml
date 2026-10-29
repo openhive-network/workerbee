@@ -101,6 +101,9 @@ python_test_mock:
   stage: test
   needs:
     - job: python_precommit
+  variables:
+    # pnpm's store-dir for .pnpm_install_with_catalog_fallback, which takes no flags
+    npm_config_store_dir: "${CI_PROJECT_DIR}/.pnpm-store"
   script:
     - cd "${CI_PROJECT_DIR}"
     - |
@@ -150,11 +153,14 @@ python_test_mock:
       fi
       node --version
       pnpm --version
-    - pnpm --recursive install --frozen-lockfile --store-dir "${CI_PROJECT_DIR}/.pnpm-store"
+    - git -C "${CI_PROJECT_DIR}" submodule status --recursive  # which ccc catalog this job installs against
+    - !reference [.pnpm_install_with_catalog_fallback, script]
     - cd "${PYTHON_DIR}"
     - pytest tests/mock -vv --tb=short --showlocals -ra --strict-markers --strict-config --durations=25 --junitxml=junit-mock.xml
   artifacts:
     when: always
+    paths:
+      - pnpm-lock.catalog-refreshed.yaml
     reports:
       junit: python/junit-mock.xml
 

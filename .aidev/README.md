@@ -14,18 +14,19 @@ failure body) and, for the Playwright steps, `test-results/<suite>/playwright-ju
 | Step | What |
 |---|---|
 | `lint` | ESLint, `--max-warnings=0` (package.json `lint-ci`) |
-| `typecheck` | `tsc --noEmit` for `src/` and `packages/blog-logic` |
+| `typecheck` | `tsc --noEmit` for `src/`, `packages/blog-logic` and the Playwright tests (`__tests__/tsconfig.json`) |
 | `build` | package.json `build` without `prebuild`: tsc, rollup, terser, size-limit |
 | `dist-exports` | (after `build`) the files package.json `main`/`types`/`exports` name exist |
 | `docs` | the API reference with typedoc, as CI's `generate_docs` |
 | `test-mock` | Playwright project `workerbee_testsuite_mock`: 31 tests on recorded API data |
 | `test-mock-a`, `-b`, `-c` | the same project split in three by test title (3.x and 6.x; 4.x and 5.x; the rest) |
 | `test`, `test-all` | Playwright project `workerbee_testsuite` (89 tests), or both projects |
+| `test-offline` | the `workerbee_testsuite` tests tagged `@offline` (6): they need no network |
 
 | Slot | Steps |
 |---|---|
-| quick, canary | lint, typecheck, build |
-| full | suites: `checks` (lint, typecheck, build, docs), `mock_a`, `mock_b`, `mock_c` (build, test-mock-a/b/c) |
+| quick, canary | lint, typecheck, build, test-offline |
+| full | suites: `checks` (lint, typecheck, build, docs, test-offline), `mock_a`, `mock_b`, `mock_c` (build, test-mock-a/b/c) |
 | baseline | suites: `mock_a`, `mock_b`, `mock_c` |
 | coverage | build, test-mock |
 | static | lint, typecheck |
@@ -38,11 +39,16 @@ so `full` and `baseline` run it as three suites of about 2 minutes, split by tes
 title; `test-mock-c` uses `--grep-invert` of the other two, so a new test always
 runs somewhere. Quick and canary (also 300 s) don't run it.
 
-**Not bound:** the `workerbee_testsuite` project (`test`). Its tests call the live
-`api.hive.blog`, and AIDEV runs suites with `--network none`; offline, 74 of its 89
-tests fail. CI runs it with network access. Binding it needs either recorded API
-data for those tests (as `workerbee_testsuite_mock` has) or a decision to give the
-suites network access. There is no coverage tool, so `coverage` measures nothing
+**Not bound:** the `workerbee_testsuite` project (`test`) as a whole. Its tests call
+the live `api.hive.blog`, and AIDEV runs suites with `--network none`; offline, 73 of
+its 89 tests fail. CI runs it with network access. Binding it needs either recorded
+API data for those tests (as `workerbee_testsuite_mock` has) or a decision to give the
+suites network access. What the slots do run of it: `typecheck` compiles all of
+`__tests__` (`__tests__/tsconfig.json`), so a wax or beekeeper API the tests use and
+the locked version no longer has fails there, and `test-offline` runs the tests that
+need no network, which a test opts into with `{ tag: "@offline" }`. Tag only a test
+that is network-free by construction (a local stub, no chain calls), not one that
+merely passes offline because it tolerates a failed request. There is no coverage tool, so `coverage` measures nothing
 yet. The Python package in `python/` (poetry, its own CI jobs) isn't bound either.
 
 ## The test runtime image (`runtime/`)

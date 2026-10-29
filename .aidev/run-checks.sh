@@ -6,7 +6,9 @@
 #   .aidev/run-checks.sh <suite> <step>...
 #
 #   lint        ESLint with --max-warnings 0 (package.json `lint-ci`)
-#   typecheck   tsc --noEmit for the library and packages/blog-logic
+#   typecheck   tsc --noEmit for the library and packages/blog-logic, and for the
+#               Playwright tests (__tests__/tsconfig.json), so a dependency API change
+#               the tests use fails here rather than only in the networked test job
 #   build       package.json `build` without its `prebuild` (ls-engines, husky):
 #               tsc, rollup, terser, size-limit; then the files package.json
 #               `exports` / `types` point at must exist in dist/ (dist-exports)
@@ -15,6 +17,9 @@
 #   test        Playwright, project workerbee_testsuite (__tests__/index.spec.ts)
 #   test-mock   Playwright, project workerbee_testsuite_mock (recorded API data)
 #   test-all    both projects, as package.json `test` and CI's `test` job run them
+#   test-offline
+#               the workerbee_testsuite tests tagged @offline: the ones that need no
+#               network (the project otherwise calls the live api.hive.blog)
 #   test-mock-a, test-mock-b, test-mock-c
 #               test-mock split in three by test title (3.x and 6.x; 4.x and 5.x;
 #               everything else, by --grep-invert, so the three always cover the
@@ -106,7 +111,7 @@ MOCK_GROUP_B='(^| )[45][.][0-9]+ '
 for s in "$@"; do
     case "$s" in
         lint) step lint pnpm exec eslint --max-warnings=0 ;;
-        typecheck) step typecheck bash -c 'pnpm exec tsc --noEmit && pnpm exec tsc --noEmit -p packages/blog-logic' ;;
+        typecheck) step typecheck bash -c 'pnpm exec tsc --noEmit && pnpm exec tsc --noEmit -p packages/blog-logic && pnpm exec tsc -p __tests__' ;;
         build) step build build && step dist-exports check_dist ;;
         docs) step docs scripts/generate_api_docs.sh "https://gitlab.syncad.com/hive/workerbee" "$(git rev-parse HEAD 2>/dev/null || echo HEAD)" "" "$out/docs" ;;
         test) step test playwright test workerbee_testsuite ;;
@@ -115,6 +120,7 @@ for s in "$@"; do
         test-mock-b) step test-mock-b playwright test-mock-b workerbee_testsuite_mock -- --grep "$MOCK_GROUP_B" ;;
         test-mock-c) step test-mock-c playwright test-mock-c workerbee_testsuite_mock -- --grep-invert "$MOCK_GROUP_A|$MOCK_GROUP_B" ;;
         test-all) step test-all playwright test-all workerbee_testsuite workerbee_testsuite_mock ;;
+        test-offline) step test-offline playwright test-offline workerbee_testsuite -- --grep @offline ;;
         *) echo "unknown step: $s" >&2; exit 2 ;;
     esac
 done
