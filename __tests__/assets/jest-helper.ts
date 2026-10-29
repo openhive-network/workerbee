@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import path from "node:path";
 import type { IHiveChainInterface } from "@hiveio/wax";
 import { test as base, expect } from "@playwright/test";
 import type { ConsoleMessage, Page } from "@playwright/test";
@@ -11,10 +12,15 @@ import type { IWorkerBeeGlobals, TEnvType } from "./globals";
 import { JsonRpcMock } from "./mock/api-mock";
 import jsonRpcMockData, { resetMockCallCounters } from "./mock/jsonRpcMock";
 import { createServer } from "./mock/proxy-mock-server";
+import { ApiRecording, RECORD_FROM_ENV, RecordedJsonRpcNode } from "./mock/recorded-node";
+
+const MOCK_API_ENDPOINT = "http://localhost:8000";
+// Each test worker serves its recordings on its own port: RECORDED_NODE_BASE_PORT + the worker's parallel index
+const RECORDED_NODE_BASE_PORT = 28100;
 
 type TWorkerBeeTestCallable<R, Args extends any[]> = (globals: IWorkerBeeGlobals, ...args: Args) => (R | Promise<R>);
 /* eslint-disable-next-line no-var */
-declare var createTestFor: (env: TEnvType) => Promise<IWorkerBeeGlobals>;
+declare var createTestFor: (env: TEnvType, apiEndpoint: string) => Promise<IWorkerBeeGlobals>;
 
 interface IWorkerBeeTestPlaywright {
   forEachTest: void;
@@ -58,27 +64,45 @@ interface IWorkerBeeWorker {
   forEachWorker: void;
 }
 
+interface IRecordedNodeTest {
+  /** Returns the API endpoint for the next environment run: the test's recording, replayed from its start */
+  nextApiEndpoint: () => string;
+}
+
+interface IRecordedNodeWorker {
+  recordedNode: { node: RecordedJsonRpcNode; url: string };
+}
+
+const recordingFile = ({ file, title }: { file: string; title: string }): string => path.resolve(
+  import.meta.dirname,
+  "api-recordings",
+  path.basename(file, path.extname(file)),
+  `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}.json.gz`
+);
+
 const envTestFor = <GlobalType extends IWorkerBeeGlobals>(
   page: Page,
-  globalFunction: (env: TEnvType) => Promise<GlobalType>,
+  globalFunction: (env: TEnvType, apiEndpoint: string) => Promise<GlobalType>,
+  nextApiEndpoint: () => string,
   isMockEnvironment: boolean = false
 ): IWorkerBeeTest["workerbeeTest"] => {
 
   const runner = async<R, Args extends any[]>(checkEqual: boolean, fn: TWorkerBeeTestCallable<R, Args>, ...args: Args): Promise<R> => {
 
-    let nodeData = await fn(await (globalFunction as (...args: any[]) => any)("node"), ...args);
+    let nodeData = await fn(await (globalFunction as (...args: any[]) => any)("node", nextApiEndpoint()), ...args);
 
     // Reset mock call counters between node and web test executions to ensure consistent state
     if (isMockEnvironment)
       resetMockCallCounters();
 
-    const webData = await page.evaluate(async({ args: pageArgs, globalFunction: globalFn, webFn, isMockEnv }) => {
+    const webData = await page.evaluate(async({ args: pageArgs, globalFunction: globalFn, webFn, isMockEnv, apiEndpoint }) => {
       /* eslint-disable no-eval */
       eval(`window.webEvalFn = ${webFn};`);
       eval(`window.isMockEnvironment = ${isMockEnv};`);
 
-      return (window as Window & typeof globalThis & { webEvalFn: (...args: any[]) => any }).webEvalFn(await (globalThis as any)[globalFn]("web"), ...pageArgs);
-    }, { args, globalFunction: globalFunction.name, webFn: fn.toString(), isMockEnv: isMockEnvironment });
+      return (window as Window & typeof globalThis & { webEvalFn: (...args: any[]) => any })
+        .webEvalFn(await (globalThis as any)[globalFn]("web", apiEndpoint), ...pageArgs);
+    }, { args, globalFunction: globalFunction.name, webFn: fn.toString(), isMockEnv: isMockEnvironment, apiEndpoint: nextApiEndpoint() });
 
     if(typeof nodeData === "object") // Remove prototype data from the node result to match webData
       nodeData = JSON.parse(JSON.stringify(nodeData, (_key, value) =>
@@ -146,7 +170,12 @@ const createWorkerBeeTest = async <T = Record<string, any>>(
   }, callback.toString(), pastDataFrom, pastDataTo, isMockEnvironment, shouldHaveFullWorkerBeeInterface);
 }
 
-export const test = base.extend<IWorkerBeeTest, IWorkerBeeWorker>({
+/**
+ * Tests run against {@link RecordedJsonRpcNode}: the JSON-RPC responses each test needs are replayed from
+ * `api-recordings/<test file>/<test title>.json.gz`. To record them, run the tests with `WORKERBEE_TEST_RECORD_FROM=https://api.hive.blog`;
+ * a passing test then saves the calls it made that were not recorded yet.
+ */
+export const test = base.extend<IWorkerBeeTest & IRecordedNodeTest, IWorkerBeeWorker & IRecordedNodeWorker>({
   forEachTest: [async ({ page }, use, ) => {
     page.on("console", (msg: ConsoleMessage) => {
       console.log(">>", msg.type(), msg.text());
@@ -163,8 +192,29 @@ export const test = base.extend<IWorkerBeeTest, IWorkerBeeWorker>({
     await browser.close();
   }, { scope: "worker", auto: true }],
 
-  workerbeeTest: ({ page }, use) => {
-    use(envTestFor(page, createTestFor));
+  recordedNode: [async ({}, use, workerInfo) => {
+    const node = new RecordedJsonRpcNode(process.env[RECORD_FROM_ENV] || undefined);
+    const port = RECORDED_NODE_BASE_PORT + workerInfo.parallelIndex;
+    const closeServer = await createServer(node, port);
+
+    await use({ node, url: `http://localhost:${port}` });
+
+    await closeServer();
+  }, { scope: "worker" }],
+
+  nextApiEndpoint: async({ recordedNode: { node, url } }, use, testInfo) => {
+    const recording = new ApiRecording(recordingFile(testInfo));
+
+    await use(() => `${url}${node.route(recording)}`);
+
+    node.reset();
+
+    if (testInfo.status === testInfo.expectedStatus)
+      recording.save();
+  },
+
+  workerbeeTest: ({ page, nextApiEndpoint }, use) => {
+    use(envTestFor(page, createTestFor, nextApiEndpoint));
   },
 
   createWorkerBeeTest: ({ workerbeeTest }, use) => {
@@ -196,7 +246,7 @@ export const mockTest = base.extend<IWorkerBeeTest, IWorkerBeeWorker>({
   }, { scope: "worker", auto: true }],
 
   createMockWorkerBeeTest: ({ page }, use) => {
-    const mockEnvTestFor = envTestFor(page, createTestFor, true);
+    const mockEnvTestFor = envTestFor(page, createTestFor, () => MOCK_API_ENDPOINT, true);
     // TODO: Improve types to not cast to `any`
     use(
       (

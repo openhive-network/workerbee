@@ -14,12 +14,13 @@
 #               `exports` / `types` point at must exist in dist/ (dist-exports)
 #   docs        the API reference, as CI's `generate_docs` job (typedoc, markdown
 #               plugins) into $out/docs
-#   test        Playwright, project workerbee_testsuite (__tests__/index.spec.ts)
+#   test        Playwright, project workerbee_testsuite (__tests__/index.spec.ts), on
+#               the API calls recorded in __tests__/assets/api-recordings
 #   test-mock   Playwright, project workerbee_testsuite_mock (recorded API data)
 #   test-all    both projects, as package.json `test` and CI's `test` job run them
 #   test-offline
 #               the workerbee_testsuite tests tagged @offline: the ones that need no
-#               network (the project otherwise calls the live api.hive.blog)
+#               API recording (no chain calls, or their own local stub node)
 #   test-mock-a, test-mock-b, test-mock-c
 #               test-mock split in three by test title (3.x and 6.x; 4.x and 5.x;
 #               everything else, by --grep-invert, so the three always cover the
