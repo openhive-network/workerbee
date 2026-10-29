@@ -20,13 +20,13 @@ failure body) and, for the Playwright steps, `test-results/<suite>/playwright-ju
 | `docs` | the API reference with typedoc, as CI's `generate_docs` |
 | `test-mock` | Playwright project `workerbee_testsuite_mock`: 31 tests on recorded API data |
 | `test-mock-a`, `-b`, `-c` | the same project split in three by test title (3.x and 6.x; 4.x and 5.x; the rest) |
-| `test`, `test-all` | Playwright project `workerbee_testsuite` (89 tests), or both projects |
-| `test-offline` | the `workerbee_testsuite` tests tagged `@offline` (6): they need no network |
+| `test`, `test-all` | Playwright project `workerbee_testsuite` (89 tests, replayed API recordings), or both projects |
+| `test-offline` | the `workerbee_testsuite` tests tagged `@offline` (7): they need no recording either |
 
 | Slot | Steps |
 |---|---|
-| quick, canary | lint, typecheck, build, test-offline |
-| full | suites: `checks` (lint, typecheck, build, docs, test-offline), `mock_a`, `mock_b`, `mock_c` (build, test-mock-a/b/c) |
+| quick, canary | lint, typecheck, build, test |
+| full | suites: `checks` (lint, typecheck, build, docs, test), `mock_a`, `mock_b`, `mock_c` (build, test-mock-a/b/c) |
 | baseline | suites: `mock_a`, `mock_b`, `mock_c` |
 | coverage | build, test-mock |
 | static | lint, typecheck |
@@ -39,17 +39,17 @@ so `full` and `baseline` run it as three suites of about 2 minutes, split by tes
 title; `test-mock-c` uses `--grep-invert` of the other two, so a new test always
 runs somewhere. Quick and canary (also 300 s) don't run it.
 
-**Not bound:** the `workerbee_testsuite` project (`test`) as a whole. Its tests call
-the live `api.hive.blog`, and AIDEV runs suites with `--network none`; offline, 73 of
-its 89 tests fail. CI runs it with network access. Binding it needs either recorded
-API data for those tests (as `workerbee_testsuite_mock` has) or a decision to give the
-suites network access. What the slots do run of it: `typecheck` compiles all of
-`__tests__` (`__tests__/tsconfig.json`), so a wax or beekeeper API the tests use and
-the locked version no longer has fails there, and `test-offline` runs the tests that
-need no network, which a test opts into with `{ tag: "@offline" }`. Tag only a test
-that is network-free by construction (a local stub, no chain calls), not one that
-merely passes offline because it tolerates a failed request. There is no coverage tool, so `coverage` measures nothing
-yet. The Python package in `python/` (poetry, its own CI jobs) isn't bound either.
+`test` (the `workerbee_testsuite` project, about a minute on 4 workers) needs no
+network: the `test` fixture in `__tests__/assets/jest-helper.ts` points the bot at a
+local node that replays each test's JSON-RPC calls from
+`__tests__/assets/api-recordings/<test file>/<test title>.json.gz`. A test whose calls
+aren't recorded fails with a `has no response recorded` error. Record them by running
+the tests with network access and `WORKERBEE_TEST_RECORD_FROM=https://api.hive.blog`:
+a passing test saves the calls it made beyond its recording (delete the file to record
+a test afresh). Tests that make no chain calls, or bring their own local stub node,
+carry `{ tag: "@offline" }` and need no recording. There is no coverage tool, so
+`coverage` measures nothing yet. The Python package in `python/` (poetry, its own CI
+jobs) isn't bound.
 
 ## The test runtime image (`runtime/`)
 

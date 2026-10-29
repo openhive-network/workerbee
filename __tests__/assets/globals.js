@@ -1,5 +1,5 @@
 // Use function as we later extract the function name in the jest-helpers
-globalThis.createTestFor = async function createTestFor(env) {
+globalThis.createTestFor = async function createTestFor(env, apiEndpoint) {
   const locWorkerBee = env === "web" ? "../../dist/bundle/index.js" : "../../dist/bundle/index.js";
 
   // Import required libraries env-dependent
@@ -12,7 +12,7 @@ globalThis.createTestFor = async function createTestFor(env) {
 
   const chain = await wax.createHiveChain({
     apiTimeout: 0,
-    apiEndpoint: "https://api.hive.blog"
+    apiEndpoint
   });
 
   // Provide results

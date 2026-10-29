@@ -19,5 +19,5 @@ export interface IWorkerBeeGlobals {
 }
 
 declare global {
-  function createTestFor(env: TEnvType): Promise<IWorkerBeeGlobals>;
+  function createTestFor(env: TEnvType, apiEndpoint: string): Promise<IWorkerBeeGlobals>;
 }
