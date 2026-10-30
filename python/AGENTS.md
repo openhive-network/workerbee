@@ -43,12 +43,15 @@ For changed unit tests, run the narrow pytest target first. Run the full unit su
 .venv/bin/python -m pytest tests/unit -q -n auto
 ```
 
-Integration tests run against a public mirrornet endpoint by default. Override it only when needed:
+Integration tests replay recorded JSON-RPC responses from a local node by default; `WORKERBEE_MIRRORNET_ENDPOINT` points them at a live node instead:
 
 ```bash
+.venv/bin/python -m pytest tests/integration -q -n auto
 WORKERBEE_MIRRORNET_ENDPOINT=https://api.hive.blog .venv/bin/python -m pytest tests/integration -q -n auto
 .venv/bin/python -m pytest tests/mock -q
 ```
+
+Record the calls of a new or changed test by running it once with `WORKERBEE_TEST_RECORD_FROM=https://api.hive.blog` and commit the `tests/integration/api-recordings/<module>/<test>.json.gz` it writes (CI's manual `python_record_integration` job records them all afresh). Each test's calls are logged to `mock-server.log`.
 
 `import workerbee` must stay under 100 ms. `tests/unit/test_import_time.py` is a permanent guard.
 
