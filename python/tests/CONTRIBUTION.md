@@ -4,8 +4,8 @@ The Python tests are part of the WorkerBee TypeScript-to-Python port. The TypeSc
 
 ## Test Scope
 
-- Keep unit tests in `python/tests/unit`, live mirrornet integration tests in
-  `python/tests/integration`, and recorded JSON-RPC mock tests in
+- Keep unit tests in `python/tests/unit`, mirrornet integration tests (replaying
+  their recorded calls) in `python/tests/integration`, and recorded JSON-RPC mock tests in
   `python/tests/mock`.
 - Do not add tests that only check constants, schema shapes, imports, README snippets, or CI configuration.
 - Avoid fake-green tests: every test must exercise observable behavior and fail for a realistic regression.
@@ -18,6 +18,7 @@ The Python tests are part of the WorkerBee TypeScript-to-Python port. The TypeSc
 - Integration tests should use mirrornet/live RPC fixtures or recorded JSON-RPC responses.
 - Use the shared mirrornet fixtures from `python/tests/integration/conftest.py`.
 - Do not hardcode `https://api.hive.blog` in test files. Use the `--workerbee-mirrornet-endpoint` option or `WORKERBEE_MIRRORNET_ENDPOINT`.
+- A new or changed integration test needs its recording: run it once with `WORKERBEE_TEST_RECORD_FROM=https://api.hive.blog` and commit the file it writes under `python/tests/integration/api-recordings/`. CI's `python_test_integration` job replays them; `python_test_integration_live` (manual or scheduled, allowed to fail) runs the same tests on a live node.
 - Do not duplicate mirrornet chain setup; use `mirrornet_chain`, `workerbee`, `inactive_workerbee`, or `mirrornet_replay`.
 - Avoid per-file `_run_replay` helpers. Put shared replay behavior in the integration fixtures or `_mirrornet.py`.
 - Avoid long sleeps and open-ended waits. Prefer deterministic block ranges, bounded waits, and explicit assertions that blocks or notifications progress.

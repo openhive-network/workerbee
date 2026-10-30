@@ -240,12 +240,15 @@ poetry run pytest tests/unit/test_import_time.py -q
 poetry run pytest tests/unit -q -n auto
 ```
 
-Integration tests run against the configured mirrornet endpoint:
+Integration tests replay recorded JSON-RPC responses from a local node; set `WORKERBEE_MIRRORNET_ENDPOINT` to run them against a live node instead:
 
 ```bash
+poetry run pytest tests/integration -q -n auto
 WORKERBEE_MIRRORNET_ENDPOINT=https://api.hive.blog poetry run pytest tests/integration -q -n auto
 poetry run pytest tests/mock -q
 ```
+
+Record the calls of a new or changed test by running it once with `WORKERBEE_TEST_RECORD_FROM=https://api.hive.blog` and commit the `tests/integration/api-recordings/<module>/<test>.json.gz` it writes (CI's manual `python_record_integration` job records them all afresh). Each test's calls are logged to `mock-server.log`.
 
 Agent/developer practices for the port live in [AGENTS.md](AGENTS.md).
 

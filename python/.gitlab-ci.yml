@@ -82,19 +82,61 @@ python_test_unit:
     reports:
       junit: python/junit-unit.xml
 
+# Replays the JSON-RPC calls recorded in tests/integration/api-recordings, so no node is needed.
 python_test_integration:
   extends: .python_job
   stage: test
   needs:
     - job: python_precommit
-  variables:
-    WORKERBEE_MIRRORNET_ENDPOINT: "https://api.hive.blog"
   script:
     - pytest tests/integration -vv --tb=short --showlocals -ra --strict-markers --strict-config -n auto --durations=25 --junitxml=junit-integration.xml
   artifacts:
     when: always
+    paths:
+      - python/mock-server*.log
     reports:
       junit: python/junit-integration.xml
+
+# The same tests against a live node, to see whether the recordings still match the chain.
+# Opt-in (manual, or on a schedule) and allowed to fail: a slow public node must not block merge requests.
+python_test_integration_live:
+  extends: .python_job
+  stage: test
+  needs:
+    - job: python_precommit
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - when: manual
+  allow_failure: true
+  variables:
+    WORKERBEE_MIRRORNET_ENDPOINT: "https://api.hive.blog"
+  script:
+    - pytest tests/integration -vv --tb=short --showlocals -ra --strict-markers --strict-config -n auto --durations=25 --junitxml=junit-integration-live.xml
+  artifacts:
+    when: always
+    reports:
+      junit: python/junit-integration-live.xml
+
+# Records tests/integration/api-recordings afresh from a live node; commit the artifact to update them.
+python_record_integration:
+  extends: .python_job
+  stage: test
+  needs:
+    - job: python_precommit
+  when: manual
+  allow_failure: true
+  variables:
+    WORKERBEE_TEST_RECORD_FROM: "https://api.hive.blog"
+  script:
+    - rm -rf tests/integration/api-recordings
+    - pytest tests/integration -vv --tb=short -ra --strict-markers --strict-config -n auto --durations=25 --junitxml=junit-integration-record.xml
+  artifacts:
+    when: always
+    paths:
+      - python/tests/integration/api-recordings
+      - python/mock-server*.log
+    reports:
+      junit: python/junit-integration-record.xml
 
 python_test_mock:
   extends: .python_job
