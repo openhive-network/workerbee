@@ -55,6 +55,12 @@ issues:
 # of ~2 min (test-mock-a/b/c, split by test title), because AIDEV gives each
 # non-pytest suite a ~300 s wall; it stays out of quick and canary. See
 # .aidev/README.md.
+# full's and baseline's suites are concurrent: each is its own --network none
+# container, so the mock suites' fixed ports never meet, and they share the
+# checkout's dist/ and node_modules through run-checks.sh's locks: the first
+# suite to reach `build` builds, the rest wait and test that build. memory: is
+# above each suite's fleet p95 memory.peak before this change (18 runs, Nov 2026:
+# checks 2.0 GiB, each mock suite 0.8 GiB including the build one of them now runs).
 verification:
   quick:
     adapter: command
@@ -67,21 +73,29 @@ verification:
         args: [".aidev/run-checks.sh", "full", "lint", "typecheck", "build", "docs", "test"]
         artifacts: ["test-results/full/"]
         stack: false
+        concurrent: true
+        memory: 3g
       - name: mock_a
         adapter: command
         args: [".aidev/run-checks.sh", "full-mock-a", "build", "test-mock-a"]
         artifacts: ["test-results/full-mock-a/"]
         stack: false
+        concurrent: true
+        memory: 1.5g
       - name: mock_b
         adapter: command
         args: [".aidev/run-checks.sh", "full-mock-b", "build", "test-mock-b"]
         artifacts: ["test-results/full-mock-b/"]
         stack: false
+        concurrent: true
+        memory: 1.5g
       - name: mock_c
         adapter: command
         args: [".aidev/run-checks.sh", "full-mock-c", "build", "test-mock-c"]
         artifacts: ["test-results/full-mock-c/"]
         stack: false
+        concurrent: true
+        memory: 1.5g
   baseline:
     suites:
       - name: mock_a
@@ -89,16 +103,22 @@ verification:
         args: [".aidev/run-checks.sh", "baseline-mock-a", "build", "test-mock-a"]
         artifacts: ["test-results/baseline-mock-a/"]
         stack: false
+        concurrent: true
+        memory: 1.5g
       - name: mock_b
         adapter: command
         args: [".aidev/run-checks.sh", "baseline-mock-b", "build", "test-mock-b"]
         artifacts: ["test-results/baseline-mock-b/"]
         stack: false
+        concurrent: true
+        memory: 1.5g
       - name: mock_c
         adapter: command
         args: [".aidev/run-checks.sh", "baseline-mock-c", "build", "test-mock-c"]
         artifacts: ["test-results/baseline-mock-c/"]
         stack: false
+        concurrent: true
+        memory: 1.5g
   canary:
     adapter: command
     args: [".aidev/run-checks.sh", "canary", "lint", "typecheck", "build", "test"]

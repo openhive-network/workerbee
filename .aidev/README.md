@@ -15,7 +15,7 @@ failure body) and, for the Playwright steps, `test-results/<suite>/playwright-ju
 |---|---|
 | `lint` | ESLint, `--max-warnings=0` (package.json `lint-ci`) |
 | `typecheck` | `tsc --noEmit` for `src/`, `packages/blog-logic` and the Playwright tests (`__tests__/tsconfig.json`) |
-| `build` | package.json `build` without `prebuild`: tsc, rollup, terser, size-limit |
+| `build` | package.json `build` without `prebuild`: tsc, rollup, terser, size-limit; a `dist/` already built from the same inputs is reused |
 | `dist-exports` | (after `build`) the files package.json `main`/`types`/`exports` name exist |
 | `docs` | the API reference with typedoc, as CI's `generate_docs` |
 | `test-mock` | Playwright project `workerbee_testsuite_mock`: 31 tests on recorded API data |
@@ -26,18 +26,36 @@ failure body) and, for the Playwright steps, `test-results/<suite>/playwright-ju
 | Slot | Steps |
 |---|---|
 | quick, canary | lint, typecheck, build, test |
-| full | suites: `checks` (lint, typecheck, build, docs, test), `mock_a`, `mock_b`, `mock_c` (build, test-mock-a/b/c) |
-| baseline | suites: `mock_a`, `mock_b`, `mock_c` |
+| full | concurrent suites: `checks` (lint, typecheck, build, docs, test), `mock_a`, `mock_b`, `mock_c` (build, test-mock-a/b/c) |
+| baseline | concurrent suites: `mock_a`, `mock_b`, `mock_c` |
 | coverage | build, test-mock |
 | static | lint, typecheck |
 | system | build, docs |
 
 `test-mock` takes about 6 minutes: it is one file, run serially on a fixed mock port
-(28091), as CI's config has it, so neither more workers nor Playwright's `--shard`
+(8000), as CI's config has it, so neither more workers nor Playwright's `--shard`
 can split it. AIDEV's gates give each non-pytest suite about 300 s (ai/aidev#14667),
 so `full` and `baseline` run it as three suites of about 2 minutes, split by test
 title; `test-mock-c` uses `--grep-invert` of the other two, so a new test always
 runs somewhere. Quick and canary (also 300 s) don't run it.
+
+`full`'s and `baseline`'s suites run concurrently (`concurrent: true`), so `full`
+takes about as long as its slowest mock suite (~2 minutes) rather than the sum of
+all four. That is safe because:
+
+- each suite is its own `--network none` container with its own loopback, so the
+  fixed ports (the JSON-RPC mock on 8000, Playwright's `http-server` on 8080, the
+  recorded nodes from 28100) never meet. Run on one host's network, they collide;
+- they share the checkout, so `pnpm-deps.sh` installs `node_modules` under
+  `test-results/.locks/pnpm-deps.lock`, and `build` runs under
+  `test-results/.locks/build.lock`: the first suite to reach it builds and writes a
+  hash of the build's inputs (`src/`, `packages/blog-logic`, the configs, the lock
+  file, Node's version) to `dist/.aidev-build`; the others find that hash and test
+  the same `dist/` (`build: reusing dist/ built by suite …` in their log). A failed
+  build writes no hash, so every suite builds again and reports the failure itself.
+  `__tests__` is not an input, since tests write into it;
+- `typecheck` passes `--incremental false`, since the tsconfigs' `incremental`
+  would write `dist/.tsbuildinfo` into the `dist/` another suite is rebuilding.
 
 `test` (the `workerbee_testsuite` project, about a minute on 4 workers) needs no
 network: the `test` fixture in `__tests__/assets/jest-helper.ts` points the bot at a

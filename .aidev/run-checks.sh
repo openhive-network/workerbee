@@ -11,7 +11,9 @@
 #               the tests use fails here rather than only in the networked test job
 #   build       package.json `build` without its `prebuild` (ls-engines, husky):
 #               tsc, rollup, terser, size-limit; then the files package.json
-#               `exports` / `types` point at must exist in dist/ (dist-exports)
+#               `exports` / `types` point at must exist in dist/ (dist-exports).
+#               A dist/ already built from the same inputs is reused (see
+#               shared_build), so concurrent suites build the package once
 #   docs        the API reference, as CI's `generate_docs` job (typedoc, markdown
 #               plugins) into $out/docs
 #   test        Playwright, project workerbee_testsuite (__tests__/index.spec.ts), on
@@ -27,6 +29,10 @@
 #               project). The project is one file run serially on a fixed mock
 #               port, so Playwright's --shard can't split it; AIDEV's gates give
 #               each suite about 300 s and the whole project takes about 6 minutes.
+#               The fixed ports (the mock on 8000, http-server on 8080, the
+#               recorded nodes from 28100) let full's suites run concurrently only
+#               because each AIDEV suite is its own `--network none` container,
+#               with a loopback of its own; on one host's network they collide.
 #
 # The Playwright steps need `build` first (the tests load dist/ in the browser and
 # in Node). Their per-test cases go to $out/<step>-junit.xml.
@@ -67,6 +73,35 @@ build() {
         && pnpm exec rollup -c \
         && pnpm exec tsx ./npm-common-config/ts-common/terser.ts \
         && pnpm exec size-limit
+}
+
+# The build's inputs, hashed with the Node that builds them. __tests__ is not one:
+# tests write into it (api-call-logs, recordings), which must not look like a new tree.
+build_key() {
+    {
+        node --version
+        find src packages/blog-logic npm-common-config/ts-common npm-common-config/pnpm-config \
+            \( -name node_modules -o -name dist \) -prune -o -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum
+        sha256sum package.json pnpm-lock.yaml tsconfig.json rollup.config.js .aidev/run-checks.sh
+    } | sha256sum | cut -d' ' -f1
+}
+
+# Suites running concurrently share the checkout's dist/: one builds while the others
+# wait on the lock, then they find its key in dist/ and test that build. A failed build
+# leaves no key, so each waiting suite builds again and reports its own failure;
+# rebuilding only ever happens for different inputs, never under a passing suite's tests.
+shared_build() {
+    local key stamp=dist/.aidev-build lock rc=0
+    key="$(build_key)" || { echo "cannot hash the build inputs" >&2; return 1; }
+    mkdir -p test-results/.locks && exec {lock}> test-results/.locks/build.lock && flock "$lock" || return 1
+    if [ "$(cut -d' ' -f1 "$stamp" 2>/dev/null)" = "$key" ]; then
+        echo "build: reusing dist/ built by suite $(cut -d' ' -f2 "$stamp") from inputs $key"
+    else
+        echo "build: building dist/ from inputs $key"
+        build && printf '%s %s\n' "$key" "$suite" > "$stamp" || rc=$?
+    fi
+    exec {lock}>&-
+    return "$rc"
 }
 
 check_dist() {
@@ -112,8 +147,10 @@ MOCK_GROUP_B='(^| )[45][.][0-9]+ '
 for s in "$@"; do
     case "$s" in
         lint) step lint pnpm exec eslint --max-warnings=0 ;;
-        typecheck) step typecheck bash -c 'pnpm exec tsc --noEmit && pnpm exec tsc --noEmit -p packages/blog-logic && pnpm exec tsc -p __tests__' ;;
-        build) step build build && step dist-exports check_dist ;;
+        # --incremental false: the tsconfigs' incremental writes dist/.tsbuildinfo even
+        # under --noEmit, into the dist/ a concurrent suite's build is replacing.
+        typecheck) step typecheck bash -c 'pnpm exec tsc --noEmit --incremental false && pnpm exec tsc --noEmit --incremental false -p packages/blog-logic && pnpm exec tsc -p __tests__' ;;
+        build) step build shared_build && head -1 "$out/build.log" >&2 && step dist-exports check_dist ;;
         docs) step docs scripts/generate_api_docs.sh "https://gitlab.syncad.com/hive/workerbee" "$(git rev-parse HEAD 2>/dev/null || echo HEAD)" "" "$out/docs" ;;
         test) step test playwright test workerbee_testsuite ;;
         test-mock) step test-mock playwright test-mock workerbee_testsuite_mock ;;
