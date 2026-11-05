@@ -1,4 +1,4 @@
-import { EManabarType, TAccountName } from "@hiveio/wax";
+import type { EManabarType as TManabarType, TAccountName } from "@hiveio/wax";
 import { WorkerBeeError } from "../../../errors";
 import { AccountClassifier, RcAccountClassifier, ManabarClassifier } from "../../classifiers";
 import { TRegisterEvaluationContext } from "../../classifiers/collector-classifier-base";
@@ -6,6 +6,13 @@ import { DynamicGlobalPropertiesClassifier } from "../../classifiers/dynamic-glo
 import { TManabars } from "../../classifiers/manabar-classifier";
 import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";
 import { CollectorBase, TAvailableClassifiers } from "../collector-base";
+
+/** Values of EManabarType of wax - the core takes wax types only, so that it never loads wax */
+const EManabarType = {
+  UPVOTE: 0 as TManabarType.UPVOTE,
+  DOWNVOTE: 1 as TManabarType.DOWNVOTE,
+  RC: 2 as TManabarType.RC
+};
 
 const PERCENT_VALUE_DOUBLE_PRECISION = 100;
 export const ONE_HUNDRED_PERCENT = 100 * PERCENT_VALUE_DOUBLE_PRECISION;
@@ -15,7 +22,7 @@ export class ManabarCollector extends CollectorBase<ManabarClassifier> {
   private readonly downvoteManabarAccounts = new Map<TAccountName, number>();
   private readonly rcManabarAccounts = new Map<TAccountName, number>();
 
-  private selectOptionsContainer(type: EManabarType): Map<TAccountName, number> {
+  private selectOptionsContainer(type: TManabarType): Map<TAccountName, number> {
     switch(type) {
     case EManabarType.UPVOTE:
       return this.upvoteManabarAccounts;

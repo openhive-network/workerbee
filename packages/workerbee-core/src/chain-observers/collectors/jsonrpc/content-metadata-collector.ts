@@ -1,7 +1,7 @@
-import { TAccountName, dateFromString } from "@hiveio/wax";
+import { TAccountName } from "@hiveio/wax";
 import { WorkerBeeError } from "../../../errors";
 import { BucketAggregateQueue } from "../../../types/queue";
-import { nullDate } from "../../../utils/time";
+import { dateFromString, nullDate } from "../../../utils/time";
 import { ContentMetadataClassifier } from "../../classifiers";
 import { IHiveContentMetadata, TContentMetadataQueryData } from "../../classifiers/content-metadata-classifier";
 import { TCollectorEvaluationContext } from "../../factories/data-evaluation-context";

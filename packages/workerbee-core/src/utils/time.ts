@@ -1,6 +1,11 @@
 /* eslint-disable no-fallthrough */
-import { dateFromString } from "@hiveio/wax";
 import { WorkerBeeError } from "../errors";
+
+/**
+ * Parses a time of the chain (UTC, with or without the trailing "Z") as `dateFromString` of wax does - without loading wax
+ */
+export const dateFromString = (dateTimeString: string): Date =>
+  new Date(dateTimeString.endsWith("Z") ? dateTimeString : `${dateTimeString}Z`);
 
 export const calculateRelativeTime = (expirationTime: number | string | Date, referenceTime?: Date): Date => {
   let expiration: Date;

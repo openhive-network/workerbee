@@ -1,4 +1,4 @@
-import type { WorkerBee } from "../../bot";
+import type { WorkerBeeCore } from "../../bot";
 import type { TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
 import type { TFilterEvaluationContext } from "../factories/data-evaluation-context";
 
@@ -8,7 +8,7 @@ export interface IFilterBase {
 }
 
 export abstract class FilterBase implements IFilterBase {
-  protected readonly worker!: WorkerBee;
+  protected readonly worker!: WorkerBeeCore;
 
   public usedContexts(): Array<TRegisterEvaluationContext> {
     return [];

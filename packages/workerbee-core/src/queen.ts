@@ -1,6 +1,6 @@
 import { asset, EManabarType, TAccountName } from "@hiveio/wax";
 
-import { WorkerBee } from "./bot";
+import { WorkerBeeCore } from "./bot";
 import { CollectorClassifierBase, DataEvaluationContext } from "./chain-observers";
 import { TRegisterEvaluationContext } from "./chain-observers/classifiers/collector-classifier-base";
 import { AccountCreatedFilter } from "./chain-observers/filters/account-created-filter";
@@ -56,11 +56,11 @@ import type { Observer, Unsubscribable } from "./types/subscribable";
 import { calculateRelativeTime } from "./utils/time";
 
 export class QueenBee<TPreviousSubscriberData extends object = {}> {
-  protected readonly worker: WorkerBee;
+  protected readonly worker: WorkerBeeCore;
   protected readonly mediator: ObserverMediator;
 
   public constructor(
-    worker: WorkerBee,
+    worker: WorkerBeeCore,
     mediator: ObserverMediator = worker.mediator
   ) {
     this.worker = worker;
