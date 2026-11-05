@@ -381,4 +381,36 @@ needs nothing more.
 Getting *verified* — reviewed by n8n, installable on n8n Cloud, listed in the
 nodes panel — is a different bar. The runtime dependencies and the restricted
 globals are gone; what is left is publishing from a public GitHub repository with
-npm provenance.
+npm provenance, and the `author` below.
+
+### `author` in `package.json`
+
+The one field n8n's gate still fails on (`npx @n8n/scan-community-package
+@hiveio/n8n-nodes-hive`, which lints this source and the published tarball). It
+is left out on purpose: it names whoever publishes the package, which is a
+decision of the release, not of the code. Before publishing, add it to
+`n8n/package.json` **as an object**:
+
+```json
+"author": {
+  "name": "<who publishes the package>",
+  "email": "<their contact address>"
+}
+```
+
+- **Both `name` and `email` must be non-empty strings** —
+  `@n8n/community-nodes/valid-author` and
+  `n8n-nodes-base/community-package-json-author-missing` fail without them.
+- **The object form, not the npm shorthand.** `"Name <email>"` satisfies
+  `valid-author` but fails `n8n-nodes-base/community-package-json-author-name-missing`,
+  which looks for an `author.name` key.
+- **Not the starter's placeholders.** The `*-author-name-still-default` and
+  `*-author-email-still-default` rules reject the default values of
+  `n8n-nodes-starter` (empty strings).
+- **The same identity as the npm publisher.** Verification fetches the package
+  by name and checks its npm provenance, so the author should be the person or
+  organisation whose npm account and GitHub repository publish it.
+
+With that field set, the scan (version 0.42.0) passes; it still prints three
+warnings for icons without a dark variant (`icon-prefer-themed-variants`), which
+do not fail it.
