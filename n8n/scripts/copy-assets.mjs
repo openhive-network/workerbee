@@ -1,8 +1,8 @@
 /*
  * Tsc emits .js only. Icons and codex files have to be carried over by hand, and
  * they must land next to the .node.js file that references them. The bundled
- * WorkerBee runtime is copied for the same reason: `dist/nodes/shared/chain.js`
- * imports it as ../../workerbee/index.mjs, which only resolves once it is inside
+ * WorkerBee runtime is copied for the same reason: `dist/shared/chain.js`
+ * imports it as ../workerbee/index.mjs, which only resolves once it is inside
  * dist/.
  */
 import { cpSync, readdirSync, statSync } from "node:fs";

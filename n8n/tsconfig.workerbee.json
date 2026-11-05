@@ -1,8 +1,9 @@
 {
-  /* Declarations only, for the WorkerBee library this package embeds.
-     `scripts/bundle-workerbee.mjs` produces the matching runtime file next to
-     them, so `nodes/shared/*.ts` can `import type` from ../../workerbee/index
-     and `await import()` ../../workerbee/index.mjs at the same relative path.
+  /* Declarations only, for the WorkerBee build this package embeds.
+     `scripts/bundle-workerbee.mjs` produces the matching runtime file, so
+     `shared/*.ts` can `import type` from
+     ../workerbee/n8n/workerbee-n8n/index and `await import()`
+     ../workerbee/index.mjs.
 
      The options mirror npm-common-config/ts-common/tsconfig.base.json, which is
      what the library itself is built with -- copied rather than extended so the
@@ -34,10 +35,10 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
 
-    "rootDir": "../src",
+    "rootDir": "..",
     "outDir": "workerbee",
 
-    /* ../src resolves its imports from its own directory upwards, which finds
+    /* The library resolves its imports from its own directory upwards, which finds
        the repository's node_modules in a checkout but nothing at all in the
        Docker build, where only n8n/node_modules exists. Pin wax to this
        package's copy so both cases resolve the same declarations. */
@@ -46,5 +47,5 @@
       "@hiveio/wax": ["node_modules/@hiveio/wax"]
     }
   },
-  "include": ["../src/**/*.ts"]
+  "include": ["workerbee-n8n/**/*.ts", "../packages/workerbee-core/src/**/*.ts"]
 }

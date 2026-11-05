@@ -8,7 +8,7 @@
     /* CommonJS, because n8n `require()`s the compiled *.node.js. `node16` (not
        plain `commonjs`) is what keeps a dynamic `import()` emitted as an
        `import()` rather than rewritten to `require()`, which is how this package
-       reaches the ESM-only wax and WorkerBee builds -- see nodes/shared/chain.ts. */
+       reaches the ESM WorkerBee build -- see shared/chain.ts. */
     "module": "node16",
     "moduleResolution": "node16",
 
@@ -19,8 +19,7 @@
        condition and no `require` one, so `node16` resolution from these
        CommonJS files finds nothing. Every wax import here is `import type`,
        erased at compile time, so pointing TypeScript straight at the bundled
-       declarations is accurate -- the runtime still loads the real ESM entry
-       through the dynamic import in nodes/shared/chain.ts. */
+       declarations is accurate -- the package never loads wax. */
     "baseUrl": ".",
     "paths": {
       "@hiveio/wax": ["node_modules/@hiveio/wax/wasm/dist/bundle/index.d.ts"]
@@ -41,5 +40,5 @@
     "exactOptionalPropertyTypes": true,
     "skipLibCheck": true
   },
-  "include": ["credentials/**/*.ts", "nodes/**/*.ts"]
+  "include": ["credentials/**/*.ts", "nodes/**/*.ts", "shared/**/*.ts"]
 }

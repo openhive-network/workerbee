@@ -25,7 +25,7 @@ export default [ {
     "examples",
     ".aidev-dir-lease",
     /*
-     * Build output of the n8n package: the esbuild bundle of ../src and tsc's
+     * Build output of the n8n package: the esbuild bundle of the core and tsc's
      * own emit. The sources next to them are linted.
      */
     "n8n/dist/**",
