@@ -7,28 +7,31 @@
  * hammering the API node. Bots are reference-counted, so deactivating the last
  * workflow on an endpoint really does stop polling it.
  *
- * ## Why everything here is loaded with `await import(...)`
+ * The chain is the JSON-RPC chain of the embedded WorkerBee build: plain `fetch`,
+ * no wax and no WebAssembly, so the package has no runtime dependencies. It reads
+ * only -- broadcasting needs wax.
  *
- * `@hiveio/wax` is an ESM-only package and the WorkerBee build that wraps it is
- * ESM too, while an n8n node must be CommonJS -- n8n `require()`s the compiled
- * `*.node.js`. A static `import` would therefore either fail to resolve at
- * runtime or force the whole package to ESM. A dynamic `import()` from CommonJS
- * is the supported bridge between the two, and it has a second benefit: nothing
- * WASM-shaped is loaded while n8n is merely scanning the nodes directory, so the
- * editor stays responsive and a broken chain cannot stop the package loading.
+ * ## Why the WorkerBee build is loaded with `await import(...)`
  *
- * The specifiers are held in variables so that TypeScript does not rewrite them
- * for the CommonJS target; the types come from the matching `import type` above.
+ * The WorkerBee build is ESM, while an n8n node must be CommonJS -- n8n
+ * `require()`s the compiled `*.node.js`. A static `import` would therefore either
+ * fail to resolve at runtime or force the whole package to ESM. A dynamic
+ * `import()` from CommonJS is the supported bridge between the two, and nothing is
+ * loaded while n8n is merely scanning the nodes directory.
+ *
+ * The specifier is held in a variable so that TypeScript does not rewrite it for
+ * the CommonJS target; the types come from the matching `import type` above.
  */
-import type { IWorkerBee } from "../../workerbee/index";
+import type { IJsonRpcChain, IWorkerBee } from "../workerbee/n8n/workerbee-n8n/index";
 import { HiveNodeError, UpstreamError } from "./errors";
-import type { IHiveChainInterface, TWaxModule } from "./wax-types";
+import { n8nRuntime } from "./runtime";
 
 /** Resolved at runtime from `dist/workerbee/index.mjs`, next to the compiled nodes. */
-const WORKERBEE_MODULE = "../../workerbee/index.mjs";
-const WAX_MODULE = "@hiveio/wax";
+const WORKERBEE_MODULE = "../workerbee/index.mjs";
 
-type TWorkerBeeModule = typeof import("../../workerbee/index");
+type TWorkerBeeModule = typeof import("../workerbee/n8n/workerbee-n8n/index");
+
+export type TBot = IWorkerBee<IJsonRpcChain>;
 
 /**
  * How many endpoints may stay resident.
@@ -43,24 +46,23 @@ export const DEFAULT_ENDPOINT = "https://api.hive.blog/";
 
 interface IEntry {
   endpoint: string;
-  chain: IHiveChainInterface;
-  bot: IWorkerBee;
+  chain: IJsonRpcChain;
+  bot: TBot;
   /** Triggers currently subscribed through this bot. */
   refs: number;
   /**
    * Whether the block poller is running.
    *
-   * Tracked here rather than read from `WorkerBee.running`, which reports the
-   * timer handle it was given and is never cleared by `stop()` -- so it stays
-   * `true` for the life of the bot once started. Trusting it would mean never
-   * restarting a poller after the last trigger had stopped it.
+   * Tracked here rather than read from `WorkerBee.running`, so that the pool
+   * decides from its own bookkeeping; the recording bots of the tests have no
+   * `running` to read.
    */
   polling: boolean;
   lastUsed: number;
 }
 
 export interface IBotHandle {
-  readonly bot: IWorkerBee;
+  readonly bot: TBot;
   readonly endpoint: string;
   /** Drop this trigger's reference; stops the bot when it was the last one. */
   release(): void;
@@ -76,31 +78,24 @@ export interface IBotHandle {
  * it claimed to be but was not.
  */
 export interface IBotFactory {
-  create(endpoint: string, chainId?: string): Promise<{ chain: IHiveChainInterface; bot: IWorkerBee }>;
+  create(endpoint: string, chainId?: string): Promise<{ chain: IJsonRpcChain; bot: TBot }>;
 }
 
 const liveBots: IBotFactory = {
-  create: async (endpoint, chainId) => {
-    const wax = (await import(WAX_MODULE)) as TWaxModule;
+  /*
+   * The chain id is what a signature is computed over; reads do not care, so it
+   * is not needed until broadcasting comes back. Entries stay keyed by endpoint
+   * alone: one endpoint serves one chain.
+   */
+  create: async (endpoint) => {
     const workerbee = (await import(WORKERBEE_MODULE)) as TWorkerBeeModule;
 
-    /*
-     * The chain id is what a signature is computed over, so a testnet or a
-     * mirrornet needs its own. Reads do not care -- which is why this went
-     * unnoticed until the first broadcast, where the node rejects the
-     * signature as `tx_missing_posting_auth`: the key is right, the chain it
-     * was signed for is not. Omitted, wax uses mainnet's.
-     *
-     * Entries stay keyed by endpoint alone: one endpoint serves one chain, so
-     * a second chain id for the same URL would be a misconfiguration rather
-     * than a case to support.
-     */
-    const chain = await wax.createHiveChain(chainId === undefined ? { apiEndpoint: endpoint } : { apiEndpoint: endpoint, chainId });
+    const chain = workerbee.createJsonRpcChain(endpoint);
     /*
      * Deliberately not started: `acquire` starts the poller, `release` stops
      * it, and a chain read needs neither.
      */
-    return { chain, bot: new workerbee.default(chain) };
+    return { chain, bot: new workerbee.WorkerBeeCore(chain, n8nRuntime(workerbee.version)) };
   },
 };
 
@@ -115,10 +110,9 @@ export class BotPool {
    *
    * Keyed by endpoint rather than held on the entry, because a use is claimed
    * before `open()` has produced an entry to hang it on. `refs` alone cannot
-   * protect a chain: a one-shot read takes no reference at all, and an `acquire`
+   * protect an entry: a one-shot read takes no reference at all, and an `acquire`
    * has not taken one yet while `open()` is still awaiting. In both windows
-   * `evict()` would `delete()` the chain out from under the caller, who then
-   * reads freed WASM memory.
+   * `evict()` would `delete()` the bot out from under the caller.
    */
   private readonly leases = new Map<string, number>();
 
@@ -213,13 +207,12 @@ export class BotPool {
   }
 
   /**
-   * Run one read-only API call against the wax chain behind `endpoint`.
+   * Run one read-only API call against the chain behind `endpoint`.
    *
    * The chain is handed to a callback rather than returned so the pool knows when
-   * the call is over. A returned chain outlives the pool's knowledge of it, and
-   * `evict()` would happily `delete()` it mid-request.
+   * the call is over and does not evict the entry mid-request.
    */
-  public async withChain<T>(endpoint: string, use: (chain: IHiveChainInterface) => Promise<T>, chainId?: string): Promise<T> {
+  public async withChain<T>(endpoint: string, use: (chain: IJsonRpcChain) => Promise<T>, chainId?: string): Promise<T> {
     this.lease(endpoint);
     try {
       const entry = await this.open(endpoint, chainId);
@@ -251,11 +244,8 @@ export class BotPool {
   }
 
   private async create(endpoint: string, chainId?: string): Promise<IEntry> {
-    let chain: IHiveChainInterface | undefined;
     try {
-      const created = await this.bots.create(endpoint, chainId);
-      chain = created.chain;
-      const bot = created.bot;
+      const { chain, bot } = await this.bots.create(endpoint, chainId);
 
       /*
        * `closeAll()` clears `opening`, so a missing key means a shutdown swept
@@ -271,7 +261,6 @@ export class BotPool {
       this.entries.set(endpoint, entry);
       return entry;
     } catch (error) {
-      chain?.delete();
       /*
        * Only a genuine connection failure is reported as one; the shutdown guard
        * above already says exactly what happened.
@@ -304,11 +293,7 @@ export class BotPool {
     this.entries.delete(entry.endpoint);
 
     entry.polling = false;
-    try {
-      entry.bot.delete();
-    } finally {
-      entry.chain.delete();
-    }
+    entry.bot.delete();
   }
 
   /**

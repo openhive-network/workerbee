@@ -19,17 +19,17 @@
  */
 import type { IDataObject, INodeType, INodeTypeDescription, ITriggerFunctions, ITriggerResponse, NodeConnectionType } from "n8n-workflow";
 
-import { botPool } from "../shared/chain";
-import { compileSpec } from "../shared/compiler";
-import { resolveChainId, resolveEndpoint } from "../shared/credentials";
-import type { TEmitMode } from "../shared/emitter";
-import { loadOptions } from "../shared/load-options";
-import { asNodeError } from "../shared/node-errors";
-import { specProperties } from "../shared/properties";
-import { buildSpec } from "../shared/spec";
-import { EventStream } from "../shared/stream";
-import type { TOverflow } from "../shared/stream";
-import { closePrevious, forget, remember } from "../shared/subscriptions";
+import { botPool } from "../../shared/chain";
+import { compileSpec } from "../../shared/compiler";
+import { resolveChainId, resolveEndpoint } from "../../shared/credentials";
+import type { TEmitMode } from "../../shared/emitter";
+import { loadOptions } from "../../shared/load-options";
+import { asNodeError } from "../../shared/node-errors";
+import { specProperties } from "../../shared/properties";
+import { buildSpec } from "../../shared/spec";
+import { EventStream } from "../../shared/stream";
+import type { TOverflow } from "../../shared/stream";
+import { closePrevious, forget, remember } from "../../shared/subscriptions";
 
 export class HiveTrigger implements INodeType {
   public description: INodeTypeDescription = {
