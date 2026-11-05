@@ -103,7 +103,7 @@ describe("coercion refuses what it used to silently accept", () => {
      */
     reject({ event: "posts", authors: null }, "must be a list");
     reject({ event: "posts", authors: true }, "must be a list");
-    reject({ event: "impacted_accounts", accounts: { 0: "alice" } }, "must be a list");
+    reject({ event: "accounts_metadata_change", accounts: { 0: "alice" } }, "must be a list");
     reject({ event: "posts", authors: [{ name: "alice" }] }, "only names");
   });
 

@@ -119,7 +119,7 @@ describe("botPool lifecycle", () => {
     const handle = await pool.acquire(ENDPOINT);
     pool.closeAll();
 
-    assert.deepEqual(verbs(), ["start", "stop", "bot.delete", "chain.delete"]);
+    assert.deepEqual(verbs(), ["start", "stop", "bot.delete"]);
     assert.deepEqual(pool.endpoints, []);
 
     /*
@@ -127,7 +127,7 @@ describe("botPool lifecycle", () => {
      * rather than stopping a bot that has already been freed.
      */
     handle.release();
-    assert.deepEqual(verbs(), ["start", "stop", "bot.delete", "chain.delete"], "a late release must not touch the freed bot");
+    assert.deepEqual(verbs(), ["start", "stop", "bot.delete"], "a late release must not touch the freed bot");
   });
 });
 

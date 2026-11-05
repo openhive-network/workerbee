@@ -7,7 +7,7 @@ import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 
-export const shared = (name) => require(`../dist/nodes/shared/${name}.js`);
+export const shared = (name) => require(`../dist/shared/${name}.js`);
 
 /**
  * A stand-in for QueenBee that records the calls a descriptor makes.
@@ -55,7 +55,7 @@ export function fakeBots() {
         stop: () => calls.push(["stop", endpoint]),
         delete: () => calls.push(["bot.delete", endpoint]),
       };
-      const chain = { endpoint, delete: () => calls.push(["chain.delete", endpoint]) };
+      const chain = { endpoint };
       created.push({ bot, chain });
       return { bot, chain };
     },
@@ -64,11 +64,10 @@ export function fakeBots() {
   return { factory, calls, created, verbs: () => calls.map(([verb]) => verb) };
 }
 
-/** A real WorkerBee over a real (unstarted) wax chain. */
+/** A real WorkerBee over the real (unstarted) chain of the nodes - it sends nothing before the first call. */
 export async function realBot(endpoint = "https://api.hive.blog/") {
-  const wax = await import("@hiveio/wax");
   const workerbee = await import("../dist/workerbee/index.mjs");
-  const chain = await wax.createHiveChain({ apiEndpoint: endpoint });
-  const bot = new workerbee.default(chain);
-  return { bot, close: () => chain.delete() };
+  const { n8nRuntime } = shared("runtime");
+  const bot = new workerbee.WorkerBeeCore(workerbee.createJsonRpcChain(endpoint), n8nRuntime(workerbee.version));
+  return { bot, close: () => bot.delete() };
 }

@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { expect } from "playwright/test";
+import type { QueenBee } from "../../packages/workerbee-core/src/queen";
 import type { IWorkerBee, Unsubscribable } from "../../src/index";
-import type { QueenBee } from "../../src/queen";
 import { mockTest } from "../assets/jest-helper";
 
 // TODO: Fix mock API response parsing issues in this entire test file

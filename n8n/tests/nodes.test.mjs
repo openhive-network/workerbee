@@ -7,7 +7,6 @@ import { shared } from "./helpers.mjs";
 const require = createRequire(import.meta.url);
 
 const { HiveApi } = require("../dist/credentials/HiveApi.credentials.js");
-const { HivePostingKey } = require("../dist/credentials/HivePostingKey.credentials.js");
 const { Hive } = require("../dist/nodes/Hive/Hive.node.js");
 const { HiveTrigger } = require("../dist/nodes/HiveTrigger/HiveTrigger.node.js");
 
@@ -19,29 +18,15 @@ const { specProperties } = shared("properties");
 const reader = (values) => (name, fallback) => (name in values ? values[name] : fallback);
 
 describe("node definitions", () => {
-  it("keeps the read-only credential optional and asks for a key only to publish", () => {
+  it("keeps the only credential optional and asks for no key", () => {
     /*
-     * The endpoint credential carries no secret, so nothing should force it. The
-     * posting key is the opposite: required, and only where something is written.
+     * The endpoint credential carries no secret, so nothing should force it, and
+     * the nodes only read, so no posting key is asked for at all.
      */
     assert.equal(new HiveApi().name, "hiveApi");
-    assert.equal(new HivePostingKey().name, "hivePostingKey");
 
     assert.deepEqual(new HiveTrigger().description.credentials, [{ name: "hiveApi", required: false }]);
-
-    const [readOnly, key] = new Hive().description.credentials;
-    assert.deepEqual(readOnly, { name: "hiveApi", required: false });
-    assert.equal(key.name, "hivePostingKey");
-    assert.equal(key.required, true);
-    assert.deepEqual(key.displayOptions.show.resource, ["comment"], "the key must be asked for only by the writing resource");
-  });
-
-  it("marks the posting key as a password and never gives it a default", () => {
-    const [account, posting] = new HivePostingKey().properties;
-    assert.equal(account.name, "account");
-    assert.equal(posting.name, "postingKey");
-    assert.equal(posting.typeOptions?.password, true, "a private key must not render in clear text");
-    assert.equal(posting.default, "", "a key must never ship with a value");
+    assert.deepEqual(new Hive().description.credentials, [{ name: "hiveApi", required: false }]);
   });
 
   it("registers the trigger as a trigger with no inputs", () => {
@@ -55,7 +40,7 @@ describe("node definitions", () => {
     const hive = new Hive();
     assert.equal(typeof hive.execute, "function");
     const resources = hive.description.properties.find((property) => property.name === "resource").options.map((option) => option.value);
-    assert.deepEqual(resources, ["account", "block", "catalog", "chain", "comment", "spec"]);
+    assert.deepEqual(resources, ["account", "block", "catalog", "chain", "spec"]);
   });
 
   it("points every icon and codex file at something the build copied", () => {
@@ -150,12 +135,12 @@ describe("buildSpec", () => {
     assert.deepEqual(spec.match, [[{ event: "posts", authors: "alice" }], [{ event: "votes", voters: "carol" }]]);
   });
 
-  it("reads (posts or votes) and impacted the way the list is written", () => {
+  it("reads (posts or votes) and metadata changes the way the list is written", () => {
     const spec = buildSpec(
       withEvents(
         event("posts", "or", { authors: "alice,bob" }),
         event("votes", "or", { voters: "alice" }),
-        event("impacted_accounts", "and", { accounts: "alice" }),
+        event("accounts_metadata_change", "and", { accounts: "alice" }),
       ),
     );
     assert.deepEqual(spec.match, [
@@ -163,7 +148,7 @@ describe("buildSpec", () => {
         { event: "posts", authors: "alice,bob" },
         { event: "votes", voters: "alice" },
       ],
-      [{ event: "impacted_accounts", accounts: "alice" }],
+      [{ event: "accounts_metadata_change", accounts: "alice" }],
     ]);
   });
 
@@ -337,133 +322,40 @@ describe("n8n's own lint rules, pinned", () => {
   });
 
   it("declares whether each node may be used as an AI tool", () => {
-    /*
-     * The reads are safe for an agent; publishing to a public chain is not
-     * something to hand one by default, so the tool description says so rather
-     * than the node being flatly usable.
-     */
+    // The action node only reads, which is safe for an agent.
     const asTool = new Hive().description.usableAsTool;
-    assert.notEqual(asTool, true, "a node that can publish must not be a bare usableAsTool: true");
-    assert.match(asTool.replacements.description, /refused when this node runs as a tool/);
+    assert.match(asTool.replacements.description, /^Read Hive chain data/);
 
     // The trigger is a stream, not a tool.
     assert.equal(new HiveTrigger().description.usableAsTool, undefined);
   });
 });
 
-describe("publishing as an AI tool", () => {
-  /**
-   * A stand-in for n8n's execute context.
-   *
-   * `credentialReads` is the assertion that matters: the refusal has to happen
-   * above the posting key, not beside it.
-   */
-  const toolContext = ({ resource, tool, nodeType = "@hiveio/n8n-nodes-hive.hiveTool" }) => {
-    const credentialReads = [];
-    return {
-      credentialReads,
-      context: {
-        getInputData: () => [{ json: {} }],
-        getNode: () => ({ name: "Hive", type: nodeType, typeVersion: 1 }),
-        isToolExecution: tool === undefined ? undefined : () => tool,
-        continueOnFail: () => false,
-        getCredentials: async (name) => {
-          credentialReads.push(name);
-          return { account: "alice", postingKey: "a-key-that-must-never-be-read" };
-        },
-        getNodeParameter: (name, _index, fallback) => {
-          if (name === "resource") return resource;
-          if (name === "operation") return resource === "comment" ? "reply" : "get";
-          return fallback ?? "";
-        },
-      },
-    };
-  };
-
-  it("refuses to publish when the node is executed as a tool", async () => {
-    const { context, credentialReads } = toolContext({ resource: "comment", tool: true });
-
-    await assert.rejects(
-      () => Hive.prototype.execute.call(context),
-      (error) => {
-        assert.equal(error.type, "forbidden_as_tool");
-        assert.match(error.message, /not available to an AI agent/);
-        return true;
-      },
-    );
-
-    assert.deepEqual(credentialReads, [], "the posting key must not even be read on the refused path");
-  });
-
-  it("refuses on the node-type suffix alone, for a host too old to report tool execution", async () => {
-    // `n8n-workflow` is a `*` peer, so `isToolExecution` may be missing entirely.
-    const { context, credentialReads } = toolContext({ resource: "comment", tool: undefined });
-
-    await assert.rejects(() => Hive.prototype.execute.call(context), { type: "forbidden_as_tool" });
-    assert.deepEqual(credentialReads, []);
+describe("the action node as an AI tool", () => {
+  /** A stand-in for n8n's execute context. */
+  const toolContext = ({ resource, tool, nodeType = "@hiveio/n8n-nodes-hive.hiveTool" }) => ({
+    getInputData: () => [{ json: {} }],
+    getNode: () => ({ name: "Hive", type: nodeType, typeVersion: 1 }),
+    isToolExecution: tool === undefined ? undefined : () => tool,
+    continueOnFail: () => false,
+    getCredentials: async () => ({}),
+    getNodeParameter: (name, _index, fallback) => {
+      if (name === "resource") return resource;
+      if (name === "operation") return resource === "comment" ? "reply" : "get";
+      return fallback ?? "";
+    },
   });
 
   it("leaves the reads alone -- they are the reason the node is a tool at all", async () => {
-    const { context } = toolContext({ resource: "catalog", tool: true });
-
-    const [items] = await Hive.prototype.execute.call(context);
+    const [items] = await Hive.prototype.execute.call(toolContext({ resource: "catalog", tool: true }));
     assert.equal(items.length, 1);
     assert.ok(Array.isArray(items[0].json.events), "the catalog must still be readable by an agent");
   });
 
-  it("does not blame the Hive endpoint for a fault on this side", async () => {
-    /*
-     * `read()` wrapped everything the callback could raise as an UpstreamError,
-     * and for resource: comment the callback is the whole of publishReply. An
-     * empty Parent Permlink came back as "Hive endpoint ... failed" -- the wrong
-     * system to debug, in the error class n8n's Retry on Fail keeps retrying.
-     */
-    const { context } = toolContext({ resource: "comment", tool: false, nodeType: "@hiveio/n8n-nodes-hive.hive" });
-    context.getCredentials = async () => ({ postingKey: "not-a-key" });
+  it("refuses the comment resource of a workflow saved while the nodes could still publish", async () => {
+    const context = toolContext({ resource: "comment", tool: false, nodeType: "@hiveio/n8n-nodes-hive.hive" });
 
-    await assert.rejects(
-      () => Hive.prototype.execute.call(context),
-      (error) => {
-        assert.notEqual(error.constructor.name, "NodeApiError", "a local fault must not be reported as an API failure");
-        assert.ok(!/Hive endpoint .* failed/.test(error.message), `blamed the endpoint: ${error.message}`);
-        return true;
-      },
-    );
-  });
-
-  it("still publishes in a plain workflow execution", async () => {
-    /*
-     * The guard keys on tool execution, not on the resource, so an ordinary
-     * workflow must reach the credential exactly as before.
-     */
-    const { context, credentialReads } = toolContext({ resource: "comment", tool: false, nodeType: "@hiveio/n8n-nodes-hive.hive" });
-
-    /*
-     * It fails later, at the chain -- what matters is that it got past the guard.
-     * No `hiveApi` is attached to the fake node, so the posting key is the only
-     * credential this path reads.
-     */
-    await assert.rejects(() => Hive.prototype.execute.call(context));
-    assert.deepEqual(credentialReads, ["hivePostingKey"], "the posting key is read on the allowed path");
-  });
-});
-
-describe("reply permlinks", () => {
-  const { derivePermlink } = shared("broadcast");
-
-  it("never emits a character the chain rejects", () => {
-    /*
-     * Validate_permlink_0_1 allows lowercase letters, digits and hyphens only.
-     * wax derives re-<parentAuthor>-<ts>, which is invalid the moment the parent
-     * has a dot in its name -- and dotted names are ordinary on Hive.
-     */
-    for (const author of ["hive.fund", "peak.snaps", "neight.tester1", "UPPER.Case", "a..b", ".leading", "trailing."])
-      assert.match(derivePermlink(author), /^[a-z0-9-]+$/, `"${author}" produced an invalid permlink`);
-  });
-
-  it("keeps the parent recognisable and stays unique", () => {
-    assert.match(derivePermlink("hive.fund"), /^re-hive-fund-/);
-    assert.notEqual(derivePermlink("gtg"), "re-gtg-");
+    await assert.rejects(() => Hive.prototype.execute.call(context), /Unsupported resource "comment"/);
   });
 });
 

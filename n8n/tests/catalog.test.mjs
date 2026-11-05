@@ -88,9 +88,11 @@ describe("against the real QueenBee", () => {
   it("exposes every observer QueenBee offers, and no more", () => {
     // OnSubscribe/onUnsubscribe are QueenBee's own lifecycle hooks, not
     // Observers; everything else matching on*/provide* must be reachable.
+    // OnImpactedAccounts is the exception: it needs the consensus rules of wax.
     const lifecycle = new Set(["onSubscribe", "onUnsubscribe"]);
+    const unavailable = new Set(["onImpactedAccounts"]);
     const prototype = Object.getPrototypeOf(fixture.bot.observe);
-    const offered = Object.getOwnPropertyNames(prototype).filter((name) => /^(on|provide)[A-Z]/.test(name) && !lifecycle.has(name));
+    const offered = Object.getOwnPropertyNames(prototype).filter((name) => /^(on|provide)[A-Z]/.test(name) && !lifecycle.has(name) && !unavailable.has(name));
 
     const used = [...EVENTS, ...PROVIDERS].map((entry) => methodCalledBy(entry));
 
