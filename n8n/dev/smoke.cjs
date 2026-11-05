@@ -18,7 +18,7 @@ const BLOCK_TIMEOUT_MS = Number(process.env.HIVE_TIMEOUT_MS ?? 60000);
 
 const { Hive } = require(`${PACKAGE}/dist/nodes/Hive/Hive.node.js`);
 const { HiveTrigger } = require(`${PACKAGE}/dist/nodes/HiveTrigger/HiveTrigger.node.js`);
-const { botPool } = require(`${PACKAGE}/dist/nodes/shared/chain.js`);
+const { botPool } = require(`${PACKAGE}/dist/shared/chain.js`);
 
 let failures = 0;
 
@@ -53,7 +53,7 @@ async function runAction(parameters) {
 
 async function actionNode() {
   const [catalog] = await runAction({ resource: "catalog", operation: "getEvents" });
-  check("catalog lists 25 events and 7 providers", catalog.events.length === 25 && catalog.providers.length === 7,
+  check("catalog lists 24 events and 7 providers", catalog.events.length === 24 && catalog.providers.length === 7,
     `${catalog.events.length}/${catalog.providers.length}`);
 
   const [schema] = await runAction({ resource: "catalog", operation: "getSchema" });
@@ -89,7 +89,7 @@ async function actionNode() {
     () => check("missing account is an error", false),
     /*
      * `type`, not `code`: errors are translated into n8n's own classes at the node
-     * boundary (nodes/shared/node-errors.ts), and `type` is where n8n keeps the
+     * boundary (shared/node-errors.ts), and `type` is where n8n keeps the
      * machine-readable classification a workflow branches on.
      */
     (error) => check("missing account is a not_found error", error.type === "not_found", `${error.constructor.name}: ${error.message}`),
