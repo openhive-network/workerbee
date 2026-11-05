@@ -1,4 +1,4 @@
-import { WorkerBee } from "../../../bot";
+import { WorkerBeeCore } from "../../../bot";
 import {
   AccountClassifier, BlockClassifier, BlockHeaderClassifier, ChangeRecoveryInProgressClassifier,
   ContentMetadataClassifier, DeclineVotingRightsClassifier, DynamicGlobalPropertiesClassifier, FeedPriceClassifier,
@@ -21,7 +21,7 @@ import { EClassifierOrigin, FactoryBase } from "../factory-base";
 
 export class JsonRpcFactory extends FactoryBase {
   public constructor(
-    worker: WorkerBee
+    worker: WorkerBeeCore
   ) {
     super(worker);
 

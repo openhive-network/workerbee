@@ -29,7 +29,36 @@ export interface IBroadcastData {
   block: IBlockHeaderData;
 }
 
-export interface IWorkerBee {
+type TWaxChain = TWaxExtended<WaxExtendTypes>;
+type TWaxApi = TWaxChain["api"];
+
+/** The part of a wax chain used by WorkerBee */
+export interface IWorkerBeeChain extends Pick<
+  TWaxChain,
+  "broadcast" | "calculateCurrentManabarValue" | "createTransactionFromJson" | "hiveCoins" | "operationGetImpactedAccounts"
+> {
+  readonly config: Pick<TWaxChain["config"], "HIVE_FEED_INTERVAL_BLOCKS">;
+  readonly api: {
+    readonly block_api: Pick<TWaxApi["block_api"], "get_block" | "get_block_range">;
+    readonly database_api: Pick<
+      TWaxApi["database_api"],
+      "find_accounts" | "find_change_recovery_account_requests" | "find_decline_voting_rights_requests" | "find_witnesses" |
+      "get_comment_pending_payouts" | "get_dynamic_global_properties" | "get_feed_history"
+    >;
+    readonly rc_api: Pick<TWaxApi["rc_api"], "find_rc_accounts">;
+  };
+}
+
+/** Timers and version of the environment WorkerBee runs in */
+export interface IWorkerBeeRuntime {
+  /** Calls the callback every `intervalMs`, returns the function stopping it */
+  every(callback: () => void, intervalMs: number): () => void;
+  /** Calls the callback once after `delayMs`, returns the function cancelling it */
+  after(callback: () => void, delayMs: number): () => void;
+  readonly version: string;
+}
+
+export interface IWorkerBee<TChain extends IWorkerBeeChain = TWaxChain> {
   /**
    * Indicates if the bot is running
    * @type {boolean}
@@ -40,7 +69,7 @@ export interface IWorkerBee {
   /**
    * Exposed hive chain interface we are using.
    */
-  readonly chain: TWaxExtended<WaxExtendTypes>;
+  readonly chain: TChain;
 
   /**
    * Starts the automation with given configuration

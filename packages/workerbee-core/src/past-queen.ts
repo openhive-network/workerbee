@@ -1,4 +1,4 @@
-import { WorkerBee } from "./bot";
+import { WorkerBeeCore } from "./bot";
 import { HistoryDataFactory } from "./chain-observers/factories/historydata/factory";
 import { ObserverMediator } from "./chain-observers/observer-mediator";
 import { QueenBee } from "./queen";
@@ -14,7 +14,7 @@ export type TPastQueen<TPreviousSubscriberData extends object = {}> = Omit<
 
 export class PastQueen<TPreviousSubscriberData extends object = {}> extends QueenBee<TPreviousSubscriberData> {
   public constructor(
-    worker: WorkerBee,
+    worker: WorkerBeeCore,
     fromBlock: number,
     toBlock?: number
   ) {

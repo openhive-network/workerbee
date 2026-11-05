@@ -1,4 +1,4 @@
-import type { WorkerBee } from "../../bot";
+import type { WorkerBeeCore } from "../../bot";
 
 import type * as TClassifiers from "../classifiers";
 import { CollectorClassifierBase, TRegisterEvaluationContext } from "../classifiers/collector-classifier-base";
@@ -16,9 +16,9 @@ export type TSpecificClassifier<T extends CollectorClassifierBase<any, any, any,
   };
 
 export class CollectorBase<Classifier extends CollectorClassifierBase<any, any, any, any, any>> {
-  protected readonly worker: WorkerBee;
+  protected readonly worker: WorkerBeeCore;
 
-  public constructor(worker: WorkerBee) {
+  public constructor(worker: WorkerBeeCore) {
     this.worker = worker;
   }
 

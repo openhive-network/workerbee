@@ -1,4 +1,4 @@
-import { WorkerBee } from "../../../bot";
+import { WorkerBeeCore } from "../../../bot";
 import {
   BlockClassifier, BlockHeaderClassifier, ContentMetadataClassifier,
   DynamicGlobalPropertiesClassifier, ImpactedAccountClassifier, OperationClassifier
@@ -17,7 +17,7 @@ export class HistoryDataFactory extends FactoryBase {
   public readonly toBlock?: number;
 
   public constructor(
-    worker: WorkerBee,
+    worker: WorkerBeeCore,
     fromBlock: number,
     toBlock?: number
   ) {

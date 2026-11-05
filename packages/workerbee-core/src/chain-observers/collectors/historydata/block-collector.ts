@@ -1,5 +1,5 @@
 import { ApiBlock, transaction } from "@hiveio/wax";
-import { WorkerBee } from "../../../bot";
+import { WorkerBeeCore } from "../../../bot";
 import { WorkerBeeError } from "../../../errors";
 import { BlockClassifier, BlockHeaderClassifier } from "../../classifiers";
 import { ITransactionData } from "../../classifiers/block-classifier";
@@ -19,7 +19,7 @@ export class BlockCollector extends CollectorBase<BlockClassifier> {
   private readonly toBlock?: number;
 
   public constructor(
-    worker: WorkerBee,
+    worker: WorkerBeeCore,
     fromBlock: number,
     toBlock?: number
   ) {

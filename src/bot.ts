@@ -1,240 +1,29 @@
-import { TWaxExtended, ITransaction, ApiTransaction, dateFromString, IHiveChainInterface } from "@hiveio/wax";
+import type { IHiveChainInterface, TWaxExtended } from "@hiveio/wax";
 
-import { IBlockData } from "./chain-observers/classifiers/block-classifier";
-import { IBlockHeaderData } from "./chain-observers/classifiers/block-header-classifier";
-import { JsonRpcFactory } from "./chain-observers/factories/jsonrpc/factory";
-import { ObserverMediator } from "./chain-observers/observer-mediator";
-import { BlockNotAvailableError, WorkerBeeError } from "./errors";
-import type { IWorkerBee, IBroadcastOptions } from "./interfaces";
-import { PastQueen } from "./past-queen";
-import { QueenBee } from "./queen";
-import { calculateRelativeTime } from "./utils/time";
-import { WaxExtendTypes } from "./wax";
+import { WorkerBeeCore } from "../packages/workerbee-core/src/bot";
+import type { IWorkerBeeRuntime } from "../packages/workerbee-core/src/interfaces";
+import type { WaxExtendTypes } from "../packages/workerbee-core/src/wax";
 
-const HIVE_BLOCK_INTERVAL = 1000 * 3;
+const timersRuntime: IWorkerBeeRuntime = {
+  every(callback: () => void, intervalMs: number): () => void {
+    const intervalId = setInterval(callback, intervalMs);
 
-export const DEFAULT_WORKERBEE_OPTIONS = {
-  chainOptions: {}
-};
+    return () => clearInterval(intervalId);
+  },
+  after(callback: () => void, delayMs: number): () => void {
+    const timeoutId = setTimeout(callback, delayMs);
 
-export const DEFAULT_BLOCK_INTERVAL_TIMEOUT_MS = 2000;
-
-type TAsyncBlockIteratorResolveCallback = (value: IteratorResult<IBlockData & IBlockHeaderData, void>) => void;
-type TAsyncBlockIteratorPromise = Promise<IteratorResult<IBlockData & IBlockHeaderData, void>>;
-
-export class WorkerBee implements IWorkerBee {
-  public chain: TWaxExtended<WaxExtendTypes>;
-
-  private intervalId: NodeJS.Timeout | undefined = undefined;
-
-  public get running() {
-    return this.intervalId !== undefined;
-  }
-
-  public get observe() {
-    return new QueenBee(this);
-  }
-
-  public getVersion(): string {
+    return () => clearTimeout(timeoutId);
+  },
+  get version(): string {
     return process.env.npm_package_version as string;
   }
+};
 
-  public mediator = new ObserverMediator(new JsonRpcFactory(this));
-
+export class WorkerBee extends WorkerBeeCore<TWaxExtended<WaxExtendTypes>> {
   public constructor(
     chain: IHiveChainInterface
   ) {
-    this.chain = chain.extend<WaxExtendTypes>();
-  }
-
-  public providePastOperations(fromBlock: number, toBlock: number): PastQueen;
-  public providePastOperations(relativeTime: string): Promise<PastQueen>;
-  public providePastOperations(fromBlockOrRelativeTime: number | string, toBlock?: number): PastQueen | Promise<PastQueen> {
-    if (typeof fromBlockOrRelativeTime === "number" && typeof toBlock === "number")
-      return new PastQueen(this, fromBlockOrRelativeTime, toBlock);
-
-    return this.chain!.api.database_api.get_dynamic_global_properties({}).then(dgp => {
-      const headBlockNumber = dgp.head_block_number;
-
-      const actualTime = calculateRelativeTime(fromBlockOrRelativeTime, dateFromString(dgp.time));
-
-      const blocksBetween = Math.floor((new Date(`${dgp.time}Z`).getTime() - actualTime.getTime()) / (3 * 1000));
-
-      if (blocksBetween <= 0)
-        throw new WorkerBeeError(`Invalid time range: ${fromBlockOrRelativeTime} is in the future`);
-
-      return new PastQueen(this, headBlockNumber - blocksBetween);
-    });
-  }
-
-  public broadcast(tx: ApiTransaction | ITransaction, options: IBroadcastOptions = {}): Promise<void> {
-    const toBroadcast: ApiTransaction = "toApiJson" in tx ? tx.toApiJson() as ApiTransaction : tx as ApiTransaction;
-
-    if(toBroadcast.signatures.length === 0)
-      throw new WorkerBeeError("You are trying to broadcast transaction without signing!");
-
-    const apiTx = this.chain!.createTransactionFromJson(toBroadcast);
-
-    return new Promise<void>((resolve, reject) => {
-      const txId = apiTx.id;
-      const legacyTxId = apiTx.legacy_id;
-
-      let firstBlock: number | undefined = undefined;
-      let lastBlock: number | undefined = undefined;
-      let lastBlockchainTime: Date | undefined = undefined;
-
-      let timeoutId: NodeJS.Timeout | undefined = undefined;
-
-      const listener = this.observe.onTransactionIds(txId, legacyTxId).onBlock().subscribe({
-        next(val) {
-          if (firstBlock === undefined)
-            firstBlock = val.block.number;
-
-          lastBlockchainTime = val.block.timestamp;
-          lastBlock = val.block.number;
-
-          const transaction = val.transactions[txId] || val.transactions[legacyTxId];
-          if (transaction === undefined)
-            return;
-
-
-          clearTimeout(timeoutId);
-          listener.unsubscribe();
-
-          if (options.verifySignatures) {
-            if(transaction.signatures.length !== apiTx.transaction.signatures.length) {
-              reject(new WorkerBeeError("Transaction broadcast error: Signatures length mismatch in broadcast result"));
-              return;
-            }
-
-            for(let i = 0; i < transaction.signatures.length; ++i)
-              if(transaction.signatures[i] !== apiTx.transaction.signatures[i]) {
-                reject(new WorkerBeeError(`Transaction broadcast error: Signatures mismatch in broadcast result at index: ${i}`));
-                return;
-              }
-          }
-
-          resolve();
-        },
-        error(val) {
-          if (val instanceof BlockNotAvailableError)
-            return; // Ignore not available block error if iteration executed before next block is available in live chain
-
-          clearTimeout(timeoutId);
-          listener.unsubscribe();
-          reject(val);
-        }
-      });
-
-      const expireIn = options.expireInMs ?? (HIVE_BLOCK_INTERVAL * 2);
-
-      this.chain!.broadcast(apiTx).then(() => {
-        timeoutId = setTimeout(async() => {
-          listener.unsubscribe();
-          const txTime = dateFromString(apiTx.transaction.expiration);
-          let errorMessage = `Transaction #${txId} (legacy: #${legacyTxId}) broadcasted successfully, but listener has expired.\n`;
-          errorMessage += `Blocks analyzed: ${lastBlock ? (firstBlock === lastBlock ? firstBlock : `${firstBlock} - ${lastBlock}`) : "(none)"}\n`;
-          errorMessage += "Transaction broadcast metadata:\n";
-          errorMessage += `  - Current timestamp:           ${new Date().toISOString()}\n`;
-          errorMessage += `  - Transaction expiration time: ${txTime.toISOString()}\n`;
-          try {
-            if (!lastBlockchainTime) {
-              const { time } = await this.chain!.api.database_api.get_dynamic_global_properties({});
-              // We do not care about race condition in this case - Blockchain time is only informational
-              /* eslint-disable-next-line require-atomic-updates */
-              lastBlockchainTime = dateFromString(time);
-            }
-            errorMessage += `  - Head block blockchain time:  ${lastBlockchainTime.toISOString()}`;
-          } catch {
-            errorMessage += "  - (!) Unable to retrieve the blockchain time";
-          }
-          errorMessage += `\nTry adjusting the 'expireInMs' option (currently set to ${expireIn} ms) in the broadcast method to a higher value.`;
-          reject(new WorkerBeeError(errorMessage));
-        }, expireIn);
-      }).catch(err => {
-        listener.unsubscribe();
-        reject(err);
-      });
-    });
-  }
-
-  public start(): void {
-    this.stop();
-
-    this.intervalId = setInterval(() => {
-      void this.mediator.notify();
-    }, DEFAULT_BLOCK_INTERVAL_TIMEOUT_MS);
-  }
-
-  public iterate(errorHandler?: boolean | ((error: WorkerBeeError) => void)): AsyncIterator<IBlockData & IBlockHeaderData> {
-    /// This variable set to some function indicates that we have waiting promise (for next block)
-    let promiseToResolveCb: TAsyncBlockIteratorResolveCallback|undefined;
-
-    const createWaitingPromise = (): TAsyncBlockIteratorPromise => {
-      return new Promise<IteratorResult<IBlockData & IBlockHeaderData, void>>(resolve => {
-        /// Execution of this callbacl means that client loop requested next block (but we don't have it yet)
-        promiseToResolveCb = resolve;
-      });
-    };
-
-    const promisesQueue: TAsyncBlockIteratorPromise[] = [
-      createWaitingPromise()
-    ];
-
-    // Create a single observer that will listen for block data
-    const observer = this.observe.onBlock().provideBlockData().subscribe({
-      next: data => {
-        if(promiseToResolveCb !== undefined) {
-          // Resolve the waiting promise in queue with the block data and pass it to the next iteration of user loop
-          promiseToResolveCb({ value: data.block, done: false });
-          /*
-           * Clear held callbackFn reference and wait for client loop request for next iteration
-           * (then promise resolution will happen, and will set promiseToResolveCb to actual function again)
-           */
-          promiseToResolveCb = undefined;
-          promisesQueue.push(createWaitingPromise());
-        } else
-          /*
-           * There is no more waiting promises (probably due to client loop blocking.
-           * We can create immediately resolved promise and push it to the queue to be consumed by the next iteration
-           */
-          promisesQueue.push(Promise.resolve({ value: data.block, done: false }));
-
-      },
-      error: (err) => {
-        if (errorHandler === true)
-          promisesQueue.push(Promise.reject(err));
-        else if (typeof errorHandler === "function")
-          errorHandler(err);
-      },
-    });
-
-    return {
-      // With each call to the next() method, we return the current (first) promise
-      next: () => {
-        return promisesQueue.shift()!;
-      },
-      return: () => { // Cleanup on break
-        observer.unsubscribe();
-        return Promise.resolve({ done: true, value: undefined });
-      }
-    };
-  }
-
-  public [Symbol.asyncIterator](): AsyncIterator<IBlockData & IBlockHeaderData> {
-    return this.iterate();
-  }
-
-  public stop(): void {
-    if(!this.running)
-      return;
-
-    clearTimeout(this.intervalId);
-  }
-
-  public delete(): void {
-    this.stop();
-
-    this.mediator.unregisterAllListeners();
+    super(chain.extend<WaxExtendTypes>(), timersRuntime);
   }
 }

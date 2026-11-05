@@ -1,4 +1,4 @@
-import type { WorkerBee } from "../../bot";
+import type { WorkerBeeCore } from "../../bot";
 import { WorkerBeeError } from "../../errors";
 import { createFactoryCircularDependencyErrorMessage, createFactoryUnsupportedClassifierErrorMessage } from "../../utils/error-helper";
 import { DynamicGlobalPropertiesClassifier } from "../classifiers";
@@ -22,9 +22,9 @@ export class FactoryBase {
   protected collectorsPerClassifier = new Map<IEvaluationContextClass, AnyCollectorClass>();
   protected currentBlockNumber?: number;
 
-  protected readonly worker: WorkerBee;
+  protected readonly worker: WorkerBeeCore;
 
-  public constructor(worker: WorkerBee) {
+  public constructor(worker: WorkerBeeCore) {
     this.worker = worker;
   }
 
