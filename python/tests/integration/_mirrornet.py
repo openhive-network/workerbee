@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
+from typing import cast
 
 from wax import WaxChainOptions, create_hive_chain
 from wax.interfaces import IHiveChainInterface
@@ -24,10 +25,12 @@ type ReplayRegister[T] = Callable[
 
 
 @asynccontextmanager
-async def open_mirrornet_chain(endpoint: str) -> AsyncIterator[IHiveChainInterface]:
-    """Open a base Hive chain for the configured mirrornet endpoint."""
-    async with create_hive_chain(WaxChainOptions(endpoint_url=endpoint)) as chain:
-        yield chain
+async def open_mirrornet_chain(endpoint: str) -> AsyncIterator[IHiveChainInterface[WorkerBeeApiCollection]]:
+    """Open a WorkerBee-extended Hive chain for the configured mirrornet endpoint."""
+    async with create_hive_chain(WaxChainOptions(endpoint_url=endpoint)) as base_chain:
+        extended_chain = cast("IHiveChainInterface[WorkerBeeApiCollection]", base_chain.extends(WorkerBeeApiCollection))
+        async with extended_chain as chain:
+            yield chain
 
 
 class MirrornetReplay:
@@ -57,8 +60,7 @@ class MirrornetReplay:
             completed = True
             replay_exhausted.set()
 
-        async with open_mirrornet_chain(self._endpoint) as chain:
-            bot = WorkerBee(chain)
+        async with open_mirrornet_chain(self._endpoint) as chain, WorkerBee(chain) as bot:
             replay = bot.provide_past_operations(from_block, to_block)
             subscription = register(replay, bot.chain, results, on_error, on_complete)
             done_task = asyncio.create_task(replay_exhausted.wait())
@@ -73,6 +75,5 @@ class MirrornetReplay:
                 error_task.cancel()
                 if not completed:
                     subscription.close()
-                await bot.aclose()
 
         return results
