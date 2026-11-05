@@ -89,8 +89,9 @@ test:
 
 # The n8n community-node package is npm-built, CommonJS and released on its own,
 # so it stands outside the pnpm workspace and the library's job templates. It
-# compiles ../src as part of its build, which makes this job the check that the
-# node package still agrees with the library.
+# compiles the core (packages/workerbee-core) as part of its build, which makes
+# this job the check that the node package still agrees with the library, and its
+# tests compare the chain it runs on without WebAssembly with wax.
 n8n_nodes_test:
   stage: test
   image: node:22-alpine
