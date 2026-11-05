@@ -3,14 +3,14 @@
 #   docker build -f n8n/Dockerfile -t hive-n8n .        # context is the repo root
 #   docker run --rm -p 5678:5678 hive-n8n
 #
-# The context is the repository root because the nodes embed the WorkerBee
-# library from ../src: this image and the checkout it was built from always agree
-# on the observer surface, which a published-package dependency could not
-# guarantee while the library and the nodes move together.
+# The context is the repository root because the nodes embed the WorkerBee core
+# from ../packages/workerbee-core: this image and the checkout it was built from
+# always agree on the observer surface, which a published-package dependency
+# could not guarantee while the library and the nodes move together.
 #
 # Alpine is fine here even though the Python-era image needed glibc: nothing in
-# this package is a compiled CPython extension, and @hiveio/wax ships portable
-# WebAssembly.
+# this package is a compiled CPython extension, and nothing it runs is
+# WebAssembly either.
 
 ARG NODE_VERSION=22
 ARG N8N_VERSION=2.36.5
@@ -31,7 +31,7 @@ COPY n8n/package.json n8n/package-lock.json ./n8n/
 RUN cd n8n && npm ci --no-audit --no-fund --ignore-scripts
 
 # Application layer: the nodes, plus the library sources they bundle.
-COPY src ./src
+COPY packages/workerbee-core ./packages/workerbee-core
 COPY n8n ./n8n
 
 RUN mkdir -p /packages && cd n8n && npm run build && npm pack --pack-destination /packages

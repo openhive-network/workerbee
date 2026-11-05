@@ -20,8 +20,8 @@ name: hive-n8n
 services:
   n8n:
     build:
-      # The repository root: the image compiles the WorkerBee library from ../src
-      # so the nodes and the library always agree.
+      # The repository root: the image compiles the WorkerBee core from
+      # ../packages/workerbee-core so the nodes and the library always agree.
       context: ..
       dockerfile: n8n/Dockerfile
       args:
