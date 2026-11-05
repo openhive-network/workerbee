@@ -77,7 +77,7 @@ export const OPERATION_GROUPS: readonly IOperationGroup[] = [
   { key: "comments", kind: "accountPairs" },
   /*
    * Keyed by the custom_json app id (`sm_claim_reward`, ...), not by an account:
-   * see `../src/chain-observers/providers/custom-operation-provider.ts`.
+   * see `../packages/workerbee-core/src/chain-observers/providers/custom-operation-provider.ts`.
    */
   { key: "customOperations", kind: "keyedPairs" },
   { key: "follows", kind: "accountPairs" },

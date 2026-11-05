@@ -81,10 +81,9 @@ export function specProperties(displayOptions?: IDisplayOptions): INodePropertie
                 typeOptions: { loadOptionsMethod: "getEvents" },
                 default: "",
                 required: true,
-                description:
-                  "The observer to subscribe to, generated from the WorkerBee observers this package wraps. " +
-                  '<a href="https://gitlab.syncad.com/hive/workerbee/-/tree/develop/n8n">Docs</a>. ' +
-                  'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+                // One literal, not a concatenation: n8n's verification lint reads no other description of a dynamic option
+                // eslint-disable-next-line max-len
+                description: 'The observer to subscribe to, generated from the WorkerBee observers this package wraps. <a href="https://gitlab.syncad.com/hive/workerbee/-/tree/develop/n8n">Docs</a>. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
               },
               {
                 displayName: "Join With Previous",
@@ -119,10 +118,8 @@ export function specProperties(displayOptions?: IDisplayOptions): INodePropertie
                         type: "options",
                         typeOptions: { loadOptionsMethod: "getEventFields", loadOptionsDependsOn: ["events.event"] },
                         default: "",
-                        description:
-                          "The parameter to set; the list depends on the event above. Switch to Raw JSON for anything not offered. " +
-                          '<a href="https://gitlab.syncad.com/hive/workerbee/-/tree/develop/n8n">Docs</a>. ' +
-                          'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+                        // eslint-disable-next-line max-len
+                        description: 'The parameter to set; the list depends on the event above. Switch to Raw JSON for anything not offered. <a href="https://gitlab.syncad.com/hive/workerbee/-/tree/develop/n8n">Docs</a>. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
                       },
                       {
                         displayName: "Value",
@@ -167,10 +164,8 @@ export function specProperties(displayOptions?: IDisplayOptions): INodePropertie
                 typeOptions: { loadOptionsMethod: "getProviders" },
                 default: "",
                 required: true,
-                description:
-                  "Data to attach to every notification, generated from the WorkerBee providers this package wraps. " +
-                  '<a href="https://gitlab.syncad.com/hive/workerbee/-/tree/develop/n8n">Docs</a>. ' +
-                  'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+                // eslint-disable-next-line max-len
+                description: 'Data to attach to every notification, generated from the WorkerBee providers this package wraps. <a href="https://gitlab.syncad.com/hive/workerbee/-/tree/develop/n8n">Docs</a>. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
               },
               {
                 displayName: "Parameters",
@@ -190,10 +185,8 @@ export function specProperties(displayOptions?: IDisplayOptions): INodePropertie
                         type: "options",
                         typeOptions: { loadOptionsMethod: "getProviderFields", loadOptionsDependsOn: ["providers.provider"] },
                         default: "",
-                        description:
-                          "The parameter to set; the list depends on the provider above. " +
-                          '<a href="https://gitlab.syncad.com/hive/workerbee/-/tree/develop/n8n">Docs</a>. ' +
-                          'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+                        // eslint-disable-next-line max-len
+                        description: 'The parameter to set; the list depends on the provider above. <a href="https://gitlab.syncad.com/hive/workerbee/-/tree/develop/n8n">Docs</a>. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
                       },
                       {
                         displayName: "Value",

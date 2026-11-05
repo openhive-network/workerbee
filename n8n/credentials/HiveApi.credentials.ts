@@ -1,11 +1,10 @@
-import type { ICredentialTestRequest, ICredentialType, INodeProperties } from "n8n-workflow";
+import type { ICredentialTestRequest, ICredentialType, Icon, INodeProperties } from "n8n-workflow";
 
 /**
  * Which Hive node to talk to.
  *
- * No keys and no secrets live here -- the signing key has its own credential,
- * `HivePostingKey`, and this one is attached to workflows that never publish.
- * The credential exists so a whole n8n instance can point at one API node (a
+ * No keys and no secrets live here -- the nodes only read. The credential
+ * exists so a whole n8n instance can point at one API node (a
  * private one, a testnet) in a single place, and it is optional: a node with no
  * credential falls back to the public default.
  *
@@ -16,6 +15,8 @@ export class HiveApi implements ICredentialType {
   public name = "hiveApi";
 
   public displayName = "Hive API";
+
+  public icon: Icon = "file:hive.svg";
 
   public documentationUrl = "https://gitlab.syncad.com/hive/workerbee/-/tree/develop/n8n";
 
@@ -36,9 +37,7 @@ export class HiveApi implements ICredentialType {
       default: "",
       placeholder: "leave empty for Hive mainnet",
       description:
-        "Only for a testnet or a mirrornet. A signature is computed over the chain ID, so publishing to one signs with the wrong chain " +
-        'unless this is set -- the node then rejects a perfectly good key with "missing required posting authority". ' +
-        "Reading is unaffected, which is why the mistake only shows up on the first broadcast.",
+        "Only for a testnet or a mirrornet, and only for signing, which these nodes do not do yet: reading is the same on every chain.",
     },
   ];
 

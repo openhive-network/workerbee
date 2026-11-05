@@ -11,7 +11,7 @@
  * `node-execute-block-wrong-error-thrown`) say so.
  *
  * The node files call this at each point they throw, and `execute()`/`trigger()`
- * catch whatever came from deeper in and convert that too -- `nodes/shared/*`
+ * catch whatever came from deeper in and convert that too -- `shared/*`
  * has no `INode`, and its tests never build one. n8n's own lint wants the first
  * of those (it is syntactic, and scans every file under `nodes/**`); the second
  * is what actually guarantees nothing untranslated escapes.

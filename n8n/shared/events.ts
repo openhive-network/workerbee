@@ -20,7 +20,7 @@
  * `Raw JSON` spec field all speak them, and they render as readable labels in
  * the n8n dropdowns.
  */
-import type { IWorkerBee } from "../../workerbee/index";
+import type { IWorkerBee } from "../workerbee/n8n/workerbee-n8n/index";
 import type { asset, EManabarType } from "./wax-types";
 
 
@@ -163,13 +163,6 @@ export const EVENTS: ISpecDescriptor[] = [
     summary: "Fires when one of the given transaction ids is seen in a block.",
     fields: [{ name: "transaction_ids", type: { kind: "strings" }, description: "Transaction ids to watch for" }],
     apply: (chain, params) => chain.onTransactionIds(...params.strings("transaction_ids")),
-  },
-  {
-    tag: "impacted_accounts",
-    kind: "event",
-    summary: "Fires on every operation that impacts one of the accounts.",
-    fields: [ACCOUNTS],
-    apply: (chain, params) => chain.onImpactedAccounts(...params.names("accounts")),
   },
   {
     tag: "accounts_balance_change",
