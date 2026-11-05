@@ -1,0 +1,10 @@
+{
+  "name": "@hiveio/workerbee-core",
+  "description": "WorkerBee observers without the environment - bundled into @hiveio/workerbee and the n8n nodes, never published",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

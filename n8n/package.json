@@ -40,22 +40,18 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/HiveApi.credentials.js",
-      "dist/credentials/HivePostingKey.credentials.js"
+      "dist/credentials/HiveApi.credentials.js"
     ],
     "nodes": [
       "dist/nodes/Hive/Hive.node.js",
       "dist/nodes/HiveTrigger/HiveTrigger.node.js"
     ]
   },
-  "dependencies": {
-    "@hiveio/wax": "2.0.2",
-    "@hiveio/beekeeper": "1.28.7-rc0"
-  },
   "peerDependencies": {
     "n8n-workflow": "*"
   },
   "devDependencies": {
+    "@hiveio/wax": "2.0.2",
     "@types/node": "22.10.6",
     "esbuild": "0.28.2",
     "n8n-workflow": "2.36.3",

@@ -212,6 +212,8 @@ importers:
         specifier: catalog:typescript-toolset
         version: 4.23.15
 
+  packages/workerbee-core: {}
+
 packages:
 
   '@aashutoshrathi/word-wrap@1.2.6':
