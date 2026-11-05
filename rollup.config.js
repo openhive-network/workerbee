@@ -6,7 +6,7 @@ import dts from "rollup-plugin-dts";
 
 export default [
   {
-    input: "dist/index.js",
+    input: "dist/src/index.js",
     output: {
       format: "es",
       name: "workerbee",
@@ -28,7 +28,7 @@ export default [
       commonjs()
     ]
   }, {
-    input: "dist/index.d.ts",
+    input: "dist/src/index.d.ts",
     output: [
       { file: "dist/bundle/index.d.ts", format: "es" }
     ],
