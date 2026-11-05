@@ -18,14 +18,18 @@ block goes from the chain to your workflow with no HTTP hop in between.
 ```
 
 Not one event name, parameter name or default is written into a form. They live
-in [`nodes/shared/events.ts`](nodes/shared/events.ts), one entry per
+in [`shared/events.ts`](shared/events.ts), one entry per
 `QueenBee.on*` / `provide*` call, and the dropdowns, the validation, the catalog
 and the JSON Schema are all derived from that one table. Adding an observer is
 one entry.
 
-The library is not a published dependency: the build compiles it from
-[`../src`](../src) and bundles it into the package, so the nodes and the
-library in this checkout always agree about what an observer is called.
+The library is not a published dependency: the build compiles the WorkerBee core
+([`../packages/workerbee-core`](../packages/workerbee-core)) with a chain of its
+own ([`workerbee-n8n/`](workerbee-n8n): JSON-RPC calls, no wax, no WebAssembly)
+and bundles both into the package, so the nodes and the library in this checkout
+always agree about what an observer is called, and the package has no runtime
+dependencies. It only reads: publishing, `impacted_accounts` and the ids of
+transactions need wax, so they are left out.
 
 ## Nodes
 
@@ -41,28 +45,9 @@ that Hive node, stops polling it.
 | Account | `Get` |
 | Block | `Get` |
 | Catalog | `Get Events` (everything the trigger can watch), `Get Schema` (JSON Schema of the spec and of both item shapes) |
-| Comment | `Reply` — **writes to the chain**: signs a reply with a posting key and broadcasts it |
 | Spec | `Preview` (compile the visual builder into the JSON the trigger's Raw JSON field takes) |
 
-### `Comment: Reply`
-
-Parent Author, Parent Permlink and Body, plus two options. It returns
-`transactionId`, `author`, `permlink`, `parentAuthor`, `parentPermlink` and the
-`endpoint` it used.
-
-**Permlink** is the one that matters. Left empty, the reply gets a permlink
-derived from the parent and the clock, so a *retry publishes a second comment* —
-and n8n's own "Retry on Fail" is exactly what would trigger that after a timeout
-whose request actually succeeded. Supply a permlink and a retry lands on the same
-comment, which the chain treats as an edit of an identical body: a no-op. Set it
-for anything unattended.
-
-**Title** is ignored by front ends; replies do not have one.
-
-The node is exposed to AI agents as a tool for its *reads*. Publishing is refused
-when it runs as one — the description says so, and `runOne` enforces it above the
-credential read, because n8n's `usableAsTool.replacements` can only rewrite prose
-and cannot restrict a single parameter.
+Everything it does is a read, so the node is exposed to AI agents as a tool.
 
 ## Composing what to watch
 
@@ -87,16 +72,16 @@ and opens the next. So
 |---|---|---|
 | — | Posts | authors = `alice,bob` |
 | Or | Votes | voters = `alice` |
-| And | Impacted Accounts | accounts = `alice` |
+| And | Accounts Metadata Change | accounts = `alice` |
 
-means *(a post by alice or bob **or** a vote by alice) **and** an operation
-impacting alice*. It is `.onPosts("alice", "bob").or.onVotes("alice").and.onImpactedAccounts("alice")`,
+means *(a post by alice or bob **or** a vote by alice) **and** a change of
+alice's metadata*. It is `.onPosts("alice", "bob").or.onVotes("alice").and.onAccountsMetadataChange("alice")`,
 and it compiles to:
 
 ```json
 {"match": [[{"event": "posts", "authors": ["alice", "bob"]},
             {"event": "votes",  "voters":  ["alice"]}],
-           [{"event": "impacted_accounts", "accounts": ["alice"]}]]}
+           [{"event": "accounts_metadata_change", "accounts": ["alice"]}]]}
 ```
 
 Values are typed by the catalog: `list[str]` splits on commas, `int`/`float`
@@ -108,7 +93,7 @@ names — rather than at the first matching block.
 
 The first entry's join is ignored — it has nothing above it — and n8n cannot hide
 a field conditionally inside a collection, so it stays visible. Each entry's
-title shows its join (`OR posts`, `AND impacted_accounts`), which is how you read
+title shows its join (`OR posts`, `AND accounts_metadata_change`), which is how you read
 the grouping without opening every row.
 
 **Spec Mode: Raw JSON** takes the whole spec by hand for anything the form
@@ -170,42 +155,15 @@ than an ever-growing heap.
 
 ## Credentials
 
-Two, and the split between them is the point.
-
 **Hive API** — optional: the API endpoint, and a chain ID for anything that is
-not Hive mainnet. No keys, no secrets. Every operation except one only reads, and
-those calls are unsigned.
-
-> **The chain ID only matters when something is signed**, which is why leaving it
-> out costs nothing until the first `Comment: Reply` — and then fails as
-> `missing required posting authority`, blaming a key that is perfectly good. A
-> signature is computed over the chain ID; omitted, wax uses mainnet's, and a
-> testnet cannot match it. Set it for a testnet or mirrornet, leave it empty for
-> mainnet.
+not Hive mainnet. No keys, no secrets: every operation only reads, and those
+calls are unsigned. The chain ID only matters once something is signed, which
+this package does not do.
 
 Leave it off entirely and the nodes use `https://api.hive.blog/`. Set it to
 point a whole instance at a private node or a testnet, and override it per
 subscription under **Spec Options → Hive API Endpoint** or per call on the
 action node.
-
-**Hive Posting Key** — an account name and its private posting key, asked for
-only by `Comment: Reply`, the one operation that writes. A workflow that never
-publishes never attaches it, and never has a secret in reach.
-
-> **Posting authority only.** A posting key can comment, vote and reblog; it
-> cannot move funds, change keys, or touch the account itself. Nothing here needs
-> an active or owner key, and n8n's credential store is not the place for one.
->
-> The key is held in memory by an in-memory beekeeper wallet — nothing is written
-> to disk — and it is never logged, never attached to an error, and never
-> returned in an item. The cache that keeps the unlocked wallet is keyed by a
-> digest of the key, not by the key itself.
->
-> There is no Test button on this credential. n8n's declarative credential test
-> can only interpolate fields of *this* credential, which holds no endpoint, so
-> it would have to hardcode `api.hive.blog` — wrong for exactly the testnet users
-> the Chain ID field exists for. A wrong key fails on the first reply, as a
-> credential error rather than as an endpoint failure.
 
 One block stream is shared per endpoint across the whole n8n process, so fifty
 workflows watching Hive cost one poller, not fifty.
@@ -222,16 +180,15 @@ panel. `docker compose logs n8n | grep hiveio` shows the load:
 
 ```
 Installing @hiveio/n8n-nodes-hive 0.2.0 (build 3f9c1a...) into /home/node/.n8n/nodes; previous build: none
-Loaded all credentials and nodes from @hiveio/n8n-nodes-hive {"credentials":2,"nodes":2}
+Loaded all credentials and nodes from @hiveio/n8n-nodes-hive {"credentials":1,"nodes":2}
 ```
 
-[`workflows/`](workflows) holds six importable examples: live blocks, account
-activity in operation mode, an on-demand account lookup, and three that end
+[`workflows/`](workflows) holds five importable examples: live blocks, account
+activity in operation mode, an on-demand account lookup, and two that end
 somewhere other than the canvas — see below.
 
 What each one is for, what it needs, and the traps it exists to demonstrate:
-[`workflows/README.md`](workflows/README.md) — which also carries the `curl` for
-reading a whole comment thread back off the chain.
+[`workflows/README.md`](workflows/README.md).
 
 Import them one at a time from the editor (**⋯ → Import from File**), or the
 whole directory in one command:
@@ -311,69 +268,19 @@ Three things this example exists to show:
   list* leaves the stored value empty, and the node reports the field as missing.
   Switch the selector to *By ID* — the workflow does this with
   `"mode": "id", "value": "llama3.1:8b"`.
-- **There is no "all comments" event**, and that is why this one still takes
-  blocks apart while the Claude example does not. WorkerBee's `comments` and
-  `impacted_accounts` observers are both account-scoped, so watching *everyone*
-  leaves only the block stream. Emit Mode: Operation does not help here either —
+- **There is no "all comments" event**, and that is why this one takes blocks
+  apart. WorkerBee's `comments` observer is account-scoped, so watching
+  *everyone* leaves only the block stream. Emit Mode: Operation does not help here either —
   it explodes the notification keys that carry operations, and a block payload is
   not one of them, so it falls back to a single item per block. Scope it to a
-  list of authors and both of those change; watch everyone and this is the shape.
+  list of authors and that changes; watch everyone and this is the shape.
   A non-empty `parent_author` is what separates a reply from a top-level post —
   the same operation carries both.
 - **The Ollama node returns only `{ content }`.** The comment it summarised is
   gone from the item, so the Discord message reaches back for the author and the
   block number through `$('Short comments only').item`.
 
-### The Claude example, and what it cannot do
-
-[`workflows/watched-post-replies.json`](workflows/watched-post-replies.json)
-follows one post — an author and a permlink set in the *Watched post* node —
-picks out replies to it, and has Claude write the answer: thanks and a light
-joke for a positive reply, an apology and a concrete promise for a negative one,
-thanks for the opinion when it is neutral.
-
-Needs an **Anthropic** credential (your API key) in the *Write the reply* node.
-The model is set as `claude-opus-5` through the resource locator's *By ID* mode,
-for the same reason as the Ollama example.
-
-It ends by publishing: the last node is `Comment: Reply` on the Hive node, which
-signs the answer with the **Hive Posting Key** credential and broadcasts it.
-
-> **A published comment cannot be edited or deleted.** Nothing in this workflow
-> asks for confirmation, and the model's output goes on-chain verbatim — which is
-> why its prompt forbids any label or preamble, and why the answer is capped at a
-> few sentences. Point it at a post you own and run it with the workflow
-> deactivated (**Test step**) before you let it run by itself.
-
-Five notes on the shape:
-
-- **It waits on the author, not on blocks.** Hive counts a comment's
-  `parent_author` among the accounts the operation impacts, so
-  `impacted_accounts` on the post's author wakes the workflow the moment someone
-  replies. An earlier version watched every block and threw ~99% of the runs
-  away; this one runs when something actually happens. With **Emit Mode:
-  Operation** the trigger hands over one already-unpacked operation per item, so
-  the two Split Out nodes that used to take a block apart are gone.
-- **It answers the reply, not the post.** The parent of what it publishes is
-  whoever just wrote and their permlink — so the answer hangs off the comment,
-  where a reader expects it. That also settles the loop question for free: the
-  bot's own comment has the incoming reply as its parent, never the watched post,
-  so the permlink check above already excludes it. Verified on chain.
-- **It still declines to talk to itself.** The second filter condition drops a
-  comment whose author is the account being watched. Not loop protection — the
-  permlink check does that — but it stops the bot answering a comment its own
-  account wrote directly under the post.
-- **`parent_permlink` still has to match.** `impacted_accounts` fires for replies
-  to *any* post that author wrote, and for votes, transfers and follows besides.
-  The permlink check narrows it to the one post — and doubles as "is this a
-  comment at all", since anything else yields an empty string.
-- **The three tones live in the prompt, not on the canvas.** One Claude call
-  classifies and writes. Splitting them into three visible branches costs a
-  Switch, three Set nodes and a Merge — six nodes to express what is one
-  paragraph of prompt — so this example keeps the prompt. Split it if you would
-  rather tune the three answers by clicking than by editing text.
-
-After a change to anything under `n8n/` or `src/`, `docker compose up -d --build`
+After a change to anything under `n8n/` or `packages/workerbee-core/`, `docker compose up -d --build`
 again — the dependency layer is cached, so it is a TypeScript compile and a copy.
 
 ### Installing into an existing n8n
@@ -386,18 +293,15 @@ cd ~/.n8n/nodes && npm install /path/to/hiveio-n8n-nodes-hive-0.2.0.tgz
 Restart n8n. `~/.n8n/nodes` is where n8n installs a community node from its own
 UI, so the package is discovered the ordinary way.
 
-> A bind mount of `dist/` into `N8N_CUSTOM_EXTENSIONS` — which an earlier version
-> of this package documented — no longer works, for two reasons. The nodes now
-> have a runtime dependency graph that has to resolve from a real `node_modules`,
-> and `CustomDirectoryLoader` globs `**/*.node.js`, which matches
-> `@hiveio/wax`'s own `build_wasm/wax.node.js` and then fails trying to load it
-> as an n8n node.
+> A bind mount of `dist/` into `N8N_CUSTOM_EXTENSIONS`, which an earlier version
+> of this package documented, is not tested any more; install the package as
+> above.
 
 ## Development
 
 ```bash
 npm ci             # --ignore-scripts is fine; isolated-vm is only pulled in for types
-npm run build      # declarations from ../src, esbuild bundle, tsc, assets
+npm run build      # declarations of the core, esbuild bundle, tsc, assets
 npm run typecheck
 npm test           # build, then node --test
 ```
@@ -405,8 +309,10 @@ npm test           # build, then node --test
 `npm test` runs the unit tests with Node's own runner — no browser, so it does not
 share the library's Playwright setup. The interesting ones compile every catalog
 entry against a **real** `QueenBee` and assert that the registry covers exactly
-the observers the library offers, so a rename in `../src` fails the build here
-instead of shipping a node that throws.
+the observers the library offers, so a rename in the core fails the build here
+instead of shipping a node that throws. Others compare what `workerbee-n8n`
+computes without WebAssembly with wax: the protobuf form of every transaction of
+the blocks the library's tests replay, and the current value of a manabar.
 
 For an end-to-end check against a live Hive node, through fake n8n execution
 contexts:
@@ -417,32 +323,34 @@ docker exec -i <container> node - < dev/smoke.cjs
 
 ## How this package is put together
 
-Three constraints shape the build, and all three come from the same place: n8n
-loads nodes as **CommonJS**, while `@hiveio/wax` and the WorkerBee build that
-wraps it are **ESM-only**.
+The constraints that shape the build come from two places: n8n loads nodes as
+**CommonJS**, while the WorkerBee build is **ESM**; and a community node may have
+no runtime dependencies and must not use timers itself.
 
 1. **The nodes are CommonJS and reach ESM through `await import()`.**
    `tsconfig.json` uses `module: node16` rather than plain `commonjs`, because
    that is what stops TypeScript rewriting a dynamic `import()` into a
-   `require()`. The specifiers live in variables so they survive compilation
-   verbatim. Nothing WASM-shaped is loaded while n8n is merely scanning the
-   nodes directory.
-2. **wax types come through `nodes/shared/wax-types.ts`.** Its `exports` map has
+   `require()`. The specifier lives in a variable so it survives compilation
+   verbatim. Nothing is loaded while n8n is merely scanning the nodes directory.
+2. **wax types come through `shared/wax-types.ts`.** Its `exports` map has
    no `require` condition, so a plain type import from a CommonJS file does not
    resolve; the `resolution-mode` attribute is spelled out once there instead of
-   at every import site.
-3. **`../src` is bundled, not compiled in place.** The library's sources use
-   extensionless relative imports, which Node's ESM loader rejects. Its own
-   release build solves that with rollup; `scripts/bundle-workerbee.mjs` solves
-   it with esbuild — one dependency instead of five, and wax stays external so
-   its WebAssembly keeps loading from its own package directory.
+   at every import site. wax is a development dependency: types and tests only.
+3. **The core is bundled, not compiled in place**, with the chain of
+   `workerbee-n8n/` — JSON-RPC over `fetch` and the few computations of wax
+   WorkerBee needs, in JavaScript. The library's sources use extensionless
+   relative imports, which Node's ESM loader rejects. Its own release build
+   solves that with rollup; `scripts/bundle-workerbee.mjs` solves it with esbuild
+   — one dependency instead of five — and fails if anything imports wax or
+   beekeeper at runtime.
+4. **The block poller runs on `sleep` of n8n-workflow** (`shared/runtime.ts`):
+   the core takes its timers from the distribution, and `@hiveio/workerbee` gives
+   it `setInterval`, which a community node must not use.
 
-There are two runtime dependencies, `@hiveio/wax` and `@hiveio/beekeeper`. That rules the package out of n8n's
-*verified* community-node programme, which allows none — the previous
-bridge-backed design had none precisely because of that rule. Running WorkerBee
-in the process is what buys the absence of a second service, and it is not
-compatible with that rule; the package is installable and works, it just is not
-a candidate for verification.
+So the package has no runtime dependencies, which n8n's *verified* community-node
+programme requires. The price is that it only reads: publishing, the
+`impacted_accounts` event and the ids of transactions need the WebAssembly of
+wax.
 
 ## Trade-offs worth knowing
 
@@ -471,7 +379,6 @@ community-node rules, so publishing to npm and installing on a self-hosted n8n
 needs nothing more.
 
 Getting *verified* — reviewed by n8n, installable on n8n Cloud, listed in the
-nodes panel — is a different bar, and this package does not clear it yet. Most
-of what n8n checks is minutes of work; one item is not — n8n Cloud allows community
-nodes no runtime dependencies, and this package has two, both WebAssembly, and
-forbids the `setInterval` its block poller runs on.
+nodes panel — is a different bar. The runtime dependencies and the restricted
+globals are gone; what is left is publishing from a public GitHub repository with
+npm provenance.

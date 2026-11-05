@@ -9,8 +9,10 @@ WorkerBee **inside the n8n process**:
 | **Hive** | action | Reads chain data (account, block, chain status), serves the event catalog and its JSON Schema, and previews the spec the visual builder produces. |
 
 Everything lives in [`n8n/`](n8n/) and is released as its own npm package,
-`@hiveio/n8n-nodes-hive`. Nothing in [`src/`](src/) is modified to accommodate
-it — the integration adapts to the library, never the other way round.
+`@hiveio/n8n-nodes-hive`. It is built on the WorkerBee core
+([`packages/workerbee-core`](packages/workerbee-core/)), the same code
+`@hiveio/workerbee` is built on, with a chain of its own: plain JSON-RPC calls, no
+wax and no WebAssembly, so the package has no runtime dependencies at all.
 
 ---
 
@@ -30,9 +32,8 @@ account; that account is yours alone and stays in the container's volume.
 second service to deploy and no credential to fill in — an unconfigured node
 talks to the public `https://api.hive.blog/`.
 
-Six ready-made workflows are in [`n8n/workflows/`](n8n/workflows), from "show me
-a block" to a bot that answers replies on-chain; the whole directory imports in
-one command. What each is for, what it needs, and the traps each one exists to
+Five ready-made workflows are in [`n8n/workflows/`](n8n/workflows), from "show me
+a block" to a Discord digest; the whole directory imports in one command. What each is for, what it needs, and the traps each one exists to
 demonstrate: [`n8n/workflows/README.md`](n8n/workflows/README.md).
 
 A few knobs, all optional (`cp .env.example .env` first):
@@ -59,7 +60,7 @@ the compose file builds with `context: ..`, so without it the whole checkout —
 `node_modules`, `dist`, the Python venv, the git history — is re-sent to the
 daemon every time, and the host's `n8n/node_modules` lands on top of the
 dependency layer the image just built. This is also the command to run after editing anything
-under `src/`, because the image compiles the library from source.
+under `packages/workerbee-core/`, because the image compiles the library from source.
 
 ### Checking that the nodes actually loaded
 
@@ -87,7 +88,7 @@ docker compose up -d --build
 
 ### One registry drives everything
 
-`n8n/nodes/shared/events.ts` holds one entry per WorkerBee observer:
+`n8n/shared/events.ts` holds one entry per WorkerBee observer:
 
 ```ts
 {
@@ -108,7 +109,7 @@ Two properties fall out of the shape rather than from discipline:
 - A user-supplied string is never used to look up a method. The entry carries its
   own `apply`, so `queen[whateverTheUserTyped]` cannot happen.
 - The registry is pinned to the real `QueenBee` type, so renaming an observer in
-  `src/` breaks *this* build instead of shipping a node that throws at runtime.
+  the core breaks *this* build instead of shipping a node that throws at runtime.
   The catalog tests go further and compile every entry against a real `QueenBee`.
 
 ### Composing conditions
@@ -121,23 +122,23 @@ equivalent WorkerBee chain say the same thing in the same order.
 
 That is why there is no boolean tree editor here: the library cannot express one.
 
-### Reading and writing
+### Read only, without WebAssembly
 
-Everything the package does is read-only but one operation. `Comment: Reply`
-signs a comment with a posting key and broadcasts it, which is why it arrives as
-its own resource, its own credential (**Hive Posting Key**), and its own module.
-A workflow that never publishes never has a key in reach.
+The nodes only read. Three things WorkerBee can do need wax and its
+WebAssembly, so they are left out until there is a way to do them without it:
 
-The key is held in memory by an in-memory beekeeper wallet — wax cannot sign from
-a raw WIF, it wants a wallet — and it never reaches a log line, an item or an
-error message. Posting authority only: it can comment, vote and reblog, and it
-cannot move funds or change keys.
+- **Publishing** (`Comment: Reply` and the Hive Posting Key credential): signing
+  needs the digest of a transaction, which only wax computes, and beekeeper only
+  signs digests.
+- **`impacted_accounts`**: which accounts an operation touches is the consensus
+  logic of hived, compiled into wax.
+- **Ids of transactions**: WorkerBee does not need them for reading — a block
+  carries the ids of its transactions.
 
-On anything that is not mainnet, set the **Chain ID** on the Hive API credential.
-A signature is computed over it, so a transaction signed without it is signed for
-mainnet, and a testnet rejects it as `missing required posting authority` —
-blaming a key that is perfectly good. Reads never notice, which is why the
-mistake only surfaces on the first broadcast.
+The rest of what WorkerBee takes from wax is reimplemented in
+[`n8n/workerbee-n8n/`](n8n/workerbee-n8n/) and compared with wax in the tests:
+the protobuf form of the transactions of a block (on every transaction of the
+blocks the library's tests replay) and the current value of a manabar.
 
 ### One block stream per endpoint
 
@@ -163,20 +164,25 @@ each payload once and emits plain JSON: iterables become arrays, big integers
 become strings so an expression cannot quietly round them, and enum ordinals
 become their names (`manabarData.alice.RC`, not `manabarData.alice["2"]`).
 
-### CommonJS nodes, an ESM-only library
+### CommonJS nodes, an ESM library
 
-n8n `require()`s a compiled node, while `@hiveio/wax` and the WorkerBee build are
-ESM-only. Three consequences, all of them deliberate:
+n8n `require()`s a compiled node, while the WorkerBee build is ESM. Four
+consequences, all of them deliberate:
 
 - `tsconfig` uses `module: node16`, not `commonjs`, so a dynamic `import()` is
   emitted as an `import()` instead of being rewritten to `require()`. That import
-  is how the CommonJS node reaches the ESM library — and it also means nothing
-  WASM-shaped loads while n8n is merely scanning the nodes directory.
-- wax types come through `nodes/shared/wax-types.ts`, which carries the
-  `resolution-mode` import attribute once instead of at every import site.
-- `../src` is bundled with esbuild into `workerbee/index.mjs`, because a plain
-  `tsc` output keeps extensionless relative imports that Node's ESM loader
-  refuses.
+  is how the CommonJS node reaches the ESM library, and nothing loads while n8n is
+  merely scanning the nodes directory.
+- wax types (wax is a development dependency only) come through
+  `shared/wax-types.ts`, which carries the `resolution-mode` import
+  attribute once instead of at every import site.
+- The core with `n8n/workerbee-n8n` is bundled with esbuild into
+  `workerbee/index.mjs`, because a plain `tsc` output keeps extensionless relative
+  imports that Node's ESM loader refuses. The bundle fails to build if anything
+  imports wax or beekeeper at runtime.
+- The block poller and the delays run on `sleep` of n8n-workflow
+  (`shared/runtime.ts`), not on `setInterval` / `setTimeout`, which a
+  community node must not use.
 
 ### How the container gets the nodes
 
@@ -199,20 +205,21 @@ code does — and a version check would keep serving the previous build, silentl
 ```bash
 cd n8n
 npm ci --ignore-scripts   # isolated-vm is a type-only transitive; skip its node-gyp build
-npm run build             # declarations from ../src, esbuild bundle, tsc, assets
+npm run build             # declarations of the core, esbuild bundle, tsc, assets
 npm test                  # build + node --test, no browser
 ```
 
 Tests use `node --test` with fixture-based fakes and no mocking library. The
 catalog tests compile every registry entry against a **real** `QueenBee` and
 assert that the registry covers exactly the observers the library offers, so a
-rename in `src/` fails there rather than in production.
+rename in the core fails there rather than in production.
 
 ---
 
 ## Publishing status
 
 The package installs into any self-hosted n8n today. Getting *verified* by n8n is
-a different bar, and it is not cleared yet: n8n Cloud allows community nodes no
-runtime dependencies and forbids `setInterval`, which is what WorkerBee's block
-poller runs on.
+a different bar. The technical blockers are gone: no runtime dependencies and no
+restricted globals. What is left is the publishing itself — the `author` of
+`package.json`, a public GitHub repository and npm provenance; see *Publishing*
+in [`n8n/README.md`](n8n/README.md).
