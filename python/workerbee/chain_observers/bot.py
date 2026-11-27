@@ -52,7 +52,7 @@ class WorkerBee(IWorkerBee):
         if isinstance(chain.api, WorkerBeeApiCollection):
             self.chain = cast("IHiveChainInterface[WorkerBeeApiCollection]", chain)
         else:
-            self._owned_chain = cast("IHiveChainInterface[WorkerBeeApiCollection]", chain.extends(WorkerBeeApiCollection))
+            self._owned_chain = chain.extends(WorkerBeeApiCollection)
             self.chain = self._owned_chain
         self.mediator = ObserverMediator(JsonRpcFactory(self))
         self._interval_task: asyncio.Task[None] | None = None
